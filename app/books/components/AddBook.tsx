@@ -24,7 +24,7 @@ export function AddBook({ isOpen, onClose, onAddBook }: AddBookProps) {
   if (!isOpen) return null;
 
   const handleAddBook = () => {
-    onAddBook({ ...newBook, id: Date.now() });
+    onAddBook({ ...newBook, id: Date.now(), dateCompleted: Date.now() });
     setNewBook({
       name: "",
       author: "",
@@ -39,7 +39,7 @@ export function AddBook({ isOpen, onClose, onAddBook }: AddBookProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-10 animate-in fade-in duration-200">
       <div className="fixed inset-0" onClick={onClose} />
       <div className="bg-zinc-900/95 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 shadow-2xl w-full max-w-md mx-4 animate-in zoom-in-95 duration-200 relative">
         <h2 className="text-xl font-semibold mb-6 text-zinc-100 flex items-center gap-2">

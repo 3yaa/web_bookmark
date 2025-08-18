@@ -5,10 +5,11 @@ import { useEffect, useState } from "react";
 import { Books, MediaStatus } from "@/types/media";
 import { AddBook } from "./AddBook";
 import { BookDetails } from "./BookDetails";
+import { formatDateShort } from "@/utils/formatDate";
 
 export default function BookList() {
   const [books, setBooks] = useState<Books[]>([]);
-  const [selectedBook, setSelectedBook] = useState<Books>();
+  const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
   const [activeModal, setActiveModal] = useState<
     "bookDetails" | "addBook" | null
   >(null);
@@ -24,15 +25,16 @@ export default function BookList() {
           return;
         }
         const parsedBooks = JSON.parse(storedBooks);
+
         if (Array.isArray(parsedBooks)) {
           setBooks(parsedBooks);
         } else {
-          console.warn("hola");
+          console.warn("invalid book format--reset");
           localStorage.setItem("books", JSON.stringify([]));
           setBooks([]);
         }
       } catch (e) {
-        console.log("error loading books:", e);
+        console.log("error loading books--reset:", e);
         localStorage.setItem("books", JSON.stringify([]));
         setBooks([]);
       }
@@ -49,6 +51,7 @@ export default function BookList() {
   };
 
   const getStatusBorder = (status: MediaStatus) => {
+    console.log(status);
     switch (status) {
       case "Completed":
         return "border-emerald-500/60";
@@ -59,6 +62,25 @@ export default function BookList() {
     }
   };
 
+  const handleBookUpdates = (bookId: number, updates: Partial<Books>) => {
+    setBooks((prevBooks) => {
+      const updatedBook = prevBooks.map((book) =>
+        book.id === bookId ? { ...book, ...updates } : book
+      );
+      localStorage.setItem("books", JSON.stringify(updatedBook));
+      return updatedBook;
+    });
+  };
+
+  const selectedBook = selectedBookId
+    ? books.find((book) => book.id === selectedBookId)
+    : undefined;
+
+  const handleModalClose = () => {
+    setActiveModal(null);
+    setSelectedBookId(null);
+  };
+
   return (
     <div className="min-h-screen p-6">
       <div className="w-full md:w-[70%] lg:w-[75%] mx-auto">
@@ -67,7 +89,7 @@ export default function BookList() {
         </h1>
 
         {/* HEADING */}
-        <div className="grid md:grid-cols-[2rem_6rem_1fr_6rem_8rem_8rem_8rem_1fr] bg-zinc-800/50 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border border-zinc-700/30">
+        <div className="grid md:grid-cols-[2rem_6rem_1fr_6rem_8rem_10rem_8rem_1fr] bg-zinc-800/50 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border border-zinc-700/30">
           <span className="font-semibold text-zinc-300 text-sm">#</span>
           <span className="font-semibold text-zinc-300 text-sm">Cover</span>
           <span className="font-semibold text-zinc-300 text-sm">Title</span>
@@ -80,10 +102,10 @@ export default function BookList() {
           <span className="text-center font-semibold text-zinc-300 text-sm">
             Author
           </span>
-          <span className="text-center font-semibold text-zinc-300 text-sm">
+          <span className="text-center font-semibold text-zinc-300 text-sm pl-0.5">
             Published
           </span>
-          <span className="text-center font-semibold text-zinc-300 text-sm">
+          <span className="text-center font-semibold text-zinc-300 text-sm pl-0.5">
             Notes
           </span>
         </div>
@@ -100,14 +122,14 @@ export default function BookList() {
           {books.map((book, index) => (
             <div
               key={book.id}
-              className={`grid md:grid-cols-[2rem_6rem_1fr_6rem_8rem_10rem_6rem_1fr] px-3 py-0.5  items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:bg-zinc-900 transition-all duration-200 rounded-md shadow-sm border-l-4 ${getStatusBorder(
+              className={`grid md:grid-cols-[2rem_6rem_1fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5  items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:bg-zinc-900 transition-all duration-200 rounded-md shadow-sm border-l-4 ${getStatusBorder(
                 book.status
               )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
                 index === 0 && "pt-1.5"
               }`}
               onClick={() => {
                 setActiveModal("bookDetails");
-                setSelectedBook(book);
+                setSelectedBookId(book.id);
               }}
             >
               <span className="font-medium text-zinc-300 text-sm">
@@ -124,22 +146,24 @@ export default function BookList() {
                   <div className="w-11.5 h-16 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
                 )}
               </div>
-              <span className="font-semibold text-zinc-100 text-sm group-hover:text-emerald-400 transition-colors duration-200">
+              <span className="font-semibold text-zinc-100 text-sm group-hover:text-emerald-400 transition-colors duration-200 truncate">
                 {book.name || "-"}
               </span>
-              <span className="text-center font-medium text-zinc-300 text-sm">
+              <span className="text-center font-semibold text-zinc-300 text-sm">
                 {book.score || "-"}
               </span>
-              <span className="text-center font-medium text-zinc-300 text-sm">
-                {book.dateCompleted || "-"}
+              <span className="text-center font-medium text-zinc-300 text-sm truncate">
+                {book.status === "Completed"
+                  ? formatDateShort(book.dateCompleted) || "?"
+                  : "-"}
               </span>
-              <span className="text-center font-medium text-zinc-300 text-sm">
+              <span className="text-center font-semibold text-zinc-300 text-sm truncate">
                 {book.author || "-"}
               </span>
-              <span className="text-center font-medium text-zinc-300 text-sm">
+              <span className="text-center font-medium text-zinc-300 text-sm truncate pl-0.5">
                 {book.dateReleased || "-"}
               </span>
-              <span className="text-zinc-400 text-sm line-clamp-2 whitespace-normal overflow-hidden">
+              <span className="text-zinc-400 text-sm line-clamp-2 whitespace-normal overflow-hidden pl-0.5">
                 {book.note || "No notes"}
               </span>
             </div>
@@ -149,12 +173,13 @@ export default function BookList() {
       {selectedBook && (
         <BookDetails
           isOpen={activeModal === "bookDetails"}
-          onClose={() => setActiveModal(null)}
           book={selectedBook}
+          onClose={handleModalClose}
+          onUpdate={handleBookUpdates}
         />
       )}
       {/* add button */}
-      <div className="fixed bottom-10 right-12 z-20">
+      <div className="fixed bottom-10 right-12 z-10">
         <button
           onClick={() => setActiveModal("addBook")}
           className="bg-emerald-600 hover:bg-emerald-500 p-4.5 rounded-full shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/30 transition-all duration-200 text-white font-medium flex items-center gap-2 hover:scale-105 active:scale-95 border border-emerald-500/20"
@@ -163,7 +188,7 @@ export default function BookList() {
         </button>
         <AddBook
           isOpen={activeModal === "addBook"}
-          onClose={() => setActiveModal(null)}
+          onClose={handleModalClose}
           onAddBook={addToBook}
         />
       </div>

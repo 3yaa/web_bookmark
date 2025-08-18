@@ -1,0 +1,3 @@
+- border on top dicpicting status
+- redo the dropdown component
+- think about the layout

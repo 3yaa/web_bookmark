@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { Books } from "@/types/media";
-import { CustomSelect } from "@/app/components/ui/Select";
+import { Dropdown } from "@/app/components/ui/Dropdown";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
-import { formatDate } from "@/utils/formatDate";
+import { getStatusBorder } from "@/utils/randomUtils";
 interface BookDetailsProps {
   book: Books;
   isOpen: boolean;
@@ -65,65 +65,65 @@ export function BookDetails({
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-20 animate-in fade-in duration-200">
       <div className="fixed inset-0" onClick={onClose} />
-      <div className="bg-zinc-900/95 backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[calc(100vh-2rem)]">
-        <div className="p-4 pl-10">
+      <div className="bg-zinc-900/95 backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 animate-in zoom-in-95 duration-200 max-h-[calc(100vh-2rem)]">
+        <div
+          className={`p-4 border-t-6 rounded-2xl ${getStatusBorder(
+            book.status
+          )}`}
+        >
           <div className="flex gap-5">
+            {/* LEFT SIDE OF THE MODAL */}
             {book.picture ? (
               <Image
                 src={book.picture}
                 alt={book.name}
-                className="w-34 h-50 object-cover rounded-md border border-zinc-600/30"
+                className="w-56 h-81 object-cover rounded-md border border-zinc-600/30"
               />
             ) : (
-              <div className="w-34 h-50 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
+              <div className="w-56 h-81 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
             )}
-            <div className="flex flex-col flex-1 mt-2">
-              <span className="mt-2 font-bold text-zinc-100 text-3xl overflow-y-auto max-h-19 mx-auto">
+            {/* RIGHT SIDE OF THE MODAL */}
+            <div className="flex flex-col justify-center flex-1 gap-1">
+              <span className="text-center font-bold text-zinc-100 text-3xl mt-3 overflow-y-auto max-h-10.5 mx-auto">
                 {book.name || "-"}
               </span>
               <div className="flex justify-center gap-2 w-full">
-                <span className="mt-2 font-bold text-zinc-100 text-1xl overflow-y-auto max-h-5">
+                <span className="text-center font-bold text-zinc-200 text-1xl overflow-y-auto max-h-6">
                   {book.author || "-"}
                 </span>
-                <div className="mt-2 font-bold text-zinc-100 text-1xl">•</div>
-                <span className="mt-2 font-bold text-zinc-100 text-1xl">
+                <div className="font-bold text-zinc-200 text-1xl">•</div>
+                <span className="text-center font-bold text-zinc-200 text-1xl">
                   {book.dateReleased || "-"}
                 </span>
               </div>
-              <div className="flex justify-center gap-5 w-full mt-2">
-                <CustomSelect
+              <div className="flex justify-center mt-2 gap-1 w-full">
+                <Dropdown
                   value={book.status}
                   onChange={handleStatusChange}
                   options={statusOptions}
-                  placeholder="Select status"
+                  customStyle="text-zinc-200 font-semibold"
                 />
 
-                <CustomSelect
+                <Dropdown
                   value={book.score?.toString() || "-"}
                   onChange={(value) => {
                     onUpdate(book.id, { score: Number(value) });
                   }}
                   options={scoreOptions}
-                  placeholder="Score"
+                  customStyle="text-zinc-200 font-semibold"
                 />
               </div>
-              <div className="mx-auto mt-2">
-                <span className="font-bold text-zinc-100 text-1xl">
-                  {book.status === "Completed" &&
-                    `Completed on: ${formatDate(book.dateCompleted)}`}
-                </span>
+              <div className="bg-zinc-800/50 rounded-lg mt-3 p-3 pr-1 pb-1 max-h-40 overflow-hidden">
+                <AutoTextarea
+                  value={book.note}
+                  onChange={(e) => {
+                    onUpdate(book.id, { note: e.target.value });
+                  }}
+                  className="text-gray-300 text-md whitespace-pre-line"
+                />
               </div>
             </div>
           </div>
-        </div>
-        <div className="bg-zinc-800/50 rounded-lg p-3 pb-1 max-h-100 overflow-hidden">
-          <AutoTextarea
-            value={book.note}
-            onChange={(e) => {
-              onUpdate(book.id, { note: e.target.value });
-            }}
-            className="text-gray-300 text-md whitespace-pre-line"
-          />
         </div>
       </div>
     </div>

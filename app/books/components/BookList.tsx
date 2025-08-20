@@ -2,10 +2,10 @@
 import Image from "next/image";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Books, MediaStatus } from "@/types/media";
+import { Books } from "@/types/media";
 import { AddBook } from "./AddBook";
 import { BookDetails } from "./BookDetails";
-import { formatDateShort } from "@/utils/formatDate";
+import { formatDateShort, getStatusBorder } from "@/utils/randomUtils";
 
 export default function BookList() {
   const [books, setBooks] = useState<Books[]>([]);
@@ -48,18 +48,6 @@ export default function BookList() {
       localStorage.setItem("books", JSON.stringify(updatedBooks));
       return updatedBooks;
     });
-  };
-
-  const getStatusBorder = (status: MediaStatus) => {
-    console.log(status);
-    switch (status) {
-      case "Completed":
-        return "border-emerald-500/60";
-      case "Want to Read":
-        return "border-blue-500/60";
-      default:
-        return "border-zinc-600/40";
-    }
   };
 
   const handleBookUpdates = (bookId: number, updates: Partial<Books>) => {
@@ -122,7 +110,7 @@ export default function BookList() {
           {books.map((book, index) => (
             <div
               key={book.id}
-              className={`grid md:grid-cols-[2rem_6rem_1fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5  items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:bg-zinc-900 transition-all duration-200 rounded-md shadow-sm border-l-4 ${getStatusBorder(
+              className={`grid md:grid-cols-[2rem_6rem_1fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5  items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:bg-zinc-900 transition-all duration-200 rounded-md shadow-sm rounded-l-none border-l-4 ${getStatusBorder(
                 book.status
               )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
                 index === 0 && "pt-1.5"
@@ -140,10 +128,10 @@ export default function BookList() {
                   <Image
                     src={book.picture}
                     alt={book.name}
-                    className="w-11.5 h-16 object-cover rounded-md border border-zinc-600/30"
+                    className="w-12.5 h-17.5 object-cover rounded-md border border-zinc-600/30"
                   />
                 ) : (
-                  <div className="w-11.5 h-16 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
+                  <div className="w-12.5 h-17.5 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30"></div>
                 )}
               </div>
               <span className="font-semibold text-zinc-100 text-sm group-hover:text-emerald-400 transition-colors duration-200 truncate">

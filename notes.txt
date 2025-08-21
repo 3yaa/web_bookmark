@@ -1,3 +1,9 @@
+z:
+- 0: page
+- 10: floating button
+- 20: modal
+- 50: dropdown
+
 manga:
 	- picture
 	- name

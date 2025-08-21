@@ -34,7 +34,7 @@ export default function BookList() {
           setBooks([]);
         }
       } catch (e) {
-        console.log("error loading books--reset:", e);
+        console.warn("error loading books--reset:", e);
         localStorage.setItem("books", JSON.stringify([]));
         setBooks([]);
       }

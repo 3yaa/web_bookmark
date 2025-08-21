@@ -1,3 +1,1 @@
-- border on top dicpicting status - done
-- redo the dropdown component
-- think about the layout
+- hover

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Books } from "@/types/media";
 import { AddBook } from "./AddBook";
 import { BookDetails } from "./BookDetails";
-import { formatDateShort, getStatusBorder } from "@/utils/randomUtils";
+import { formatDateShort, getStatusBorderColor } from "@/utils/randomUtils";
 
 export default function BookList() {
   const [books, setBooks] = useState<Books[]>([]);
@@ -110,7 +110,7 @@ export default function BookList() {
           {books.map((book, index) => (
             <div
               key={book.id}
-              className={`grid md:grid-cols-[2rem_6rem_1fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5  items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:bg-zinc-900 transition-all duration-200 rounded-md shadow-sm rounded-l-none border-l-4 ${getStatusBorder(
+              className={`grid md:grid-cols-[2rem_6rem_1fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 rounded-md shadow-sm rounded-l-none border-l-4 ${getStatusBorderColor(
                 book.status
               )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
                 index === 0 && "pt-1.5"
@@ -124,9 +124,9 @@ export default function BookList() {
                 {index + 1}
               </span>
               <div>
-                {book.picture ? (
+                {book.coverUrl ? (
                   <Image
-                    src={book.picture}
+                    src={book.coverUrl}
                     alt={book.name}
                     className="w-12.5 h-17.5 object-cover rounded-md border border-zinc-600/30"
                   />

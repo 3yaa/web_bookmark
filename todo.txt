@@ -1,1 +1,1 @@
-- hover
+search book -> select book -> goes to detail modal

@@ -1,7 +1,0 @@
-- make the intial detail page temporary -- where users get the option
-	to add it manually or see more options
-	- make wiki call after a book is actually added
-
-- fix up detail page
-- match the border gradient with the picture?
-- look into motion.div

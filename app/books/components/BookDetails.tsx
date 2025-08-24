@@ -1,13 +1,15 @@
 import Image from "next/image";
-import { Books } from "@/types/media";
+import { BookProps } from "@/types/books";
 import { Dropdown } from "@/app/components/ui/Dropdown";
-import { AutoTextarea } from "@/app/components/ui/AutoTextarea";
-import { formatDate, getStatusBorderGradient } from "@/utils/randomUtils";
+import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
+import { formatDate, getStatusBorderGradient } from "@/utils/formattingUtils";
+import { getCoverUrl } from "@/app/books/utils/bookMapping";
+import { Trash2 } from "lucide-react";
 interface BookDetailsProps {
-  book: Books;
+  book: BookProps;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (bookId: number, changes: Partial<Books>) => void;
+  onUpdate: (bookId: number, updates: Partial<BookProps> | null) => void;
 }
 
 export function BookDetails({
@@ -20,7 +22,7 @@ export function BookDetails({
 
   const handleStatusChange = (value: string) => {
     const newStatus = value as "Completed" | "Want to Read";
-    const statusLoad: Partial<Books> = {
+    const statusLoad: Partial<BookProps> = {
       status: newStatus,
     };
     if (newStatus === "Completed") {
@@ -62,6 +64,33 @@ export function BookDetails({
     };
   });
 
+  const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
+    //detects which side of the div was clicked
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const elementWidth = rect.width;
+    const isRightSide = clickX > elementWidth / 2;
+
+    //
+    if (book.curCoverIndex !== undefined && book.coverEditions !== undefined) {
+      let newCoverIndex = book.curCoverIndex;
+      if (isRightSide) {
+        newCoverIndex = (book.curCoverIndex + 1) % book.coverEditions.length;
+      } else {
+        newCoverIndex =
+          book.curCoverIndex === 0
+            ? book.coverEditions.length - 1
+            : book.curCoverIndex - 1;
+      }
+      onUpdate(book.id, { curCoverIndex: newCoverIndex });
+    }
+  };
+
+  const handleDelete = () => {
+    onUpdate(book.id, null);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-black/40 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
       <div className="fixed inset-0" onClick={onClose} />
@@ -72,29 +101,41 @@ export function BookDetails({
         )} py-2 px-2`}
       >
         {/* ACTUAL DETAIL CARD */}
-        <div className="bg-gradient-to-br from-zinc-900/100 via-zinc-900/100 to-zinc-800/100 backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 max-w-3xl w-full max-h-[calc(100vh-3rem)]">
-          <div
-            className={`px-8 py-7 border-0 rounded-2xl $
-            `}
-          >
+        <div className="bg-gradient-to-br bg-zinc-900 backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 max-w-3xl w-full max-h-[calc(100vh-3rem)]">
+          <div className={`px-8 py-7 border-0 rounded-2xl`}>
+            {/* DELETE BUTTON */}
+            <button
+              className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/50 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group"
+              onClick={handleDelete}
+            >
+              <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors duration-200" />
+            </button>
             <div className="flex gap-8 ">
               {/* LEFT SIDE -- PIC */}
-              <div className="flex-shrink-0">
-                {book.coverUrl ? (
+              <div className="flex-shrink-0" onClick={handleCoverChange}>
+                {book.curCoverIndex !== undefined &&
+                book.curCoverIndex !== null ? (
                   <Image
-                    src={book.coverUrl}
-                    alt={book.name}
-                    className="w-62 h-90 object-cover rounded-xl border border-zinc-600/30"
+                    src={getCoverUrl(book.coverEditions?.[book.curCoverIndex])}
+                    alt={book.title}
+                    width={248}
+                    height={372}
+                    className="w-62 h-93 object-contain"
                   />
                 ) : (
-                  <div className="w-62 h-90 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-xl border border-zinc-600/30"></div>
+                  <div className="w-62 h-93 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-lg border border-zinc-600/30"></div>
                 )}
               </div>
               {/* RIGHT SIDE -- DETIALS */}
               <div className="flex flex-col justify-center flex-1 min-h-60 space-y-2 min-w-0">
                 {/* TITLE */}
+                {book.seriesTitle && (
+                  <span className="font-semibold text-zinc-100 text-xl overflow-y-auto max-h-10.5 mb-0">
+                    {book.seriesTitle}:
+                  </span>
+                )}
                 <span className="font-bold text-zinc-100 text-3xl overflow-y-auto max-h-10.5 mb-0">
-                  {book.name || "Untitled"}
+                  {book.title || "Untitled"}
                 </span>
                 {/* AUTHOR AND DATE */}
                 <div className="flex justify-start items-center gap-2 w-full mb-3">
@@ -106,7 +147,7 @@ export function BookDetails({
                     •
                   </div>
                   <span className="font-medium text-zinc-200 text-md overflow-y-auto max-h-6 min-w-10.5 leading-6">
-                    {book.dateReleased || "Unknown"}
+                    {book.datePublished || "Unknown"}
                   </span>
                   {book.status === "Completed" && (
                     <div className="flex items-center gap-2">
@@ -114,7 +155,7 @@ export function BookDetails({
                         •
                       </div>
                       <span className="font-medium text-zinc-200 text-md overflow-y-auto max-h-6 min-w-25 leading-6">
-                        {formatDate(book.dateCompleted)}
+                        {formatDate(book.dateCompleted ?? 0)}
                       </span>
                     </div>
                   )}
@@ -158,6 +199,7 @@ export function BookDetails({
                     />
                   </div>
                 </div>
+                {/* NOTES */}
                 <div className="space-y-1 mt-2">
                   <label className="text-sm font-medium text-zinc-400 block">
                     Notes
@@ -171,6 +213,36 @@ export function BookDetails({
                       placeholder="Add your thoughts about this book..."
                       className="text-gray-300 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500"
                     />
+                  </div>
+                </div>
+                {/* PREQUEL AND SEQUEL */}
+                <div className="flex justify-between w-full">
+                  <div className="truncate text-left">
+                    {book.prequel && (
+                      <div>
+                        <label className="text-sm font-medium text-zinc-400 block">
+                          <span className="inline-flex items-center gap-1">
+                            <span>←</span>
+                            <span>Prequel</span>
+                          </span>
+                        </label>
+                        {book.prequel}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="truncate text-right">
+                    {book.sequel && (
+                      <div>
+                        <label className="text-sm font-medium text-zinc-400 block">
+                          <span className="inline-flex items-center gap-1">
+                            <span>Sequel</span>
+                            <span>→</span>
+                          </span>
+                        </label>
+                        {book.sequel}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

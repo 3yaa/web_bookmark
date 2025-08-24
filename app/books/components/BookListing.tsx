@@ -2,13 +2,14 @@
 import Image from "next/image";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Books } from "@/types/media";
-import { AddBook } from "./AddBook";
+import { BookProps } from "@/types/books";
+import { AddBook } from "./addingBook/AutoAdd";
 import { BookDetails } from "./BookDetails";
-import { formatDateShort, getStatusBorderColor } from "@/utils/randomUtils";
+import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
+import { getCoverUrl } from "@/app/books/utils/bookMapping";
 
 export default function BookList() {
-  const [books, setBooks] = useState<Books[]>([]);
+  const [books, setBooks] = useState<BookProps[]>([]);
   const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
   const [activeModal, setActiveModal] = useState<
     "bookDetails" | "addBook" | null
@@ -42,7 +43,7 @@ export default function BookList() {
     loadBooks();
   }, []);
 
-  const addToBook = (book: Books) => {
+  const addToBook = (book: BookProps) => {
     setBooks((prevBooks) => {
       const updatedBooks = [...prevBooks, book];
       localStorage.setItem("books", JSON.stringify(updatedBooks));
@@ -50,11 +51,22 @@ export default function BookList() {
     });
   };
 
-  const handleBookUpdates = (bookId: number, updates: Partial<Books>) => {
+  // USES null ON UPDATE TO DETECT ITS A DELETE
+  const handleBookUpdates = (
+    bookId: number,
+    updates: Partial<BookProps> | null
+  ) => {
     setBooks((prevBooks) => {
-      const updatedBook = prevBooks.map((book) =>
-        book.id === bookId ? { ...book, ...updates } : book
-      );
+      let updatedBook;
+      //delete book
+      if (!updates) {
+        updatedBook = prevBooks.filter((book) => book.id !== bookId);
+      } else {
+        //update book
+        updatedBook = prevBooks.map((book) =>
+          book.id === bookId ? { ...book, ...updates } : book
+        );
+      }
       localStorage.setItem("books", JSON.stringify(updatedBook));
       return updatedBook;
     });
@@ -110,7 +122,7 @@ export default function BookList() {
           {books.map((book, index) => (
             <div
               key={book.id}
-              className={`grid md:grid-cols-[2rem_6rem_1fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 rounded-md shadow-sm rounded-l-none border-l-4 ${getStatusBorderColor(
+              className={`group grid md:grid-cols-[2rem_6rem_1fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 rounded-md shadow-sm rounded-l-none border-l-4 ${getStatusBorderColor(
                 book.status
               )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
                 index === 0 && "pt-1.5"
@@ -124,32 +136,35 @@ export default function BookList() {
                 {index + 1}
               </span>
               <div>
-                {book.coverUrl ? (
+                {book.curCoverIndex !== undefined &&
+                book.curCoverIndex !== null ? (
                   <Image
-                    src={book.coverUrl}
-                    alt={book.name}
-                    className="w-12.5 h-17.5 object-cover rounded-md border border-zinc-600/30"
+                    src={getCoverUrl(book.coverEditions?.[book.curCoverIndex])}
+                    alt={book.title}
+                    width={50}
+                    height={75}
+                    className="w-12.5 h-17.5 object-fill rounded-sm group-hover:rounded-[0.35rem] border border-zinc-600/30"
                   />
                 ) : (
-                  <div className="w-12.5 h-17.5 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30"></div>
+                  <div className="w-12.5 h-17.5 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-sm group-hover:rounded-[0.35rem] border border-zinc-600/30"></div>
                 )}
               </div>
               <span className="font-semibold text-zinc-100 text-sm group-hover:text-emerald-400 transition-colors duration-200 truncate">
-                {book.name || "-"}
+                {book.title || "-"}
               </span>
               <span className="text-center font-semibold text-zinc-300 text-sm">
                 {book.score || "-"}
               </span>
               <span className="text-center font-medium text-zinc-300 text-sm truncate">
                 {book.status === "Completed"
-                  ? formatDateShort(book.dateCompleted) || "?"
+                  ? formatDateShort(book.dateCompleted ?? 0) || "?"
                   : "-"}
               </span>
               <span className="text-center font-semibold text-zinc-300 text-sm truncate">
                 {book.author || "-"}
               </span>
               <span className="text-center font-medium text-zinc-300 text-sm truncate pl-0.5">
-                {book.dateReleased || "-"}
+                {book.datePublished || "-"}
               </span>
               <span className="text-zinc-400 text-sm line-clamp-2 whitespace-normal overflow-hidden pl-0.5">
                 {book.note || "No notes"}
@@ -177,6 +192,7 @@ export default function BookList() {
         <AddBook
           isOpen={activeModal === "addBook"}
           onClose={handleModalClose}
+          existingBooks={books}
           onAddBook={addToBook}
         />
       </div>

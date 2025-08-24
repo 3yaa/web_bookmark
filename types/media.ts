@@ -1,25 +1,19 @@
 export type MediaStatus = 'Completed' | 'Want to Read' | 'Want to Watch';
 
-interface BaseMediaInterface {
+export interface BaseMediaInterface {
 	id: number;
-	name: string;
-	score: number;
+	// 
+	title: string;
 	coverUrl: string;
+	dateReleased: number;
+	// 
+	score: number;
 	status: MediaStatus;
 	dateCompleted: number;
-	dateReleased: number;
 	note?: string;
 }
 export interface Manga extends BaseMediaInterface {
 	status: 'Completed' | 'Want to Read';
-}
-
-export interface Books extends BaseMediaInterface {
-	author: string;
-	status: 'Completed' | 'Want to Read';
-	genre?: string[];
-	prequel?: string;
-	sequel?: string;
 }
 
 export interface Movies extends BaseMediaInterface {

@@ -1,21 +1,21 @@
 "use client";
 import { useState } from "react";
 import { Book } from "lucide-react";
-import { Books } from "@/types/media";
+import { BookProps } from "@/types/books";
 
 interface AddBookProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddBook: (book: Books) => void;
+  onAddBook: (book: BookProps) => void;
 }
 
 export function AddBook({ isOpen, onClose, onAddBook }: AddBookProps) {
-  const [newBook, setNewBook] = useState<Omit<Books, "id">>({
-    name: "",
+  const [newBook, setNewBook] = useState<Omit<BookProps, "id">>({
+    title: "",
     author: "",
-    coverUrl: "",
+    // coverUrl: "",
     dateCompleted: 0,
-    dateReleased: 0,
+    datePublished: 0,
     status: "Want to Read",
     score: 0,
     note: "",
@@ -26,11 +26,11 @@ export function AddBook({ isOpen, onClose, onAddBook }: AddBookProps) {
   const handleAddBook = () => {
     onAddBook({ ...newBook, id: Date.now(), dateCompleted: Date.now() });
     setNewBook({
-      name: "",
+      title: "",
       author: "",
-      coverUrl: "",
+      // coverUrl: "",
       dateCompleted: 0,
-      dateReleased: 0,
+      datePublished: 0,
       status: "Want to Read",
       score: 0,
       note: "",
@@ -50,8 +50,8 @@ export function AddBook({ isOpen, onClose, onAddBook }: AddBookProps) {
           <input
             type="text"
             placeholder="Book Name"
-            value={newBook.name}
-            onChange={(e) => setNewBook({ ...newBook, name: e.target.value })}
+            value={newBook.title}
+            onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
             className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-400 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 outline-none transition-all duration-200"
           />
           <input
@@ -79,11 +79,11 @@ export function AddBook({ isOpen, onClose, onAddBook }: AddBookProps) {
             <input
               type="number"
               placeholder="Year"
-              value={newBook.dateReleased}
+              value={newBook.datePublished}
               onChange={(e) =>
                 setNewBook({
                   ...newBook,
-                  dateReleased: parseInt(e.target.value),
+                  datePublished: parseInt(e.target.value),
                 })
               }
               className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-400 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 outline-none transition-all duration-200"

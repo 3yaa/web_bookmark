@@ -1,4 +1,4 @@
-import { OpenLibPayload } from "@/types/book";
+import { OpenLibData } from "@/types/books";
 
 interface SearchForBooksProps {
   query: string;
@@ -8,11 +8,11 @@ interface SearchForBooksProps {
 export async function searchForBooks({
   query,
   limit = 10,
-}: SearchForBooksProps): Promise<OpenLibPayload[]> {
+}: SearchForBooksProps): Promise<OpenLibData[]> {
   try {
     const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(
       query
-    )}&lang=en&fields=title,cover_i,author_name,first_publish_year,subject&limit=${limit}`;
+    )}&lang=en&fields=key,title,author_name,first_publish_year,subject,edition_key,cover_edition_key&limit=${limit}`;
 
     const headers = new Headers({
       "User-Agent": `Media Manager/0.3 (${process.env.PAGE_CONTACT})`,
@@ -35,3 +35,4 @@ export async function searchForBooks({
     return [];
   }
 }
+

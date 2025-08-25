@@ -7,7 +7,7 @@ interface SearchForBooksProps {
 
 export async function searchForBooks({
   query,
-  limit = 10,
+  limit,
 }: SearchForBooksProps): Promise<OpenLibData[]> {
   try {
     const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(

@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { BookProps } from "@/types/books";
-import { AddBook } from "./addingBook/AutoAdd";
+import { AddBook } from "./addingBook/AddBook";
 import { BookDetails } from "./BookDetails";
 import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { getCoverUrl } from "@/app/books/utils/bookMapping";
@@ -44,6 +44,7 @@ export default function BookList() {
   }, []);
 
   const addToBook = (book: BookProps) => {
+    //add book
     setBooks((prevBooks) => {
       const updatedBooks = [...prevBooks, book];
       localStorage.setItem("books", JSON.stringify(updatedBooks));
@@ -122,10 +123,10 @@ export default function BookList() {
           {books.map((book, index) => (
             <div
               key={book.id}
-              className={`group grid md:grid-cols-[2rem_6rem_1fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 rounded-md shadow-sm rounded-l-none border-l-4 ${getStatusBorderColor(
+              className={`group grid md:grid-cols-[2rem_6rem_1fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4  rounded-md ${getStatusBorderColor(
                 book.status
               )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
-                index === 0 && "pt-1.5"
+                index === 0 ? "pt-1.5 rounded-bl-none" : "rounded-l-none"
               }`}
               onClick={() => {
                 setActiveModal("bookDetails");
@@ -140,7 +141,7 @@ export default function BookList() {
                 book.curCoverIndex !== null ? (
                   <Image
                     src={getCoverUrl(book.coverEditions?.[book.curCoverIndex])}
-                    alt={book.title}
+                    alt={book.title || "Untitled"}
                     width={50}
                     height={75}
                     className="w-12.5 h-17.5 object-fill rounded-sm group-hover:rounded-[0.35rem] border border-zinc-600/30"
@@ -166,7 +167,7 @@ export default function BookList() {
               <span className="text-center font-medium text-zinc-300 text-sm truncate pl-0.5">
                 {book.datePublished || "-"}
               </span>
-              <span className="text-zinc-400 text-sm line-clamp-2 whitespace-normal overflow-hidden pl-0.5">
+              <span className="text-zinc-400 text-sm line-clamp-2 whitespace-normal overflow-hidden pl-0.5 text-center">
                 {book.note || "No notes"}
               </span>
             </div>

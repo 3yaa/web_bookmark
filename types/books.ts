@@ -6,6 +6,7 @@ export interface BookProps {
 	note?: string;
 	status: 'Completed' | 'Want to Read'; //--REQUIRED
 	// from ol
+	olKey: string; //--REQUIRED
 	title: string; //--REQUIRED
 	author?: string;
 	coverEditions?: string[]; //might not need later?

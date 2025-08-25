@@ -4,10 +4,39 @@ export function getCoverUrl(coverOLID?: string, size: "S" | "M" | "L" = "L"): st
   return `https://covers.openlibrary.org/b/olid/${coverOLID}-${size}.jpg`;
 }
 
-function cleanName(title: string | undefined, seriesTitle: string | undefined) {
+export function mapOlDataToBook(dataOL: OpenLibData): Partial<BookProps> {
+  return {
+    olKey: dataOL.key.split("/").pop(),
+    title: dataOL.title,
+    author: dataOL.author_name?.[0],
+    coverEditions: dataOL.edition_key,
+    curCoverIndex: 1,
+    datePublished: dataOL.first_publish_year,
+	  genre: cleanGenre(dataOL.subject), //NOT USING
+  };
+}
+
+export function mapWikiDataToBook(dataWiki: WikiData): Partial<BookProps> {
+  const sTitle = dataWiki.seriesTitle
+  return {
+    // title: cleanName(dataWiki.wikiTitle, sTitle),
+    seriesTitle: sTitle,
+    placeInSeries: dataWiki.placeInSeries,
+    prequel: cleanName(dataWiki.prequel, sTitle),
+    sequel: cleanName(dataWiki.sequel, sTitle),
+  };
+}
+
+
+export function cleanName(title: string | undefined, seriesTitle: string | undefined) {
   if (!title || !seriesTitle) {
     return title;
   }
+  //in the case series and title are the same
+  if (title.trim() === seriesTitle.trim()) {
+    return title;
+  }
+  //
   return title
     .replace(`${seriesTitle}`, '')
     // Remove common separators at start
@@ -42,26 +71,4 @@ function cleanGenre(genre: string[] | undefined) {
 
     return true;
   });
-}
-
-export function mapOlDataToBook(dataOL: OpenLibData): Partial<BookProps> {
-  return {
-    title: dataOL.title,
-    author: dataOL.author_name?.[0],
-    coverEditions: dataOL.edition_key,
-    curCoverIndex: 1,
-    datePublished: dataOL.first_publish_year,
-	  genre: cleanGenre(dataOL.subject), //NOT USING
-  };
-}
-
-export function mapWikiDataToBook(dataWiki: WikiData): Partial<BookProps> {
-  const sTitle = dataWiki.seriesTitle
-  return {
-    title: cleanName(dataWiki.wikiTitle, sTitle),
-    seriesTitle: sTitle,
-    placeInSeries: dataWiki.placeInSeries,
-    prequel: cleanName(dataWiki.prequel, sTitle),
-    sequel: cleanName(dataWiki.sequel, sTitle),
-  };
 }

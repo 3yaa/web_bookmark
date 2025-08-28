@@ -1,10 +1,10 @@
-import { OpenLibData } from "@/types/books";
+import { AllBooks, OpenLibData, GoogleBooks } from "@/types/books";
 
 interface MultSearchProps {
   isOpen: boolean;
   onClose: () => void;
-  books: OpenLibData[]; // ✅ must be array
-  onClickedBook: (book: OpenLibData) => void;
+  books: AllBooks;
+  onClickedBook: (book: OpenLibData | GoogleBooks) => void;
 }
 
 export function ShowMultBooks({
@@ -14,6 +14,48 @@ export function ShowMultBooks({
   onClickedBook,
 }: MultSearchProps) {
   if (!isOpen) return null;
+
+  // Combine and alternate books from both sources
+  const combinedBooks: Array<{
+    book: OpenLibData | GoogleBooks;
+    source: "OpenLib" | "Google";
+  }> = [];
+  const totalLength = books.OpenLibBooks.length + books.GoogleBooks.length;
+  let openLibI = 0;
+  let googleI = 0;
+
+  for (let i = 0; i < totalLength; i++) {
+    if (i % 2 === 0) {
+      if (openLibI < books.OpenLibBooks.length) {
+        combinedBooks.push({
+          book: books.OpenLibBooks[openLibI],
+          source: "OpenLib",
+        });
+        openLibI++;
+      } else if (googleI < books.GoogleBooks.length) {
+        combinedBooks.push({
+          book: books.GoogleBooks[googleI],
+          source: "Google",
+        });
+        googleI++;
+      }
+    } else {
+      if (googleI < books.GoogleBooks.length) {
+        combinedBooks.push({
+          book: books.GoogleBooks[googleI],
+          source: "Google",
+        });
+        googleI++;
+      } else if (openLibI < books.OpenLibBooks.length) {
+        combinedBooks.push({
+          book: books.OpenLibBooks[openLibI],
+          source: "OpenLib",
+        });
+        openLibI++;
+      }
+    }
+  }
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
       {/* Overlay (click to close) */}
@@ -26,26 +68,26 @@ export function ShowMultBooks({
         </h2>
 
         <div className="overflow-y-auto space-y-3 pr-2">
-          {books.length === 0 ? (
+          {combinedBooks.length === 0 ? (
             <p className="text-gray-400">No books found.</p>
           ) : (
-            books.map((book) => (
+            combinedBooks.map((item, index) => (
               <button
-                key={book.key}
+                key={`${item.source}-${index}`}
                 className="w-full text-left p-3 rounded-xl bg-zinc-800/60 hover:bg-amber-600/20 transition flex flex-col gap-1"
-                onClick={() => onClickedBook(book)}
+                onClick={() => onClickedBook(item.book)}
               >
                 <span className="text-lg font-medium text-zinc-100">
-                  {book.title}
+                  {item.book.title}
                 </span>
-                {book.author_name && book.author_name.length > 0 && (
+                {item.book.author_name && item.book.author_name.length > 0 && (
                   <span className="text-sm text-gray-400">
-                    {book.author_name.join(", ")}
+                    {item.book.author_name.join(", ")}
                   </span>
                 )}
-                {book.first_publish_year && (
+                {item.book.first_publish_year && (
                   <span className="text-xs text-gray-500">
-                    First published: {book.first_publish_year}
+                    First published: {item.book.first_publish_year}
                   </span>
                 )}
               </button>

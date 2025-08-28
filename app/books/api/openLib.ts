@@ -2,7 +2,7 @@ import { OpenLibData } from "@/types/books";
 
 interface SearchForBooksProps {
   query: string;
-  limit?: number;
+  limit: number;
 }
 
 export async function searchForBooks({
@@ -15,7 +15,7 @@ export async function searchForBooks({
     )}&lang=en&fields=key,title,author_name,first_publish_year,subject,edition_key,cover_edition_key&limit=${limit}`;
 
     const headers = new Headers({
-      "User-Agent": `Media Manager/0.3 (${process.env.PAGE_CONTACT})`,
+      "User-Agent": `Media Manager/0.3 (${process.env.NEXT_PUBLIC_PAGE_CONTACT})`,
     });
 
     const options = {
@@ -29,10 +29,10 @@ export async function searchForBooks({
       throw new Error(`HTTP error; status: ${response.status}`);
     }
     const data = await response.json();
+    console.log("open lib: ", data.docs);
     return data.docs || [];
-  } catch (error) {
-    console.error("Open Library fetch failed: ", error);
+  } catch (e) {
+    console.error("Open Library fetch failed: ", e);
     return [];
   }
 }
-

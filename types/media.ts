@@ -1,4 +1,4 @@
-export type MediaStatus = 'Completed' | 'Want to Read' | 'Want to Watch';
+export type MediaStatus = 'Completed' | 'Want to Read' | 'Want to Watch' | "Dropped";
 
 export interface BaseMediaInterface {
 	id: number;

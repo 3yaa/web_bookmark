@@ -41,6 +41,7 @@ const query = `
     }
 
     const binding = data.results.bindings[0];
+    console.log("Hi wikidata");
     return {
       wikiTitle: binding.workLabel?.value,
       seriesTitle: binding.seriesLabel?.value,
@@ -48,10 +49,9 @@ const query = `
       prequel: binding.followsLabel?.value,
       sequel: binding.followedByLabel?.value
     };
-
-  } catch (error) {
-    console.error('Error executing SPARQL query:', error);
-    throw error;
+  } catch (e) {
+    console.error('Error executing SPARQL query:', e);
+    throw e;
   }
 }
 

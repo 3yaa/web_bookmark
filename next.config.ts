@@ -9,6 +9,18 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/b/olid/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'books.google.com',
+        port: '',
+        pathname: '/books/content**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'books.google.com',
+        port: '',
+        pathname: '/books/content**',
+      }
     ],
   }
 };

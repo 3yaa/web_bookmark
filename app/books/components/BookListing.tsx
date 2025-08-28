@@ -136,7 +136,7 @@ export default function BookList() {
               <span className="font-medium text-zinc-300 text-sm">
                 {index + 1}
               </span>
-              <div>
+              <div className="w-12.5 h-18">
                 {book.curCoverIndex !== undefined &&
                 book.curCoverIndex !== null ? (
                   <Image
@@ -144,10 +144,18 @@ export default function BookList() {
                     alt={book.title || "Untitled"}
                     width={50}
                     height={75}
-                    className="w-12.5 h-17.5 object-fill rounded-sm group-hover:rounded-[0.35rem] border border-zinc-600/30"
+                    className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
+                  />
+                ) : book.coverUrl ? (
+                  <Image
+                    src={book.coverUrl}
+                    alt={book.title || "Untitled"}
+                    width={50}
+                    height={75}
+                    className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
                   />
                 ) : (
-                  <div className="w-12.5 h-17.5 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-sm group-hover:rounded-[0.35rem] border border-zinc-600/30"></div>
+                  <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-[0.25rem] border border-zinc-600/30"></div>
                 )}
               </div>
               <span className="font-semibold text-zinc-100 text-sm group-hover:text-emerald-400 transition-colors duration-200 truncate">

@@ -8,8 +8,8 @@ import { Trash2, Plus, ChevronsUp, X } from "lucide-react";
 interface BookDetailsProps {
   book: BookProps;
   isOpen: boolean;
-  onClose: () => void;
   onUpdate: (bookId: number, updates: Partial<BookProps> | null) => void;
+  onClose: () => void;
   addBook?: () => void;
 }
 
@@ -19,6 +19,11 @@ const statusOptions = [
     value: "Want to Read",
     label: "Want to Read",
     className: "text-blue-500",
+  },
+  {
+    value: "Dropped",
+    label: "Dropped",
+    className: "text-red-500",
   },
 ];
 
@@ -48,8 +53,8 @@ const scoreOptions = Array.from({ length: 11 }, (_, i) => {
 
 export function BookDetails({
   isOpen,
-  book,
   onClose,
+  book,
   onUpdate,
   addBook,
 }: BookDetailsProps) {
@@ -140,7 +145,7 @@ export function BookDetails({
                 </button>
                 {/* CLOSE BUTTON */}
                 <button
-                  className="py-1.5 px-3 rounded-lg bg-zinc-800/50 hover:bg-red-600/50 
+                  className="py-1.5 px-2 rounded-lg bg-zinc-800/50 hover:bg-red-600/50 
                   hover:cursor-pointer transition-all group"
                   onClick={onClose}
                 >
@@ -157,7 +162,10 @@ export function BookDetails({
             )}
             <div className="flex gap-8">
               {/* LEFT SIDE -- PIC */}
-              <div className="flex-shrink-0" onClick={handleCoverChange}>
+              <div
+                className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg"
+                onClick={handleCoverChange}
+              >
                 {book.curCoverIndex !== undefined &&
                 book.curCoverIndex !== null ? (
                   <Image
@@ -165,15 +173,23 @@ export function BookDetails({
                     alt={book.title || "Untitled"}
                     width={248}
                     height={372}
-                    className="w-62 h-93 object-contain rounded-lg"
+                    className="w-full h-full min-w-62 min-h-93 object-fill"
+                  />
+                ) : book.coverUrl ? (
+                  <Image
+                    src={book.coverUrl}
+                    alt={book.title || "Untitled"}
+                    width={248}
+                    height={372}
+                    className="w-full h-full min-w-62 min-h-93 object-fill"
                   />
                 ) : (
-                  <div className="w-62 h-93 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-lg border border-zinc-600/30"></div>
+                  <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
                 )}
               </div>
               {/* RIGHT SIDE -- DETIALS */}
               <div className="flex flex-col flex-1 min-h-93 min-w-62">
-                <div className="flex flex-col justify-center flex-1 space-y-2">
+                <div className="flex flex-col justify-center flex-1">
                   {/* SERIES TITLE */}
                   {book.seriesTitle && (
                     <span className="font-semibold text-zinc-100 text-xl overflow-y-auto max-h-10.5 mb-0">

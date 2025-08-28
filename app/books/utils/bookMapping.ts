@@ -1,4 +1,4 @@
-import {BookProps, OpenLibData, WikiData} from '@/types/books'
+import {BookProps, OpenLibData, GoogleBooks , WikiData} from '@/types/books'
 
 export function getCoverUrl(coverOLID?: string, size: "S" | "M" | "L" = "L"): string {
   return `https://covers.openlibrary.org/b/olid/${coverOLID}-${size}.jpg`;
@@ -6,13 +6,21 @@ export function getCoverUrl(coverOLID?: string, size: "S" | "M" | "L" = "L"): st
 
 export function mapOlDataToBook(dataOL: OpenLibData): Partial<BookProps> {
   return {
-    olKey: dataOL.key.split("/").pop(),
     title: dataOL.title,
+    originalTitle: dataOL.title,
     author: dataOL.author_name?.[0],
     coverEditions: dataOL.edition_key,
     curCoverIndex: 1,
     datePublished: dataOL.first_publish_year,
-	  genre: cleanGenre(dataOL.subject), //NOT USING
+  };
+}
+
+export function mapGoogleDataToBook(dataOL: GoogleBooks): Partial<BookProps> {
+  return {
+    title: cleanTitle(dataOL.title),
+    author: dataOL.author_name?.[0],
+    datePublished: dataOL.first_publish_year,
+    coverUrl: dataOL.coverUrl,
   };
 }
 
@@ -25,6 +33,22 @@ export function mapWikiDataToBook(dataWiki: WikiData): Partial<BookProps> {
     prequel: cleanName(dataWiki.prequel, sTitle),
     sequel: cleanName(dataWiki.sequel, sTitle),
   };
+}
+
+function cleanTitle(title:string) {
+  return title
+    //removes brackets
+    .replace(/\[.*?\]/g, '')
+    .replace(/\(.*?\)/g, '')
+    .replace(/\{.*?\}/g, '')
+    .replace(/.g/, '')
+    //
+    // Remove common separators at start and end
+    .replace(/^[\s\-\–\—:;,\.\|#!]*/, '')
+    .replace(/[\s\-\–\—:;,\.\|#!]*$/, '')
+    // Clean up multiple spaces
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 
@@ -48,27 +72,4 @@ export function cleanName(title: string | undefined, seriesTitle: string | undef
     // Remove connecting words like "and the", "and", "&", "the"
     .replace(/^(and the|and|&)\s+/i, '')
     .trim();
-}
-
-function cleanGenre(genre: string[] | undefined) {
-  if (!genre) return genre;
-  
-  return genre.filter(g => {
-    // Remove if contains punctuation (commas, colons, semicolons, hyphens, etc.)
-    if (/[,\-:;()[\]{}'""/\\|<>?!@#$%^&*+=~`]/.test(g)) return false;
-    // Remove if more than one word
-    if (g.trim().split(/\s+/).length > 1) return false;
-    // Remove if contains numbers
-    if (/\d/.test(g)) return false;
-    // Remove common non-genre words
-    const excludeWords = new Set([
-      'spanish', 'modern','new', 'old', 'popular',
-      'literature', 'novel', 'book', 'story', 'tales'
-    ]);
-    if (excludeWords.has(g.toLowerCase().trim())) return false;
-    // Remove if contains accented char  
-    if (/[àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]/i.test(g)) return false;
-
-    return true;
-  });
 }

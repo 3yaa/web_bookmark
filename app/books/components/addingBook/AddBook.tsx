@@ -1,16 +1,19 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { Book } from "lucide-react";
-import { BookProps, OpenLibData } from "@/types/books";
-import { searchForBooks } from "../../bookSearch/openLib";
-import { getSeriesInfo } from "../../bookSearch/wikiData";
+import { BookProps, OpenLibData, AllBooks, GoogleBooks } from "@/types/books";
+import { searchForBooks } from "../../api/openLib";
+import { getSeriesInfo } from "../../api/wikiData";
 import {
   cleanName,
+  mapGoogleDataToBook,
   mapOlDataToBook,
   mapWikiDataToBook,
 } from "@/app/books/utils/bookMapping";
 import { BookDetails } from "../BookDetails";
 import { ShowMultBooks } from "./ShowMultBooks";
+import { ManualAddBook } from "./ManualAddBook";
+import { backUpSearchForBooks } from "../../api/googleBooks";
 
 interface AddBookProps {
   isOpen: boolean;
@@ -27,23 +30,35 @@ export function AddBook({
   existingBooks,
   onAddBook,
 }: AddBookProps) {
-  const titleToSearch = useRef<HTMLInputElement>(null);
+  //failure reasons && their fixes -- for user
   const [failedReason, setFailedReason] = useState("");
   const [isDupTitle, setisDupTitle] = useState(false);
+  const [isAddManual, setIsAddManual] = useState(false);
+  //
+  const titleToSearch = useRef<HTMLInputElement>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [activeModal, setActiveModal] = useState<
-    "bookDetails" | "multOptions" | null
+    "bookDetails" | "multOptions" | "manualAdd" | null
   >(null);
   const [newBook, setNewBook] = useState<Partial<BookProps>>({});
-  const [allNewBooks, setAllNewBooks] = useState<OpenLibData[]>([]);
+  const [allNewBooks, setAllNewBooks] = useState<AllBooks>({
+    OpenLibBooks: [],
+    GoogleBooks: [],
+  });
 
+  //reset on both because sometimes when opening some ui artificate
   useEffect(() => {
-    setNewBook({});
-    setAllNewBooks([]);
     setFailedReason("");
-    setActiveModal(null);
     setisDupTitle(false);
+    setIsAddManual(false);
+    //
     setIsSearching(false);
+    setActiveModal(null);
+    setNewBook({});
+    setAllNewBooks({
+      OpenLibBooks: [],
+      GoogleBooks: [],
+    });
     if (titleToSearch.current) {
       titleToSearch.current.value = "";
       titleToSearch.current.focus();
@@ -55,7 +70,7 @@ export function AddBook({
   const isDuplicate = (title: string) => {
     if (!existingBooks) return null;
     const duplicate = existingBooks.find(
-      (book: BookProps) => book.title === title
+      (book: BookProps) => book.originalTitle === title
     );
     return duplicate ? duplicate.title : null;
   };
@@ -71,10 +86,15 @@ export function AddBook({
     const olData = response?.[0];
     if (!olData) {
       setFailedReason("Could Not Find Book.");
+      setIsAddManual(true);
       return null;
     }
+
     //save books
-    setAllNewBooks(response); //all
+    setAllNewBooks({
+      OpenLibBooks: response,
+      GoogleBooks: [],
+    }); //all
     setNewBook(mapOlDataToBook(response?.[0])); //main
     return {
       title: olData.title,
@@ -84,7 +104,6 @@ export function AddBook({
 
   const handleBookSearch = async () => {
     try {
-      setNewBook({});
       setIsSearching(true);
       // make call to open lib
       const response = await handleTitleSearch();
@@ -139,8 +158,6 @@ export function AddBook({
     if (failedReason) setFailedReason("");
   };
 
-  //BookDetails func
-
   const handleBookAdd = async () => {
     // double check not adding duplicate
     if (newBook.title && isDupTitle) {
@@ -152,34 +169,76 @@ export function AddBook({
     const finalBook = {
       ...newBook,
       id: Date.now(),
-      status: "Want to Read",
     };
     onAddBook(finalBook as BookProps);
     onClose();
   };
+
+  //BookDetails func
 
   const handleBookDetailsClose = () => {
     setActiveModal(null);
     onClose();
   };
 
+  const handleBackUpBookSearch = async () => {
+    const titleSearching = titleToSearch.current?.value.trim();
+    if (!titleSearching) return null;
+
+    const response = await backUpSearchForBooks({
+      query: titleSearching,
+      limit: 5,
+    });
+
+    setAllNewBooks((prev) => {
+      return {
+        ...prev,
+        GoogleBooks: response,
+      };
+    });
+  };
+
   // USES null TO DETECT SHOW MORE BOOK OPTION
-  const handleNewBookUpdates = (
+  const handleNewBookUpdates = async (
     _bookId: number,
     updates: Partial<BookProps> | null
   ) => {
     if (!updates) {
+      if (!allNewBooks.GoogleBooks.length) {
+        try {
+          setIsSearching(true);
+          await handleBackUpBookSearch();
+        } finally {
+          setIsSearching(false);
+        }
+      }
       setActiveModal("multOptions");
+      return;
     }
     setNewBook((prev) => ({ ...prev, ...updates }));
   };
 
   //MultSearch func
 
-  const handlePickFromMultBooks = async (book: OpenLibData) => {
-    setNewBook(mapOlDataToBook(book));
-    const key = book.key.split("/").pop();
-    if (key) await handleSeriesSearch(key);
+  const handlePickFromMultBooks = async (book: OpenLibData | GoogleBooks) => {
+    // ol
+    if ("key" in book) {
+      setNewBook(mapOlDataToBook(book));
+      const key = book.key.split("/").pop();
+      if (key) await handleSeriesSearch(key);
+    }
+    // google -- NOT CALLING WIKI FOR GOOGLE
+    else {
+      setNewBook(mapGoogleDataToBook(book));
+    }
+    setActiveModal("bookDetails");
+  };
+
+  const handleMultOptionClose = () => {
+    if (isDupTitle) {
+      setActiveModal(null);
+      return;
+    }
     setActiveModal("bookDetails");
   };
 
@@ -223,9 +282,17 @@ export function AddBook({
               See Books Found!
             </button>
           )}
+          {isAddManual && !isSearching && (
+            <button
+              className="mt-4 text-zinc-400 text-sm hover:cursor-pointer border border-zinc-300 rounded-md p-0.5"
+              onClick={() => setActiveModal("manualAdd")}
+            >
+              Add Book Manually
+            </button>
+          )}
         </div>
       </div>
-      {activeModal === "bookDetails" && (
+      {activeModal === "bookDetails" && !isSearching && (
         <BookDetails
           isOpen={activeModal === "bookDetails"}
           book={newBook as BookProps}
@@ -234,12 +301,23 @@ export function AddBook({
           addBook={handleBookAdd}
         />
       )}
-      {activeModal === "multOptions" && (
+      {activeModal === "multOptions" && !isSearching && (
         <ShowMultBooks
           isOpen={activeModal === "multOptions"}
-          onClose={() => setActiveModal("bookDetails")}
+          onClose={handleMultOptionClose}
           books={allNewBooks}
           onClickedBook={handlePickFromMultBooks}
+        />
+      )}
+      {activeModal === "manualAdd" && !isSearching && (
+        <ManualAddBook
+          isOpen={activeModal === "manualAdd"}
+          onClose={() => setActiveModal(null)}
+          book={newBook}
+          onUpdate={(updates: Partial<BookProps>) =>
+            setNewBook((prev) => ({ ...prev, ...updates }))
+          }
+          addBook={handleBookAdd}
         />
       )}
     </div>

@@ -22,24 +22,30 @@ export const formatDate = (timestamp: number): string => {
 
 // STATUS BORDER COLORS
 
+//for booklisting
 export const getStatusBorderColor = (status: MediaStatus) => {
 	switch (status) {
 	  case "Completed":
-		return "border-emerald-500/60";
+			return "border-emerald-500/50";
 	  case "Want to Read":
-		return "border-blue-500/60";
+			return "border-blue-500/60";
+		case "Dropped":
+			return "border-red-500/40";
 	  default:
-		return "border-zinc-600/40";
+			return "border-zinc-600/40";
 	}
-  };
+};
 
+//everything else
 export const getStatusBorderGradient = (status: MediaStatus) => {
-switch (status) {
-	case "Completed":
-	return "from-emerald-500/50";
-	case "Want to Read":
-	return "from-blue-500/40";
-	default:
-	return "from-zinc-600/40";
-}
+	switch (status) {
+		case "Completed":
+			return "from-emerald-500/50";
+		case "Want to Read":
+			return "border-blue-500/60";
+		case "Dropped":
+			return "from-red-500/40";
+		default:
+			return "from-zinc-600/40";
+	}
 };

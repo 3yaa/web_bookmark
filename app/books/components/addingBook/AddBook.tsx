@@ -9,6 +9,7 @@ import {
   mapGoogleDataToBook,
   mapOlDataToBook,
   mapWikiDataToBook,
+  resetBookValues,
 } from "@/app/books/utils/bookMapping";
 import { BookDetails } from "../BookDetails";
 import { ShowMultBooks } from "./ShowMultBooks";
@@ -32,7 +33,7 @@ export function AddBook({
 }: AddBookProps) {
   //failure reasons && their fixes -- for user
   const [failedReason, setFailedReason] = useState("");
-  const [isDupTitle, setisDupTitle] = useState(false);
+  const [isDupTitle, setIsDupTitle] = useState(false);
   const [isAddManual, setIsAddManual] = useState(false);
   //
   const titleToSearch = useRef<HTMLInputElement>(null);
@@ -48,8 +49,18 @@ export function AddBook({
 
   //reset on both because sometimes when opening some ui artificate
   useEffect(() => {
+    reset();
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (activeModal === null) {
+      reset();
+    }
+  }, [activeModal]);
+
+  const reset = () => {
     setFailedReason("");
-    setisDupTitle(false);
+    setIsDupTitle(false);
     setIsAddManual(false);
     //
     setIsSearching(false);
@@ -63,7 +74,7 @@ export function AddBook({
       titleToSearch.current.value = "";
       titleToSearch.current.focus();
     }
-  }, [isOpen]);
+  };
 
   if (!isOpen) return null;
 
@@ -112,7 +123,7 @@ export function AddBook({
       const duplicate = isDuplicate(response.title);
       if (duplicate) {
         setFailedReason(`Already Have Book: ${duplicate}`);
-        setisDupTitle(true);
+        setIsDupTitle(true);
         return;
       }
       // do series search for main book
@@ -212,6 +223,7 @@ export function AddBook({
           setIsSearching(false);
         }
       }
+      setNewBook(resetBookValues(newBook));
       setActiveModal("multOptions");
       return;
     }
@@ -221,6 +233,13 @@ export function AddBook({
   //MultSearch func
 
   const handlePickFromMultBooks = async (book: OpenLibData | GoogleBooks) => {
+    //check if clicked book is duplicate
+    const duplicate = isDuplicate(book.title);
+    if (duplicate) {
+      setFailedReason(`Already Have Book: ${duplicate}`);
+      setIsDupTitle(true);
+      return;
+    }
     // ol
     if ("key" in book) {
       setNewBook(mapOlDataToBook(book));
@@ -234,11 +253,12 @@ export function AddBook({
     setActiveModal("bookDetails");
   };
 
-  const handleMultOptionClose = () => {
-    if (isDupTitle) {
-      setActiveModal(null);
+  const handleMultOptionClose = (action: "manualAdd" | null) => {
+    if (action === "manualAdd") {
+      setActiveModal("manualAdd");
       return;
     }
+    //just close the modal
     setActiveModal("bookDetails");
   };
 
@@ -247,7 +267,7 @@ export function AddBook({
       {/* maybe not allow user to close modal as new book coming? */}
       <div className="fixed inset-0" onClick={onClose} />
       <div className="bg-zinc-900/95 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 shadow-2xl w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
-        <h2 className="text-xl font-semibold mb-6 text-zinc-100 flex items-center gap-2">
+        <h2 className="text-xl font-semibold mb-4 text-zinc-100 flex justify-center items-center gap-2">
           <Book className="w-5 h-5 text-emerald-400" />
           Search for New Book
         </h2>
@@ -261,33 +281,17 @@ export function AddBook({
             disabled={isSearching}
             className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-400 focus:border-zinc-500/50 focus:ring-1 focus:ring-zinc-700/20 outline-none transition-all duration-200"
           />
-
-          <button
-            onClick={handleBookSearch}
-            disabled={isSearching}
-            className="px-6 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 disabled:bg-zinc-700 disabled:text-zinc-500 disabled:shadow-none text-white font-medium transition-all duration-200 shadow-md shadow-zinc-900"
-          >
-            {isSearching ? "Searching..." : "Search"}
-          </button>
         </div>
         <div className="flex justify-between">
           {failedReason && !isSearching && (
             <div className="mt-4 text-zinc-400 text-sm">{failedReason}</div>
           )}
-          {isDupTitle && !isSearching && (
-            <button
-              className="mt-4 text-zinc-400 text-sm hover:cursor-pointer border border-zinc-300 rounded-md p-0.5"
-              onClick={() => setActiveModal("multOptions")}
-            >
-              See Books Found!
-            </button>
-          )}
           {isAddManual && !isSearching && (
             <button
-              className="mt-4 text-zinc-400 text-sm hover:cursor-pointer border border-zinc-300 rounded-md p-0.5"
+              className="mt-4 text-zinc-400 text-sm hover:cursor-pointer underline"
               onClick={() => setActiveModal("manualAdd")}
             >
-              Add Book Manually
+              Manual Add
             </button>
           )}
         </div>
@@ -306,6 +310,7 @@ export function AddBook({
           isOpen={activeModal === "multOptions"}
           onClose={handleMultOptionClose}
           books={allNewBooks}
+          prompt={titleToSearch.current?.value || ""}
           onClickedBook={handlePickFromMultBooks}
         />
       )}

@@ -1,10 +1,9 @@
 "use client";
-import { Book, X } from "lucide-react";
+import { DiamondPlus, X } from "lucide-react";
 import { BookProps } from "@/types/books";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
-import Image from "next/image";
 
 interface ManualAddBook {
   isOpen: boolean;
@@ -15,11 +14,16 @@ interface ManualAddBook {
 }
 
 const statusOptions = [
-  { value: "Completed", label: "Completed", className: "text-green-600" },
   {
     value: "Want to Read",
     label: "Want to Read",
     className: "text-blue-500",
+  },
+  { value: "Completed", label: "Completed", className: "text-green-600" },
+  {
+    value: "Dropped",
+    label: "Dropped",
+    className: "text-red-500",
   },
 ];
 
@@ -35,15 +39,17 @@ const getScoreLabel = (score: number): string => {
   if (score >= 3) return "Bad";
   if (score >= 2) return "Awful";
   if (score >= 1) return "Dog Water";
-  return "Not Rated";
+  return "Select Option";
 };
 
-const scoreOptions = Array.from({ length: 11 }, (_, i) => {
-  const scoreValue = 11 - i;
+const scoreOptions = Array.from({ length: 12 }, (_, i) => {
+  const scoreValue = i === 0 ? 0 : 12 - i;
   return {
     value: scoreValue.toString(),
-    label: `${scoreValue} - ${getScoreLabel(scoreValue)}`,
-    className: "text-zinc-200",
+    label:
+      scoreValue !== 0
+        ? `${scoreValue} - ${getScoreLabel(scoreValue)}`
+        : `${getScoreLabel(scoreValue)}`,
   };
 });
 
@@ -78,54 +84,52 @@ export function ManualAddBook({
         {/* ACTUAL DETAIL CARD */}
         <div className="bg-gradient-to-br bg-zinc-900 backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 lg:min-w-3xl lg:max-w-3xl w-full max-h-[calc(100vh-3rem)]">
           <div className="px-8.5 py-7 border-0 rounded-2xl">
-            {/* CLOSE BUTTON */}
-            <button
-              className="absolute right-3 top-3 py-1.5 px-2 rounded-lg bg-zinc-800/50 hover:bg-red-600/50 
-              hover:cursor-pointer transition-all group"
-              onClick={onClose}
-            >
-              <X className="w-5 h-5 text-gray-400 group-hover:text-red-600 transition-colors" />
-            </button>
+            {/* ACTION BUTTONS */}
+            <div className="absolute right-3 top-3 flex items-center gap-2">
+              {/* ADD */}
+              <button
+                className={`py-1.5 px-5 rounded-lg transition-all group ${
+                  book.title && book.title.trim()
+                    ? "bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer"
+                    : "bg-zinc-800/40 cursor-not-allowed opacity-50"
+                }`}
+                onClick={book.title && book.title.trim() ? addBook : undefined}
+                disabled={!book.title || !book.title.trim()}
+              >
+                <DiamondPlus
+                  className={`w-5 h-5 transition-colors ${
+                    book.title && book.title.trim()
+                      ? "text-gray-400 group-hover:text-green-500"
+                      : "text-gray-500"
+                  }`}
+                />
+              </button>
+              {/* CLOSE -- goes to listing*/}
+              <button
+                className="py-1.5 px-2 rounded-lg bg-zinc-800/50 hover:bg-red-600/50 
+                  hover:cursor-pointer transition-all group"
+                onClick={onClose}
+              >
+                <X className="w-5 h-5 text-gray-400 group-hover:text-red-300 transition-colors" />
+              </button>
+            </div>
 
             <div className="flex gap-8">
-              <div className="flex-shrink-0">
-                {book.coverUrl ? (
-                  <img
-                    src={book.coverUrl}
-                    alt={book.title || "Untitled"}
-                    width={248}
-                    height={372}
-                    className="w-62 h-93 object-contain rounded-lg"
-                  />
-                ) : (
-                  <div className="w-62 h-93 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-lg border border-zinc-600/30"></div>
-                )}
-              </div>
+              {/* LEFT SIDE -- EMPTY COVER */}
+              <div className="w-62 h-93 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-lg border border-zinc-600/30" />
               {/* RIGHT SIDE -- DETIALS */}
-              <div className="flex flex-col flex-1 min-h-93 min-w-62">
+              <div className="flex flex-col flex-1 justify-center min-h-93 min-w-62 gap-1">
                 {/* TITLE */}
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-zinc-400 block">
-                    Title*
+                    Book Title*
                   </label>
                   <input
                     type="text"
                     placeholder="Enter book title"
                     value={book.title || ""}
                     onChange={(e) => onUpdate({ title: e.target.value })}
-                    className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-4 py-3 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 outline-none transition-all duration-200"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm font-medium text-zinc-400 block">
-                    Cover Image Url
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter cover url"
-                    value={book.coverUrl || ""}
-                    onChange={(e) => onUpdate({ coverUrl: e.target.value })}
-                    className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-4 py-3 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 outline-none transition-all duration-200"
+                    className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-4 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 outline-none transition-all duration-200"
                   />
                 </div>
                 {/* AUTHOR */}
@@ -139,7 +143,7 @@ export function ManualAddBook({
                       placeholder="Enter author name"
                       value={book.author || ""}
                       onChange={(e) => onUpdate({ author: e.target.value })}
-                      className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-4 py-3 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 outline-none transition-all duration-200"
+                      className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-4 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 outline-none transition-all duration-200"
                     />
                   </div>
                   {/* PUBLICATION YEAR */}
@@ -156,7 +160,7 @@ export function ManualAddBook({
                           datePublished: parseInt(e.target.value) || undefined,
                         })
                       }
-                      className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-4 py-3 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 outline-none transition-all duration-200"
+                      className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-4 py-2 text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 outline-none transition-all duration-200"
                     />
                   </div>
                 </div>
@@ -181,7 +185,7 @@ export function ManualAddBook({
                   </div>
                   <div className="flex-1 lg:min-w-[195px]">
                     <label className="text-sm font-medium text-zinc-400 mb-1 block">
-                      Rating
+                      Score
                     </label>
                     <Dropdown
                       value={book.score?.toString() || "-"}
@@ -210,6 +214,8 @@ export function ManualAddBook({
                       onChange={(e) => {
                         onUpdate({ note: e.target.value });
                       }}
+                      minHeight={100}
+                      maxHeight={100}
                       placeholder="Add your thoughts about this book..."
                       className="text-gray-300 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500"
                     />

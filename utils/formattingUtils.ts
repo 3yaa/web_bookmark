@@ -28,7 +28,7 @@ export const getStatusBorderColor = (status: MediaStatus) => {
 	  case "Completed":
 			return "border-emerald-500/50";
 	  case "Want to Read":
-			return "border-blue-500/60";
+			return "border-blue-500/50";
 		case "Dropped":
 			return "border-red-500/40";
 	  default:
@@ -42,7 +42,7 @@ export const getStatusBorderGradient = (status: MediaStatus) => {
 		case "Completed":
 			return "from-emerald-500/50";
 		case "Want to Read":
-			return "border-blue-500/60";
+			return "from-blue-500/50";
 		case "Dropped":
 			return "from-red-500/40";
 		default:

@@ -14,12 +14,12 @@ interface BookDetailsProps {
 }
 
 const statusOptions = [
-  { value: "Completed", label: "Completed", className: "text-green-600" },
   {
     value: "Want to Read",
     label: "Want to Read",
     className: "text-blue-500",
   },
+  { value: "Completed", label: "Completed", className: "text-green-600" },
   {
     value: "Dropped",
     label: "Dropped",
@@ -39,15 +39,17 @@ const getScoreLabel = (score: number): string => {
   if (score >= 3) return "Bad";
   if (score >= 2) return "Awful";
   if (score >= 1) return "Dog Water";
-  return "Not Rated";
+  return "Select Option";
 };
 
-const scoreOptions = Array.from({ length: 11 }, (_, i) => {
-  const scoreValue = 11 - i;
+const scoreOptions = Array.from({ length: 12 }, (_, i) => {
+  const scoreValue = i === 0 ? 0 : 12 - i;
   return {
     value: scoreValue.toString(),
-    label: `${scoreValue} - ${getScoreLabel(scoreValue)}`,
-    className: "text-zinc-200",
+    label:
+      scoreValue !== 0
+        ? `${scoreValue} - ${getScoreLabel(scoreValue)}`
+        : `${getScoreLabel(scoreValue)}`,
   };
 });
 
@@ -116,7 +118,7 @@ export function BookDetails({
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-black/40 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
       <div className="fixed inset-0" onClick={handleModalClose} />
-      {/* BACKGROUND BORDER GRAIDENT */}
+      {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
           book.status
@@ -149,7 +151,7 @@ export function BookDetails({
                   hover:cursor-pointer transition-all group"
                   onClick={onClose}
                 >
-                  <X className="w-5 h-5 text-gray-400 group-hover:text-red-600 transition-colors" />
+                  <X className="w-5 h-5 text-gray-400 group-hover:text-red-300 transition-colors" />
                 </button>
               </div>
             ) : (
@@ -163,7 +165,7 @@ export function BookDetails({
             <div className="flex gap-8">
               {/* LEFT SIDE -- PIC */}
               <div
-                className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg"
+                className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg hover:cursor-pointer"
                 onClick={handleCoverChange}
               >
                 {book.curCoverIndex !== undefined &&
@@ -173,7 +175,7 @@ export function BookDetails({
                     alt={book.title || "Untitled"}
                     width={248}
                     height={372}
-                    className="w-full h-full min-w-62 min-h-93 object-fill"
+                    className="min-w-62 min-h-93 object-fill"
                   />
                 ) : book.coverUrl ? (
                   <Image
@@ -181,13 +183,13 @@ export function BookDetails({
                     alt={book.title || "Untitled"}
                     width={248}
                     height={372}
-                    className="w-full h-full min-w-62 min-h-93 object-fill"
+                    className="min-w-62 min-h-93 object-fill"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
+                  <div className="min-w-62 min-h-93 bg-gradient-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
                 )}
               </div>
-              {/* RIGHT SIDE -- DETIALS */}
+              {/* RIGHT SIDE -- DETAILS */}
               <div className="flex flex-col flex-1 min-h-93 min-w-62">
                 <div className="flex flex-col justify-center flex-1">
                   {/* SERIES TITLE */}

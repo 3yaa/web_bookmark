@@ -4,6 +4,27 @@ export function getCoverUrl(coverOLID?: string, size: "S" | "M" | "L" = "L"): st
   return `https://covers.openlibrary.org/b/olid/${coverOLID}-${size}.jpg`;
 }
 
+export function resetBookValues(book: Partial<BookProps>): Partial<BookProps> {
+  return {
+    id: book.id,
+    status: "Want to Read",
+    originalTitle: "",
+    title: "",
+    score: undefined,
+    dateCompleted: undefined,
+    note: undefined,
+    author: undefined,
+    coverUrl: undefined,
+    coverEditions: undefined,
+    curCoverIndex: undefined,
+    datePublished: undefined,
+    seriesTitle: undefined,
+    placeInSeries: undefined,
+    prequel: undefined,
+    sequel: undefined,
+  };
+}
+
 export function mapOlDataToBook(dataOL: OpenLibData): Partial<BookProps> {
   return {
     title: dataOL.title,
@@ -15,12 +36,13 @@ export function mapOlDataToBook(dataOL: OpenLibData): Partial<BookProps> {
   };
 }
 
-export function mapGoogleDataToBook(dataOL: GoogleBooks): Partial<BookProps> {
+export function mapGoogleDataToBook(dataGoogle: GoogleBooks): Partial<BookProps> {
   return {
-    title: cleanTitle(dataOL.title),
-    author: dataOL.author_name?.[0],
-    datePublished: dataOL.first_publish_year,
-    coverUrl: dataOL.coverUrl,
+    title: cleanTitle(dataGoogle.title),
+    originalTitle: dataGoogle.title,
+    author: dataGoogle.author_name?.[0],
+    datePublished: dataGoogle.first_publish_year,
+    coverUrl: dataGoogle.coverUrl,
   };
 }
 

@@ -100,7 +100,7 @@ export function ShowMultBooks({
           </h2>
         )}
 
-        <div className="overflow-y-auto space-y-3 pr-2">
+        <div className="overflow-y-auto space-y-2.5">
           {combinedBooks.length === 0 ? (
             <p className="text-gray-400">No books found.</p>
           ) : (
@@ -142,17 +142,17 @@ export function ShowMultBooks({
                 </div>
                 {/* DETAILS */}
                 <div className="flex flex-col">
-                  <span className="text-lg font-medium text-zinc-100">
+                  <span className="text-lg font-medium text-zinc-100 truncate max-w-132">
                     {item.book.title}
                   </span>
                   {item.book.author_name &&
                     item.book.author_name.length > 0 && (
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-gray-400 truncate max-w-135">
                         {item.book.author_name.join(", ")}
                       </span>
                     )}
                   {item.book.first_publish_year && (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 truncate max-w-135">
                       First published: {item.book.first_publish_year}
                     </span>
                   )}

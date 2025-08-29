@@ -259,7 +259,8 @@ export function AddBook({
       return;
     }
     //just close the modal
-    setActiveModal("bookDetails");
+    setActiveModal(null);
+    onClose();
   };
 
   return (
@@ -267,6 +268,16 @@ export function AddBook({
       {/* maybe not allow user to close modal as new book coming? */}
       <div className="fixed inset-0" onClick={onClose} />
       <div className="bg-zinc-900/95 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 shadow-2xl w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
+        {isSearching && (
+          <div className="absolute inset-0 bg-zinc-900 rounded-2xl flex items-center justify-center z-20">
+            <div className="flex flex-col items-center gap-3">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div>
+              <span className="text-zinc-300 text-sm">
+                Searching for books...
+              </span>
+            </div>
+          </div>
+        )}
         <h2 className="text-xl font-semibold mb-4 text-zinc-100 flex justify-center items-center gap-2">
           <Book className="w-5 h-5 text-emerald-400" />
           Search for New Book

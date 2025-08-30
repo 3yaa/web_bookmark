@@ -11,6 +11,7 @@ interface BookDetailsProps {
   onUpdate: (bookId: number, updates: Partial<BookProps> | null) => void;
   onClose: () => void;
   addBook?: () => void;
+  allBooks?: BookProps[];
 }
 
 const statusOptions = [
@@ -57,6 +58,7 @@ export function BookDetails({
   isOpen,
   onClose,
   book,
+  allBooks,
   onUpdate,
   addBook,
 }: BookDetailsProps) {
@@ -93,6 +95,10 @@ export function BookDetails({
       }
       onUpdate(book.id, { curCoverIndex: newCoverIndex });
     }
+  };
+
+  const openSeriesBook = (option: "sequel" | "prequel") => {
+    
   };
 
   const handleDelete = () => {
@@ -292,17 +298,21 @@ export function BookDetails({
                 <div className="grid grid-cols-[1fr_3rem_1fr] w-full pr-1.5">
                   <div className="truncate text-left">
                     {book.prequel && (
-                      <div
-                        className="text-sm text-zinc-400/80 hover:cursor-pointer"
-                        onClick={() => console.log("hi")}
-                      >
-                        <label className="text-xs font-medium text-zinc-400 block hover:cursor-pointer">
+                      <div className="text-sm text-zinc-400/80">
+                        <label className="text-xs font-medium text-zinc-400 block">
                           <span className="inline-flex items-center gap-1">
                             <span>←</span>
                             <span>Prequel</span>
                           </span>
                         </label>
-                        {book.prequel}
+                        <span
+                          className="hover:underline hover:cursor-pointer"
+                          onClick={() => {
+                            console.log("hi");
+                          }}
+                        >
+                          {book.prequel}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -315,17 +325,21 @@ export function BookDetails({
                   </div>
                   <div className="truncate text-right">
                     {book.sequel && (
-                      <div
-                        className="text-sm text-zinc-400/80 hover:cursor-pointer"
-                        onClick={() => console.log("bye")}
-                      >
-                        <label className="text-xs font-medium text-zinc-400 block hover:cursor-pointer">
+                      <div className="text-sm text-zinc-400/80">
+                        <label className="text-xs font-medium text-zinc-400 block">
                           <span className="inline-flex items-center gap-1">
                             <span>Sequel</span>
                             <span>→</span>
                           </span>
                         </label>
-                        {book.sequel}
+                        <span
+                          className="hover:underline hover:cursor-pointer"
+                          onClick={() => {
+                            console.log("bye");
+                          }}
+                        >
+                          {book.sequel}
+                        </span>
                       </div>
                     )}
                   </div>

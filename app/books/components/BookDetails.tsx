@@ -248,7 +248,7 @@ export function BookDetails({
                             ? ["to-emerald-500/10", "text-emerald-500"]
                             : ["to-blue-500/10", "text-blue-500"]
                         }
-                        dropDuration={0.22}
+                        dropDuration={0.3}
                       />
                     </div>
                     <div className="flex-[0.865] lg:min-w-[195px]">

@@ -119,7 +119,7 @@ export function Dropdown({
               key={option.value}
               type="button"
               onClick={() => handleSelect(option.value)}
-              className={`w-full flex items-center justify-between px-3 py-2 text-sm text-zinc-200 focus:outline-none border-b border-zinc-800/90 last:border-none transition-all duration-200 ease-out
+              className={`w-full flex items-center justify-between px-3 py-2 text-sm text-zinc-200 focus:outline-none border-b border-zinc-800/90 last:border-none transition-all duration-200 ease-out hover:cursor-pointer
                 ${
                   option.value === value
                     ? `rounded-md bg-gradient-to-r from-transparent ${dropStyle[0]}`

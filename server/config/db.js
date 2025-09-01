@@ -14,12 +14,3 @@ export const pool = new Pool({
     ca: process.env.DB_CA_CERT,
   },
 });
-
-// Test the connection
-pool.on("connect", () => {
-  console.log("Connected to PostgreSQL database");
-});
-
-pool.on("error", (err) => {
-  console.error("PostgreSQL connection error:", err);
-});

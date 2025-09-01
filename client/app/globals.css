@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+/* Hide scrollbars on common scroll containers */
+html, body, 
+.overflow-auto, .overflow-x-auto, .overflow-y-auto,
+.overflow-scroll, .overflow-x-scroll, .overflow-y-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar, 
+body::-webkit-scrollbar,
+.overflow-auto::-webkit-scrollbar, 
+.overflow-x-auto::-webkit-scrollbar, 
+.overflow-y-auto::-webkit-scrollbar,
+.overflow-scroll::-webkit-scrollbar, 
+.overflow-x-scroll::-webkit-scrollbar, 
+.overflow-y-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* input spinner */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none; 
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield; 
+}

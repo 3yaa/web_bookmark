@@ -1,0 +1,16 @@
+backend:
+
+database:
+
+FEATURES:
+- sorts on listing: 
+	-score (number), complted (number), author (alpha), published (number)
+	-default status sort: (want to read)->(completed)->(dropped)
+		- only show items under certain status
+- publication year validation
+- mult searching if duplicate no ui indication -- just doesn't let you open details as of now
+
+FIXES:
+- scaling on different size monitors
+- fix on mobile
+- after hitting duplicate the text fields act weird: it starts at the beginning and clicking and typing makes the text go away (might be a feature?)

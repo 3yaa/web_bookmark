@@ -208,10 +208,13 @@ export function AddBook({
     [handleSeriesSearch, isDuplicate]
   );
 
-  // USES null TO DETECT SHOW MORE BOOK OPTION
-  const handleNewBookUpdates = useCallback(
-    async (_bookId: number, updates: Partial<BookProps> | null) => {
-      if (!updates) {
+  const handleBookDetailsUpdates = useCallback(
+    async (
+      _bookId: number,
+      updates?: Partial<BookProps>,
+      showMore?: boolean
+    ) => {
+      if (showMore) {
         setActiveModal("multOptions");
         if (!allNewBooks.GoogleBooks.length) {
           await handleBackUpBookSearch();
@@ -361,10 +364,12 @@ export function AddBook({
           isOpen={activeModal === "bookDetails"}
           book={newBook as BookProps}
           onClose={handleBookDetailsClose}
-          onUpdate={handleNewBookUpdates}
+          onUpdate={handleBookDetailsUpdates}
           addBook={handleBookAdd}
           isLoading={isSearching}
-          onSeriesChange={allSeries.length > 1 ? handleSeriesChange : undefined}
+          showBookInSeries={
+            allSeries.length > 1 ? handleSeriesChange : undefined
+          }
         />
       )}
       {activeModal === "multOptions" && (

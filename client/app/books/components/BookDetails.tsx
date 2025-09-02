@@ -57,15 +57,16 @@ const scoreOptions = Array.from({ length: 12 }, (_, i) => {
 interface BookDetailsProps {
   book: BookProps;
   isOpen: boolean;
+  onClose: () => void;
+  isLoading?: boolean;
   onUpdate: (
     bookId: number,
-    updates: Partial<BookProps> | null,
-    newBook?: { bookTitle: string | null }
+    updates?: Partial<BookProps>,
+    takeAction?: boolean
   ) => void;
-  onClose: () => void;
   addBook?: () => void;
-  isLoading?: boolean;
-  onSeriesChange?: (option: "left" | "right") => void;
+  showSequelPrequel?: (sequelTitle: string) => void;
+  showBookInSeries?: (seriesDir: "left" | "right") => void;
 }
 
 export function BookDetails({
@@ -75,7 +76,8 @@ export function BookDetails({
   onUpdate,
   addBook,
   isLoading,
-  onSeriesChange,
+  showBookInSeries,
+  showSequelPrequel,
 }: BookDetailsProps) {
   if (!isOpen || !book) return null;
 
@@ -112,15 +114,17 @@ export function BookDetails({
     }
   };
 
-  const openSeriesBook = (option: "sequel" | "prequel") => {
-    const targetTitle = option === "sequel" ? book.sequel : book.prequel;
+  const openSeriesBook = (seriesDir: string) => {
+    if (!showSequelPrequel) return;
+    const targetTitle = seriesDir === "sequel" ? book.sequel : book.prequel;
     if (targetTitle) {
-      onUpdate(0, null, { bookTitle: targetTitle });
+      showSequelPrequel(targetTitle);
     }
   };
 
   const handleDelete = () => {
-    onUpdate(book.id, null);
+    const shouldDelete = true;
+    onUpdate(book.id, undefined, shouldDelete);
     onClose();
   };
 
@@ -136,7 +140,8 @@ export function BookDetails({
   };
 
   const handleMoreBook = () => {
-    onUpdate(book.id, null);
+    const showMoreBooks = true;
+    onUpdate(book.id, undefined, showMoreBooks);
   };
 
   return (
@@ -160,13 +165,13 @@ export function BookDetails({
             {/* ACTION BUTTONS */}
             {addBook ? (
               <div className="absolute right-3 top-3 flex items-center gap-1.5">
-                {onSeriesChange && (
+                {showBookInSeries && (
                   <div className="flex gap-1 bg-zinc-800/50 rounded-lg">
                     {/* LEFT BUTTON */}
                     <button
                       className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
                     hover:cursor-pointer transition-all group"
-                      onClick={() => onSeriesChange("left")}
+                      onClick={() => showBookInSeries("left")}
                     >
                       <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
                     </button>
@@ -174,7 +179,7 @@ export function BookDetails({
                     <button
                       className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
                     hover:cursor-pointer transition-all group"
-                      onClick={() => onSeriesChange("right")}
+                      onClick={() => showBookInSeries("right")}
                     >
                       <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
                     </button>

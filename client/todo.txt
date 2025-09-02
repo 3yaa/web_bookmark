@@ -1,6 +1,5 @@
 backend:
-
-database:
+- auth
 
 FEATURES:
 - sorts on listing: 

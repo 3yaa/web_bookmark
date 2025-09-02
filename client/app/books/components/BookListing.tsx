@@ -1,137 +1,53 @@
 "use client";
 import Image from "next/image";
 import { Plus } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { BookProps } from "@/types/books";
 import { AddBook } from "./addingBook/AddBook";
 import { BookDetails } from "./BookDetails";
 import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { getCoverUrl } from "@/app/books/utils/bookMapping";
+import { useBookData } from "@/hooks/useBookData";
 
 export default function BookList() {
-  const [books, setBooks] = useState<BookProps[]>([]);
+  const { books, addBook, updateBook, deleteBook } = useBookData();
   const [selectedBook, setSelectedBook] = useState<BookProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
     "bookDetails" | "addBook" | null
   >(null);
 
-  // temp: loads books from localstorage
-  useEffect(() => {
-    const loadBooks = () => {
-      try {
-        const storedBooks = localStorage.getItem("books");
-        if (!storedBooks) {
-          localStorage.setItem("books", JSON.stringify([]));
-          setBooks([]);
-          return;
-        }
-        const parsedBooks = JSON.parse(storedBooks);
-
-        if (Array.isArray(parsedBooks)) {
-          setBooks(parsedBooks);
-        } else {
-          console.warn("invalid book format--reset");
-          localStorage.setItem("books", JSON.stringify([]));
-          setBooks([]);
-        }
-      } catch (e) {
-        console.warn("error loading books--reset:", e);
-        localStorage.setItem("books", JSON.stringify([]));
-        setBooks([]);
-      }
-    };
-    loadBooks();
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("books", JSON.stringify(books));
-  }, [books]);
-
-  // if book is missing sequel or prequel tries to link from user lib
-  const linkBook = useCallback(
-    (book: BookProps) => {
-      if (book.seriesTitle) {
-        books.forEach((bk) => {
-          // when book isn't linked
-          if (bk.sequel === book.title && !book.prequel) {
-            // set book prequel to bk
-            book.prequel = bk.title;
-          } else if (bk.prequel === book.title && !book.sequel) {
-            // set book sequel to bk
-            book.sequel = bk.title;
-          }
-          // when bk isn't linked
-          if (book.prequel === bk.title && !bk.sequel) {
-            // sets bk sequel to book
-            bk.sequel = book.title;
-          } else if (book.sequel === bk.title && !bk.prequel) {
-            // sets bk prequel to book
-            bk.prequel = book.title;
-          }
-        });
-      }
-      return book;
-    },
-    [books]
-  );
-
-  const addToBook = useCallback(
-    (book: BookProps) => {
-      //add book
-      const linkedBook = linkBook(book);
-      setBooks((prevBooks) => {
-        const updatedBooks = [...prevBooks, linkedBook];
-        return updatedBooks;
-      });
-    },
-    [linkBook]
-  );
-
-  // USES null ON UPDATE TO DETECT ITS A DELETE
-  const handleBookUpdates = useCallback(
-    (
-      bookId: number,
-      updates: Partial<BookProps> | null,
-      newBook?: { bookTitle: string | null }
-    ) => {
-      // book title search and sequel/prequel linking
-      if (newBook?.bookTitle) {
-        const targetBook = books.find(
-          (book) => book.title === newBook.bookTitle
-        );
+  const showSequelPrequel = useCallback(
+    (targetTitle: string) => {
+      if (targetTitle) {
+        // !NEEDS TO MAKE THIS CALL WITH THE ENTIRE DB
+        const targetBook = books.find((book) => book.title === targetTitle);
 
         if (targetBook) {
           setSelectedBook(targetBook);
         } else {
-          // need to call library
-          setTitleToUse(newBook.bookTitle);
+          // need to call library -- couldn't find in db
+          setTitleToUse(targetTitle);
           setActiveModal("addBook");
         }
         return;
       }
-
-      // book updates or deletion
-      setBooks((prevBooks) => {
-        if (!updates) {
-          // Delete book
-          return prevBooks.filter((book) => book.id !== bookId);
-        } else {
-          // Update book
-          const updatedBooks = prevBooks.map((book) =>
-            book.id === bookId ? { ...book, ...updates } : book
-          );
-
-          // Update selectedBook if it's the one being modified
-          if (selectedBook?.id === bookId) {
-            setSelectedBook({ ...selectedBook, ...updates });
-          }
-
-          return updatedBooks;
-        }
-      });
     },
-    [books, selectedBook]
+    [books]
+  );
+
+  const handleBookUpdates = useCallback(
+    (bookId: number, updates?: Partial<BookProps>, shouldDelete?: boolean) => {
+      if (updates) {
+        if (selectedBook?.id === bookId) {
+          setSelectedBook({ ...selectedBook, ...updates });
+        }
+        updateBook(bookId, updates);
+      } else if (shouldDelete) {
+        deleteBook(bookId);
+      }
+    },
+    [deleteBook, selectedBook, updateBook]
   );
 
   const handleModalClose = useCallback(() => {
@@ -246,6 +162,7 @@ export default function BookList() {
           book={selectedBook}
           onClose={handleModalClose}
           onUpdate={handleBookUpdates}
+          showSequelPrequel={showSequelPrequel}
         />
       )}
       {/* add button */}
@@ -260,7 +177,7 @@ export default function BookList() {
           isOpen={activeModal === "addBook"}
           onClose={handleModalClose}
           existingBooks={books}
-          onAddBook={addToBook}
+          onAddBook={addBook}
           titleFromAbove={titleToUse}
         />
       </div>

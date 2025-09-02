@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 // Routes
-app.use("/api/books", booksRouter);
+app.use("/books", booksRouter);
 
 // render health check endpoint
 app.get("/healthz", (_, res) => {

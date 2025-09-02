@@ -10,7 +10,7 @@ import {
   validateBookId,
   validateBookPatch,
   validateBookCreate,
-} from "../middleware/validateBookId.js";
+} from "../middleware/validateBooks.js";
 
 const booksRouter = express.Router();
 

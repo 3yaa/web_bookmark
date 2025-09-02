@@ -119,26 +119,26 @@ export const createBook = async (req, res) => {
     } = req.body;
 
     const query = `
-	INSERT INTO books (
-		title,
-		author,  
-		cover_url,
-		cover_editions,
-		cur_cover_index,
-		date_published,
-		series_title,
-		place_in_series,
-		prequel,
-		sequel,
-		status,
-		score,
-		date_completed,
-		note,
-		date_created,
-		key
-	) VALUES (
-		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP, $15
-	) RETURNING *
+    INSERT INTO books (
+      title,
+      author,  
+      cover_url,
+      cover_editions,
+      cur_cover_index,
+      date_published,
+      series_title,
+      place_in_series,
+      prequel,
+      sequel,
+      status,
+      score,
+      date_completed,
+      note,
+      date_created,
+      key
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP, $15
+    ) RETURNING *
 	`;
     const values = [
       title,

@@ -25,7 +25,7 @@ export const validateBookPatch = (req, res, next) => {
   }
 
   // check if allowed
-  const invalidFields = Objects.keys(updates).filter(
+  const invalidFields = Object.keys(updates).filter(
     (field) => !allowedFields.includes(field)
   );
 

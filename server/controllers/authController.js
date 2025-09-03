@@ -47,7 +47,7 @@ export const loginUser = async (req, res) => {
 
       // save the refreshtoken to the user in db
       const values = [hashedToken, expiresAt, email];
-      const result = await pool.query(
+      await pool.query(
         `UPDATE users 
         SET refresh_token_hash = $1, refresh_token_expires = $2
         WHERE email = $3`,
@@ -60,12 +60,12 @@ export const loginUser = async (req, res) => {
         secure: true,
         maxAge: 30 * 24 * 60 * 60 * 1000,
       }); //should be 30 days
-
       res.status(200).json({
         success: true,
         message: `User ${foundUser.username} is logged in`,
         accessToken: accessToken,
         user: {
+          id: foundUser.id,
           username: foundUser.username,
           email: foundUser.email,
         },

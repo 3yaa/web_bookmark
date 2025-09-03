@@ -30,7 +30,6 @@ export const logoutUser = async (req, res) => {
       );
     }
 
-    // https in prod
     res.clearCookie("jwt", { httpOnly: true, sameSite: "none", secure: true });
     res.sendStatus(204);
   } catch (error) {

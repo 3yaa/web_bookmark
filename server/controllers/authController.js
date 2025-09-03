@@ -1,5 +1,10 @@
+import dotenv from "dotenv";
+import crypto from "crypto";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { pool } from "../config/db.js";
+
+dotenv.config();
 
 export const loginUser = async (req, res) => {
   try {
@@ -24,11 +29,43 @@ export const loginUser = async (req, res) => {
     const match = await bcrypt.compare(pwd, foundUser.password_hash);
 
     if (match) {
+      const accessToken = jwt.sign(
+        {
+          id: foundUser.id,
+          email: foundUser.email,
+          username: foundUser.username,
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "15m" }
+      );
+      const refreshToken = crypto.randomBytes(32).toString("base64url");
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      const hashedToken = crypto
+        .createHash("sha256")
+        .update(refreshToken)
+        .digest("hex");
+
+      // save the refreshtoken to the user in db
+      const values = [hashedToken, expiresAt, email];
+      const result = await pool.query(
+        `UPDATE users 
+        SET refresh_token_hash = $1, refresh_token_expires = $2
+        WHERE email = $3`,
+        values
+      );
+
+      res.cookie("jwt", refreshToken, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+      }); //should be 30 days
+
       res.status(200).json({
         success: true,
         message: `User ${foundUser.username} is logged in`,
+        accessToken: accessToken,
         user: {
-          id: foundUser.id,
           username: foundUser.username,
           email: foundUser.email,
         },
@@ -40,50 +77,10 @@ export const loginUser = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Error logging in:", error);
     res.status(500).json({
       success: false,
-      message: "Server error",
-    });
-  }
-};
-
-export const registerUser = async (req, res) => {
-  try {
-    const { user, email, pwd } = req.body;
-    const hashedPassword = await bcrypt.hash(pwd, 10);
-    //store the user
-    const query = `
-    INSERT INTO users (
-      username,
-      email,
-      password_hash,
-      created_at
-    ) VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
-    `;
-
-    const values = [user, email, hashedPassword];
-    const result = await pool.query(query, values);
-
-    res.status(201).json({
-      success: true,
-      message: `New user ${user} created`,
-      user: result.rows[0],
-    });
-  } catch (error) {
-    console.error("Error creating user: ", error);
-
-    // Unique violation
-    if (error.code === "23505") {
-      return res.status(400).json({
-        success: false,
-        message: "Email already exists",
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: "Error creating user",
+      message: "Error logging in",
       error: error.message,
     });
   }

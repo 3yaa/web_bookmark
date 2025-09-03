@@ -5,9 +5,13 @@ import { pool } from "../config/db.js";
  **HAS TO SORT VIA STATUS: 'Want to Read' -> 'Completed' -> 'Deleted'
  **HAS A LIMIT OF 300 ?? not sure if to implement here or in client
  */
-export const getBooks = async (_, res) => {
+export const getBooks = async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM books;");
+    const userId = req.user.id;
+
+    const result = await pool.query("SELECT * FROM books WHERE user_id=$1", [
+      userId,
+    ]);
 
     res.json({
       success: true,
@@ -27,9 +31,11 @@ export const getBooks = async (_, res) => {
 export const getBook = async (req, res) => {
   try {
     const bookId = req.params.id;
-    const result = await pool.query(`SELECT * FROM books where id = $1`, [
-      bookId,
-    ]);
+    const userId = req.user.id;
+    const result = await pool.query(
+      `SELECT * FROM books WHERE id=$1 AND user_id=$2`,
+      [bookId, userId]
+    );
 
     // if no book were found
     if (result.rows.length === 0) {
@@ -56,6 +62,7 @@ export const getBook = async (req, res) => {
 export const patchBook = async (req, res) => {
   try {
     const bookId = req.params.id;
+    const userId = req.user.id;
     const updates = req.body;
 
     // breaks all the keys into key=$i
@@ -68,10 +75,13 @@ export const patchBook = async (req, res) => {
     // gets all the values of the keys
     const values = Object.values(updates);
     values.push(bookId);
+    values.push(userId);
 
     const query = `
 	 	UPDATE books
-		SET ${setClause} WHERE id=$${values.length} RETURNING * 
+		SET ${setClause} WHERE id=$${values.length - 1} AND user_id=${
+      values.length
+    } RETURNING * 
 	  `;
     const result = await pool.query(query, values);
 
@@ -100,6 +110,7 @@ export const patchBook = async (req, res) => {
 // NEED TO VALIDATE NON-NULLABLE DATA
 export const createBook = async (req, res) => {
   try {
+    const userId = req.user.id;
     const {
       title,
       author,
@@ -135,9 +146,10 @@ export const createBook = async (req, res) => {
       date_completed,
       note,
       date_created,
-      key
+      key,
+      user_id
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP, $15
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP, $15, $16
     ) RETURNING *
 	`;
     const values = [
@@ -156,6 +168,7 @@ export const createBook = async (req, res) => {
       dateCompleted,
       note,
       key,
+      userId,
     ];
     const result = await pool.query(query, values);
 
@@ -177,11 +190,12 @@ export const createBook = async (req, res) => {
 export const deleteBook = async (req, res) => {
   try {
     const bookId = req.params.id;
+    const userId = req.user.id;
 
     // delete book
     const result = await pool.query(
-      "DELETE FROM books WHERE id = $1 RETURNING *",
-      [bookId]
+      "DELETE FROM books WHERE id=$1 AND user_id=$2 RETURNING *",
+      [bookId, userId]
     );
 
     if (result.rows.length === 0) {

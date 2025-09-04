@@ -3,8 +3,8 @@ import { pool } from "../config/db.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { user, email, pwd } = req.body;
-    const hashedPassword = await bcrypt.hash(pwd, 10);
+    const { username, email, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
     //store the user
     const query = `
 		INSERT INTO users (
@@ -15,13 +15,13 @@ export const registerUser = async (req, res) => {
 		) VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
 		`;
 
-    const values = [user, email, hashedPassword];
+    const values = [username, email, hashedPassword];
     const result = await pool.query(query, values);
 
     res.status(201).json({
       success: true,
-      message: `New user ${user} created`,
-      user: result.rows[0],
+      message: `New user ${username} created`,
+      username: result.rows[0],
     });
   } catch (error) {
     console.error("Error creating user: ", error);

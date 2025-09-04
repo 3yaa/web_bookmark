@@ -1,5 +1,6 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import { corsOptions } from "./config/cors.js";
 import { registerRouter } from "./routes/registerRouter.js";
 import { refreshRouter } from "./routes/refreshRouter.js";

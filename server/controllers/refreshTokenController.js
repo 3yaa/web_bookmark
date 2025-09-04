@@ -7,10 +7,7 @@ dotenv.config();
 
 export const refreshToken = async (req, res) => {
   try {
-    const cookies = req.cookies;
-    if (!cookies?.jwt) return res.sendStatus(401);
-
-    const refreshToken = cookies.jwt;
+    const refreshToken = req.cookies.jwt;
     const hashedToken = crypto
       .createHash("sha256")
       .update(refreshToken)

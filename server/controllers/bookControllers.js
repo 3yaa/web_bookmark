@@ -79,7 +79,7 @@ export const patchBook = async (req, res) => {
 
     const query = `
 	 	UPDATE books
-		SET ${setClause} WHERE id=$${values.length - 1} AND user_id=${
+		SET ${setClause} WHERE id=$${values.length - 1} AND user_id=$${
       values.length
     } RETURNING * 
 	  `;

@@ -8,7 +8,7 @@ dotenv.config();
 
 export const loginUser = async (req, res) => {
   try {
-    const { email, pwd } = req.body;
+    const { email, password } = req.body;
 
     // Get ALL needed fields from database
     const result = await pool.query(
@@ -26,7 +26,7 @@ export const loginUser = async (req, res) => {
     const foundUser = result.rows[0];
 
     // compare password with hash from db
-    const match = await bcrypt.compare(pwd, foundUser.password_hash);
+    const match = await bcrypt.compare(password, foundUser.password_hash);
 
     if (match) {
       const accessToken = jwt.sign(

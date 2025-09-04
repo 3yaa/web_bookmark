@@ -1,11 +1,18 @@
 import { pool } from "../config/db.js";
 
+export const validateRefreshTokenCookie = (req, res, next) => {
+  const cookies = req.cookies;
+  if (!cookies?.jwt) return res.sendStatus(401);
+
+  next();
+};
+
 export const validateRegister = (req, res, next) => {
-  const { user, email, pwd } = req.body;
-  if (!user || !pwd || !email) {
+  const { username, email, password } = req.body;
+  if (!username || !password || !email) {
     return res.status(400).json({
       success: false,
-      message: "email, user, and password are required",
+      message: "email, username, and password are required",
     });
   }
 
@@ -13,8 +20,8 @@ export const validateRegister = (req, res, next) => {
 };
 
 export const validateLogin = (req, res, next) => {
-  const { email, pwd } = req.body;
-  if (!pwd || !email) {
+  const { email, password } = req.body;
+  if (!password || !email) {
     return res.status(400).json({
       success: false,
       message: "email and password are required",

@@ -14,7 +14,7 @@ export const validateBookId = (req, res, next) => {
 //
 export const validateBookPatch = (req, res, next) => {
   const updates = req.body;
-  const allowedFields = ["score, status, notes"];
+  const allowedFields = ["score", "status", "notes"];
 
   // check if exists
   if (!updates || Object.keys(updates).length === 0) {

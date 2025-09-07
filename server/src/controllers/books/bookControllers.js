@@ -1,5 +1,26 @@
 import { pool } from "../../config/db.js";
 
+const convertBookToCamelCase = (book) => ({
+  id: book.id,
+  title: book.title,
+  author: book.author,
+  coverUrl: book.cover_url,
+  coverEditions: book.cover_editions,
+  curCoverIndex: book.cur_cover_index,
+  datePublished: book.date_published,
+  seriesTitle: book.series_title,
+  placeInSeries: book.place_in_series,
+  prequel: book.prequel,
+  sequel: book.sequel,
+  status: book.status,
+  score: book.score,
+  dateCompleted: book.date_completed,
+  note: book.note,
+  dateCreated: book.date_created,
+  key: book.key,
+  userId: book.user_id,
+});
+
 export const getBooks = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -8,10 +29,12 @@ export const getBooks = async (req, res) => {
       userId,
     ]);
 
+    const convertedBooks = result.rows.map(convertBookToCamelCase);
+
     res.json({
       success: true,
-      count: result.rows.length,
-      data: result.rows,
+      count: convertedBooks.length,
+      data: convertedBooks,
     });
   } catch (error) {
     console.error("Error fetching books: ", error);
@@ -40,9 +63,11 @@ export const getBook = async (req, res) => {
       });
     }
 
+    const convertedBook = convertBookToCamelCase(result.rows[0]);
+
     res.status(200).json({
       success: true,
-      data: result.rows[0],
+      data: convertedBook,
     });
   } catch (error) {
     console.error("Error fetching book: ", error);
@@ -60,24 +85,37 @@ export const patchBook = async (req, res) => {
     const userId = req.user.id;
     const updates = req.body;
 
+    // map camelCase to snake_case for db
+    const fieldMapping = {
+      coverUrl: "cover_url",
+      coverEditions: "cover_editions",
+      curCoverIndex: "cur_cover_index",
+      datePublished: "date_published",
+      seriesTitle: "series_title",
+      placeInSeries: "place_in_series",
+      dateCompleted: "date_completed",
+      userId: "user_id",
+    };
+    const dbUpdates = {};
+    Object.entries(updates).forEach(([key, value]) => {
+      const dbColumn = fieldMapping[key] || key;
+      dbUpdates[dbColumn] = value;
+    });
+
     // breaks all the keys into key=$i
-    const setClause = Object.keys(updates)
-      .map((key, index) => {
-        const columnName = key;
-        return `${columnName}=$${index + 1}`;
-      })
+    const setClause = Object.keys(dbUpdates)
+      .map((key, index) => `${key}=$${index + 1}`)
       .join(", ");
     // gets all the values of the keys
-    const values = Object.values(updates);
-    values.push(bookId);
-    values.push(userId);
+    const values = Object.values(dbUpdates);
+    values.push(bookId, userId);
 
     const query = `
-	 	UPDATE books
-		SET ${setClause} WHERE id=$${values.length - 1} AND user_id=$${
-      values.length
-    } RETURNING * 
-	  `;
+      UPDATE books
+      SET ${setClause} 
+      WHERE id=$${values.length - 1} AND user_id=$${values.length} 
+      RETURNING *
+    `;
     const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
@@ -87,10 +125,12 @@ export const patchBook = async (req, res) => {
       });
     }
 
+    const convertedBook = convertBookToCamelCase(result.rows[0]);
+
     res.status(200).json({
       success: true,
       message: "Book updated successfully",
-      data: result.rows[0],
+      data: convertedBook,
     });
   } catch (error) {
     console.error("Error updating book: ", error);
@@ -167,10 +207,12 @@ export const createBook = async (req, res) => {
     ];
     const result = await pool.query(query, values);
 
+    const convertedBook = convertBookToCamelCase(result.rows[0]);
+
     res.status(201).json({
       success: true,
       message: "Book Created Successfully",
-      data: result.rows[0],
+      data: convertedBook,
     });
   } catch (error) {
     console.error("Error creating book: ", error);
@@ -200,10 +242,12 @@ export const deleteBook = async (req, res) => {
       });
     }
 
+    const convertedBook = convertBookToCamelCase(result.rows[0]);
+
     res.status(200).json({
       success: true,
       message: "Book deleted successfully",
-      data: result.rows[0],
+      data: convertedBook,
     });
   } catch (error) {
     console.error("Error deleting book: ", error);

@@ -2,17 +2,20 @@
 import Image from "next/image";
 import { Plus } from "lucide-react";
 import { useCallback, useState } from "react";
+//
 import { BookProps } from "@/types/books";
+import { NavMenu } from "./NavMenu";
+//
+import { useBookData } from "@/hooks/useBookData";
 import { AddBook } from "./addingBook/AddBook";
 import { BookDetails } from "./BookDetails";
+//
 import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { getCoverUrl } from "@/app/books/utils/bookMapping";
-import { useBookData } from "@/hooks/useBookData";
-
-import { NavMenu } from "./NavMenu";
 
 export default function BookList() {
-  const { books, addBook, updateBook, deleteBook } = useBookData();
+  const { books, addBook, updateBook, deleteBook, bookDataLoading } =
+    useBookData();
   const [selectedBook, setSelectedBook] = useState<BookProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
@@ -165,6 +168,7 @@ export default function BookList() {
           onClose={handleModalClose}
           onUpdate={handleBookUpdates}
           showSequelPrequel={showSequelPrequel}
+          isLoading={bookDataLoading}
         />
       )}
 

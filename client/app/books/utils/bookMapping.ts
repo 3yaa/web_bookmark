@@ -1,6 +1,9 @@
-import {BookProps, OpenLibData, GoogleBooks , WikiData} from '@/types/books'
+import { BookProps, OpenLibData, GoogleBooks, WikiData } from "@/types/books";
 
-export function getCoverUrl(coverOLID?: string, size: "S" | "M" | "L" = "L"): string {
+export function getCoverUrl(
+  coverOLID?: string,
+  size: "S" | "M" | "L" = "L"
+): string {
   return `https://covers.openlibrary.org/b/olid/${coverOLID}-${size}.jpg`;
 }
 
@@ -29,6 +32,7 @@ export function mapOlDataToBook(dataOL: OpenLibData): Partial<BookProps> {
   return {
     key: dataOL.key,
     title: dataOL.title,
+    status: "Want to Read",
     author: dataOL.author_name?.[0],
     coverEditions: dataOL.edition_key,
     curCoverIndex: 0,
@@ -36,10 +40,13 @@ export function mapOlDataToBook(dataOL: OpenLibData): Partial<BookProps> {
   };
 }
 
-export function mapGoogleDataToBook(dataGoogle: GoogleBooks): Partial<BookProps> {
+export function mapGoogleDataToBook(
+  dataGoogle: GoogleBooks
+): Partial<BookProps> {
   return {
     key: dataGoogle.id,
     title: cleanTitle(dataGoogle.title),
+    status: "Want to Read",
     author: dataGoogle.author_name?.[0],
     datePublished: dataGoogle.first_publish_year,
     coverUrl: dataGoogle.cover_url,
@@ -47,7 +54,7 @@ export function mapGoogleDataToBook(dataGoogle: GoogleBooks): Partial<BookProps>
 }
 
 export function mapWikiDataToBook(dataWiki: WikiData): Partial<BookProps> {
-  const sTitle = dataWiki.series_title
+  const sTitle = dataWiki.series_title;
   return {
     // title: cleanName(dataWiki.wikiTitle, sTitle),
     seriesTitle: sTitle,
@@ -57,24 +64,28 @@ export function mapWikiDataToBook(dataWiki: WikiData): Partial<BookProps> {
   };
 }
 
-function cleanTitle(title:string) {
-  return title
-    //removes brackets
-    .replace(/\[.*?\]/g, '')
-    .replace(/\(.*?\)/g, '')
-    .replace(/\{.*?\}/g, '')
-    .replace(/.g/, '')
-    //
-    // Remove common separators at start and end
-    .replace(/^[\s\-\–\—:;,\.\|#!]*/, '')
-    .replace(/[\s\-\–\—:;,\.\|#!]*$/, '')
-    // Clean up multiple spaces
-    .replace(/\s+/g, ' ')
-    .trim();
+function cleanTitle(title: string) {
+  return (
+    title
+      //removes brackets
+      .replace(/\[.*?\]/g, "")
+      .replace(/\(.*?\)/g, "")
+      .replace(/\{.*?\}/g, "")
+      .replace(/.g/, "")
+      //
+      // Remove common separators at start and end
+      .replace(/^[\s\-\–\—:;,\.\|#!]*/, "")
+      .replace(/[\s\-\–\—:;,\.\|#!]*$/, "")
+      // Clean up multiple spaces
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }
 
-
-export function cleanName(title: string | undefined, seriesTitle: string | undefined) {
+export function cleanName(
+  title: string | undefined,
+  seriesTitle: string | undefined
+) {
   if (!title || !seriesTitle) {
     return title;
   }
@@ -83,15 +94,20 @@ export function cleanName(title: string | undefined, seriesTitle: string | undef
     return title;
   }
   //
-  return title
-    .replace(`${seriesTitle}`, '')
-    // Remove common separators at start
-    .replace(/^[\s\-\–\—:;,\.\|#]*/, '') 
-    // Remove book/volume indicators
-    .replace(/^(Book|Vol|Volume|Part|Episode|Chapter|No|Number)[\s\d\.\-:#]*/, '') 
-    // Remove leading numbers with separators
-    .replace(/^\d+[\s\-\.\):]*/, '')
-    // Remove connecting words like "and the", "and", "&", "the"
-    .replace(/^(and the|and|&)\s+/i, '')
-    .trim();
+  return (
+    title
+      .replace(`${seriesTitle}`, "")
+      // Remove common separators at start
+      .replace(/^[\s\-\–\—:;,\.\|#]*/, "")
+      // Remove book/volume indicators
+      .replace(
+        /^(Book|Vol|Volume|Part|Episode|Chapter|No|Number)[\s\d\.\-:#]*/,
+        ""
+      )
+      // Remove leading numbers with separators
+      .replace(/^\d+[\s\-\.\):]*/, "")
+      // Remove connecting words like "and the", "and", "&", "the"
+      .replace(/^(and the|and|&)\s+/i, "")
+      .trim()
+  );
 }

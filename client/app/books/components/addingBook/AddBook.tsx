@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Book } from "lucide-react";
+//
 import {
   BookProps,
   OpenLibData,
@@ -8,8 +9,7 @@ import {
   GoogleBooks,
   WikiData,
 } from "@/types/books";
-import { searchForBooks } from "../../api/openLib";
-import { getSeriesInfo } from "../../api/wikiData";
+//
 import {
   cleanName,
   mapGoogleDataToBook,
@@ -17,10 +17,12 @@ import {
   mapWikiDataToBook,
   resetBookValues,
 } from "@/app/books/utils/bookMapping";
+//
 import { BookDetails } from "../BookDetails";
 import { ShowMultBooks } from "./ShowMultBooks";
 import { ManualAddBook } from "./ManualAddBook";
-import { backUpSearchForBooks } from "../../api/googleBooks";
+//
+import { useBookSearch } from "@/hooks/useBookSearch";
 
 interface AddBookProps {
   isOpen: boolean;
@@ -30,6 +32,7 @@ interface AddBookProps {
   titleFromAbove?: string;
 }
 
+const BOOKLIMIT = 5;
 const bookSeriesCache = new Map<string, Partial<BookProps>>();
 
 export function AddBook({
@@ -41,14 +44,15 @@ export function AddBook({
 }: AddBookProps) {
   //failure reasons && their fixes -- for user
   const [failedReason, setFailedReason] = useState("");
-  const [isDupTitle, setIsDupTitle] = useState(false);
-  const [isAddManual, setIsAddManual] = useState(false);
   //
-  const titleToSearch = useRef<HTMLInputElement>(null);
-  const [isSearching, setIsSearching] = useState(false);
+  const [isAddManual, setIsAddManual] = useState(false);
   const [activeModal, setActiveModal] = useState<
     "bookDetails" | "multOptions" | "manualAdd" | null
   >(null);
+  //
+  const titleToSearch = useRef<HTMLInputElement>(null);
+  const [isDupTitle, setIsDupTitle] = useState(false);
+  //
   const [newBook, setNewBook] = useState<Partial<BookProps>>({});
   const [allNewBooks, setAllNewBooks] = useState<AllBooks>({
     OpenLibBooks: [],
@@ -56,13 +60,19 @@ export function AddBook({
   });
   const [allSeries, setAllSeries] = useState<WikiData[]>([]);
   const [curSeries, setCurSeries] = useState<number>(0);
+  //
+  const {
+    searchForBooks,
+    searchForSeriesInfo,
+    searchForBackupBooks,
+    isSearching,
+  } = useBookSearch();
 
   const reset = useCallback(() => {
     setFailedReason("");
     setIsDupTitle(false);
     setIsAddManual(false);
     //
-    setIsSearching(false);
     setActiveModal(null);
     setNewBook({});
     setAllNewBooks({
@@ -90,13 +100,9 @@ export function AddBook({
     const titleSearching = titleToSearch.current?.value.trim();
     if (!titleSearching) return null;
 
-    const response = await searchForBooks({
-      query: titleSearching,
-      limit: 5,
-    });
+    const response = await searchForBooks(titleSearching, BOOKLIMIT);
     const olData = response?.[0];
     if (!olData) return null;
-
     //save books
     setAllNewBooks({
       OpenLibBooks: response,
@@ -108,17 +114,19 @@ export function AddBook({
       title: olData.title,
       olKey: olData.key,
     };
-  }, []);
+  }, [searchForBooks]);
 
-  const handleSeriesSearch = useCallback(async (olKey: string) => {
-    // check for cache
-    if (bookSeriesCache.has(olKey)) {
-      setNewBook(bookSeriesCache.get(olKey) || {});
-      return;
-    }
-    // make call
-    const seriesData = await getSeriesInfo(olKey);
-    if (seriesData) {
+  const handleSeriesSearch = useCallback(
+    async (olKey: string) => {
+      // check for cache
+      if (bookSeriesCache.has(olKey)) {
+        setNewBook(bookSeriesCache.get(olKey) || {});
+        return;
+      }
+      // make call
+      const seriesData = await searchForSeriesInfo(olKey);
+      if (!seriesData) return null;
+      //
       setAllSeries(seriesData);
       const mappedData = mapWikiDataToBook(seriesData[0]);
       setNewBook((prev) => {
@@ -131,57 +139,43 @@ export function AddBook({
         return updated; //setting newBook
       });
       return mappedData;
-    }
-    return null;
-  }, []);
+    },
+    [searchForSeriesInfo]
+  );
 
   const handleBookSearch = useCallback(async () => {
-    try {
-      setIsSearching(true);
-      setActiveModal("bookDetails");
-      // make call to open lib
-      const response = await handleTitleSearch();
-      if (!response?.olKey || !response.title) {
-        setFailedReason("Could Not Find Book.");
-        setIsAddManual(true);
-        setActiveModal(null);
-        return;
-      }
-      //check for duplicate
-      const duplicate = isDuplicate(response.olKey);
-      if (duplicate) {
-        setFailedReason(`Already Have Book: ${duplicate}`);
-        setIsDupTitle(true);
-        setActiveModal(null);
-        return;
-      }
-      // do series search for main book
-      if (response.olKey) await handleSeriesSearch(response.olKey);
-    } finally {
-      setIsSearching(false);
+    setActiveModal("bookDetails");
+    // make call to open lib
+    const response = await handleTitleSearch();
+    if (!response?.olKey || !response.title) {
+      setFailedReason("Could Not Find Book.");
+      setIsAddManual(true);
+      setActiveModal(null);
+      return;
     }
+    //check for duplicate
+    const duplicate = isDuplicate(response.olKey);
+    if (duplicate) {
+      setFailedReason(`Already Have Book: ${duplicate}`);
+      setIsDupTitle(true);
+      setActiveModal(null);
+      return;
+    }
+    // do series search for main book
+    if (response.olKey) await handleSeriesSearch(response.olKey);
   }, [isDuplicate, handleTitleSearch, handleSeriesSearch]);
 
   const handleBackUpBookSearch = useCallback(async () => {
     const titleSearching = titleToSearch.current?.value.trim();
     if (!titleSearching) return null;
 
-    try {
-      setIsSearching(true);
-      //
-      const response = await backUpSearchForBooks({
-        query: titleSearching,
-        limit: 5,
-      });
-
-      setAllNewBooks((prev) => ({
-        ...prev,
-        GoogleBooks: response,
-      }));
-    } finally {
-      setIsSearching(false);
-    }
-  }, []);
+    const booksInfo = await searchForBackupBooks(titleSearching, BOOKLIMIT);
+    if (!booksInfo) return null;
+    setAllNewBooks((prev) => ({
+      ...prev,
+      GoogleBooks: booksInfo,
+    }));
+  }, [searchForBackupBooks]);
 
   const handlePickFromMultBooks = useCallback(
     async (book: OpenLibData | GoogleBooks) => {

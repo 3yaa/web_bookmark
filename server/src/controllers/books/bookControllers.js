@@ -85,37 +85,24 @@ export const patchBook = async (req, res) => {
     const userId = req.user.id;
     const updates = req.body;
 
-    // map camelCase to snake_case for db
-    const fieldMapping = {
-      coverUrl: "cover_url",
-      coverEditions: "cover_editions",
-      curCoverIndex: "cur_cover_index",
-      datePublished: "date_published",
-      seriesTitle: "series_title",
-      placeInSeries: "place_in_series",
-      dateCompleted: "date_completed",
-      userId: "user_id",
-    };
-    const dbUpdates = {};
-    Object.entries(updates).forEach(([key, value]) => {
-      const dbColumn = fieldMapping[key] || key;
-      dbUpdates[dbColumn] = value;
-    });
-
     // breaks all the keys into key=$i
-    const setClause = Object.keys(dbUpdates)
-      .map((key, index) => `${key}=$${index + 1}`)
+    const setClause = Object.keys(updates)
+      .map((key, index) => {
+        const columnName = key;
+        return `${columnName}=$${index + 1}`;
+      })
       .join(", ");
     // gets all the values of the keys
-    const values = Object.values(dbUpdates);
-    values.push(bookId, userId);
+    const values = Object.values(updates);
+    values.push(bookId);
+    values.push(userId);
 
     const query = `
-      UPDATE books
-      SET ${setClause} 
-      WHERE id=$${values.length - 1} AND user_id=$${values.length} 
-      RETURNING *
-    `;
+	 	UPDATE books
+		SET ${setClause} WHERE id=$${values.length - 1} AND user_id=$${
+      values.length
+    } RETURNING * 
+	  `;
     const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {

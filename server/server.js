@@ -2,16 +2,16 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 //
-import { corsOptions } from "./config/cors.js";
+import { corsOptions } from "./src/config/cors.js";
 //
-import { registerRouter } from "./routes/registerRouter.js";
-import { refreshRouter } from "./routes/refreshRouter.js";
-import { authRouter } from "./routes/authRouter.js";
-import { logoutRouter } from "./routes/logoutRouter.js";
-import { verifyJWT } from "./middleware/validateJWT.js";
+import { registerRouter } from "./src/routes/registerRouter.js";
+import { refreshRouter } from "./src/routes/refreshRouter.js";
+import { authRouter } from "./src/routes/authRouter.js";
+import { logoutRouter } from "./src/routes/logoutRouter.js";
+import { verifyJWT } from "./src/middleware/validateJWT.js";
 //
-import { booksRouter } from "./routes/booksRoute.js";
-import { externalBooksAPIRouter } from "./routes/externalBooksAPIRouter.js";
+import { booksRouter } from "./src/routes/booksRoute.js";
+import { externalBooksAPIRouter } from "./src/routes/externalBooksAPIRouter.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 

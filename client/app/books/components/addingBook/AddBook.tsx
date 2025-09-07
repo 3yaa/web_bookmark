@@ -65,7 +65,7 @@ export function AddBook({
     searchForBooks,
     searchForSeriesInfo,
     searchForBackupBooks,
-    isSearching,
+    isBookSearching,
   } = useBookSearch();
 
   const reset = useCallback(() => {
@@ -239,9 +239,13 @@ export function AddBook({
       }
     }
 
+    let defaultStatus = newBook.status;
+    if (!defaultStatus) {
+      defaultStatus = "Want to Read";
+    }
     const finalBook = {
       ...newBook,
-      id: Date.now(),
+      status: defaultStatus,
     };
     onAddBook(finalBook as BookProps);
     onClose();
@@ -338,15 +342,15 @@ export function AddBook({
               placeholder="Search for book..."
               onKeyDown={handleKeyPress}
               onInput={eraseErrMsg}
-              disabled={isSearching}
+              disabled={isBookSearching}
               className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-400 focus:border-zinc-500/50 focus:ring-1 focus:ring-zinc-700/20 outline-none transition-all duration-200"
             />
           </div>
           <div className="flex justify-between mx-2">
-            {failedReason && !isSearching && (
+            {failedReason && !isBookSearching && (
               <div className="mt-3 text-zinc-400 text-sm">{failedReason}</div>
             )}
-            {isAddManual && !isSearching && (
+            {isAddManual && !isBookSearching && (
               <button
                 className="mt-3 text-zinc-400 text-sm hover:cursor-pointer underline"
                 onClick={() => setActiveModal("manualAdd")}
@@ -371,7 +375,11 @@ export function AddBook({
           onClose={handleBookDetailsClose}
           onUpdate={handleBookDetailsUpdates}
           addBook={handleBookAdd}
-          isLoading={isSearching}
+          isLoading={{
+            isTrue: isBookSearching,
+            style: "h-8 w-8 border-emerald-400",
+            text: "Searching Book...",
+          }}
           showBookInSeries={
             allSeries.length > 1 ? handleSeriesChange : undefined
           }
@@ -384,7 +392,7 @@ export function AddBook({
           books={allNewBooks}
           prompt={titleToSearch.current?.value || ""}
           onClickedBook={handlePickFromMultBooks}
-          isLoading={isSearching}
+          isLoading={isBookSearching}
         />
       )}
       {activeModal === "manualAdd" && (

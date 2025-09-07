@@ -68,7 +68,7 @@ export function ManualAddBook({
       status: newStatus,
     };
     if (newStatus === "Completed") {
-      statusLoad.dateCompleted = Date.now();
+      statusLoad.dateCompleted = new Date();
     }
     onUpdate(statusLoad);
   };

@@ -1,9 +1,14 @@
+"use client";
+import { useState } from "react";
 import Image from "next/image";
+//
 import { BookProps } from "@/types/books";
-import { Dropdown } from "@/app/components/ui/Dropdown";
-import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { formatDate, getStatusBorderGradient } from "@/utils/formattingUtils";
+import { statusOptions, scoreOptions } from "../utils/bookDetailsDropdown";
 import { getCoverUrl } from "@/app/books/utils/bookMapping";
+//
+import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
+import { Dropdown } from "@/app/components/ui/Dropdown";
 import { Loading } from "@/app/components/ui/Loading";
 import {
   Trash2,
@@ -13,52 +18,11 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-
-const statusOptions = [
-  {
-    value: "Want to Read",
-    label: "Want to Read",
-    className: "text-blue-500",
-  },
-  { value: "Completed", label: "Completed", className: "text-green-600" },
-  {
-    value: "Dropped",
-    label: "Dropped",
-    className: "text-red-500",
-  },
-];
-
-const getScoreLabel = (score: number): string => {
-  if (score >= 11) return "Beyond Cinema";
-  if (score >= 10) return "Masterpiece";
-  if (score >= 9) return "Amazing";
-  if (score >= 8) return "Great";
-  if (score >= 7) return "Good";
-  if (score >= 6) return "Average";
-  if (score >= 5) return "Below Average";
-  if (score >= 4) return "Yikes";
-  if (score >= 3) return "Bad";
-  if (score >= 2) return "Awful";
-  if (score >= 1) return "Dog Water";
-  return "Select Option";
-};
-
-const scoreOptions = Array.from({ length: 12 }, (_, i) => {
-  const scoreValue = i === 0 ? 0 : 12 - i;
-  return {
-    value: scoreValue.toString(),
-    label:
-      scoreValue !== 0
-        ? `${scoreValue} - ${getScoreLabel(scoreValue)}`
-        : `${getScoreLabel(scoreValue)}`,
-  };
-});
-
 interface BookDetailsProps {
   book: BookProps;
   isOpen: boolean;
   onClose: () => void;
-  isLoading?: boolean;
+  isLoading?: { isTrue: boolean; style: string; text: string };
   onUpdate: (
     bookId: number,
     updates?: Partial<BookProps>,
@@ -79,7 +43,7 @@ export function BookDetails({
   showBookInSeries,
   showSequelPrequel,
 }: BookDetailsProps) {
-  if (!isOpen || !book) return null;
+  const [localNote, setLocalNote] = useState(book.note || "");
 
   const handleStatusChange = (value: string) => {
     const newStatus = value as "Completed" | "Want to Read";
@@ -87,7 +51,7 @@ export function BookDetails({
       status: newStatus,
     };
     if (newStatus === "Completed") {
-      statusLoad.dateCompleted = Date.now();
+      statusLoad.dateCompleted = new Date();
     }
     onUpdate(book.id, statusLoad);
   };
@@ -122,10 +86,27 @@ export function BookDetails({
     }
   };
 
+  const saveNote = () => {
+    if (localNote !== book.note) {
+      onUpdate(book.id, { note: localNote });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // Prevent new line
+      saveNote();
+      e.currentTarget.blur(); // Optional: remove focus
+    }
+  };
+
+  const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setLocalNote(e.target.value);
+  };
+
   const handleDelete = () => {
     const shouldDelete = true;
     onUpdate(book.id, undefined, shouldDelete);
-    onClose();
   };
 
   const handleModalClose = () => {
@@ -144,6 +125,8 @@ export function BookDetails({
     onUpdate(book.id, undefined, showMoreBooks);
   };
 
+  if (!isOpen || !book) return null;
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-black/40 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
       <div className="fixed inset-0" onClick={handleModalClose} />
@@ -155,11 +138,8 @@ export function BookDetails({
       >
         {/* ACTUAL DETAIL CARD */}
         <div className="bg-gradient-to-br bg-zinc-900 backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 lg:min-w-3xl lg:max-w-3xl w-full max-h-[calc(100vh-3rem)]">
-          {isLoading && (
-            <Loading
-              borderColor={"border-emerald-400"}
-              text="Searching Book..."
-            />
+          {isLoading?.isTrue && (
+            <Loading customStyle={isLoading.style} text={isLoading.text} />
           )}
           <div className={`px-8.5 py-7 border-0 rounded-2xl`}>
             {/* ACTION BUTTONS */}
@@ -293,7 +273,7 @@ export function BookDetails({
                           className="font-medium text-zinc-200 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
                           title="Date Completed"
                         >
-                          {formatDate(book.dateCompleted ?? 0)}
+                          {formatDate(book.dateCompleted)}
                         </span>
                       </div>
                     )}
@@ -344,10 +324,10 @@ export function BookDetails({
                     </label>
                     <div className="bg-zinc-800/50 rounded-lg pl-3 pt-2 pr-1 pb-1 max-h-25 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200">
                       <AutoTextarea
-                        value={book.note || ""}
-                        onChange={(e) => {
-                          onUpdate(book.id, { note: e.target.value });
-                        }}
+                        value={localNote}
+                        onChange={handleNoteChange}
+                        onKeyDown={handleKeyDown}
+                        onBlur={saveNote}
                         placeholder="Add your thoughts about this book..."
                         className="text-gray-300 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500"
                       />

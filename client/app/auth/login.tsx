@@ -28,6 +28,7 @@ export function Login() {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include", 
           body: JSON.stringify({
             email: formData.email,
             password: formData.password,

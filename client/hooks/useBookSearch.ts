@@ -1,11 +1,13 @@
-import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { OpenLibData, GoogleBooks, WikiData } from "@/types/books";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
 
 export function useBookSearch() {
-  const { authToken } = useAuth();
+  const { authFetch, isAuthLoading } = useAuthFetch();
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isBookSearching = isSearching || isAuthLoading;
 
   // OPEN LIBRARY API -- BOOK PRIMINARY
   const searchForBooks = async (
@@ -17,12 +19,7 @@ export function useBookSearch() {
       setError(null);
       // make call
       const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books-api/open-library?query=${query}&limit=${limit}`;
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
+      const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
       }
@@ -49,12 +46,7 @@ export function useBookSearch() {
       setError(null);
       //
       const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books-api/wikidata?openLibraryID=${olid}`;
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
+      const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
       }
@@ -82,12 +74,7 @@ export function useBookSearch() {
       setError(null);
       //
       const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books-api/google-books?query=${query}&limit=${limit}`;
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
+      const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
       }
@@ -107,7 +94,7 @@ export function useBookSearch() {
 
   return {
     error,
-    isSearching,
+    isBookSearching,
     searchForBooks,
     searchForSeriesInfo,
     searchForBackupBooks,

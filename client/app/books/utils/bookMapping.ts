@@ -11,7 +11,6 @@ export function resetBookValues(book: Partial<BookProps>): Partial<BookProps> {
   return {
     id: book.id,
     key: book.key,
-    status: "Want to Read",
     title: "",
     score: undefined,
     dateCompleted: undefined,
@@ -25,6 +24,7 @@ export function resetBookValues(book: Partial<BookProps>): Partial<BookProps> {
     placeInSeries: undefined,
     prequel: undefined,
     sequel: undefined,
+    status: "Want to Read",
   };
 }
 
@@ -32,7 +32,6 @@ export function mapOlDataToBook(dataOL: OpenLibData): Partial<BookProps> {
   return {
     key: dataOL.key,
     title: dataOL.title,
-    status: "Want to Read",
     author: dataOL.author_name?.[0],
     coverEditions: dataOL.edition_key,
     curCoverIndex: 0,
@@ -46,7 +45,6 @@ export function mapGoogleDataToBook(
   return {
     key: dataGoogle.id,
     title: cleanTitle(dataGoogle.title),
-    status: "Want to Read",
     author: dataGoogle.author_name?.[0],
     datePublished: dataGoogle.first_publish_year,
     coverUrl: dataGoogle.cover_url,

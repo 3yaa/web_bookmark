@@ -2,7 +2,7 @@ export interface BookProps {
   id: number; //--REQUIRED -> will do on server side
   // user set
   score?: number;
-  dateCompleted?: number;
+  dateCompleted?: Date;
   note?: string;
   status: "Completed" | "Want to Read" | "Dropped"; //!--REQUIRED
   // from ol&&google -- used for checking duplicate

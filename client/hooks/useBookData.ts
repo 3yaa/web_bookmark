@@ -1,11 +1,13 @@
 import { BookProps } from "@/types/books";
 import { useEffect, useState, useCallback } from "react";
-import { useAuth } from "./useAuth";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
 
 export function useBookData() {
-  const { authToken } = useAuth();
+  const { authFetch, isAuthLoading } = useAuthFetch();
   const [books, setBooks] = useState<BookProps[]>([]);
-  const [bookDataLoading, setBookDataLoading] = useState(false);
+  const [bookDataLoading, setBookDataLoading] = useState(true);
+
+  const isProcessingBook = bookDataLoading || isAuthLoading;
 
   // move this to server
   // const linkBook = useCallback(
@@ -41,12 +43,7 @@ export function useBookData() {
       setBookDataLoading(true);
       //
       const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books`;
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
+      const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
       }
@@ -60,7 +57,7 @@ export function useBookData() {
     } finally {
       setBookDataLoading(false);
     }
-  }, [authToken]);
+  }, [authFetch]);
 
   // PUT
   const addBook = useCallback(
@@ -74,14 +71,14 @@ export function useBookData() {
         setBookDataLoading(true);
         //
         const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books`;
-        const response = await fetch(url, {
+        const options = {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify(book),
-        });
+        };
+        const response = await authFetch(url, options);
         if (!response.ok) {
           throw new Error(`HTTP error--status: ${response.status}`);
         }
@@ -95,49 +92,52 @@ export function useBookData() {
         setBookDataLoading(false);
       }
     },
-    [authToken]
+    [authFetch]
   );
 
   // PATCH
   const updateBook = useCallback(
     async (bookId: number, updates: Partial<BookProps>) => {
       // only updates these
-      const allowedFields = ["score", "status", "notes"];
+      const allowedFields = [
+        "score",
+        "status",
+        "note",
+        "dateCompleted",
+        "curCoverIndex",
+      ];
       const invalidFields = Object.keys(updates).filter(
         (field) => !allowedFields.includes(field)
       );
-      if (invalidFields.length > 0) return;
-      //
+      if (invalidFields.length > 0) {
+        console.warn("Invalid fields attempted:", invalidFields);
+        return;
+      }
+      // update local immediately
+      setBooks((prevBooks) =>
+        prevBooks.map((book) =>
+          book.id === bookId ? { ...book, ...updates } : book
+        )
+      );
+      // update db
       try {
-        setBookDataLoading(true);
-        //
         const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books/${bookId}`;
-        const response = await fetch(url, {
+        const options = {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify(updates),
-        });
+        };
+        const response = await authFetch(url, options);
         if (!response.ok) {
           throw new Error(`HTTP error--status: ${response.status}`);
         }
-        //
-        const resJson = await response.json();
-        const updatedBook = resJson.data;
-        setBooks((prevBooks) => {
-          return prevBooks.map((book) =>
-            book.id === bookId ? updatedBook : book
-          );
-        });
       } catch (e) {
         console.error("Error updating book", e);
-      } finally {
-        setBookDataLoading(false);
       }
     },
-    [authToken]
+    [authFetch]
   );
 
   // DELETE
@@ -147,13 +147,13 @@ export function useBookData() {
         setBookDataLoading(true);
         //
         const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books/${bookId}`;
-        const response = await fetch(url, {
+        const options = {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
           },
-        });
+        };
+        const response = await authFetch(url, options);
         if (!response.ok) {
           throw new Error(`HTTP error--status: ${response.status}`);
         }
@@ -169,19 +169,20 @@ export function useBookData() {
         setBookDataLoading(false);
       }
     },
-    [authToken]
+    [authFetch]
   );
 
   //
   useEffect(() => {
     getBooks();
-  }, [getBooks]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     books,
     addBook,
     updateBook,
     deleteBook,
-    bookDataLoading,
+    isProcessingBook,
   };
 }

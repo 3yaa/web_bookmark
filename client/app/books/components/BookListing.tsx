@@ -12,9 +12,10 @@ import { BookDetails } from "./BookDetails";
 //
 import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { getCoverUrl } from "@/app/books/utils/bookMapping";
+import { Loading } from "@/app/components/ui/Loading";
 
 export default function BookList() {
-  const { books, addBook, updateBook, deleteBook, bookDataLoading } =
+  const { books, addBook, updateBook, deleteBook, isProcessingBook } =
     useBookData();
   const [selectedBook, setSelectedBook] = useState<BookProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
@@ -42,14 +43,19 @@ export default function BookList() {
   );
 
   const handleBookUpdates = useCallback(
-    (bookId: number, updates?: Partial<BookProps>, shouldDelete?: boolean) => {
+    async (
+      bookId: number,
+      updates?: Partial<BookProps>,
+      shouldDelete?: boolean
+    ) => {
       if (updates) {
         if (selectedBook?.id === bookId) {
           setSelectedBook({ ...selectedBook, ...updates });
         }
         updateBook(bookId, updates);
       } else if (shouldDelete) {
-        deleteBook(bookId);
+        await deleteBook(bookId);
+        setActiveModal(null);
       }
     },
     [deleteBook, selectedBook, updateBook]
@@ -91,7 +97,12 @@ export default function BookList() {
         </div>
 
         {/* LISTING */}
-        <div className="divide-y divide-zinc-700/30">
+        <div className="relative">
+          {isProcessingBook && (
+            <div className="mt-14">
+              <Loading customStyle={"h-12 w-12 border-gray-300"} text="" />
+            </div>
+          )}
           {books.length === 0 && (
             <div className="text-center py-12">
               <p className="text-zinc-400 italic text-lg">
@@ -145,7 +156,7 @@ export default function BookList() {
               </span>
               <span className="text-center font-medium text-zinc-300 text-sm truncate">
                 {book.status === "Completed"
-                  ? formatDateShort(book.dateCompleted ?? 0) || "?"
+                  ? formatDateShort(book.dateCompleted) || "?"
                   : "-"}
               </span>
               <span className="text-center font-semibold text-zinc-300 text-sm truncate">
@@ -168,7 +179,11 @@ export default function BookList() {
           onClose={handleModalClose}
           onUpdate={handleBookUpdates}
           showSequelPrequel={showSequelPrequel}
-          isLoading={bookDataLoading}
+          isLoading={{
+            isTrue: isProcessingBook,
+            style: "border-gray-300",
+            text: "",
+          }}
         />
       )}
 

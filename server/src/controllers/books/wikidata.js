@@ -18,7 +18,12 @@ export async function useWikidataAPI(req, res) {
     const endpoint = "https://query.wikidata.org/sparql";
     const url = `${endpoint}?query=${encodeURIComponent(query)}&format=json`;
     // make call
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": `mouthful-server/1.0 ${process.env.PAGE_CONTACT}`,
+        Accept: "application/sparql-results+json",
+      },
+    });
     if (!response.ok) {
       return res.status(response.status).json({
         success: false,

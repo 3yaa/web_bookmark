@@ -82,6 +82,9 @@ export const validateBookPatch = (req, res, next) => {
       });
     }
   }
+
+  const convertedUpdates = { ...updates };
+
   // for dateCompleted
   if (updates.dateCompleted !== undefined) {
     // Allow null to clear the date
@@ -103,6 +106,8 @@ export const validateBookPatch = (req, res, next) => {
         });
       }
     }
+    convertedUpdates.date_completed = updates.dateCompleted;
+    delete convertedUpdates.dateCompleted;
   }
 
   // for curCoverIndex
@@ -115,7 +120,8 @@ export const validateBookPatch = (req, res, next) => {
           "Invalid curCoverIndex field provided (must be non-negative integer)",
       });
     }
-    updates.curCoverIndex = index;
+    convertedUpdates.cur_cover_index = index;
+    delete convertedUpdates.curCoverIndex;
   }
 
   next();

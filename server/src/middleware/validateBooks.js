@@ -123,6 +123,7 @@ export const validateBookPatch = (req, res, next) => {
     convertedUpdates.cur_cover_index = index;
     delete convertedUpdates.curCoverIndex;
   }
+  req.body = convertedUpdates;
 
   next();
 };

@@ -5,7 +5,7 @@ import {
   patchBook,
   createBook,
   deleteBook,
-} from "../controllers/bookControllers.js";
+} from "../controllers/books/bookControllers.js";
 import {
   validateBookId,
   validateBookPatch,

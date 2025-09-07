@@ -185,22 +185,33 @@ export function AddBook({
 
   const handlePickFromMultBooks = useCallback(
     async (book: OpenLibData | GoogleBooks) => {
-      //check if clicked book is duplicate
-      const key = book.key;
-      if (!key) return;
-      const duplicate = isDuplicate(key);
-      if (duplicate) {
-        setFailedReason(`Already Have Book: ${duplicate}`);
-        setIsDupTitle(true);
-        return;
-      }
       // ol
-      if ("curCoverIndex" in book) {
+      if ("key" in book) {
+        //check if clicked book is duplicate
+        const key = book.key;
+        if (!key) return;
+        const duplicate = isDuplicate(key);
+        if (duplicate) {
+          setFailedReason(`Already Have Book: ${duplicate}`);
+          setIsDupTitle(true);
+          return;
+        }
+        //
         setNewBook(mapOlDataToBook(book));
         if (key) await handleSeriesSearch(key);
       }
       // google -- NOT CALLING WIKI FOR GOOGLE
-      else {
+      else if ("id" in book) {
+        //check if clicked book is duplicate
+        const key = book.id;
+        if (!key) return;
+        const duplicate = isDuplicate(key);
+        if (duplicate) {
+          setFailedReason(`Already Have Book: ${duplicate}`);
+          setIsDupTitle(true);
+          return;
+        }
+        //
         setNewBook(mapGoogleDataToBook(book));
       }
       setActiveModal("bookDetails");

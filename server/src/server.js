@@ -1,13 +1,17 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+//
 import { corsOptions } from "./config/cors.js";
+//
 import { registerRouter } from "./routes/registerRouter.js";
 import { refreshRouter } from "./routes/refreshRouter.js";
 import { authRouter } from "./routes/authRouter.js";
 import { logoutRouter } from "./routes/logoutRouter.js";
 import { verifyJWT } from "./middleware/validateJWT.js";
+//
 import { booksRouter } from "./routes/booksRoute.js";
+import { externalBooksAPIRouter } from "./routes/externalBooksAPIRouter.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -28,14 +32,15 @@ app.use("/logout", logoutRouter);
 // auth
 app.use(verifyJWT);
 
-// api routers
+// books api routers
+app.use("/books-api", externalBooksAPIRouter);
 app.use("/books", booksRouter);
+
+app.listen(PORT, () => {
+  console.log(`server running on PORT: ${PORT}`);
+});
 
 // render health check endpoint
 // app.get("/healthz", (_, res) => {
 // res.status(200).json({ status: "OK", message: "Server is running" });
 // });
-
-app.listen(PORT, () => {
-  console.log(`server running on PORT: ${PORT}`);
-});

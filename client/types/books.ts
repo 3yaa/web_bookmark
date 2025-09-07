@@ -37,17 +37,17 @@ export interface OpenLibData {
 }
 
 export interface GoogleBooks {
-	key: string; // check dup
+	id: string; // check dup
 	title: string;
 	author_name?: string[];
 	first_publish_year?: number;
-	coverUrl?: string;
+	cover_url?: string;
 }
 
 export interface WikiData {
-	wikiTitle?: string; // another title
-	seriesTitle?: string;
-	placeInSeries?: string;
+	wiki_title?: string; // another title
+	series_title?: string;
+	place_in_series?: string;
 	prequel?: string;
 	sequel?: string;
 }

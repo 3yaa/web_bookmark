@@ -9,6 +9,8 @@ import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { getCoverUrl } from "@/app/books/utils/bookMapping";
 import { useBookData } from "@/hooks/useBookData";
 
+import { NavMenu } from "./NavMenu";
+
 export default function BookList() {
   const { books, addBook, updateBook, deleteBook } = useBookData();
   const [selectedBook, setSelectedBook] = useState<BookProps | null>(null);
@@ -165,6 +167,8 @@ export default function BookList() {
           showSequelPrequel={showSequelPrequel}
         />
       )}
+
+      <NavMenu />
       {/* add button */}
       <div className="fixed bottom-10 right-12 z-10">
         <button

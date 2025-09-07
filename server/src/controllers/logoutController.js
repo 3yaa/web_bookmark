@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import crypto from "crypto";
-import { pool } from "../config/db.js";
+import { pool } from "../../src/config/db.js";
 
 dotenv.config();
 

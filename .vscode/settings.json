@@ -1,0 +1,14 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "package.json": "node_modules, package-lock.json",
+    "tsconfig.json": "*.tsbuildinfo"
+  },
+  "explorer.sortOrder": "type",
+  "files.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    "**/*.map": true
+  },
+  "postman.settings.dotenv-detection-notification-visibility": false
+}

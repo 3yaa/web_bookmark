@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { pool } from "../config/db.js";
+import { pool } from "../../src/config/db.js";
 
 dotenv.config();
 

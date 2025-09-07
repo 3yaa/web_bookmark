@@ -1,10 +1,5 @@
-import { pool } from "../config/db.js";
+import { pool } from "../../config/db.js";
 
-/*
- **NEED TO CHECK AUTH
- **HAS TO SORT VIA STATUS: 'Want to Read' -> 'Completed' -> 'Deleted'
- **HAS A LIMIT OF 300 ?? not sure if to implement here or in client
- */
 export const getBooks = async (req, res) => {
   try {
     const userId = req.user.id;

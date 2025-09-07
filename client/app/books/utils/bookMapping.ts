@@ -38,20 +38,20 @@ export function mapOlDataToBook(dataOL: OpenLibData): Partial<BookProps> {
 
 export function mapGoogleDataToBook(dataGoogle: GoogleBooks): Partial<BookProps> {
   return {
-    key: dataGoogle.key,
+    key: dataGoogle.id,
     title: cleanTitle(dataGoogle.title),
     author: dataGoogle.author_name?.[0],
     datePublished: dataGoogle.first_publish_year,
-    coverUrl: dataGoogle.coverUrl,
+    coverUrl: dataGoogle.cover_url,
   };
 }
 
 export function mapWikiDataToBook(dataWiki: WikiData): Partial<BookProps> {
-  const sTitle = dataWiki.seriesTitle
+  const sTitle = dataWiki.series_title
   return {
     // title: cleanName(dataWiki.wikiTitle, sTitle),
     seriesTitle: sTitle,
-    placeInSeries: dataWiki.placeInSeries,
+    placeInSeries: dataWiki.place_in_series,
     prequel: cleanName(dataWiki.prequel, sTitle),
     sequel: cleanName(dataWiki.sequel, sTitle),
   };

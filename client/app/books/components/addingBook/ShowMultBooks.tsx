@@ -139,9 +139,9 @@ export function ShowMultBooks({
                       className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
                     />
                   ) : item.source === "GoogleB" &&
-                    (item.book as GoogleBooks).coverUrl ? (
+                    (item.book as GoogleBooks).cover_url ? (
                     <Image
-                      src={(item.book as GoogleBooks).coverUrl!}
+                      src={(item.book as GoogleBooks).cover_url!}
                       alt={item.book.title || "Untitled"}
                       width={50}
                       height={75}

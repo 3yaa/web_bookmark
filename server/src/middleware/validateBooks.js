@@ -15,7 +15,13 @@ export const validateBookId = (req, res, next) => {
 //
 export const validateBookPatch = (req, res, next) => {
   const updates = req.body;
-  const allowedFields = ["score", "status", "note"];
+  const allowedFields = [
+    "score",
+    "status",
+    "note",
+    "dateCompleted",
+    "curCoverIndex",
+  ];
 
   // check if exists
   if (!updates || Object.keys(updates).length === 0) {
@@ -61,11 +67,55 @@ export const validateBookPatch = (req, res, next) => {
     });
   }
   // for notes
-  if (updates.note && updates.note.length > 1000) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid note field provided (>1000 char)",
-    });
+  if (updates.note !== undefined) {
+    // Allow null/empty to clear notes
+    if (updates.note !== null && typeof updates.note !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid note field provided (must be string or null)",
+      });
+    }
+    if (updates.note && updates.note.length > 1000) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid note field provided (>1000 characters)",
+      });
+    }
+  }
+  // for dateCompleted
+  if (updates.dateCompleted !== undefined) {
+    // Allow null to clear the date
+    if (updates.dateCompleted !== null) {
+      const date = new Date(updates.dateCompleted);
+      if (isNaN(date.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Invalid dateCompleted field provided (must be valid date or null)",
+        });
+      }
+      // Ensure it's not a future date
+      if (date > new Date()) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Invalid dateCompleted field provided (cannot be in the future)",
+        });
+      }
+    }
+  }
+
+  // for curCoverIndex
+  if (updates.curCoverIndex !== undefined) {
+    const index = parseInt(updates.curCoverIndex);
+    if (isNaN(index) || index < 0) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid curCoverIndex field provided (must be non-negative integer)",
+      });
+    }
+    updates.curCoverIndex = index;
   }
 
   next();

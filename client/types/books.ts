@@ -1,8 +1,13 @@
+export type SortConfig = {
+  type: "title" | "score" | "dateCompleted" | "author" | "datePublished";
+  order: "asc" | "desc";
+};
+
 export interface BookProps {
   id: number; //--REQUIRED -> will do on server side
   // user set
   score?: number;
-  dateCompleted?: Date;
+  dateCompleted?: Date | null;
   note?: string;
   status: "Completed" | "Want to Read" | "Dropped"; //!--REQUIRED
   // from ol&&google -- used for checking duplicate

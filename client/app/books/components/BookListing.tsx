@@ -1,22 +1,27 @@
 "use client";
 import Image from "next/image";
-import { Plus } from "lucide-react";
 import { useCallback, useState } from "react";
-//
-import { BookProps } from "@/types/books";
-import { NavMenu } from "./NavMenu";
-//
+import { Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { BookProps, SortConfig } from "@/types/books";
+// hooks
+import { useSortedDisplay } from "@/hooks/useSortedDisplay";
 import { useBookData } from "@/hooks/useBookData";
+// components
 import { AddBook } from "./addingBook/AddBook";
 import { BookDetails } from "./BookDetails";
-//
+// utils and ui components
 import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { getCoverUrl } from "@/app/books/utils/bookMapping";
 import { Loading } from "@/app/components/ui/Loading";
+import { NavMenu } from "./NavMenu";
 
 export default function BookList() {
+  //
   const { books, addBook, updateBook, deleteBook, isProcessingBook } =
     useBookData();
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  const sortedBooks = useSortedDisplay(books, sortConfig);
+  //
   const [selectedBook, setSelectedBook] = useState<BookProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
@@ -32,7 +37,7 @@ export default function BookList() {
         if (targetBook) {
           setSelectedBook(targetBook);
         } else {
-          // need to call library -- couldn't find in db
+          // need to call external API
           setTitleToUse(targetTitle);
           setActiveModal("addBook");
         }
@@ -61,6 +66,18 @@ export default function BookList() {
     [deleteBook, selectedBook, updateBook]
   );
 
+  const handleSortConfig = (sortType: SortConfig["type"]) => {
+    setSortConfig((prev) => {
+      if (!prev || prev.type !== sortType) {
+        return { type: sortType, order: "desc" };
+      } else if (prev.order === "desc") {
+        return { type: sortType, order: "asc" };
+      } else {
+        return null;
+      }
+    });
+  };
+
   const handleModalClose = useCallback(() => {
     setActiveModal(null);
     setTitleToUse("");
@@ -75,22 +92,98 @@ export default function BookList() {
         </h1>
 
         {/* HEADING */}
-        <div className="grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] bg-zinc-800/50 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border border-zinc-700/30">
+        <div className="grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] bg-zinc-800/50 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border border-zinc-700/30 select-none">
           <span className="font-semibold text-zinc-300 text-sm">#</span>
           <span className="font-semibold text-zinc-300 text-sm">Cover</span>
-          <span className="font-semibold text-zinc-300 text-sm">Title</span>
-          <span className="text-center font-semibold text-zinc-300 text-sm">
-            Score
-          </span>
-          <span className="text-center font-semibold text-zinc-300 text-sm">
-            Completed
-          </span>
-          <span className="text-center font-semibold text-zinc-300 text-sm">
-            Author
-          </span>
-          <span className="text-center font-semibold text-zinc-300 text-sm pl-0.5">
-            Published
-          </span>
+          {/* TITLE */}
+          <div
+            className="flex justify-start items-center gap-1 hover:cursor-pointer"
+            onClick={() => handleSortConfig("title")}
+          >
+            <span className="font-semibold text-zinc-300 text-sm">Title</span>
+            {sortConfig?.type === "title" &&
+              (sortConfig?.order === "desc" ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronUp className="w-4 h-4" />
+              ))}
+          </div>
+          {/* SCORE */}
+          <div
+            className="flex justify-center items-center gap-1 hover:cursor-pointer"
+            onClick={() => handleSortConfig("score")}
+          >
+            <span
+              className={`text-center font-semibold text-zinc-300 text-sm ${
+                sortConfig?.type === "score" ? "ml-4" : ""
+              }`}
+            >
+              Score
+            </span>
+            {sortConfig?.type === "score" &&
+              (sortConfig?.order === "desc" ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronUp className="w-4 h-4" />
+              ))}
+          </div>
+          {/* DATE COMPLETED */}
+          <div
+            className="flex justify-center items-center gap-1 hover:cursor-pointer"
+            onClick={() => handleSortConfig("dateCompleted")}
+          >
+            <span
+              className={`text-center font-semibold text-zinc-300 text-sm ${
+                sortConfig?.type === "dateCompleted" ? "ml-4" : ""
+              }`}
+            >
+              Completed
+            </span>
+            {sortConfig?.type === "dateCompleted" &&
+              (sortConfig?.order === "desc" ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronUp className="w-4 h-4" />
+              ))}
+          </div>
+          {/* AUTHOR */}
+          <div
+            className="flex justify-center items-center gap-1 hover:cursor-pointer"
+            onClick={() => handleSortConfig("author")}
+          >
+            <span
+              className={`text-center font-semibold text-zinc-300 text-sm ${
+                sortConfig?.type === "author" ? "ml-4" : ""
+              }`}
+            >
+              Author
+            </span>
+            {sortConfig?.type === "author" &&
+              (sortConfig?.order === "desc" ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronUp className="w-4 h-4" />
+              ))}
+          </div>
+          {/* DATE PUBLISHED */}
+          <div
+            className="flex justify-center items-center gap-1 hover:cursor-pointer"
+            onClick={() => handleSortConfig("datePublished")}
+          >
+            <span
+              className={`text-center font-semibold text-zinc-300 text-sm ${
+                sortConfig?.type === "datePublished" ? "ml-4" : ""
+              }`}
+            >
+              Published
+            </span>
+            {sortConfig?.type === "datePublished" &&
+              (sortConfig?.order === "desc" ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronUp className="w-4 h-4" />
+              ))}
+          </div>
           <span className="text-center font-semibold text-zinc-300 text-sm pl-0.5">
             Notes
           </span>
@@ -103,14 +196,14 @@ export default function BookList() {
               <Loading customStyle={"h-12 w-12 border-gray-300"} text="" />
             </div>
           )}
-          {books.length === 0 && (
+          {sortedBooks.length === 0 && (
             <div className="text-center py-12">
               <p className="text-zinc-400 italic text-lg">
                 No books yet — add one above!
               </p>
             </div>
           )}
-          {books.map((book, index) => (
+          {sortedBooks.map((book, index) => (
             <div
               key={book.id}
               className={`group grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(

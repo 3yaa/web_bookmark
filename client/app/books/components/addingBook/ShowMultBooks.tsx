@@ -70,8 +70,8 @@ export function ShowMultBooks({
       <div className="relative bg-zinc-900/95 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] flex flex-col shadow-xl">
         {isLoading && (
           <Loading
-            borderColor={"border-emerald-400"}
-            text="Searching Book..."
+            customStyle={"border-emerald-400 h-8 w-8"}
+            text="Searching..."
           />
         )}
         {/* ACTION BUTTON */}

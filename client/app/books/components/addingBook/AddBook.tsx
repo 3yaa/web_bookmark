@@ -125,7 +125,7 @@ export function AddBook({
       }
       // make call
       const seriesData = await searchForSeriesInfo(olKey);
-      if (!seriesData) return null;
+      if (!seriesData || seriesData.length === 0) return null;
       //
       setAllSeries(seriesData);
       const mappedData = mapWikiDataToBook(seriesData[0]);
@@ -170,7 +170,7 @@ export function AddBook({
     if (!titleSearching) return null;
 
     const booksInfo = await searchForBackupBooks(titleSearching, BOOKLIMIT);
-    if (!booksInfo) return null;
+    if (!booksInfo || booksInfo.length === 0) return null;
     setAllNewBooks((prev) => ({
       ...prev,
       GoogleBooks: booksInfo,
@@ -378,7 +378,7 @@ export function AddBook({
           isLoading={{
             isTrue: isBookSearching,
             style: "h-8 w-8 border-emerald-400",
-            text: "Searching Book...",
+            text: "Searching...",
           }}
           showBookInSeries={
             allSeries.length > 1 ? handleSeriesChange : undefined

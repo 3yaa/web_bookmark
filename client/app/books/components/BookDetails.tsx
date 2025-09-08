@@ -4,7 +4,7 @@ import Image from "next/image";
 //
 import { BookProps } from "@/types/books";
 import { formatDate, getStatusBorderGradient } from "@/utils/formattingUtils";
-import { statusOptions, scoreOptions } from "../utils/bookDetailsDropdown";
+import { statusOptions, scoreOptions } from "../utils/bookDropdownDetails";
 import { getCoverUrl } from "@/app/books/utils/bookMapping";
 //
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
@@ -52,6 +52,8 @@ export function BookDetails({
     };
     if (newStatus === "Completed") {
       statusLoad.dateCompleted = new Date();
+    } else if (book.dateCompleted) {
+      statusLoad.dateCompleted = null;
     }
     onUpdate(book.id, statusLoad);
   };
@@ -205,8 +207,16 @@ export function BookDetails({
               {/* LEFT SIDE -- PIC */}
               <div
                 className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg hover:cursor-pointer"
-                onClick={handleCoverChange}
-                title={`${book.curCoverIndex}/${book.coverEditions?.length}`}
+                onClick={
+                  book.coverEditions && book.coverEditions?.length > 1
+                    ? handleCoverChange
+                    : undefined
+                }
+                title={
+                  book.coverEditions
+                    ? `${book.curCoverIndex}/${book.coverEditions?.length}`
+                    : ""
+                }
               >
                 {book.curCoverIndex !== undefined &&
                 book.coverEditions !== null ? (

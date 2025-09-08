@@ -107,6 +107,7 @@ export function BookDetails({
   };
 
   const handleDelete = () => {
+    onClose();
     const shouldDelete = true;
     onUpdate(book.id, undefined, shouldDelete);
   };
@@ -136,10 +137,10 @@ export function BookDetails({
       <div
         className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
           book.status
-        )} py-2 px-2`}
+        )} py-2 px-2 lg:min-w-[43.5%] lg:max-w-[43.5%]`}
       >
         {/* ACTUAL DETAIL CARD */}
-        <div className="bg-gradient-to-br bg-zinc-900 backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 lg:min-w-3xl lg:max-w-3xl w-full max-h-[calc(100vh-3rem)]">
+        <div className="bg-gradient-to-br bg-zinc-900 backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 w-full max-h-[calc(100vh-3rem)]">
           {isLoading?.isTrue && (
             <Loading customStyle={isLoading.style} text={isLoading.text} />
           )}
@@ -225,7 +226,7 @@ export function BookDetails({
                     alt={book.title || "Untitled"}
                     width={248}
                     height={372}
-                    className="min-w-62 min-h-93 object-fill"
+                    className="min-w-[62] min-h-93 object-fill"
                   />
                 ) : book.coverUrl ? (
                   <Image
@@ -289,8 +290,8 @@ export function BookDetails({
                     )}
                   </div>
                   {/* STATUS AND SCORE */}
-                  <div className="flex justify-start gap-4 mb-2.5">
-                    <div className="lg:min-w-[165px]">
+                  <div className="flex justify-start gap-4 mb-2.5 max-w-[94%]">
+                    <div className="flex-[0.77] lg:min-w-[165px]">
                       <label className="text-sm font-medium text-zinc-400 mb-1 block">
                         Status
                       </label>
@@ -332,7 +333,7 @@ export function BookDetails({
                     <label className="text-sm font-medium text-zinc-400 block">
                       Notes
                     </label>
-                    <div className="bg-zinc-800/50 rounded-lg pl-3 pt-2 pr-1 pb-1 max-h-25 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200">
+                    <div className="bg-zinc-800/50 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-25 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200">
                       <AutoTextarea
                         value={localNote}
                         onChange={handleNoteChange}

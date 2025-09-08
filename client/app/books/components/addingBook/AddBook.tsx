@@ -321,7 +321,8 @@ export function AddBook({
       }
       handleBookSearch();
     }
-  }, [handleBookSearch, titleFromAbove]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [titleFromAbove]);
 
   if (!isOpen) return null;
 

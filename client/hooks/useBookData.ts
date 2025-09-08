@@ -1,6 +1,7 @@
 import { BookProps } from "@/types/books";
 import { useEffect, useState, useCallback } from "react";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
+import { validateAndFilterCovers } from "@/app/books/utils/cleanUpCover";
 
 export function useBookData() {
   const { authFetch, isAuthLoading } = useAuthFetch();
@@ -70,13 +71,22 @@ export function useBookData() {
       try {
         setBookDataLoading(true);
         //
+        const [validCovers] = await Promise.all([
+          validateAndFilterCovers(book.coverEditions),
+          // You could add other async validations here if needed
+        ]);
+        const cleanedBooks = {
+          ...book,
+          coverEditions: validCovers,
+        };
+        //
         const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books`;
         const options = {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(book),
+          body: JSON.stringify(cleanedBooks),
         };
         const response = await authFetch(url, options);
         if (!response.ok) {

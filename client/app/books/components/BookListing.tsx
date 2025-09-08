@@ -60,7 +60,6 @@ export default function BookList() {
         updateBook(bookId, updates);
       } else if (shouldDelete) {
         await deleteBook(bookId);
-        setActiveModal(null);
       }
     },
     [deleteBook, selectedBook, updateBook]
@@ -188,22 +187,23 @@ export default function BookList() {
             Notes
           </span>
         </div>
-
-        {/* LISTING */}
-        <div className="relative">
+        {/* LOADER */}
+        <div className="relative bg-black/20 backdrop-blur-lg">
           {isProcessingBook && (
-            <div className="mt-14">
-              <Loading customStyle={"h-12 w-12 border-gray-300"} text="" />
-            </div>
+            <Loading customStyle={"mt-72 h-12 w-12 border-gray-400"} text="" />
           )}
-          {sortedBooks.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-zinc-400 italic text-lg">
-                No books yet — add one above!
-              </p>
-            </div>
-          )}
-          {sortedBooks.map((book, index) => (
+        </div>
+        {/* NO BOOKS */}
+        {!isProcessingBook && sortedBooks.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-zinc-400 italic text-lg">
+              No books yet — add one above!
+            </p>
+          </div>
+        )}
+        {/* LISTING */}
+        {!isProcessingBook &&
+          sortedBooks.map((book, index) => (
             <div
               key={book.id}
               className={`group grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
@@ -263,25 +263,9 @@ export default function BookList() {
               </span>
             </div>
           ))}
-        </div>
       </div>
-      {selectedBook && (
-        <BookDetails
-          isOpen={activeModal === "bookDetails"}
-          book={selectedBook}
-          onClose={handleModalClose}
-          onUpdate={handleBookUpdates}
-          showSequelPrequel={showSequelPrequel}
-          isLoading={{
-            isTrue: isProcessingBook,
-            style: "border-gray-300",
-            text: "",
-          }}
-        />
-      )}
-
       <NavMenu />
-      {/* add button */}
+      {/* ADD BUTTON */}
       <div className="fixed bottom-10 right-12 z-10">
         <button
           onClick={() => setActiveModal("addBook")}
@@ -297,6 +281,16 @@ export default function BookList() {
           titleFromAbove={titleToUse}
         />
       </div>
+      {/* BOOK DETAILS */}
+      {selectedBook && (
+        <BookDetails
+          isOpen={activeModal === "bookDetails"}
+          book={selectedBook}
+          onClose={handleModalClose}
+          onUpdate={handleBookUpdates}
+          showSequelPrequel={showSequelPrequel}
+        />
+      )}
     </div>
   );
 }

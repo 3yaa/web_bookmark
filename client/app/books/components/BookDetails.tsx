@@ -40,7 +40,7 @@ export function BookDetails({
   onUpdate,
   addBook,
   isLoading,
-  showBookInSeries,
+  showBookInSeries, //when wiki gives more then 1 option
   showSequelPrequel,
 }: BookDetailsProps) {
   const [localNote, setLocalNote] = useState(book.note || "");
@@ -346,7 +346,7 @@ export function BookDetails({
                   </div>
                 </div>
                 {/* PREQUEL AND SEQUEL */}
-                <div className="grid grid-cols-[1fr_3rem_1fr] w-full pr-1.5">
+                <div className="grid grid-cols-[1fr_3rem_1fr] w-full pr-1.5 select-none">
                   <div className="truncate text-left">
                     {book.prequel && (
                       <div

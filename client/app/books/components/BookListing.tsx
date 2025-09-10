@@ -32,7 +32,9 @@ export default function BookList() {
     (targetTitle: string) => {
       if (targetTitle) {
         // !NEEDS TO MAKE THIS CALL WITH THE ENTIRE DB
-        const targetBook = books.find((book) => book.title === targetTitle);
+        const targetBook = books.find(
+          (book) => book.title.toLowerCase() === targetTitle.toLowerCase()
+        );
 
         if (targetBook) {
           setSelectedBook(targetBook);
@@ -84,14 +86,10 @@ export default function BookList() {
   }, []);
 
   return (
-    <div className="min-h-screen p-6">
-      <div className="w-full md:w-[70%] lg:w-[62%] mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-6 text-zinc-100 tracking-tight">
-          My Books
-        </h1>
-
+    <div className="min-h-screen">
+      <div className="w-full md:w-[70%] lg:w-[60%] mx-auto">
         {/* HEADING */}
-        <div className="grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] bg-zinc-800/50 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border border-zinc-700/30 select-none">
+        <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
           <span className="font-semibold text-zinc-300 text-sm">#</span>
           <span className="font-semibold text-zinc-300 text-sm">Cover</span>
           {/* TITLE */}
@@ -206,7 +204,7 @@ export default function BookList() {
           sortedBooks.map((book, index) => (
             <div
               key={book.id}
-              className={`group grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
+              className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
                 book.status
               )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
                 index === 0 ? "pt-1.5 rounded-bl-none" : "rounded-l-none"
@@ -241,9 +239,16 @@ export default function BookList() {
                   <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-[0.25rem] border border-zinc-600/30"></div>
                 )}
               </div>
-              <span className="font-semibold text-zinc-100 text-sm group-hover:text-emerald-400 transition-colors duration-200 truncate">
-                {book.title || "-"}
-              </span>
+              <div className="flex flex-col">
+                <span className="font-semibold text-zinc-400 text-[70%] group-hover:text-emerald-400">
+                  {book.seriesTitle
+                    ? `${book.seriesTitle} ᭡ ${book.placeInSeries}`
+                    : ""}
+                </span>
+                <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-emerald-400 transition-colors duration-200 truncate">
+                  {book.title || "-"}
+                </span>
+              </div>
               <span className="text-center font-semibold text-zinc-300 text-sm">
                 {book.score || "-"}
               </span>
@@ -269,7 +274,7 @@ export default function BookList() {
       <div className="fixed bottom-10 right-12 z-10">
         <button
           onClick={() => setActiveModal("addBook")}
-          className="bg-emerald-600 hover:bg-emerald-500 p-4.5 rounded-full shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/30 transition-all duration-200 text-white font-medium flex items-center gap-2 hover:scale-105 active:scale-95 border border-emerald-500/20"
+          className="bg-emerald-700 hover:bg-emerald-600 p-4.5 rounded-full shadow-lg shadow-emerald-700/20 hover:shadow-emerald-500/30 transition-all duration-200 text-white font-medium flex items-center gap-2 hover:scale-105 active:scale-95 border border-emerald-600/20"
         >
           <Plus className="w-4 h-4" />
         </button>

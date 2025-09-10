@@ -36,7 +36,7 @@ export const getBooks = async (req, res) => {
           WHEN 'Dropped' THEN 3
           ELSE 4
         END,
-        title ASC
+        date_created DESC
     `,
       [userId]
     );

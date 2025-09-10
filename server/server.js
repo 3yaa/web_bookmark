@@ -10,8 +10,10 @@ import { authRouter } from "./src/routes/authRouter.js";
 import { logoutRouter } from "./src/routes/logoutRouter.js";
 import { verifyJWT } from "./src/middleware/validateJWT.js";
 //
-import { booksRouter } from "./src/routes/booksRoute.js";
 import { externalBooksAPIRouter } from "./src/routes/externalBooksAPIRouter.js";
+import { externalMoviesAPIRouter } from "./src/routes/externalMoviesAPIRoute.js";
+//
+import { booksRouter } from "./src/routes/booksRoute.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -34,6 +36,7 @@ app.use(verifyJWT);
 
 // books api routers
 app.use("/books-api", externalBooksAPIRouter);
+app.use("/movies-api", externalMoviesAPIRouter);
 app.use("/books", booksRouter);
 
 app.listen(PORT, () => {

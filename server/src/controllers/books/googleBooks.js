@@ -7,7 +7,7 @@ export async function useGoogleBooksAPI(req, res) {
     const { query, limit } = req.query;
     const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
       query
-    )}&maxResults=${limit}&key=${process.env.GOOGLE_BOOKS_API}`;
+    )}&maxResults=${limit}&key=${process.env.GOOGLE_BOOKS_API_KEY}`;
     // make call
     const response = await fetch(url);
     if (!response.ok) {

@@ -19,6 +19,10 @@ externalBooksAPIRouter.get(
   validateBooksAPI,
   useGoogleBooksAPI
 );
-externalBooksAPIRouter.get("/wikidata", validateSeriesAPI, useWikidataAPI);
+externalBooksAPIRouter.get(
+  "/books-wikidata",
+  validateSeriesAPI,
+  useWikidataAPI
+);
 
 export { externalBooksAPIRouter };

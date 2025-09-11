@@ -234,7 +234,7 @@ export default function MovieList() {
                     ? `${movie.seriesTitle} ᭡ ${movie.placeInSeries}`
                     : ""}
                 </span>
-                <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-emerald-400 transition-colors duration-200 truncate">
+                <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-emerald-400 transition-colors duration-200 truncate max-w-53">
                   {movie.title || "-"}
                 </span>
               </div>

@@ -43,8 +43,6 @@ export function mapOMDbToMovie(dataOMDb: OMDbProps): Partial<MovieProps> {
 }
 
 export function mapTMDBToMovie(dataTMDB: TMDBProps): Partial<MovieProps> {
-  console.log("---", dataTMDB.poster_url);
-  console.log("---", dataTMDB.backdrop_url);
   return {
     posterUrl: dataTMDB.poster_url,
     backdropUrl: dataTMDB.backdrop_url,
@@ -54,7 +52,7 @@ export function mapTMDBToMovie(dataTMDB: TMDBProps): Partial<MovieProps> {
 export function mapWikidataToMovie(
   dataWiki: WikidataProps
 ): Partial<MovieProps> {
-  const sTitle = dataWiki.series_title;
+  const sTitle = dataWiki.series_title ?? undefined;
   return {
     // title: cleanName(dataWiki.wikiTitle, sTitle),
     seriesTitle: sTitle,

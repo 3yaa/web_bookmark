@@ -114,17 +114,17 @@ export function MovieDetails({
       <div
         className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
           movie.status
-        )} py-2 px-2 lg:min-w-[43.5%] lg:max-w-[43.5%]`}
+        )} py-2 px-2 lg:min-w-[45%] lg:max-w-[45%]`}
       >
         {/* ACTUAL DETAIL CARD */}
         <div className="bg-gradient-to-br bg-zinc-900 backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 w-full max-h-[calc(100vh-3rem)]">
           {isLoading?.isTrue && (
             <Loading customStyle={isLoading.style} text={isLoading.text} />
           )}
-          <div className={`px-8.5 py-7 border-0 rounded-2xl`}>
+          <div className={`px-8.5 py-7 border-0 rounded-2xl overflow-hidden`}>
             {/* ACTION BUTTONS */}
             {addMovie ? (
-              <div className="absolute right-3 top-3 flex items-center gap-1.5">
+              <div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
                 {showAnotherSeries && (
                   <div className="flex gap-1 bg-zinc-800/50 rounded-lg">
                     {/* LEFT BUTTON */}
@@ -174,16 +174,16 @@ export function MovieDetails({
               </div>
             ) : (
               <button
-                className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/50 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group"
+                className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/0 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group"
                 onClick={handleDelete}
                 title={"Delete Book"}
               >
-                <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors duration-200" />
+                <Trash2 className="w-4 h-4 text-gray-400/20 group-hover:text-red-500 transition-colors duration-200" />
               </button>
             )}
             <div className="flex gap-8">
               {/* LEFT SIDE -- PIC */}
-              <div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg hover:cursor-pointer">
+              <div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg">
                 {movie.posterUrl !== undefined ? (
                   <Image
                     src={movie.posterUrl}
@@ -197,17 +197,49 @@ export function MovieDetails({
                 )}
               </div>
               {/* RIGHT SIDE -- DETAILS */}
-              <div className="flex flex-col flex-1 min-h-93 min-w-62">
-                <div className="flex flex-col justify-center flex-1">
+              <div className="flex flex-col flex-1 min-h-93 min-w-62 relative">
+                {/* BACKDROP */}
+                {movie.backdropUrl && (
+                  <div className="absolute -top-7 left-20 -right-30 h-60 -z-10 overflow-hidden rounded-2xl">
+                    <div className="relative h-full">
+                      <Image
+                        src={movie.backdropUrl}
+                        alt="Backdrop"
+                        fill
+                        className="object-cover opacity-30"
+                        style={{
+                          objectPosition: "center -10px", // image positioning
+                        }}
+                      />
+                      {/* HORIZONTAL */}
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background:
+                            "linear-gradient(to right, rgba(24,24,27,1) 0%, rgba(24,24,27,0.2) 40%, transparent 50%, rgba(24,24,27,0.8) 100%)",
+                        }}
+                      />
+                      {/* VERTICAL GRADIENT */}
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background:
+                            "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0.8) 65%, rgba(24,24,27,1) 100%)",
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                <div className="flex flex-col justify-end mb-6 flex-1">
                   {/* SERIES TITLE */}
                   {movie.seriesTitle && (
-                    <span className="font-semibold text-zinc-100 text-xl overflow-y-auto max-h-10.5 mb-0">
+                    <span className="font-semibold text-zinc-100/80 text-xl overflow-y-auto max-h-10.5 mb-0">
                       {movie.seriesTitle}
                     </span>
                   )}
                   {/* TITLE */}
                   <div className="w-fit mb-1.5 max-w-full">
-                    <div className="font-bold text-zinc-100 text-3xl overflow-x-auto overflow-y-hidden max-h-10.5 mb-1.5">
+                    <div className="font-bold text-zinc-100/90 text-3xl overflow-x-auto overflow-y-hidden max-h-10.5 mb-1.5">
                       {movie.title || "Untitled"}
                     </div>
                     <div
@@ -218,26 +250,26 @@ export function MovieDetails({
                   </div>
                   {/* DIRECTOR AND DATES */}
                   <div className="flex justify-start items-center gap-2 w-full mb-3">
-                    <span className="font-medium text-zinc-200 text-lg overflow-y-auto max-h-6 leading-6">
+                    <span className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 leading-6">
                       {movie.director || "Unknown Director"}
                     </span>
                     {/* ◎ ◈ ୭ ✿ ✧ */}
-                    <div className="font-medium text-zinc-200 text-lg leading-6">
+                    <div className="font-medium text-zinc-200/70 text-md leading-6">
                       •
                     </div>
                     <span
-                      className="font-medium text-zinc-200 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
+                      className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
                       title="Date Published"
                     >
                       {movie.dateReleased || "Unknown"}
                     </span>
                     {movie.status === "Completed" && (
                       <div className="flex items-center gap-2">
-                        <div className="font-medium text-zinc-200 text-lg leading-6">
+                        <div className="font-medium text-zinc-200/70 text-md leading-6">
                           •
                         </div>
                         <span
-                          className="font-medium text-zinc-200 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
+                          className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
                           title="Date Completed"
                         >
                           {formatDate(movie.dateCompleted)}
@@ -255,7 +287,7 @@ export function MovieDetails({
                         value={movie.status}
                         onChange={handleStatusChange}
                         options={statusOptions}
-                        customStyle="text-zinc-200 font-semibold"
+                        customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={
                           movie.status === "Completed"
                             ? ["to-emerald-500/10", "text-emerald-500"]
@@ -274,7 +306,7 @@ export function MovieDetails({
                           onUpdate(movie.id, { score: Number(value) });
                         }}
                         options={scoreOptions}
-                        customStyle="text-zinc-200 font-semibold"
+                        customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={
                           movie.status === "Completed"
                             ? ["to-emerald-500/10", "text-emerald-500"]
@@ -302,7 +334,7 @@ export function MovieDetails({
                   </div>
                 </div>
                 {/* PREQUEL AND SEQUEL */}
-                <div className="grid grid-cols-[1fr_3rem_1fr] w-full pr-1.5 select-none">
+                <div className="grid grid-cols-[1fr_3rem_1fr] pr-1.5 select-none w-full">
                   <div className="truncate text-left">
                     {movie.prequel && (
                       <div

@@ -1,4 +1,8 @@
-import { AllBooks, OpenLibData, GoogleBooks } from "@/types/books";
+import {
+  AllBooksProps,
+  OpenLibraryProps,
+  GoogleBooksProps,
+} from "@/types/book";
 import { X, DiamondPlus } from "lucide-react";
 import Image from "next/image";
 import { getCoverUrl } from "../../utils/bookMapping";
@@ -8,8 +12,8 @@ interface MultSearchProps {
   isOpen: boolean;
   onClose: (action: "manualAdd" | null) => void;
   prompt: string;
-  books: AllBooks;
-  onClickedBook: (book: OpenLibData | GoogleBooks) => void;
+  books: AllBooksProps;
+  onClickedBook: (book: OpenLibraryProps | GoogleBooksProps) => void;
   isLoading?: boolean;
 }
 
@@ -25,10 +29,10 @@ export function ShowMultBooks({
 
   // Combine and alternate books from both sources
   const combinedBooks: Array<{
-    book: OpenLibData | GoogleBooks;
+    book: OpenLibraryProps | GoogleBooksProps;
     source: "OpenLib" | "GoogleB";
   }> = [];
-  const totalLength = books.OpenLibBooks.length + books.GoogleBooks.length;
+  const totalLength = books.OpenLibBooks.length + books.GoogleBooksProps.length;
   let openLibI = 0;
   let googleI = 0;
 
@@ -40,17 +44,17 @@ export function ShowMultBooks({
           source: "OpenLib",
         });
         openLibI++;
-      } else if (googleI < books.GoogleBooks.length) {
+      } else if (googleI < books.GoogleBooksProps.length) {
         combinedBooks.push({
-          book: books.GoogleBooks[googleI],
+          book: books.GoogleBooksProps[googleI],
           source: "GoogleB",
         });
         googleI++;
       }
     } else {
-      if (googleI < books.GoogleBooks.length) {
+      if (googleI < books.GoogleBooksProps.length) {
         combinedBooks.push({
-          book: books.GoogleBooks[googleI],
+          book: books.GoogleBooksProps[googleI],
           source: "GoogleB",
         });
         googleI++;
@@ -128,10 +132,10 @@ export function ShowMultBooks({
                 {/* COVER */}
                 <div className="w-12.5 h-18">
                   {item.source === "OpenLib" &&
-                  (item.book as OpenLibData).edition_key !== undefined ? (
+                  (item.book as OpenLibraryProps).edition_key !== undefined ? (
                     <Image
                       src={getCoverUrl(
-                        (item.book as OpenLibData).edition_key?.at(0)
+                        (item.book as OpenLibraryProps).edition_key?.at(0)
                       )}
                       alt={item.book.title || "Untitled"}
                       width={50}
@@ -139,9 +143,9 @@ export function ShowMultBooks({
                       className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
                     />
                   ) : item.source === "GoogleB" &&
-                    (item.book as GoogleBooks).cover_url ? (
+                    (item.book as GoogleBooksProps).cover_url ? (
                     <Image
-                      src={(item.book as GoogleBooks).cover_url!}
+                      src={(item.book as GoogleBooksProps).cover_url!}
                       alt={item.book.title || "Untitled"}
                       width={50}
                       height={75}

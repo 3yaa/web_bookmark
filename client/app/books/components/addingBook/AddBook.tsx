@@ -4,17 +4,17 @@ import { Book } from "lucide-react";
 //
 import {
   BookProps,
-  OpenLibData,
-  AllBooks,
-  GoogleBooks,
-  WikiData,
-} from "@/types/books";
+  OpenLibraryProps,
+  AllBooksProps,
+  GoogleBooksProps,
+  WikidataProps,
+} from "@/types/book";
 //
 import {
   cleanName,
   mapGoogleDataToBook,
-  mapOlDataToBook,
-  mapWikiDataToBook,
+  mapOpenLibDataToBook,
+  mapWikidataToBook,
   resetBookValues,
 } from "@/app/books/utils/bookMapping";
 //
@@ -22,7 +22,7 @@ import { BookDetails } from "../BookDetails";
 import { ShowMultBooks } from "./ShowMultBooks";
 import { ManualAddBook } from "./ManualAddBook";
 //
-import { useBookSearch } from "@/hooks/useBookSearch";
+import { useBookSearch } from "@/app/books/hooks/useBookSearch";
 
 interface AddBookProps {
   isOpen: boolean;
@@ -54,11 +54,11 @@ export function AddBook({
   const [isDupTitle, setIsDupTitle] = useState(false);
   //
   const [newBook, setNewBook] = useState<Partial<BookProps>>({});
-  const [allNewBooks, setAllNewBooks] = useState<AllBooks>({
+  const [allNewBooks, setAllNewBooks] = useState<AllBooksProps>({
     OpenLibBooks: [],
-    GoogleBooks: [],
+    GoogleBooksProps: [],
   });
-  const [allSeries, setAllSeries] = useState<WikiData[]>([]);
+  const [allSeries, setAllSeries] = useState<WikidataProps[]>([]);
   const [curSeries, setCurSeries] = useState<number>(0);
   //
   const {
@@ -77,7 +77,7 @@ export function AddBook({
     setNewBook({});
     setAllNewBooks({
       OpenLibBooks: [],
-      GoogleBooks: [],
+      GoogleBooksProps: [],
     });
     if (titleToSearch.current) {
       titleToSearch.current.value = "";
@@ -106,10 +106,10 @@ export function AddBook({
     //save books
     setAllNewBooks({
       OpenLibBooks: response,
-      GoogleBooks: [],
+      GoogleBooksProps: [],
     }); //all
     // console.log(response?.[0].title, ": ", response?.[0].key);
-    setNewBook(mapOlDataToBook(response?.[0])); //main
+    setNewBook(mapOpenLibDataToBook(response?.[0])); //main
     return {
       title: olData.title,
       olKey: olData.key,
@@ -128,7 +128,7 @@ export function AddBook({
       if (!seriesData || seriesData.length === 0) return null;
       //
       setAllSeries(seriesData);
-      const mappedData = mapWikiDataToBook(seriesData[0]);
+      const mappedData = mapWikidataToBook(seriesData[0]);
       setNewBook((prev) => {
         const updated = {
           ...prev,
@@ -173,12 +173,12 @@ export function AddBook({
     if (!booksInfo || booksInfo.length === 0) return null;
     setAllNewBooks((prev) => ({
       ...prev,
-      GoogleBooks: booksInfo,
+      GoogleBooksProps: booksInfo,
     }));
   }, [searchForBackupBooks]);
 
   const handlePickFromMultBooks = useCallback(
-    async (book: OpenLibData | GoogleBooks) => {
+    async (book: OpenLibraryProps | GoogleBooksProps) => {
       // ol
       if ("key" in book) {
         //check if clicked book is duplicate
@@ -191,7 +191,7 @@ export function AddBook({
           return;
         }
         //
-        setNewBook(mapOlDataToBook(book));
+        setNewBook(mapOpenLibDataToBook(book));
         if (key) await handleSeriesSearch(key);
       }
       // google -- NOT CALLING WIKI FOR GOOGLE
@@ -221,7 +221,7 @@ export function AddBook({
     ) => {
       if (showMore) {
         setActiveModal("multOptions");
-        if (!allNewBooks.GoogleBooks.length) {
+        if (!allNewBooks.GoogleBooksProps.length) {
           await handleBackUpBookSearch();
         }
         return;
@@ -234,9 +234,7 @@ export function AddBook({
   const handleBookAdd = async () => {
     // double check not adding duplicate
     if (newBook.key && isDupTitle) {
-      if (isDuplicate(newBook.key)) {
-        return;
-      }
+      return;
     }
 
     let defaultStatus = newBook.status;
@@ -259,7 +257,7 @@ export function AddBook({
       } else if (option === "right") {
         newSeries = curSeries === allSeries.length - 1 ? 0 : curSeries + 1;
       }
-      const mappedData = mapWikiDataToBook(allSeries[newSeries]);
+      const mappedData = mapWikidataToBook(allSeries[newSeries]);
       setCurSeries(newSeries);
       setNewBook((prev) => {
         const updated = {
@@ -321,7 +319,7 @@ export function AddBook({
       }
       handleBookSearch();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [titleFromAbove]);
 
   if (!isOpen) return null;

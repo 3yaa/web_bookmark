@@ -19,20 +19,20 @@ export interface BookProps {
   coverEditions?: string[];
   curCoverIndex?: number;
   datePublished?: number;
-  // from wikidata
+  // from WikidataProps
   seriesTitle?: string;
   placeInSeries?: string;
   prequel?: string;
   sequel?: string;
 }
 
-export interface AllBooks {
-  OpenLibBooks: OpenLibData[];
-  GoogleBooks: GoogleBooks[];
+export interface AllBooksProps {
+  OpenLibBooks: OpenLibraryProps[];
+  GoogleBooksProps: GoogleBooksProps[];
 }
 
-export interface OpenLibData {
-  key: string; // call to wikidata || check dup
+export interface OpenLibraryProps {
+  key: string; // call to WikidataProps || check dup
   // details
   title: string;
   author_name?: string[];
@@ -41,7 +41,7 @@ export interface OpenLibData {
   edition_key?: string[];
 }
 
-export interface GoogleBooks {
+export interface GoogleBooksProps {
   id: string; // check dup
   title: string;
   author_name?: string[];
@@ -49,7 +49,7 @@ export interface GoogleBooks {
   cover_url?: string;
 }
 
-export interface WikiData {
+export interface WikidataProps {
   wiki_title?: string; // another title
   series_title?: string;
   place_in_series?: string;

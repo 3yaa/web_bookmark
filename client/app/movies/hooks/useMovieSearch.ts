@@ -1,51 +1,83 @@
 import { useState } from "react";
-import { OpenLibData, GoogleBooks, WikiData } from "@/types/books";
+import { OMDbProps, TMDBProps, WikidataProps } from "@/types/movie";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 
-export function useBookSearch() {
+export function useMovieSearch() {
   const { authFetch, isAuthLoading } = useAuthFetch();
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isBookSearching = isSearching || isAuthLoading;
+  const isMovieSearching = isSearching || isAuthLoading;
 
-  // OPEN LIBRARY API -- BOOK PRIMINARY
-  const searchForBooks = async (
-    query: string,
-    limit: number
-  ): Promise<OpenLibData[] | null> => {
+  // OMDb API -- MOVIE METADATA
+  const searchForMovie = async (
+    title: string,
+    year?: number
+  ): Promise<OMDbProps | null> => {
     try {
       setIsSearching(true);
       setError(null);
       // make call
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books-api/open-library?query=${query}&limit=${limit}`;
+      let url;
+      if (year) {
+        url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies-api/omdb?title=${title}&year=${year}`;
+      } else {
+        url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies-api/omdb?title=${title}`;
+      }
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
       }
       // format data
       const resJson = await response.json();
-      const books = resJson.data || null;
+      const movie = resJson.data || null;
       //
-      return books;
+      return movie;
     } catch (e) {
       setError(e instanceof Error ? e.message : "An error occurred");
-      console.error("Getting open library failed: ", e);
+      console.error("Getting OMDb failed: ", e);
       return null;
     } finally {
       setIsSearching(false);
     }
   };
 
-  // WIKIDATA API -- SERIES
-  const searchForSeriesInfo = async (
-    olid: string
-  ): Promise<WikiData[] | null> => {
+  // TMDB API -- MOVIE POSTERS
+  const searchForPosters = async (
+    imdbId: string
+  ): Promise<TMDBProps | null> => {
     try {
       setIsSearching(true);
       setError(null);
       //
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books-api/wikidata?openLibraryID=${olid}`;
+      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies-api/tmdb?imdbId=${imdbId}`;
+      const response = await authFetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error--status: ${response.status}`);
+      }
+      //
+      const resJson = await response.json();
+      const moviePosters = resJson.data || null;
+      //
+      return moviePosters;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "An error occurred");
+      console.error("Getting TMDb failed:", e);
+      return null;
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // WikidataProps API -- SERIES INFO
+  const searchForSeriesInfo = async (
+    imdbId: string
+  ): Promise<WikidataProps[] | null> => {
+    try {
+      setIsSearching(true);
+      setError(null);
+      //
+      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies-api/movies-wikidata?imdbId=${imdbId}`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
@@ -57,35 +89,7 @@ export function useBookSearch() {
       return seriesInfo;
     } catch (e) {
       setError(e instanceof Error ? e.message : "An error occurred");
-      console.error("Getting wikidata failed:", e);
-      return null;
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  // GOOGLE BOOKS API -- BOOK BACKUP
-  const searchForBackupBooks = async (
-    query: string,
-    limit: number
-  ): Promise<GoogleBooks[] | null> => {
-    try {
-      setIsSearching(true);
-      setError(null);
-      //
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books-api/google-books?query=${query}&limit=${limit}`;
-      const response = await authFetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error--status: ${response.status}`);
-      }
-      //
-      const resJson = await response.json();
-      const books = resJson.data || null;
-      //
-      return books;
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "An error occurred");
-      console.error("Getting google books failed: ", e);
+      console.error("Getting WikidataProps failed: ", e);
       return null;
     } finally {
       setIsSearching(false);
@@ -94,9 +98,9 @@ export function useBookSearch() {
 
   return {
     error,
-    isBookSearching,
-    searchForBooks,
+    isMovieSearching,
+    searchForMovie,
+    searchForPosters,
     searchForSeriesInfo,
-    searchForBackupBooks,
   };
 }

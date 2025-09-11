@@ -1,4 +1,9 @@
-import { BookProps, OpenLibData, GoogleBooks, WikiData } from "@/types/books";
+import {
+  BookProps,
+  OpenLibraryProps,
+  GoogleBooksProps,
+  WikidataProps,
+} from "@/types/book";
 
 export function getCoverUrl(
   coverOLID?: string,
@@ -28,7 +33,7 @@ export function resetBookValues(book: Partial<BookProps>): Partial<BookProps> {
   };
 }
 
-export function mapOlDataToBook(dataOL: OpenLibData): Partial<BookProps> {
+export function mapOpenLibDataToBook(dataOL: OpenLibraryProps): Partial<BookProps> {
   return {
     key: dataOL.key,
     title: dataOL.title,
@@ -40,7 +45,7 @@ export function mapOlDataToBook(dataOL: OpenLibData): Partial<BookProps> {
 }
 
 export function mapGoogleDataToBook(
-  dataGoogle: GoogleBooks
+  dataGoogle: GoogleBooksProps
 ): Partial<BookProps> {
   return {
     key: dataGoogle.id,
@@ -51,7 +56,7 @@ export function mapGoogleDataToBook(
   };
 }
 
-export function mapWikiDataToBook(dataWiki: WikiData): Partial<BookProps> {
+export function mapWikidataToBook(dataWiki: WikidataProps): Partial<BookProps> {
   const sTitle = dataWiki.series_title;
   return {
     // title: cleanName(dataWiki.wikiTitle, sTitle),

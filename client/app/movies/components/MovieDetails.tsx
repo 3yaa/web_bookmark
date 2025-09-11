@@ -2,10 +2,9 @@
 import { useState } from "react";
 import Image from "next/image";
 //
-import { BookProps } from "@/types/book";
+import { MovieProps } from "@/types/movie";
 import { formatDate, getStatusBorderGradient } from "@/utils/formattingUtils";
-import { statusOptions, scoreOptions } from "../../../utils/bookDropdownDetails";
-import { getCoverUrl } from "@/app/books/utils/bookMapping";
+import { statusOptions, scoreOptions } from "@/utils/bookDropdownDetails";
 //
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { Dropdown } from "@/app/components/ui/Dropdown";
@@ -19,78 +18,56 @@ import {
   ChevronRight,
 } from "lucide-react";
 interface BookDetailsProps {
-  book: BookProps;
+  movie: MovieProps;
   isOpen: boolean;
   onClose: () => void;
   isLoading?: { isTrue: boolean; style: string; text: string };
   onUpdate: (
-    bookId: number,
-    updates?: Partial<BookProps>,
+    movieId: number,
+    updates?: Partial<MovieProps>,
     takeAction?: boolean
   ) => void;
-  addBook?: () => void;
+  addMovie?: () => void;
   showSequelPrequel?: (sequelTitle: string) => void;
-  showBookInSeries?: (seriesDir: "left" | "right") => void;
+  showAnotherSeries?: (seriesDir: "left" | "right") => void;
 }
 
-export function BookDetails({
+export function MovieDetails({
   isOpen,
   onClose,
-  book,
+  movie,
   onUpdate,
-  addBook,
+  addMovie,
   isLoading,
-  showBookInSeries, //when wiki gives more then 1 option
+  showAnotherSeries, //when wiki gives more then 1 option
   showSequelPrequel,
 }: BookDetailsProps) {
-  const [localNote, setLocalNote] = useState(book.note || "");
+  const [localNote, setLocalNote] = useState(movie.note || "");
 
   const handleStatusChange = (value: string) => {
     const newStatus = value as "Completed" | "Want to Read";
-    const statusLoad: Partial<BookProps> = {
+    const statusLoad: Partial<MovieProps> = {
       status: newStatus,
     };
     if (newStatus === "Completed") {
       statusLoad.dateCompleted = new Date();
-    } else if (book.dateCompleted) {
+    } else if (movie.dateCompleted) {
       statusLoad.dateCompleted = null;
     }
-    onUpdate(book.id, statusLoad);
+    onUpdate(movie.id, statusLoad);
   };
 
-  const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
-    //detects which side of the div was clicked
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const elementWidth = rect.width;
-    const isRightSide = clickX > elementWidth / 2;
-
-    //
-    if (book.curCoverIndex !== undefined && book.coverEditions !== undefined) {
-      let newCoverIndex = book.curCoverIndex;
-      if (isRightSide) {
-        newCoverIndex = (book.curCoverIndex + 1) % book.coverEditions.length;
-      } else {
-        newCoverIndex =
-          book.curCoverIndex === 0
-            ? book.coverEditions.length - 1
-            : book.curCoverIndex - 1;
-      }
-      onUpdate(book.id, { curCoverIndex: newCoverIndex });
-    }
-  };
-
-  const openSeriesBook = (seriesDir: string) => {
+  const openSeriesMovie = (seriesDir: string) => {
     if (!showSequelPrequel) return;
-    const targetTitle = seriesDir === "sequel" ? book.sequel : book.prequel;
+    const targetTitle = seriesDir === "sequel" ? movie.sequel : movie.prequel;
     if (targetTitle) {
       showSequelPrequel(targetTitle);
     }
   };
 
   const saveNote = () => {
-    if (localNote !== book.note) {
-      onUpdate(book.id, { note: localNote });
+    if (localNote !== movie.note) {
+      onUpdate(movie.id, { note: localNote });
     }
   };
 
@@ -109,26 +86,26 @@ export function BookDetails({
   const handleDelete = () => {
     onClose();
     const shouldDelete = true;
-    onUpdate(book.id, undefined, shouldDelete);
+    onUpdate(movie.id, undefined, shouldDelete);
   };
 
   const handleModalClose = () => {
-    if (addBook) return;
+    if (addMovie) return;
     onClose();
   };
 
-  const handleAddBook = () => {
-    if (!addBook) return;
-    addBook();
+  const handleAddMovie = () => {
+    if (!addMovie) return;
+    addMovie();
     onClose();
   };
 
-  const handleMoreBook = () => {
-    const showMoreBooks = true;
-    onUpdate(book.id, undefined, showMoreBooks);
+  const handleMoreMovie = () => {
+    const showMoreMovie = true;
+    onUpdate(movie.id, undefined, showMoreMovie);
   };
 
-  if (!isOpen || !book) return null;
+  if (!isOpen || !movie) return null;
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-black/40 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
@@ -136,7 +113,7 @@ export function BookDetails({
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
-          book.status
+          movie.status
         )} py-2 px-2 lg:min-w-[43.5%] lg:max-w-[43.5%]`}
       >
         {/* ACTUAL DETAIL CARD */}
@@ -146,15 +123,15 @@ export function BookDetails({
           )}
           <div className={`px-8.5 py-7 border-0 rounded-2xl`}>
             {/* ACTION BUTTONS */}
-            {addBook ? (
+            {addMovie ? (
               <div className="absolute right-3 top-3 flex items-center gap-1.5">
-                {showBookInSeries && (
+                {showAnotherSeries && (
                   <div className="flex gap-1 bg-zinc-800/50 rounded-lg">
                     {/* LEFT BUTTON */}
                     <button
                       className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
                     hover:cursor-pointer transition-all group"
-                      onClick={() => showBookInSeries("left")}
+                      onClick={() => showAnotherSeries("left")}
                     >
                       <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
                     </button>
@@ -162,7 +139,7 @@ export function BookDetails({
                     <button
                       className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
                     hover:cursor-pointer transition-all group"
-                      onClick={() => showBookInSeries("right")}
+                      onClick={() => showAnotherSeries("right")}
                     >
                       <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
                     </button>
@@ -171,7 +148,7 @@ export function BookDetails({
                 {/* ADD */}
                 <button
                   className="py-1.5 px-5 rounded-lg bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer transition-all group"
-                  onClick={handleAddBook}
+                  onClick={handleAddMovie}
                   title={"Add Book"}
                 >
                   <Plus className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors duration-0" />
@@ -180,7 +157,7 @@ export function BookDetails({
                 <button
                   className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer
                     transition-all group"
-                  onClick={handleMoreBook}
+                  onClick={handleMoreMovie}
                   title={"See More Options"}
                 >
                   <ChevronsUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
@@ -206,35 +183,14 @@ export function BookDetails({
             )}
             <div className="flex gap-8">
               {/* LEFT SIDE -- PIC */}
-              <div
-                className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg hover:cursor-pointer"
-                onClick={
-                  book.coverEditions && book.coverEditions?.length > 1
-                    ? handleCoverChange
-                    : undefined
-                }
-                title={
-                  book.coverEditions
-                    ? `${book.curCoverIndex}/${book.coverEditions?.length}`
-                    : ""
-                }
-              >
-                {book.curCoverIndex !== undefined &&
-                book.coverEditions !== null ? (
+              <div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg hover:cursor-pointer">
+                {movie.posterUrl !== undefined ? (
                   <Image
-                    src={getCoverUrl(book.coverEditions?.[book.curCoverIndex])}
-                    alt={book.title || "Untitled"}
+                    src={movie.posterUrl}
+                    alt={movie.title || "Untitled"}
                     width={248}
                     height={372}
                     className="min-w-[62] min-h-93 object-fill"
-                  />
-                ) : book.coverUrl ? (
-                  <Image
-                    src={book.coverUrl}
-                    alt={book.title || "Untitled"}
-                    width={248}
-                    height={372}
-                    className="min-w-62 min-h-93 object-fill"
                   />
                 ) : (
                   <div className="min-w-62 min-h-93 bg-gradient-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
@@ -244,26 +200,26 @@ export function BookDetails({
               <div className="flex flex-col flex-1 min-h-93 min-w-62">
                 <div className="flex flex-col justify-center flex-1">
                   {/* SERIES TITLE */}
-                  {book.seriesTitle && (
+                  {movie.seriesTitle && (
                     <span className="font-semibold text-zinc-100 text-xl overflow-y-auto max-h-10.5 mb-0">
-                      {book.seriesTitle}
+                      {movie.seriesTitle}
                     </span>
                   )}
                   {/* TITLE */}
                   <div className="w-fit mb-1.5 max-w-full">
                     <div className="font-bold text-zinc-100 text-3xl overflow-x-auto overflow-y-hidden max-h-10.5 mb-1.5">
-                      {book.title || "Untitled"}
+                      {movie.title || "Untitled"}
                     </div>
                     <div
                       className={`w-full h-0.5 bg-gradient-to-r ${getStatusBorderGradient(
-                        book.status
+                        movie.status
                       )} to-zinc-800 rounded-full`}
                     ></div>
                   </div>
-                  {/* AUTHOR AND DATES */}
+                  {/* DIRECTOR AND DATES */}
                   <div className="flex justify-start items-center gap-2 w-full mb-3">
                     <span className="font-medium text-zinc-200 text-lg overflow-y-auto max-h-6 leading-6">
-                      {book.author || "Unknown Author"}
+                      {movie.director || "Unknown Director"}
                     </span>
                     {/* ◎ ◈ ୭ ✿ ✧ */}
                     <div className="font-medium text-zinc-200 text-lg leading-6">
@@ -273,9 +229,9 @@ export function BookDetails({
                       className="font-medium text-zinc-200 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
                       title="Date Published"
                     >
-                      {book.datePublished || "Unknown"}
+                      {movie.dateReleased || "Unknown"}
                     </span>
-                    {book.status === "Completed" && (
+                    {movie.status === "Completed" && (
                       <div className="flex items-center gap-2">
                         <div className="font-medium text-zinc-200 text-lg leading-6">
                           •
@@ -284,7 +240,7 @@ export function BookDetails({
                           className="font-medium text-zinc-200 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
                           title="Date Completed"
                         >
-                          {formatDate(book.dateCompleted)}
+                          {formatDate(movie.dateCompleted)}
                         </span>
                       </div>
                     )}
@@ -296,12 +252,12 @@ export function BookDetails({
                         Status
                       </label>
                       <Dropdown
-                        value={book.status}
+                        value={movie.status}
                         onChange={handleStatusChange}
                         options={statusOptions}
                         customStyle="text-zinc-200 font-semibold"
                         dropStyle={
-                          book.status === "Completed"
+                          movie.status === "Completed"
                             ? ["to-emerald-500/10", "text-emerald-500"]
                             : ["to-blue-500/10", "text-blue-500"]
                         }
@@ -313,14 +269,14 @@ export function BookDetails({
                         Score
                       </label>
                       <Dropdown
-                        value={book.score?.toString() || "-"}
+                        value={movie.score?.toString() || "-"}
                         onChange={(value) => {
-                          onUpdate(book.id, { score: Number(value) });
+                          onUpdate(movie.id, { score: Number(value) });
                         }}
                         options={scoreOptions}
                         customStyle="text-zinc-200 font-semibold"
                         dropStyle={
-                          book.status === "Completed"
+                          movie.status === "Completed"
                             ? ["to-emerald-500/10", "text-emerald-500"]
                             : ["to-blue-500/10", "text-blue-500"]
                         }
@@ -348,10 +304,12 @@ export function BookDetails({
                 {/* PREQUEL AND SEQUEL */}
                 <div className="grid grid-cols-[1fr_3rem_1fr] w-full pr-1.5 select-none">
                   <div className="truncate text-left">
-                    {book.prequel && (
+                    {movie.prequel && (
                       <div
                         className={`text-sm text-zinc-400/80 ${
-                          !addBook ? "hover:underline hover:cursor-pointer" : ""
+                          !addMovie
+                            ? "hover:underline hover:cursor-pointer"
+                            : ""
                         }`}
                       >
                         <label className="text-xs font-medium text-zinc-400 block">
@@ -362,26 +320,28 @@ export function BookDetails({
                         </label>
                         <span
                           onClick={() => {
-                            if (!addBook) openSeriesBook("prequel");
+                            if (!addMovie) openSeriesMovie("prequel");
                           }}
                         >
-                          {book.prequel}
+                          {movie.prequel}
                         </span>
                       </div>
                     )}
                   </div>
                   <div className="flex justify-center items-end">
-                    {book.placeInSeries && (
+                    {movie.placeInSeries && (
                       <label className="text-xs font-medium text-zinc-400/85 block">
-                        {book.placeInSeries}
+                        {movie.placeInSeries}
                       </label>
                     )}
                   </div>
                   <div className="truncate text-right">
-                    {book.sequel && (
+                    {movie.sequel && (
                       <div
                         className={`text-sm text-zinc-400/80 ${
-                          !addBook ? "hover:underline hover:cursor-pointer" : ""
+                          !addMovie
+                            ? "hover:underline hover:cursor-pointer"
+                            : ""
                         }`}
                       >
                         <label className="text-xs font-medium text-zinc-400 block">
@@ -392,10 +352,10 @@ export function BookDetails({
                         </label>
                         <span
                           onClick={() => {
-                            if (!addBook) openSeriesBook("sequel");
+                            if (!addMovie) openSeriesMovie("sequel");
                           }}
                         >
-                          {book.sequel}
+                          {movie.sequel}
                         </span>
                       </div>
                     )}

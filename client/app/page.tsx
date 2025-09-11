@@ -4,8 +4,11 @@ export default function Home() {
   return (
     <main>
       <h1>Hello World</h1>
-      <Link href="/auth">Users</Link>
-      <Link href="/books">Books</Link>
+      <div className="flex gap-5">
+        <Link href="/auth">Users</Link>
+        <Link href="/books">Books</Link>
+        <Link href="/movies">Movies</Link>
+      </div>
     </main>
   );
 }

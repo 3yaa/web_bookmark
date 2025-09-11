@@ -1,17 +1,17 @@
 import { useMemo } from "react";
-import { BookProps, SortConfig } from "@/types/books";
+import { MovieProps, SortConfig } from "@/types/movie";
 
-export const useSortedDisplay = (
-  books: BookProps[],
+export const useSortMovies = (
+  movies: MovieProps[],
   sortConfig: SortConfig | null
 ) => {
   return useMemo(() => {
     switch (sortConfig?.type) {
       case "title":
-        const sortedTitle = [...books].sort((a, b) => {
+        const sortedTitle = [...movies].sort((a, b) => {
           // Handle null/undefined titles
           if (!a.title && !b.title) return 0;
-          if (!a.title) return 1; // Put books without title at the end
+          if (!a.title) return 1; // Put movies without title at the end
           if (!b.title) return -1;
 
           // Sort based on the order configuration
@@ -24,7 +24,7 @@ export const useSortedDisplay = (
         return sortedTitle;
       // for fooking score
       case "score":
-        const sortedScore = [...books].sort((a, b) => {
+        const sortedScore = [...movies].sort((a, b) => {
           if (!a.score && !b.score) return 0;
           if (!a.score) return 1;
           if (!b.score) return -1;
@@ -38,10 +38,10 @@ export const useSortedDisplay = (
         return sortedScore;
       // complete date
       case "dateCompleted":
-        const sortedCompleted = [...books].sort((a, b) => {
+        const sortedCompleted = [...movies].sort((a, b) => {
           // Handle null/undefined dates
           if (!a.dateCompleted && !b.dateCompleted) return 0;
-          if (!a.dateCompleted) return 1; // Put books without completion date at the end
+          if (!a.dateCompleted) return 1; // Put movies without completion date at the end
           if (!b.dateCompleted) return -1;
 
           // Convert to Date objects and sort based on the order configuration
@@ -60,41 +60,41 @@ export const useSortedDisplay = (
           }
         });
         return sortedCompleted;
-      // author
-      case "author":
-        const sortedAuthor = [...books].sort((a, b) => {
-          // Handle null/undefined authors
-          if (!a.author && !b.author) return 0;
-          if (!a.author) return 1; // Put books without author at the end
-          if (!b.author) return -1;
+      // director
+      case "director":
+        const sortedDirector = [...movies].sort((a, b) => {
+          // Handle null/undefined directors
+          if (!a.director && !b.director) return 0;
+          if (!a.director) return 1; // Put movies without director at the end
+          if (!b.director) return -1;
 
           // Sort based on the order configuration
           if (sortConfig.order === "desc") {
-            return a.author.localeCompare(b.author); // A-Z
+            return a.director.localeCompare(b.director); // A-Z
           } else {
-            return b.author.localeCompare(a.author); // Z-A
+            return b.director.localeCompare(a.director); // Z-A
           }
         });
-        return sortedAuthor;
-      // pubslihed date
-      case "datePublished":
-        const sortedPublished = [...books].sort((a, b) => {
+        return sortedDirector;
+      // released date
+      case "dateReleased":
+        const sortedReleased = [...movies].sort((a, b) => {
           // Handle null/undefined publication years
-          if (!a.datePublished && !b.datePublished) return 0;
-          if (!a.datePublished) return 1; // Put books without publication year at the end
-          if (!b.datePublished) return -1;
+          if (!a.dateReleased && !b.dateReleased) return 0;
+          if (!a.dateReleased) return 1; // Put movies without released year at the end
+          if (!b.dateReleased) return -1;
 
           // Sort based on the order configuration
           if (sortConfig.order === "asc") {
-            return a.datePublished - b.datePublished; // Oldest year first
+            return a.dateReleased - b.dateReleased; // Oldest year first
           } else {
-            return b.datePublished - a.datePublished; // Newest year first
+            return b.dateReleased - a.dateReleased; // Newest year first
           }
         });
-        return sortedPublished;
+        return sortedReleased;
       // default order
       default:
-        return books;
+        return movies;
     }
-  }, [books, sortConfig]);
+  }, [movies, sortConfig]);
 };

@@ -2,69 +2,68 @@
 import Image from "next/image";
 import { useCallback, useState } from "react";
 import { Plus, ChevronDown, ChevronUp } from "lucide-react";
-import { BookProps, SortConfig } from "@/types/book";
+import { MovieProps, SortConfig } from "@/types/movie";
 // hooks
-import { useSortBooks } from "@/app/books/hooks/useSortBooks";
-import { useBookData } from "@/app/books/hooks/useBookData";
+import { useSortMovies } from "@/app/movies/hooks/useSortMovies";
+import { useMovieData } from "@/app/movies/hooks/useMovieData";
 // components
-import { AddBook } from "./addingBook/AddBook";
-import { BookDetails } from "./BookDetails";
+import { AddMovie } from "./addMovie/AddMovie";
+import { MovieDetails } from "./MovieDetails";
 // utils and ui components
 import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
-import { getCoverUrl } from "@/app/books/utils/bookMapping";
 import { Loading } from "@/app/components/ui/Loading";
-import { NavMenu } from "./NavMenu";
 
-export default function BookList() {
+export default function MovieList() {
   //
-  const { books, addBook, updateBook, deleteBook, isProcessingBook } =
-    useBookData();
+  const { movies, addMovie, updateMovie, deleteMovie, isProcessingMovie } =
+    useMovieData();
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
-  const sortedBooks = useSortBooks(books, sortConfig);
+  const sortedMovies = useSortMovies(movies, sortConfig);
+
   //
-  const [selectedBook, setSelectedBook] = useState<BookProps | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<MovieProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
-    "bookDetails" | "addBook" | null
+    "movieDetails" | "addMovie" | null
   >(null);
 
   const showSequelPrequel = useCallback(
     (targetTitle: string) => {
       if (targetTitle) {
         // !NEEDS TO MAKE THIS CALL WITH THE ENTIRE DB
-        const targetBook = books.find(
-          (book) => book.title.toLowerCase() === targetTitle.toLowerCase()
+        const targetMovie = movies.find(
+          (movie) => movie.title.toLowerCase() === targetTitle.toLowerCase()
         );
 
-        if (targetBook) {
-          setSelectedBook(targetBook);
+        if (targetMovie) {
+          setSelectedMovie(targetMovie);
         } else {
           // need to call external API
           setTitleToUse(targetTitle);
-          setActiveModal("addBook");
+          setActiveModal("addMovie");
         }
         return;
       }
     },
-    [books]
+    [movies]
   );
 
-  const handleBookUpdates = useCallback(
+  const handleMovieUpdates = useCallback(
     async (
-      bookId: number,
-      updates?: Partial<BookProps>,
+      movieId: number,
+      updates?: Partial<MovieProps>,
       shouldDelete?: boolean
     ) => {
       if (updates) {
-        if (selectedBook?.id === bookId) {
-          setSelectedBook({ ...selectedBook, ...updates });
+        if (selectedMovie?.id === movieId) {
+          setSelectedMovie({ ...selectedMovie, ...updates });
         }
-        updateBook(bookId, updates);
+        updateMovie(movieId, updates);
       } else if (shouldDelete) {
-        await deleteBook(bookId);
+        await deleteMovie(movieId);
       }
     },
-    [deleteBook, selectedBook, updateBook]
+    [deleteMovie, selectedMovie, updateMovie]
   );
 
   const handleSortConfig = (sortType: SortConfig["type"]) => {
@@ -82,7 +81,7 @@ export default function BookList() {
   const handleModalClose = useCallback(() => {
     setActiveModal(null);
     setTitleToUse("");
-    setSelectedBook(null);
+    setSelectedMovie(null);
   }, []);
 
   return (
@@ -143,38 +142,38 @@ export default function BookList() {
                 <ChevronUp className="w-4 h-4" />
               ))}
           </div>
-          {/* AUTHOR */}
+          {/* DIRECTOR */}
           <div
             className="flex justify-center items-center gap-1 hover:cursor-pointer"
-            onClick={() => handleSortConfig("author")}
+            onClick={() => handleSortConfig("director")}
           >
             <span
               className={`text-center font-semibold text-zinc-300 text-sm ${
-                sortConfig?.type === "author" ? "ml-4" : ""
+                sortConfig?.type === "director" ? "ml-4" : ""
               }`}
             >
-              Author
+              Director
             </span>
-            {sortConfig?.type === "author" &&
+            {sortConfig?.type === "director" &&
               (sortConfig?.order === "desc" ? (
                 <ChevronDown className="w-4 h-4" />
               ) : (
                 <ChevronUp className="w-4 h-4" />
               ))}
           </div>
-          {/* DATE PUBLISHED */}
+          {/* DATE RELEASED */}
           <div
             className="flex justify-center items-center gap-1 hover:cursor-pointer"
-            onClick={() => handleSortConfig("datePublished")}
+            onClick={() => handleSortConfig("dateReleased")}
           >
             <span
               className={`text-center font-semibold text-zinc-300 text-sm ${
-                sortConfig?.type === "datePublished" ? "ml-4" : ""
+                sortConfig?.type === "dateReleased" ? "ml-4" : ""
               }`}
             >
-              Published
+              Released
             </span>
-            {sortConfig?.type === "datePublished" &&
+            {sortConfig?.type === "dateReleased" &&
               (sortConfig?.order === "desc" ? (
                 <ChevronDown className="w-4 h-4" />
               ) : (
@@ -187,12 +186,11 @@ export default function BookList() {
         </div>
         {/* LOADER */}
         <div className="relative bg-black/20 backdrop-blur-lg">
-          {isProcessingBook && (
+          {isProcessingMovie && (
             <Loading customStyle={"mt-72 h-12 w-12 border-gray-400"} text="" />
           )}
         </div>
-        {/* NO BOOKS */}
-        {!isProcessingBook && sortedBooks.length === 0 && (
+        {!isProcessingMovie && sortedMovies.length === 0 && (
           <div className="text-center py-12">
             <p className="text-zinc-400 italic text-lg">
               No books yet — add one above!
@@ -200,37 +198,28 @@ export default function BookList() {
           </div>
         )}
         {/* LISTING */}
-        {!isProcessingBook &&
-          sortedBooks.map((book, index) => (
+        {!isProcessingMovie &&
+          sortedMovies.map((movie, index) => (
             <div
-              key={book.id}
+              key={movie.id}
               className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
-                book.status
+                movie.status
               )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
                 index === 0 ? "pt-1.5 rounded-bl-none" : "rounded-l-none"
               } hover:cursor-pointer`}
               onClick={() => {
-                setActiveModal("bookDetails");
-                setSelectedBook(book);
+                setActiveModal("movieDetails");
+                setSelectedMovie(movie);
               }}
             >
               <span className="font-medium text-zinc-300 text-sm">
                 {index + 1}
               </span>
               <div className="w-12.5 h-18">
-                {book.curCoverIndex !== undefined &&
-                book.curCoverIndex !== null ? (
+                {movie.posterUrl !== undefined ? (
                   <Image
-                    src={getCoverUrl(book.coverEditions?.[book.curCoverIndex])}
-                    alt={book.title || "Untitled"}
-                    width={50}
-                    height={75}
-                    className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
-                  />
-                ) : book.coverUrl ? (
-                  <Image
-                    src={book.coverUrl}
-                    alt={book.title || "Untitled"}
+                    src={movie.posterUrl}
+                    alt={movie.title || "Untitled"}
                     width={50}
                     height={75}
                     className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
@@ -241,58 +230,57 @@ export default function BookList() {
               </div>
               <div className="flex flex-col">
                 <span className="font-semibold text-zinc-400 text-[70%] group-hover:text-emerald-400">
-                  {book.seriesTitle
-                    ? `${book.seriesTitle} ᭡ ${book.placeInSeries}`
+                  {movie.seriesTitle
+                    ? `${movie.seriesTitle} ᭡ ${movie.placeInSeries}`
                     : ""}
                 </span>
                 <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-emerald-400 transition-colors duration-200 truncate">
-                  {book.title || "-"}
+                  {movie.title || "-"}
                 </span>
               </div>
               <span className="text-center font-semibold text-zinc-300 text-sm">
-                {book.score || "-"}
+                {movie.score || "-"}
               </span>
               <span className="text-center font-medium text-zinc-300 text-sm truncate">
-                {book.status === "Completed"
-                  ? formatDateShort(book.dateCompleted) || "?"
+                {movie.status === "Completed"
+                  ? formatDateShort(movie.dateCompleted) || "?"
                   : "-"}
               </span>
               <span className="text-center font-semibold text-zinc-300 text-sm truncate">
-                {book.author || "-"}
+                {movie.director || "-"}
               </span>
               <span className="text-center font-medium text-zinc-300 text-sm truncate pl-0.5">
-                {book.datePublished || "-"}
+                {movie.dateReleased || "-"}
               </span>
               <span className="text-zinc-400 text-sm line-clamp-2 whitespace-normal overflow-hidden pl-0.5 text-center">
-                {book.note || "No notes"}
+                {movie.note || "No notes"}
               </span>
             </div>
           ))}
       </div>
-      <NavMenu />
       {/* ADD BUTTON */}
       <div className="fixed bottom-10 right-12 z-10">
         <button
-          onClick={() => setActiveModal("addBook")}
+          onClick={() => setActiveModal("addMovie")}
           className="bg-emerald-700 hover:bg-emerald-600 p-4.5 rounded-full shadow-lg shadow-emerald-700/20 hover:shadow-emerald-500/30 transition-all duration-200 text-white font-medium flex items-center gap-2 hover:scale-105 active:scale-95 border border-emerald-600/20"
         >
           <Plus className="w-4 h-4" />
         </button>
-        <AddBook
-          isOpen={activeModal === "addBook"}
+        <AddMovie
+          isOpen={activeModal === "addMovie"}
           onClose={handleModalClose}
-          existingBooks={books}
-          onAddBook={addBook}
+          existingMovies={movies}
+          onAddMovie={addMovie}
           titleFromAbove={titleToUse}
         />
       </div>
-      {/* BOOK DETAILS */}
-      {selectedBook && (
-        <BookDetails
-          isOpen={activeModal === "bookDetails"}
-          book={selectedBook}
+      {/* MOVIE DETAILS */}
+      {selectedMovie && (
+        <MovieDetails
+          isOpen={activeModal === "movieDetails"}
+          movie={selectedMovie}
           onClose={handleModalClose}
-          onUpdate={handleBookUpdates}
+          onUpdate={handleMovieUpdates}
           showSequelPrequel={showSequelPrequel}
         />
       )}

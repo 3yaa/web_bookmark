@@ -1,4 +1,4 @@
-import { BookProps } from "@/types/books";
+import { BookProps } from "@/types/book";
 import { useEffect, useState, useCallback } from "react";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 import { validateAndFilterCovers } from "@/app/books/utils/cleanUpCover";
@@ -75,7 +75,7 @@ export function useBookData() {
           validateAndFilterCovers(book.coverEditions),
           // You could add other async validations here if needed
         ]);
-        const cleanedBooks = {
+        const cleanedBook = {
           ...book,
           coverEditions: validCovers,
         };
@@ -86,7 +86,7 @@ export function useBookData() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(cleanedBooks),
+          body: JSON.stringify(cleanedBook),
         };
         const response = await authFetch(url, options);
         if (!response.ok) {

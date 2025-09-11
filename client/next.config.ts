@@ -4,25 +4,31 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'covers.openlibrary.org',
-        port: '',
-        pathname: '/b/olid/**',
+        protocol: "https",
+        hostname: "covers.openlibrary.org",
+        port: "",
+        pathname: "/b/olid/**",
       },
       {
-        protocol: 'http',
-        hostname: 'books.google.com',
-        port: '',
-        pathname: '/books/content**',
+        protocol: "http",
+        hostname: "books.google.com",
+        port: "",
+        pathname: "/books/content**",
       },
       {
-        protocol: 'https',
-        hostname: 'books.google.com',
-        port: '',
-        pathname: '/books/content**',
-      }
+        protocol: "https",
+        hostname: "books.google.com",
+        port: "",
+        pathname: "/books/content**",
+      },
+      {
+        protocol: "https",
+        hostname: "image.tmdb.org",
+        port: "",
+        pathname: "/t/p/w500/**",
+      },
     ],
-  }
+  },
 };
 
 export default nextConfig;

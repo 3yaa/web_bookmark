@@ -1,10 +1,11 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Film } from "lucide-react";
+import { Clapperboard } from "lucide-react";
 //
 import { MovieProps, WikidataProps } from "@/types/movie";
 //
 import {
+  cleanName,
   mapOMDbToMovie,
   mapTMDBToMovie,
   mapWikidataToMovie,
@@ -33,11 +34,13 @@ export function AddMovie({
   const [failedReason, setFailedReason] = useState("");
   //
   const [isAddManual, setIsAddManual] = useState(false);
+  const [needYear, setNeedYear] = useState(false);
   const [activeModal, setActiveModal] = useState<
     "movieDetails" | "manualAdd" | null
   >(null);
   //
   const titleToSearch = useRef<HTMLInputElement>(null);
+  const yearToSearch = useRef<HTMLInputElement>(null);
   //
   const [newMovie, setNewMovie] = useState<Partial<MovieProps>>({});
   const [allSeries, setAllSeries] = useState<WikidataProps[]>([]);
@@ -53,12 +56,16 @@ export function AddMovie({
   const reset = useCallback(() => {
     setFailedReason("");
     setIsAddManual(false);
+    setNeedYear(false);
     //
     setActiveModal(null);
     setNewMovie({});
     if (titleToSearch.current) {
       titleToSearch.current.value = "";
       titleToSearch.current.focus();
+    }
+    if (yearToSearch.current) {
+      yearToSearch.current.value = "";
     }
   }, []);
 
@@ -76,8 +83,12 @@ export function AddMovie({
   const handleTitleSearch = useCallback(async () => {
     const titleSearching = titleToSearch.current?.value.trim();
     if (!titleSearching) return null;
-
-    const movieData = await searchForMovie(titleSearching);
+    const yearSearchingStr = yearToSearch.current?.value.trim();
+    const yearSearching = yearSearchingStr
+      ? parseInt(yearSearchingStr, 10)
+      : undefined;
+    //
+    const movieData = await searchForMovie(titleSearching, yearSearching);
     if (!movieData) return null;
     //format movie
     setNewMovie(mapOMDbToMovie(movieData));
@@ -103,8 +114,10 @@ export function AddMovie({
       if (!seriesData || seriesData.length === 0) return null;
       //
       setAllSeries(seriesData);
+      const mappedData = mapWikidataToMovie(seriesData[0]);
       setNewMovie((prev) => ({
         ...prev,
+        title: cleanName(prev.title, mappedData.seriesTitle),
         ...mapWikidataToMovie(seriesData[0]),
       }));
     },
@@ -117,6 +130,7 @@ export function AddMovie({
     const response = await handleTitleSearch();
     if (!response?.imdbId || !response.title) {
       setFailedReason("Could Not Find Movie.");
+      setNeedYear(true);
       setIsAddManual(true);
       setActiveModal(null);
       return;
@@ -135,7 +149,19 @@ export function AddMovie({
   }, [isDuplicate, handleTitleSearch, handlePosterSearch, handleSeriesSearch]);
 
   const handleMovieDetailsUpdates = useCallback(
-    async (_movieId: number, updates?: Partial<MovieProps>) => {
+    async (
+      _movieId: number,
+      updates?: Partial<MovieProps>,
+      needYear?: boolean
+    ) => {
+      if (needYear) {
+        setActiveModal(null);
+        setNeedYear(true);
+        setTimeout(() => {
+          yearToSearch.current?.focus();
+        }, 0);
+        return;
+      }
       setNewMovie((prev) => ({ ...prev, ...updates }));
     },
     []
@@ -163,9 +189,11 @@ export function AddMovie({
         newSeries = curSeries === allSeries.length - 1 ? 0 : curSeries + 1;
       }
       setCurSeries(newSeries);
+      const mappedData = mapWikidataToMovie(allSeries[newSeries]);
       setNewMovie((prev) => ({
         ...prev,
-        ...mapWikidataToMovie(allSeries[newSeries]),
+        title: cleanName(prev.title, mappedData.seriesTitle),
+        ...mappedData,
       }));
     },
     [allSeries, curSeries]
@@ -185,7 +213,10 @@ export function AddMovie({
   };
 
   const eraseErrMsg = () => {
-    if (failedReason) setFailedReason("");
+    if (failedReason) {
+      setFailedReason("");
+      setIsAddManual(false);
+    }
   };
 
   //reset on both because sometimes when opening some ui artificate
@@ -193,11 +224,11 @@ export function AddMovie({
     reset();
   }, [isOpen, reset]);
 
-  useEffect(() => {
-    if (activeModal === null && !failedReason) {
-      reset();
-    }
-  }, [activeModal, reset, failedReason]);
+  // useEffect(() => {
+  //   if (activeModal === null && !failedReason) {
+  //     reset();
+  //   }
+  // }, [activeModal, reset, failedReason]);
 
   // for when to search movie without modal
   useEffect(() => {
@@ -218,7 +249,7 @@ export function AddMovie({
       {!titleFromAbove ? (
         <div className="bg-zinc-900/95 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 shadow-2xl w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
           <h2 className="text-xl font-semibold mb-4 text-zinc-100 flex justify-center items-center gap-2">
-            <Film className="w-5 h-5 text-emerald-400" />
+            <Clapperboard className="w-5 h-5 text-emerald-400" />
             Search for New Movie
           </h2>
           <div className="flex gap-3">
@@ -231,6 +262,19 @@ export function AddMovie({
               disabled={isMovieSearching}
               className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-400 focus:border-zinc-500/50 focus:ring-1 focus:ring-zinc-700/20 outline-none transition-all duration-200"
             />
+            {needYear && (
+              <div className="">
+                <input
+                  type="number"
+                  ref={yearToSearch}
+                  placeholder="Release Year"
+                  onKeyDown={handleKeyPress}
+                  onInput={eraseErrMsg}
+                  disabled={isMovieSearching}
+                  className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-400 focus:border-zinc-500/50 focus:ring-1 focus:ring-zinc-700/20 outline-none transition-all duration-200"
+                />
+              </div>
+            )}
           </div>
           <div className="flex justify-between mx-2">
             {failedReason && !isMovieSearching && (

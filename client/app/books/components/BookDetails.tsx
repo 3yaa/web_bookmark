@@ -4,7 +4,7 @@ import Image from "next/image";
 //
 import { BookProps } from "@/types/book";
 import { formatDate, getStatusBorderGradient } from "@/utils/formattingUtils";
-import { statusOptions, scoreOptions } from "../../../utils/bookDropdownDetails";
+import { statusOptions, scoreOptions } from "../../../utils/dropDownDetails";
 import { getCoverUrl } from "@/app/books/utils/bookMapping";
 //
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
@@ -147,7 +147,7 @@ export function BookDetails({
           <div className={`px-8.5 py-7 border-0 rounded-2xl`}>
             {/* ACTION BUTTONS */}
             {addBook ? (
-              <div className="absolute right-3 top-3 flex items-center gap-1.5">
+              <div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
                 {showBookInSeries && (
                   <div className="flex gap-1 bg-zinc-800/50 rounded-lg">
                     {/* LEFT BUTTON */}
@@ -197,7 +197,7 @@ export function BookDetails({
               </div>
             ) : (
               <button
-                className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/50 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group"
+                className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/50 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group z-10"
                 onClick={handleDelete}
                 title={"Delete Book"}
               >
@@ -239,19 +239,26 @@ export function BookDetails({
                 ) : (
                   <div className="min-w-62 min-h-93 bg-gradient-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
                 )}
+                <div
+                  className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
+                  style={{
+                    background:
+                      "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0) 50%, rgba(24,24,27,0.2) 100%)",
+                  }}
+                />
               </div>
               {/* RIGHT SIDE -- DETAILS */}
               <div className="flex flex-col flex-1 min-h-93 min-w-62">
                 <div className="flex flex-col justify-center flex-1">
                   {/* SERIES TITLE */}
                   {book.seriesTitle && (
-                    <span className="font-semibold text-zinc-100 text-xl overflow-y-auto max-h-10.5 mb-0">
+                    <span className="font-semibold text-zinc-100/80 text-xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-0">
                       {book.seriesTitle}
                     </span>
                   )}
                   {/* TITLE */}
                   <div className="w-fit mb-1.5 max-w-full">
-                    <div className="font-bold text-zinc-100 text-3xl overflow-x-auto overflow-y-hidden max-h-10.5 mb-1.5">
+                    <div className="font-bold text-zinc-100/90 text-3xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-1.5">
                       {book.title || "Untitled"}
                     </div>
                     <div
@@ -262,26 +269,26 @@ export function BookDetails({
                   </div>
                   {/* AUTHOR AND DATES */}
                   <div className="flex justify-start items-center gap-2 w-full mb-3">
-                    <span className="font-medium text-zinc-200 text-lg overflow-y-auto max-h-6 leading-6">
+                    <span className="font-medium text-zinc-200/80 text-lg overflow-y-auto max-h-6 leading-6">
                       {book.author || "Unknown Author"}
                     </span>
                     {/* ◎ ◈ ୭ ✿ ✧ */}
-                    <div className="font-medium text-zinc-200 text-lg leading-6">
+                    <div className="font-medium text-zinc-200/80 text-lg leading-6">
                       •
                     </div>
                     <span
-                      className="font-medium text-zinc-200 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
+                      className="font-medium text-zinc-200/80 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
                       title="Date Published"
                     >
                       {book.datePublished || "Unknown"}
                     </span>
                     {book.status === "Completed" && (
                       <div className="flex items-center gap-2">
-                        <div className="font-medium text-zinc-200 text-lg leading-6">
+                        <div className="font-medium text-zinc-200/80 text-lg leading-6">
                           •
                         </div>
                         <span
-                          className="font-medium text-zinc-200 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
+                          className="font-medium text-zinc-200/80 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
                           title="Date Completed"
                         >
                           {formatDate(book.dateCompleted)}
@@ -299,7 +306,7 @@ export function BookDetails({
                         value={book.status}
                         onChange={handleStatusChange}
                         options={statusOptions}
-                        customStyle="text-zinc-200 font-semibold"
+                        customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={
                           book.status === "Completed"
                             ? ["to-emerald-500/10", "text-emerald-500"]
@@ -318,7 +325,7 @@ export function BookDetails({
                           onUpdate(book.id, { score: Number(value) });
                         }}
                         options={scoreOptions}
-                        customStyle="text-zinc-200 font-semibold"
+                        customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={
                           book.status === "Completed"
                             ? ["to-emerald-500/10", "text-emerald-500"]
@@ -329,11 +336,11 @@ export function BookDetails({
                     </div>
                   </div>
                   {/* NOTES */}
-                  <div className="space-y-1 mb-5">
+                  <div className="space-y-1 mb-2">
                     <label className="text-sm font-medium text-zinc-400 block">
                       Notes
                     </label>
-                    <div className="bg-zinc-800/50 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-25 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200">
+                    <div className="bg-zinc-800/50 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-21.5 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200">
                       <AutoTextarea
                         value={localNote}
                         onChange={handleNoteChange}

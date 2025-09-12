@@ -12,18 +12,13 @@ export function useMovieSearch() {
   // OMDb API -- MOVIE METADATA
   const searchForMovie = async (
     title: string,
-    year?: number
+    year?: number | undefined
   ): Promise<OMDbProps | null> => {
     try {
       setIsSearching(true);
       setError(null);
       // make call
-      let url;
-      if (year) {
-        url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies-api/omdb?title=${title}&year=${year}`;
-      } else {
-        url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies-api/omdb?title=${title}`;
-      }
+      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies-api/omdb?title=${title}&year=${year}`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);

@@ -4,7 +4,7 @@ import { BookProps } from "@/types/book";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
-import { statusOptions, scoreOptions } from "@/utils/bookDropdownDetails";
+import { statusOptions, scoreOptions } from "@/utils/dropDownDetails";
 interface ManualAddBookProps {
   isOpen: boolean;
   onClose: () => void;

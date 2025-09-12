@@ -15,7 +15,7 @@ export const useSortMovies = (
           if (!b.title) return -1;
 
           // Sort based on the order configuration
-          if (sortConfig.order === "asc") {
+          if (sortConfig.order === "desc") {
             return a.title.localeCompare(b.title); // A-Z
           } else {
             return b.title.localeCompare(a.title); // Z-A
@@ -70,9 +70,9 @@ export const useSortMovies = (
 
           // Sort based on the order configuration
           if (sortConfig.order === "desc") {
-            return a.director.localeCompare(b.director); // A-Z
+            return a.director[0].localeCompare(b.director[0]); // A-Z
           } else {
-            return b.director.localeCompare(a.director); // Z-A
+            return b.director[0].localeCompare(a.director[0]); // Z-A
           }
         });
         return sortedDirector;

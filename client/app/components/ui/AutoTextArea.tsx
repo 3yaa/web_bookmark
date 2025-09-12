@@ -9,6 +9,7 @@ interface AutoTextareaProps
 export function AutoTextarea({
   value,
   onChange,
+  onKeyDown,
   minHeight = 0,
   maxHeight = 400,
   className = "",
@@ -16,79 +17,79 @@ export function AutoTextarea({
 }: AutoTextareaProps) {
   const ref = useRef<HTMLTextAreaElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
-  const resizeTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const adjustHeight = useCallback(() => {
     const textarea = ref.current;
     if (!textarea) return;
 
-    // Store current scroll position and selection
-    const scrollTop = textarea.scrollTop;
+    // Only adjust if the content actually changed
+    const currentHeight = textarea.scrollHeight;
+    const currentTextareaHeight = parseInt(textarea.style.height) || 0;
+
+    // Check if we need to resize
+    const needsResize =
+      currentHeight !== currentTextareaHeight ||
+      currentHeight < minHeight ||
+      currentHeight > maxHeight;
+
+    if (!needsResize) return;
+
+    // Store current state
     const selectionStart = textarea.selectionStart;
     const selectionEnd = textarea.selectionEnd;
-    const isAtBottom =
-      scrollTop >= textarea.scrollHeight - textarea.clientHeight - 5;
+    const isActive = document.activeElement === textarea;
 
-    // Reset height to get accurate scrollHeight
-    textarea.style.height = `${minHeight}px`;
+    // Calculate new height
+    const newHeight = Math.min(Math.max(currentHeight, minHeight), maxHeight);
+    const willOverflow = currentHeight > maxHeight;
 
-    const scrollHeight = textarea.scrollHeight;
-    const newHeight = Math.min(scrollHeight, maxHeight);
-    const willOverflow = scrollHeight > maxHeight;
-
-    // Apply new height
+    // Apply height change
     textarea.style.height = `${newHeight}px`;
+    setIsOverflowing(willOverflow);
 
-    // Update overflow state only if it changed
-    setIsOverflowing((prev) => (prev !== willOverflow ? willOverflow : prev));
-
-    // Restore scroll position and selection if needed
-    if (willOverflow) {
-      if (isAtBottom) {
-        textarea.scrollTop = textarea.scrollHeight - textarea.clientHeight;
-      } else {
-        textarea.scrollTop = scrollTop;
-      }
+    // Only restore selection if textarea was active (user was typing)
+    if (isActive) {
+      // Use setTimeout to let the browser finish layout
+      setTimeout(() => {
+        if (textarea && document.activeElement === textarea) {
+          textarea.setSelectionRange(selectionStart, selectionEnd);
+        }
+      }, 0);
     }
-
-    // Restore selection
-    textarea.setSelectionRange(selectionStart, selectionEnd);
   }, [maxHeight, minHeight]);
 
-  // Use useLayoutEffect to prevent layout thrashing
+  // Adjust height when value changes
   useLayoutEffect(() => {
     adjustHeight();
   }, [value, adjustHeight]);
 
-  // Debounced version for input events to reduce excessive calls
-  const handleInput = useCallback(() => {
-    // Clear existing timeout
-    if (resizeTimeoutRef.current) {
-      clearTimeout(resizeTimeoutRef.current);
-    }
-
-    // Debounce rapid input events
-    resizeTimeoutRef.current = setTimeout(() => {
-      adjustHeight();
-    }, 0);
-  }, [adjustHeight]);
-
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       onChange?.(e);
-      // No need for setTimeout here since value change will trigger useLayoutEffect
     },
     [onChange]
   );
 
-  // Cleanup timeout on unmount
-  useLayoutEffect(() => {
-    return () => {
-      if (resizeTimeoutRef.current) {
-        clearTimeout(resizeTimeoutRef.current);
+  // Handle input with minimal interference
+  const handleInput = useCallback(() => {
+    // Let the browser handle the typing naturally, then adjust height
+    requestAnimationFrame(() => {
+      adjustHeight();
+    });
+  }, [adjustHeight]);
+
+  // Handle key events to ensure proper behavior
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      // For Enter key, let browser handle scroll naturally
+      if (e.key === "Enter") {
+        // Don't interfere - let browser scroll to cursor automatically
+        setTimeout(() => adjustHeight(), 0);
       }
-    };
-  }, []);
+      onKeyDown?.(e);
+    },
+    [adjustHeight, onKeyDown]
+  );
 
   return (
     <textarea
@@ -96,14 +97,17 @@ export function AutoTextarea({
       value={value}
       onChange={handleChange}
       onInput={handleInput}
+      onKeyDown={handleKeyDown}
       rows={1}
       style={{
         minHeight: `${minHeight}px`,
         maxHeight: `${maxHeight}px`,
-        // Using CSS to handle overflow instead of conditional classes
         paddingBottom: isOverflowing ? "1.25rem" : undefined,
+        boxSizing: "border-box",
+        // Let overflow be visible during typing
+        overflowY: isOverflowing ? "auto" : "hidden",
       }}
-      className={`w-full resize-none overflow-y-auto bg-transparent outline-none text-gray-300 text-md ${className}`}
+      className={`w-full resize-none bg-transparent outline-none text-gray-300 text-md ${className}`}
       {...props}
     />
   );

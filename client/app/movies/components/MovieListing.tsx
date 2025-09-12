@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { MovieProps, SortConfig } from "@/types/movie";
 // hooks
@@ -83,6 +83,18 @@ export default function MovieList() {
     setTitleToUse("");
     setSelectedMovie(null);
   }, []);
+
+  useEffect(() => {
+    if (activeModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [activeModal]);
 
   return (
     <div className="min-h-screen">
@@ -193,7 +205,7 @@ export default function MovieList() {
         {!isProcessingMovie && sortedMovies.length === 0 && (
           <div className="text-center py-12">
             <p className="text-zinc-400 italic text-lg">
-              No books yet — add one above!
+              No movies yet — add one above!
             </p>
           </div>
         )}

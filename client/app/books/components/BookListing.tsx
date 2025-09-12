@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { BookProps, SortConfig } from "@/types/book";
 // hooks
@@ -84,6 +84,18 @@ export default function BookList() {
     setTitleToUse("");
     setSelectedBook(null);
   }, []);
+
+  useEffect(() => {
+    if (activeModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [activeModal]);
 
   return (
     <div className="min-h-screen">

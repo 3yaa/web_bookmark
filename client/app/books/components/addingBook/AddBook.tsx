@@ -257,8 +257,8 @@ export function AddBook({
       } else if (option === "right") {
         newSeries = curSeries === allSeries.length - 1 ? 0 : curSeries + 1;
       }
-      const mappedData = mapWikidataToBook(allSeries[newSeries]);
       setCurSeries(newSeries);
+      const mappedData = mapWikidataToBook(allSeries[newSeries]);
       setNewBook((prev) => {
         const updated = {
           ...prev,
@@ -297,7 +297,11 @@ export function AddBook({
   };
 
   const eraseErrMsg = () => {
-    if (failedReason) setFailedReason("");
+    if (failedReason) {
+      setFailedReason("");
+      setIsAddManual(false);
+      setIsDupTitle(false);
+    }
   };
 
   //reset on both because sometimes when opening some ui artificate
@@ -305,11 +309,11 @@ export function AddBook({
     reset();
   }, [isOpen, reset]);
 
-  useEffect(() => {
-    if (activeModal === null && !failedReason) {
-      reset();
-    }
-  }, [activeModal, reset, failedReason]);
+  // useEffect(() => {
+  //   if (activeModal === null && !failedReason) {
+  //     reset();
+  //   }
+  // }, [activeModal, reset, failedReason]);
 
   // for when to search book without modal
   useEffect(() => {

@@ -4,7 +4,7 @@ import { MovieProps } from "@/types/movie";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
-import { scoreOptions, statusOptions } from "@/utils/bookDropdownDetails";
+import { scoreOptions, statusOptions } from "@/utils/dropDownDetails";
 
 interface ManualAddMovieProps {
   isOpen: boolean;

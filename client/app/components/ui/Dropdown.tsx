@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
-
+import { Portal } from "@/utils/portal";
 interface Option {
   value: string;
   label: string;
@@ -29,6 +29,8 @@ export function Dropdown({
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const selectRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   // makes dropdown close when clicking outside it
   useEffect(() => {
@@ -36,7 +38,9 @@ export function Dropdown({
     const handleClickOutside = (event: MouseEvent) => {
       if (
         selectRef.current &&
-        !selectRef.current.contains(event.target as Node)
+        menuRef.current &&
+        !selectRef.current.contains(event.target as Node) &&
+        !menuRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
@@ -71,6 +75,7 @@ export function Dropdown({
     <div ref={selectRef} className={`relative ${customStyle}`}>
       {/* BUTTON FOR DROPDOWN */}
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
@@ -104,37 +109,49 @@ export function Dropdown({
       </button>
       {/* DROPDOWN */}
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, clipPath: "inset(0 0 100% 0)" }}
-          animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }}
-          transition={{
-            duration: dropDuration,
-            ease: [0.25, 1, 0.5, 1],
-          }}
-          className="absolute top-full left-0 right-0 z-50  rounded-lg rounded-t-md border border-zinc-700/40 bg-zinc-900/70 backdrop-blur-md shadow-lg overflow-hidden min-w-max"
-          //
-        >
-          {options.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => handleSelect(option.value)}
-              className={`w-full flex items-center justify-between px-3 py-2 text-sm text-zinc-200 focus:outline-none border-b border-zinc-800/90 last:border-none transition-all duration-200 ease-out cursor-pointer
+        <Portal>
+          <motion.div
+            ref={menuRef}
+            initial={{ opacity: 0, clipPath: "inset(0 0 100% 0)" }}
+            animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }}
+            transition={{
+              duration: dropDuration,
+              ease: [0.25, 1, 0.5, 1],
+            }}
+            className="z-50 rounded-lg rounded-t-md border border-zinc-700/40 bg-zinc-900/70 backdrop-blur-md shadow-lg overflow-hidden min-w-max"
+            style={{
+              position: "absolute",
+              top:
+                (buttonRef.current?.getBoundingClientRect().bottom ?? 0) +
+                window.scrollY,
+              left:
+                (buttonRef.current?.getBoundingClientRect().left ?? 0) +
+                window.scrollX,
+              width: buttonRef.current?.offsetWidth, // keeps same width as button
+            }}
+          >
+            {options.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => handleSelect(option.value)}
+                className={`w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-zinc-200 focus:outline-none border-b border-zinc-800/90 last:border-none transition-all duration-200 ease-out cursor-pointer
                 ${
                   option.value === value
                     ? `rounded-md bg-gradient-to-r from-transparent ${dropStyle[0]}`
                     : "hover:bg-zinc-800/70 hover:text-white"
                 }`}
-            >
-              <span
-                className={`${option.value === value ? `${dropStyle[1]}` : ""}
-                  `}
               >
-                {option.label}
-              </span>
-            </button>
-          ))}
-        </motion.div>
+                <span
+                  className={`${option.value === value ? `${dropStyle[1]}` : ""}
+                  `}
+                >
+                  {option.label}
+                </span>
+              </button>
+            ))}
+          </motion.div>
+        </Portal>
       )}
     </div>
   );

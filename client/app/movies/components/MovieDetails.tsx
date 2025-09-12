@@ -3,8 +3,11 @@ import { useState } from "react";
 import Image from "next/image";
 //
 import { MovieProps } from "@/types/movie";
-import { formatDate, getStatusBorderGradient } from "@/utils/formattingUtils";
-import { statusOptions, scoreOptions } from "@/utils/bookDropdownDetails";
+import {
+  formatDateShort,
+  getStatusBorderGradient,
+} from "@/utils/formattingUtils";
+import { statusOptions, scoreOptions } from "@/utils/dropDownDetails";
 //
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { Dropdown } from "@/app/components/ui/Dropdown";
@@ -17,7 +20,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-interface BookDetailsProps {
+interface MovieDetailsProps {
   movie: MovieProps;
   isOpen: boolean;
   onClose: () => void;
@@ -41,7 +44,7 @@ export function MovieDetails({
   isLoading,
   showAnotherSeries, //when wiki gives more then 1 option
   showSequelPrequel,
-}: BookDetailsProps) {
+}: MovieDetailsProps) {
   const [localNote, setLocalNote] = useState(movie.note || "");
 
   const handleStatusChange = (value: string) => {
@@ -100,9 +103,9 @@ export function MovieDetails({
     onClose();
   };
 
-  const handleMoreMovie = () => {
-    const showMoreMovie = true;
-    onUpdate(movie.id, undefined, showMoreMovie);
+  const handleNeedYear = () => {
+    const needYear = true;
+    onUpdate(movie.id, undefined, needYear);
   };
 
   if (!isOpen || !movie) return null;
@@ -153,11 +156,11 @@ export function MovieDetails({
                 >
                   <Plus className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors duration-0" />
                 </button>
-                {/* MORE VIEW */}
+                {/* NEED YEAR */}
                 <button
                   className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer
                     transition-all group"
-                  onClick={handleMoreMovie}
+                  onClick={handleNeedYear}
                   title={"See More Options"}
                 >
                   <ChevronsUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
@@ -174,24 +177,34 @@ export function MovieDetails({
               </div>
             ) : (
               <button
-                className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/0 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group"
+                className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/0 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group z-10"
                 onClick={handleDelete}
-                title={"Delete Book"}
+                title={"Delete Movie"}
               >
-                <Trash2 className="w-4 h-4 text-gray-400/20 group-hover:text-red-500 transition-colors duration-200" />
+                <Trash2 className="w-4 h-4 text-gray-400/5 group-hover:text-red-500 transition-colors duration-200" />
               </button>
             )}
+
             <div className="flex gap-8">
               {/* LEFT SIDE -- PIC */}
               <div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg">
                 {movie.posterUrl !== undefined ? (
-                  <Image
-                    src={movie.posterUrl}
-                    alt={movie.title || "Untitled"}
-                    width={248}
-                    height={372}
-                    className="min-w-[62] min-h-93 object-fill"
-                  />
+                  <>
+                    <Image
+                      src={movie.posterUrl}
+                      alt={movie.title || "Untitled"}
+                      width={248}
+                      height={372}
+                      className="min-w-[62] min-h-93 object-fill"
+                    />
+                    <div
+                      className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
+                      style={{
+                        background:
+                          "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0) 50%, rgba(24,24,27,0.5) 100%)",
+                      }}
+                    />
+                  </>
                 ) : (
                   <div className="min-w-62 min-h-93 bg-gradient-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
                 )}
@@ -200,7 +213,7 @@ export function MovieDetails({
               <div className="flex flex-col flex-1 min-h-93 min-w-62 relative">
                 {/* BACKDROP */}
                 {movie.backdropUrl && (
-                  <div className="absolute -top-7 left-20 -right-30 h-60 -z-10 overflow-hidden rounded-2xl">
+                  <div className="absolute -top-7 left-20 -right-25 h-[70%] -z-10 overflow-hidden rounded-2xl">
                     <div className="relative h-full">
                       <Image
                         src={movie.backdropUrl}
@@ -216,7 +229,7 @@ export function MovieDetails({
                         className="absolute inset-0"
                         style={{
                           background:
-                            "linear-gradient(to right, rgba(24,24,27,1) 0%, rgba(24,24,27,0.2) 40%, transparent 50%, rgba(24,24,27,0.8) 100%)",
+                            "linear-gradient(to right, rgba(24,24,27,1) 0%, rgba(24,24,27,0.1) 30%, transparent 50%, rgba(24,24,27,0.2) 100%)",
                         }}
                       />
                       {/* VERTICAL GRADIENT */}
@@ -224,22 +237,28 @@ export function MovieDetails({
                         className="absolute inset-0"
                         style={{
                           background:
-                            "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0.8) 65%, rgba(24,24,27,1) 100%)",
+                            "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0.8) 50%, rgba(24,24,27,1) 75%, rgba(24,24,27,1) 100%)",
                         }}
                       />
                     </div>
                   </div>
                 )}
-                <div className="flex flex-col justify-end mb-6 flex-1">
+                <div
+                  className={`flex flex-col ${
+                    movie.seriesTitle
+                      ? "justify-center"
+                      : "justify-center mt-12"
+                  } flex-1`}
+                >
                   {/* SERIES TITLE */}
                   {movie.seriesTitle && (
-                    <span className="font-semibold text-zinc-100/80 text-xl overflow-y-auto max-h-10.5 mb-0">
+                    <span className="font-semibold text-zinc-100/80 text-xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-0">
                       {movie.seriesTitle}
                     </span>
                   )}
                   {/* TITLE */}
                   <div className="w-fit mb-1.5 max-w-full">
-                    <div className="font-bold text-zinc-100/90 text-3xl overflow-x-auto overflow-y-hidden max-h-10.5 mb-1.5">
+                    <div className="font-bold text-zinc-100/90 text-3xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-1.5">
                       {movie.title || "Untitled"}
                     </div>
                     <div
@@ -272,13 +291,13 @@ export function MovieDetails({
                           className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
                           title="Date Completed"
                         >
-                          {formatDate(movie.dateCompleted)}
+                          {formatDateShort(movie.dateCompleted)}
                         </span>
                       </div>
                     )}
                   </div>
                   {/* STATUS AND SCORE */}
-                  <div className="flex justify-start gap-4 mb-2.5 max-w-[94%]">
+                  <div className=" flex justify-start gap-4 mb-2.5 max-w-[94%]">
                     <div className="flex-[0.77] lg:min-w-[165px]">
                       <label className="text-sm font-medium text-zinc-400 mb-1 block">
                         Status
@@ -317,17 +336,17 @@ export function MovieDetails({
                     </div>
                   </div>
                   {/* NOTES */}
-                  <div className="space-y-1 mb-5">
+                  <div className="space-y-1 mb-2">
                     <label className="text-sm font-medium text-zinc-400 block">
                       Notes
                     </label>
-                    <div className="bg-zinc-800/50 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-25 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200">
+                    <div className="bg-zinc-800/50 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-21.5 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200">
                       <AutoTextarea
                         value={localNote}
                         onChange={handleNoteChange}
                         onKeyDown={handleKeyDown}
                         onBlur={saveNote}
-                        placeholder="Add your thoughts about this book..."
+                        placeholder="Add your thoughts about this movie..."
                         className="text-gray-300 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500"
                       />
                     </div>

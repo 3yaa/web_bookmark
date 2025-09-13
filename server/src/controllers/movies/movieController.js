@@ -6,7 +6,7 @@ const convertMovieToCamelCase = (movie) => ({
   title: movie.title,
   director: movie.director,
   posterUrl: movie.poster_url,
-  backdropUrl: movie.backdropUrl,
+  backdropUrl: movie.backdrop_url,
   dateReleased: movie.date_released,
   seriesTitle: movie.series_title,
   placeInSeries: movie.place_in_series,

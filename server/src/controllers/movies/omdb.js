@@ -32,11 +32,11 @@ export async function useOMDbAPI(req, res) {
       title: movie.Title,
       director: movie.Director,
       released_date: movie.Year,
-      lead_actors: movie.Actors,
-      awards: movie.Awards,
-      imdbRating: movie.imdbRating,
-      imdbVotes: movie.imdbVotes,
-      genre: movie.Genre,
+      // lead_actors: movie.Actors,
+      // awards: movie.Awards,
+      // imdbRating: movie.imdbRating,
+      // imdbVotes: movie.imdbVotes,
+      // genre: movie.Genre,
     };
     //
     res.status(200).json({

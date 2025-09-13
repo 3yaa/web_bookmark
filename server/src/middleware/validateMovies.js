@@ -1,6 +1,5 @@
 const MAX_SCORE = 11;
 const MAX_NOTE_LENGTH = 1000;
-const MAX_COVER_EDITIONS = 15;
 const VALID_STATUSES = ["Want to Read", "Completed", "Dropped"];
 
 export const validateMovieId = (req, res, next) => {

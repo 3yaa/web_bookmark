@@ -1,88 +1,77 @@
 import { MovieProps } from "@/types/movie";
 import { useEffect, useState, useCallback } from "react";
-
-const MOVIES_STORAGE_KEY = "mouthful_movies";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
 
 export function useMovieData() {
+  const { authFetch, isAuthLoading } = useAuthFetch();
   const [movies, setMovies] = useState<MovieProps[]>([]);
   const [movieDataLoading, setMovieDataLoading] = useState(true);
 
-  const isProcessingMovie = movieDataLoading;
+  const isProcessingMovie = movieDataLoading || isAuthLoading;
 
-  // Helper function to save movies to localStorage
-  const saveMoviesToStorage = useCallback((moviesData: MovieProps[]) => {
-    try {
-      localStorage.setItem(MOVIES_STORAGE_KEY, JSON.stringify(moviesData));
-    } catch (e) {
-      console.error("Error saving movies to localStorage", e);
-    }
-  }, []);
-
-  // Helper function to load movies from localStorage
-  const loadMoviesFromStorage = useCallback((): MovieProps[] => {
-    try {
-      const storedMovies = localStorage.getItem(MOVIES_STORAGE_KEY);
-      return storedMovies ? JSON.parse(storedMovies) : [];
-    } catch (e) {
-      console.error("Error loading movies from localStorage", e);
-      return [];
-    }
-  }, []);
-
-  // GET
+  // READ
   const getMovies = useCallback(async () => {
     try {
       setMovieDataLoading(true);
-      const moviesFromStorage = loadMoviesFromStorage();
-      setMovies(moviesFromStorage);
+      //
+      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies`;
+      const response = await authFetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error--status: ${response.status}`);
+      }
+      //
+      const resJson = await response.json();
+      const moviesDB = resJson.data || [];
+      setMovies(moviesDB);
     } catch (e) {
       console.error("Error loading movies", e);
       setMovies([]);
     } finally {
       setMovieDataLoading(false);
     }
-  }, [loadMoviesFromStorage]);
+  }, [authFetch]);
 
-  // POST (Add Movie)
+  // CREATE
   const addMovie = useCallback(
     async (movie: MovieProps) => {
       // req data
       if (!movie.title || !movie.status || !movie.imdbId) {
         return;
       }
-
+      // 
       try {
         setMovieDataLoading(true);
-
-        // Generate a temporary ID if not provided
-        const newMovie = {
-          ...movie,
-          id: movie.id || Date.now(), // Use timestamp as temporary ID
+        //
+        const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies`;
+        const options = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(movie),
         };
-
-        const updatedMovies = [...movies, newMovie];
-        setMovies(updatedMovies);
-        saveMoviesToStorage(updatedMovies);
+        const response = await authFetch(url, options);
+        if (!response.ok) {
+          throw new Error(`HTTP error--status: ${response.status}`);
+        }
+        //
+        const resJson = await response.json();
+        const newMovie = resJson.data;
+        setMovies((prev) => [...prev, newMovie]);
       } catch (e) {
         console.error("Error adding movie", e);
       } finally {
         setMovieDataLoading(false);
       }
     },
-    [movies, saveMoviesToStorage]
+    [authFetch]
   );
 
-  // PATCH
+  // UPDATE
   const updateMovie = useCallback(
     async (movieId: number, updates: Partial<MovieProps>) => {
       // only updates these
-      const allowedFields = [
-        "score",
-        "status",
-        "note",
-        "dateCompleted",
-        "curCoverIndex",
-      ];
+      const allowedFields = ["score", "status", "note", "dateCompleted"];
       const invalidFields = Object.keys(updates).filter(
         (field) => !allowedFields.includes(field)
       );
@@ -90,19 +79,31 @@ export function useMovieData() {
         console.warn("Invalid fields attempted:", invalidFields);
         return;
       }
-
-      try {
-        // update local immediately
-        const updatedMovies = movies.map((movie) =>
+      // update local immediately
+      setMovies((prevMovies) =>
+        prevMovies.map((movie) =>
           movie.id === movieId ? { ...movie, ...updates } : movie
-        );
-        setMovies(updatedMovies);
-        saveMoviesToStorage(updatedMovies);
+        )
+      );
+      // update db
+      try {
+        const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies/${movieId}`;
+        const options = {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updates),
+        };
+        const response = await authFetch(url, options);
+        if (!response.ok) {
+          throw new Error(`HTTP error--status: ${response.status}`);
+        }
       } catch (e) {
         console.error("Error updating movie", e);
       }
     },
-    [movies, saveMoviesToStorage]
+    [authFetch]
   );
 
   // DELETE
@@ -110,17 +111,31 @@ export function useMovieData() {
     async (movieId: number) => {
       try {
         setMovieDataLoading(true);
-
-        const updatedMovies = movies.filter((movie) => movie.id !== movieId);
-        setMovies(updatedMovies);
-        saveMoviesToStorage(updatedMovies);
+        //
+        const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies/${movieId}`;
+        const options = {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+        const response = await authFetch(url, options);
+        if (!response.ok) {
+          throw new Error(`HTTP error--status: ${response.status}`);
+        }
+        //
+        const resJson = await response.json();
+        const deletedMovie = resJson.data;
+        setMovies((prevMovies) => {
+          return prevMovies.filter((movie) => movie.id !== deletedMovie.id);
+        });
       } catch (e) {
         console.error("Error deleting movie", e);
       } finally {
         setMovieDataLoading(false);
       }
     },
-    [movies, saveMoviesToStorage]
+    [authFetch]
   );
 
   // Load movies on component mount

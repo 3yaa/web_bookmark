@@ -106,15 +106,8 @@ export function ManualAddMovie({
                     <input
                       type="text"
                       placeholder="Director Name"
-                      value={movie.director?.join(", ") || ""}
-                      onChange={(e) =>
-                        onUpdate({
-                          director: e.target.value
-                            .split(", ")
-                            .map((d) => d.trim())
-                            .filter((d) => d),
-                        })
-                      }
+                      value={movie.director || ""}
+                      onChange={(e) => onUpdate({ director: e.target.value })}
                       className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-4 py-2 text-zinc-100 placeholder-zinc-500 focus:ring-zinc-600/60 focus:ring-1  outline-none transition-all duration-200"
                     />
                   </div>

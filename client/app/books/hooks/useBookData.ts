@@ -38,7 +38,7 @@ export function useBookData() {
   //   [books]
   // );
 
-  // GET
+  // READ
   const getBooks = useCallback(async () => {
     try {
       setBookDataLoading(true);
@@ -60,7 +60,7 @@ export function useBookData() {
     }
   }, [authFetch]);
 
-  // PUT
+  // CREATE
   const addBook = useCallback(
     async (book: BookProps) => {
       // req data
@@ -105,7 +105,7 @@ export function useBookData() {
     [authFetch]
   );
 
-  // PATCH
+  // UPDATE
   const updateBook = useCallback(
     async (bookId: number, updates: Partial<BookProps>) => {
       // only updates these

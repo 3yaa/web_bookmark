@@ -18,12 +18,6 @@ export function resetMovieValues(
     prequel: undefined,
     sequel: undefined,
     status: "Want to Read",
-    //
-    leadActors: undefined,
-    awards: undefined,
-    imdbRating: undefined,
-    imdbVotes: undefined,
-    genre: undefined,
   };
 }
 
@@ -33,12 +27,6 @@ export function mapOMDbToMovie(dataOMDb: OMDbProps): Partial<MovieProps> {
     title: dataOMDb.title,
     director: dataOMDb.director,
     dateReleased: dataOMDb.released_date,
-    //
-    leadActors: dataOMDb.lead_actors,
-    awards: dataOMDb.awards,
-    imdbRating: dataOMDb.imdbRating,
-    imdbVotes: dataOMDb.imdbVotes,
-    genre: dataOMDb.genre,
   };
 }
 

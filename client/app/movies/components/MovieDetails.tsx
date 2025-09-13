@@ -296,6 +296,7 @@ export function MovieDetails({
                       </div>
                     )}
                   </div>
+                  <div></div>
                   {/* STATUS AND SCORE */}
                   <div className=" flex justify-start gap-4 mb-2.5 max-w-[94%]">
                     <div className="flex-[0.77] lg:min-w-[165px]">

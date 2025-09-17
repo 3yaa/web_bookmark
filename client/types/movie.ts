@@ -10,12 +10,12 @@ export interface MovieProps {
   dateCompleted?: Date | null;
   note?: string;
   status: "Completed" | "Want to Read" | "Dropped"; //!--REQUIRED
-  // from ol&&google -- used for checking duplicate
+  // from omdb
   imdbId: string; //!--REQUIRED
-  // from ol||google
   title: string; //!--REQUIRED
   director?: string;
   dateReleased?: number;
+  // from tmdb
   posterUrl?: string;
   backdropUrl?: string;
   // from WikidataProps

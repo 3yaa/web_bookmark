@@ -22,7 +22,7 @@ export async function useTMDBSearchAPI(req, res) {
     const shows = data.results || [];
     // data clean up
     const processedShows = shows.map((item) => ({
-      id: item.id,
+      tmdbId: item.id,
       title: item.name,
       released_date: item.first_air_date,
       poster_url: item.poster_path

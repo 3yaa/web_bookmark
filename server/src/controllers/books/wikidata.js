@@ -51,7 +51,7 @@ export async function useWikidataAPI(req, res) {
     console.error("Wikidata fetch failed: ", error);
     res.status(500).json({
       success: false,
-      message: "Failed to fetch series from Wikidata",
+      message: "Failed to fetch book's series from Wikidata",
       error: error.message,
     });
   }

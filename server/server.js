@@ -12,6 +12,7 @@ import { verifyJWT } from "./src/middleware/validateJWT.js";
 //
 import { externalBooksAPIRouter } from "./src/routes/externalBooksAPIRouter.js";
 import { externalMoviesAPIRouter } from "./src/routes/externalMoviesAPIRoute.js";
+import { externalShowsAPIRouter } from "./src/routes/externalShowAPIRouter.js";
 //
 import { booksRouter } from "./src/routes/booksRoute.js";
 import { moviesRouter } from "./src/routes/moviesRoute.js";
@@ -37,6 +38,7 @@ app.use("/logout", logoutRouter);
 app.use(verifyJWT);
 
 // books api routers
+app.use("/shows-api", externalShowsAPIRouter);
 app.use("/movies-api", externalMoviesAPIRouter);
 app.use("/books-api", externalBooksAPIRouter);
 app.use("/movies", moviesRouter);

@@ -34,7 +34,7 @@ export async function useWikidataAPI(req, res) {
     // data clean up
     const data = await response.json();
     const seriesInfo = data.results?.bindings || [];
-    const processedBooks = seriesInfo.map((binding) => ({
+    const processMovieSeries = seriesInfo.map((binding) => ({
       wiki_title: binding.workLabel?.value || null,
       series_title: binding.seriesLabel?.value || null,
       place_in_series: binding.ordinal?.value || null,
@@ -44,14 +44,14 @@ export async function useWikidataAPI(req, res) {
     //
     res.status(200).json({
       success: true,
-      count: processedBooks.length,
-      data: processedBooks,
+      count: processMovieSeries.length,
+      data: processMovieSeries,
     });
   } catch (error) {
     console.error("Wikidata fetch failed: ", error);
     res.status(500).json({
       success: false,
-      message: "Failed to fetch series from Wikidata",
+      message: "Failed to fetch movie's series from Wikidata",
       error: error.message,
     });
   }

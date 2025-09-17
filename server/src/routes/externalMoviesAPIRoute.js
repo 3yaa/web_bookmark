@@ -1,7 +1,7 @@
 import express from "express";
-import { useOMDbAPI } from "../controllers/movies/omdb.js";
-import { useTMDBAPI } from "../controllers/movies/tmdb.js";
-import { useWikidataAPI } from "../controllers/movies/wikidata.js";
+import { useOMDbAPI } from "../controllers/movies/movieOMDb.js";
+import { useTMDBAPI } from "../controllers/movies/movieTMDB.js";
+import { useWikidataAPI } from "../controllers/movies/movieWikidata.js";
 import {
   validateMoviesAPI,
   validateImdbIdAPI,
@@ -11,10 +11,6 @@ const externalMoviesAPIRouter = express.Router();
 
 externalMoviesAPIRouter.get("/omdb", validateMoviesAPI, useOMDbAPI);
 externalMoviesAPIRouter.get("/tmdb", validateImdbIdAPI, useTMDBAPI);
-externalMoviesAPIRouter.get(
-  "/movies-wikidata",
-  validateImdbIdAPI,
-  useWikidataAPI
-);
+externalMoviesAPIRouter.get("/wikidata", validateImdbIdAPI, useWikidataAPI);
 
 export { externalMoviesAPIRouter };

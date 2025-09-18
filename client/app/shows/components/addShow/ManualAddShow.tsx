@@ -1,31 +1,31 @@
 "use client";
 import { DiamondPlus, X } from "lucide-react";
-import { MovieProps } from "@/types/movie";
+import { ShowProps } from "@/types/show";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
 import { scoreOptions, statusOptions } from "@/utils/dropDownDetails";
 
-interface ManualAddMovieProps {
+interface ManualAddShowProps {
   isOpen: boolean;
   onClose: () => void;
-  addMovie: () => void;
-  movie: Partial<MovieProps>;
-  onUpdate: (updates: Partial<MovieProps>) => void;
+  addShow: () => void;
+  show: Partial<ShowProps>;
+  onUpdate: (updates: Partial<ShowProps>) => void;
 }
 
-export function ManualAddMovie({
+export function ManualAddShow({
   isOpen,
   onClose,
-  movie,
+  show,
   onUpdate,
-  addMovie,
-}: ManualAddMovieProps) {
+  addShow,
+}: ManualAddShowProps) {
   if (!isOpen) return null;
 
   const handleStatusChange = (value: string) => {
     const newStatus = value as "Completed" | "Want to Read";
-    const statusLoad: Partial<MovieProps> = {
+    const statusLoad: Partial<ShowProps> = {
       status: newStatus,
     };
     if (newStatus === "Completed") {
@@ -39,7 +39,7 @@ export function ManualAddMovie({
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
-          movie.status ?? "Want to Read"
+          show.status ?? "Want to Read"
         )} py-2 px-2`}
       >
         {/* ACTUAL DETAIL CARD */}
@@ -50,19 +50,17 @@ export function ManualAddMovie({
               {/* ADD */}
               <button
                 className={`py-1.5 px-5 rounded-lg transition-all group ${
-                  movie.title && movie.title.trim()
+                  show.title && show.title.trim()
                     ? "bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer"
                     : "bg-zinc-800/40 cursor-not-allowed opacity-50"
                 }`}
-                onClick={
-                  movie.title && movie.title.trim() ? addMovie : undefined
-                }
-                disabled={!movie.title || !movie.title.trim()}
+                onClick={show.title && show.title.trim() ? addShow : undefined}
+                disabled={!show.title || !show.title.trim()}
                 title={"Add"}
               >
                 <DiamondPlus
                   className={`w-5 h-5 transition-colors ${
-                    movie.title && movie.title.trim()
+                    show.title && show.title.trim()
                       ? "text-gray-400 group-hover:text-green-500"
                       : "text-gray-500"
                   }`}
@@ -87,12 +85,12 @@ export function ManualAddMovie({
                 {/* TITLE */}
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-zinc-400 block">
-                    Movie Title*
+                    Show Title*
                   </label>
                   <input
                     type="text"
-                    placeholder="Movie title"
-                    value={movie.title || ""}
+                    placeholder="Show title"
+                    value={show.title || ""}
                     onChange={(e) => onUpdate({ title: e.target.value })}
                     className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-4 py-2 text-zinc-100 placeholder-zinc-500  focus:ring-1 focus:ring-zinc-600/60 outline-none transition-all duration-200"
                   />
@@ -105,9 +103,9 @@ export function ManualAddMovie({
                     </label>
                     <input
                       type="text"
-                      placeholder="Director Name"
-                      value={movie.director || ""}
-                      onChange={(e) => onUpdate({ director: e.target.value })}
+                      placeholder="Studio Name"
+                      value={show.studio || ""}
+                      onChange={(e) => onUpdate({ studio: e.target.value })}
                       className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-4 py-2 text-zinc-100 placeholder-zinc-500 focus:ring-zinc-600/60 focus:ring-1  outline-none transition-all duration-200"
                     />
                   </div>
@@ -120,7 +118,7 @@ export function ManualAddMovie({
                       type="number"
                       min={0}
                       placeholder="Publication year"
-                      value={movie.dateReleased || ""}
+                      value={show.dateReleased || ""}
                       onChange={(e) =>
                         onUpdate({
                           dateReleased: parseInt(e.target.value) || undefined,
@@ -137,12 +135,12 @@ export function ManualAddMovie({
                       Status
                     </label>
                     <Dropdown
-                      value={movie.status || "Want to Read"}
+                      value={show.status || "Want to Read"}
                       onChange={handleStatusChange}
                       options={statusOptions}
                       customStyle="text-zinc-200 font-semibold"
                       dropStyle={
-                        movie.status === "Completed"
+                        show.status === "Completed"
                           ? ["to-emerald-500/10", "text-emerald-500"]
                           : ["to-blue-500/10", "text-blue-500"]
                       }
@@ -154,14 +152,14 @@ export function ManualAddMovie({
                       Score
                     </label>
                     <Dropdown
-                      value={movie.score?.toString() || "-"}
+                      value={show.score?.toString() || "-"}
                       onChange={(value) => {
                         onUpdate({ score: Number(value) });
                       }}
                       options={scoreOptions}
                       customStyle="text-zinc-200 font-semibold"
                       dropStyle={
-                        movie.status === "Completed"
+                        show.status === "Completed"
                           ? ["to-emerald-500/10", "text-emerald-500"]
                           : ["to-blue-500/10", "text-blue-500"]
                       }
@@ -176,13 +174,13 @@ export function ManualAddMovie({
                   </label>
                   <div className="bg-zinc-800/50 rounded-lg pl-3 pt-2 pr-1 pb-1 max-h-25 overflow-auto focus-within:ring-2 focus-within:ring-zinc-600/60 transition-all duration-200">
                     <AutoTextarea
-                      value={movie.note || ""}
+                      value={show.note || ""}
                       onChange={(e) => {
                         onUpdate({ note: e.target.value });
                       }}
                       minHeight={100}
                       maxHeight={100}
-                      placeholder="Add your thoughts about this movie..."
+                      placeholder="Add your thoughts about this show..."
                       className="text-gray-300 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500"
                     />
                   </div>

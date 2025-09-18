@@ -1,11 +1,11 @@
 import { MovieProps, OMDbProps, TMDBProps, WikidataProps } from "@/types/movie";
 
 export function resetMovieValues(
-  book: Partial<MovieProps>
+  movie: Partial<MovieProps>
 ): Partial<MovieProps> {
   return {
-    id: book.id,
-    imdbId: book.imdbId,
+    id: movie.id,
+    imdbId: movie.imdbId,
     title: "",
     score: undefined,
     dateCompleted: undefined,

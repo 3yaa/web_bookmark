@@ -1,5 +1,5 @@
 export type SortConfig = {
-  type: "title" | "score" | "dateCompleted" | "director" | "dateReleased";
+  type: "title" | "score" | "dateCompleted" | "studio" | "dateReleased";
   order: "asc" | "desc";
 };
 
@@ -18,7 +18,7 @@ export interface ShowProps {
   posterUrl?: string;
   backdropUrl?: string;
   // from tmdb-tv
-  seasons?: TMDBSeasonProps;
+  seasons?: TMDBSeasonProps[];
 }
 
 export interface TMDBProps {
@@ -31,10 +31,11 @@ export interface TMDBProps {
 
 export interface TMDBTvProps {
   seasons?: TMDBSeasonProps[];
+  studio?: string;
 }
 
-export interface TMDBSeasonProps {
+interface TMDBSeasonProps {
   season_number: number;
   episode_count: number;
-  poster_url?: string;
+  // poster_url?: string;
 }

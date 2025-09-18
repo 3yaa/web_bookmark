@@ -19,23 +19,23 @@ export async function useTMDBSearchAPI(req, res) {
     }
     // check if valid
     const data = await response.json();
-    const shows = data.results || [];
+    const show = data.results[0] || {};
     // data clean up
-    const processedShows = shows.map((item) => ({
-      tmdbId: item.id,
-      title: item.name,
-      released_date: item.first_air_date,
-      poster_url: item.poster_path
-        ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+    const processedShow = {
+      tmdbId: show.id,
+      title: show.name,
+      released_date: show.first_air_date,
+      poster_url: show.poster_path
+        ? `https://image.tmdb.org/t/p/w500${show.poster_path}`
         : null,
-      backdrop_url: item.backdrop_path
-        ? `https://image.tmdb.org/t/p/w1280${item.backdrop_path}`
+      backdrop_url: show.backdrop_path
+        ? `https://image.tmdb.org/t/p/w1280${show.backdrop_path}`
         : null,
-    }));
+    };
     //
     res.status(200).json({
       success: true,
-      data: processedShows,
+      data: processedShow,
     });
   } catch (error) {
     console.error("TMDB fetch failed: ", error);

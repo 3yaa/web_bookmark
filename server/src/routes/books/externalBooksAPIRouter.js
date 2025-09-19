@@ -1,11 +1,11 @@
 import express from "express";
-import { useOpenLibraryAPI } from "../controllers/books/openLib.js";
-import { useGoogleBooksAPI } from "../controllers/books/googleBooks.js";
-import { useWikidataAPI } from "../controllers/books/wikidata.js";
+import { useOpenLibraryAPI } from "../../controllers/books/openLib.js";
+import { useGoogleBooksAPI } from "../../controllers/books/googleBooks.js";
+import { useWikidataAPI } from "../../controllers/books/wikidata.js";
 import {
   validateBooksAPI,
   validateSeriesAPI,
-} from "../middleware/validateBooksAPI.js";
+} from "../../middleware/books/validateBooksAPI.js";
 
 const externalBooksAPIRouter = express.Router();
 

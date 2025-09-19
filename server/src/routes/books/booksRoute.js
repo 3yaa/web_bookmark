@@ -5,13 +5,13 @@ import {
   patchBook,
   createBook,
   deleteBook,
-} from "../controllers/books/bookControllers.js";
+} from "../../controllers/books/bookControllers.js";
 import {
   validateBookId,
   validateBookData,
   validateBookPatch,
   validateBookCreate,
-} from "../middleware/validateBooks.js";
+} from "../../middleware/books/validateBooks.js";
 
 const booksRouter = express.Router();
 

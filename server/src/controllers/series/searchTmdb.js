@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export async function useTMDBSearchAPI(req, res) {
+export async function useTmdbSearchAPI(req, res) {
   try {
     const { title, year } = req.query;
     const url = `https://api.themoviedb.org/3/search/tv?api_key=${

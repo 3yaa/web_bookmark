@@ -5,13 +5,13 @@ import {
   patchMovie,
   createMovie,
   deleteMovie,
-} from "../controllers/movies/movieController.js";
+} from "../../controllers/movies/movieController.js";
 import {
   validateMovieId,
   validateMovieData,
   validateMoviePatch,
   validateMovieCreate,
-} from "../middleware/validateMovies.js";
+} from "../../middleware/movies/validateMovies.js";
 
 const moviesRouter = express.Router();
 

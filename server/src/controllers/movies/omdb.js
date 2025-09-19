@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export async function useOMDbAPI(req, res) {
+export async function useOmdbAPI(req, res) {
   try {
     const { title, year } = req.query;
     const url = `http://www.omdbapi.com/?apikey=${

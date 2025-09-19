@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export async function useTMDBTvAPI(req, res) {
+export async function useTmdbTvAPI(req, res) {
   try {
     const tmdbId = req.query.tmdbId;
     const url = `https://api.themoviedb.org/3/tv/${tmdbId}?api_key=${process.env.TMDB_API_KEY}`;

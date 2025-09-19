@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export async function useTMDBAPI(req, res) {
+export async function useTmdbAPI(req, res) {
   try {
     const imdbId = req.query.imdbId;
     const url = `https://api.themoviedb.org/3/find/${imdbId}?api_key=${process.env.TMDB_API_KEY}&external_source=imdb_id`;

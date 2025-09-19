@@ -2,12 +2,10 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export async function useRawgAPI(req, res) {
+export async function useRawgDetailsAPI(req, res) {
   try {
-    const { title, limit } = req.query;
-    const url = `https://api.rawg.io/api/games?search=${encodeURIComponent(
-      title
-    )}&key=${process.env.RAWG_API_KEY}&page_size=${limit}`;
+    const rawgId = req.query.rawgId;
+    const url = `https://api.rawg.io/api/games/${rawgId}?key=${process.env.RAWG_API_KEY}`;
     // call
     const response = await fetch(url);
     if (!response.ok) {
@@ -19,20 +17,23 @@ export async function useRawgAPI(req, res) {
     }
     // data clean
     const data = await response.json();
-    const games = data.results || [];
-    const processedGames = games.map((game) => {
-      return {
-        id: game.id,
-        title: game.name,
-        // released: game.released,
-        // background_image: game.background_image,
-        // short_screenshots: game.short_screenshots,
-      };
-    });
+    const game = data || {};
+    const processedGames = {
+      released: game.released,
+      background_image: game.background_image,
+      background_image_additional: game.background_image_additional,
+      developers: game.developers
+        ? game.developers.map((developer) => {
+            return {
+              name: developer.name,
+              image_background: developer.image_background,
+            };
+          })
+        : [],
+    };
     //
     res.status(200).json({
       success: true,
-      count: processedGames.length,
       data: processedGames,
     });
   } catch (error) {

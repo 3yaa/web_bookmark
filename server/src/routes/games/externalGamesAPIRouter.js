@@ -1,5 +1,6 @@
 import express from "express";
 import { useRawgAPI } from "../../controllers/games/rawgAPI.js";
+import { useRawgDetailsAPI } from "../../controllers/games/rawgDetailsAPI.js";
 import { useRawgDlcAPI } from "../../controllers/games/rawgDlcAPI.js";
 import {
   validateGameAPI,
@@ -8,6 +9,11 @@ import {
 const externalGamesAPIRouter = express.Router();
 
 externalGamesAPIRouter.get("/rawg", validateGameAPI, useRawgAPI);
+externalGamesAPIRouter.get(
+  "/rawg-details",
+  validateRawgIdAPI,
+  useRawgDetailsAPI
+);
 externalGamesAPIRouter.get("/rawg-dlc", validateRawgIdAPI, useRawgDlcAPI);
 
 export { externalGamesAPIRouter };

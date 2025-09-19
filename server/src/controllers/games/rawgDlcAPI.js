@@ -22,10 +22,6 @@ export async function useRawgDlcAPI(req, res) {
       return {
         id: dlc.id,
         title: dlc.name,
-        released: dlc.released,
-        background_image: dlc.background_image,
-        short_screenshots: dlc.short_screenshots,
-        genre: dlc.genre,
       };
     });
     //

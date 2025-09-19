@@ -41,7 +41,7 @@ export async function useOpenLibraryAPI(req, res) {
       data: processedBooks,
     });
   } catch (error) {
-    console.error("Open Library fetch failed: ", error);
+    console.error("OpenLibrary fetch failed: ", error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch book from Open Library",

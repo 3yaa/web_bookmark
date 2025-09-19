@@ -42,7 +42,7 @@ export async function useGoogleBooksAPI(req, res) {
       data: processedBooks,
     });
   } catch (error) {
-    console.error("Google Books fetch failed: ", error);
+    console.error("GoogleBooks fetch failed: ", error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch book from Google Books",

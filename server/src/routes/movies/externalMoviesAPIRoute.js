@@ -1,7 +1,7 @@
 import express from "express";
-import { useOmdbAPI } from "../../controllers/movies/omdb.js";
-import { useTmdbAPI } from "../../controllers/movies/tmdb.js";
-import { useWikidataAPI } from "../../controllers/movies/wikidata.js";
+import { useOmdbAPI } from "../../controllers/movies/omdbAPI.js";
+import { useTmdbAPI } from "../../controllers/movies/tmdbAPI.js";
+import { useWikidataAPI } from "../../controllers/movies/wikidataAPI.js";
 import {
   validateMoviesAPI,
   validateImdbIdAPI,

@@ -4,7 +4,7 @@ dotenv.config();
 
 export async function useRawgAPI(req, res) {
   try {
-    const { title, limit } = req.body;
+    const { title, limit } = req.query;
     const url = `https://api.rawg.io/api/games?search=${encodeURIComponent(
       title
     )}&key=${process.env.RAWG_API_KEY}&page_size=${limit}`;
@@ -26,8 +26,7 @@ export async function useRawgAPI(req, res) {
         title: game.name,
         released: game.released,
         background_image: game.background_image,
-        short_screenshots: game.short_screenshots,
-        genre: game.genre,
+        // short_screenshots: game.short_screenshots,
       };
     });
     //

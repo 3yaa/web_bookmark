@@ -1,7 +1,7 @@
 import express from "express";
-import { useOpenLibraryAPI } from "../../controllers/books/openLib.js";
-import { useGoogleBooksAPI } from "../../controllers/books/googleBooks.js";
-import { useWikidataAPI } from "../../controllers/books/wikidata.js";
+import { useOpenLibraryAPI } from "../../controllers/books/openLibraryAPI.js";
+import { useGoogleBooksAPI } from "../../controllers/books/googleBooksAPI.js";
+import { useWikidataAPI } from "../../controllers/books/wikidataAPI.js";
 import {
   validateBooksAPI,
   validateSeriesAPI,

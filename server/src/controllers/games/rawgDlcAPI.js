@@ -4,7 +4,7 @@ dotenv.config();
 
 export async function useRawgDlcAPI(req, res) {
   try {
-    const rawgId = req.body.rawgId;
+    const rawgId = req.query.rawgId;
     const url = `https://api.rawg.io/api/games/${rawgId}/additions?key=${process.env.RAWG_API_KEY}`;
     // call
     const response = await fetch(url);

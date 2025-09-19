@@ -10,12 +10,13 @@ import { authRouter } from "./src/routes/authRouter.js";
 import { logoutRouter } from "./src/routes/logoutRouter.js";
 import { verifyJWT } from "./src/middleware/validateJWT.js";
 //
-import { externalBooksAPIRouter } from "./src/routes/externalBooksAPIRouter.js";
-import { externalMoviesAPIRouter } from "./src/routes/externalMoviesAPIRoute.js";
-import { externalShowsAPIRouter } from "./src/routes/externalShowAPIRouter.js";
+import { externalBooksAPIRouter } from "./src/routes/books/externalBooksAPIRouter.js";
+import { externalMoviesAPIRouter } from "./src/routes/movies/externalMoviesAPIRoute.js";
+import { externalShowsAPIRouter } from "./src/routes/shows/externalShowAPIRouter.js";
+import { externalGamesAPIRouter } from "./src/routes/games/externalGamesAPIRouter.js";
 //
-import { booksRouter } from "./src/routes/booksRoute.js";
-import { moviesRouter } from "./src/routes/moviesRoute.js";
+import { booksRouter } from "./src/routes/books/booksRoute.js";
+import { moviesRouter } from "./src/routes/movies/moviesRoute.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -41,6 +42,7 @@ app.use(verifyJWT);
 app.use("/shows-api", externalShowsAPIRouter);
 app.use("/movies-api", externalMoviesAPIRouter);
 app.use("/books-api", externalBooksAPIRouter);
+app.use("/games-api", externalGamesAPIRouter);
 app.use("/movies", moviesRouter);
 app.use("/books", booksRouter);
 

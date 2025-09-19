@@ -1,6 +1,6 @@
 import express from "express";
-import { useTmdbSearchAPI } from "../../controllers/series/searchTmdb.js";
-import { useTmdbTvAPI } from "../../controllers/series/tvTmdb.js";
+import { useTmdbSearchAPI } from "../../controllers/series/searchTmdbAPI.js";
+import { useTmdbTvAPI } from "../../controllers/series/tvTmdbAPI.js";
 import {
   validateShowsAPI,
   validateTMDBIdAPI,

@@ -11,8 +11,8 @@ export async function useRawgDetailsAPI(req, res) {
     if (!response.ok) {
       res.status(response.status).json({
         success: false,
-        message: `RAWG API error: ${(await response).statusText}`,
-        error: "RAWG API failure",
+        message: `RAWG-DETAILS API error: ${(await response).statusText}`,
+        error: "RAWG-DETAILS API failure",
       });
     }
     // data clean
@@ -37,10 +37,10 @@ export async function useRawgDetailsAPI(req, res) {
       data: processedGames,
     });
   } catch (error) {
-    console.error("RAWG fetch failed: ", error);
+    console.error("RAWG-DETAILS fetch failed: ", error);
     res.status(500).json({
       success: false,
-      message: "Failed to fetch game from RAWG",
+      message: "Failed to fetch game details from RAWG",
       error: error.message,
     });
   }

@@ -22,7 +22,7 @@ export async function useRawgAPI(req, res) {
     const games = data.results || [];
     const processedGames = games.map((game) => {
       return {
-        id: game.id,
+        rawgId: game.id,
         title: game.name,
         // released: game.released,
         // background_image: game.background_image,

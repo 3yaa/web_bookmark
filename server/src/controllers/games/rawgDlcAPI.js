@@ -20,7 +20,7 @@ export async function useRawgDlcAPI(req, res) {
     const dlcs = data.results || [];
     const processedDlcs = dlcs.map((dlc) => {
       return {
-        id: dlc.id,
+        rawgId: dlc.id,
         title: dlc.name,
       };
     });

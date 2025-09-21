@@ -35,16 +35,3 @@ export const validateGameAPI = (req, res, next) => {
 
   next();
 };
-
-export const validateRawgIdAPI = (req, res, next) => {
-  const rawgId = req.query.rawgId;
-
-  if (!rawgId) {
-    return res.status(400).json({
-      success: false,
-      message: "rawg id required",
-    });
-  }
-
-  next();
-};

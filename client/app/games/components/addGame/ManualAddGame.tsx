@@ -1,30 +1,30 @@
 "use client";
 import { DiamondPlus, X } from "lucide-react";
-import { BookProps } from "@/types/book";
+import { GameProps } from "@/types/game";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
 import { statusOptions, scoreOptions } from "@/utils/dropDownDetails";
-interface ManualAddBookProps {
+interface ManualAddGameProps {
   isOpen: boolean;
   onClose: () => void;
-  addBook: () => void;
-  book: Partial<BookProps>;
-  onUpdate: (updates: Partial<BookProps>) => void;
+  addGame: () => void;
+  game: Partial<GameProps>;
+  onUpdate: (updates: Partial<GameProps>) => void;
 }
 
-export function ManualAddBook({
+export function ManualAddGame({
   isOpen,
   onClose,
-  book,
+  game,
   onUpdate,
-  addBook,
-}: ManualAddBookProps) {
+  addGame,
+}: ManualAddGameProps) {
   if (!isOpen) return null;
 
   const handleStatusChange = (value: string) => {
-    const newStatus = value as "Completed" | "Want to Read";
-    const statusLoad: Partial<BookProps> = {
+    const newStatus = value as "Completed" | "Playing";
+    const statusLoad: Partial<GameProps> = {
       status: newStatus,
     };
     if (newStatus === "Completed") {
@@ -38,7 +38,7 @@ export function ManualAddBook({
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
-          book.status ?? "Want to Read"
+          game.status ?? "Want to Read"
         )} py-2 px-2`}
       >
         {/* ACTUAL DETAIL CARD */}
@@ -49,17 +49,17 @@ export function ManualAddBook({
               {/* ADD */}
               <button
                 className={`py-1.5 px-5 rounded-lg transition-all group ${
-                  book.title && book.title.trim()
+                  game.title && game.title.trim()
                     ? "bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer"
                     : "bg-zinc-800/40 cursor-not-allowed opacity-50"
                 }`}
-                onClick={book.title && book.title.trim() ? addBook : undefined}
-                disabled={!book.title || !book.title.trim()}
+                onClick={game.title && game.title.trim() ? addGame : undefined}
+                disabled={!game.title || !game.title.trim()}
                 title={"Add"}
               >
                 <DiamondPlus
                   className={`w-5 h-5 transition-colors ${
-                    book.title && book.title.trim()
+                    game.title && game.title.trim()
                       ? "text-gray-400 group-hover:text-green-500"
                       : "text-gray-500"
                   }`}
@@ -84,12 +84,12 @@ export function ManualAddBook({
                 {/* TITLE */}
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-zinc-400 block">
-                    Book Title*
+                    Game Title*
                   </label>
                   <input
                     type="text"
-                    placeholder="Book title"
-                    value={book.title || ""}
+                    placeholder="Game title"
+                    value={game.title || ""}
                     onChange={(e) => onUpdate({ title: e.target.value })}
                     className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-4 py-2 text-zinc-100 placeholder-zinc-500  focus:ring-1 focus:ring-zinc-600/60 outline-none transition-all duration-200"
                   />
@@ -102,9 +102,9 @@ export function ManualAddBook({
                     </label>
                     <input
                       type="text"
-                      placeholder="Author Name"
-                      value={book.author || ""}
-                      onChange={(e) => onUpdate({ author: e.target.value })}
+                      placeholder="Studio Name"
+                      value={game.studio || ""}
+                      onChange={(e) => onUpdate({ studio: e.target.value })}
                       className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-4 py-2 text-zinc-100 placeholder-zinc-500 focus:ring-zinc-600/60 focus:ring-1  outline-none transition-all duration-200"
                     />
                   </div>
@@ -117,10 +117,10 @@ export function ManualAddBook({
                       type="number"
                       min={0}
                       placeholder="Publication year"
-                      value={book.datePublished || ""}
+                      value={game.dateReleased || ""}
                       onChange={(e) =>
                         onUpdate({
-                          datePublished: parseInt(e.target.value) || undefined,
+                          dateReleased: parseInt(e.target.value) || undefined,
                         })
                       }
                       className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-4 py-2 text-zinc-100 placeholder-zinc-500 focus:ring-zinc-600/60 focus:ring-1 outline-none transition-all duration-200"
@@ -134,12 +134,12 @@ export function ManualAddBook({
                       Status
                     </label>
                     <Dropdown
-                      value={book.status || "Want to Read"}
+                      value={game.status || "Want to Read"}
                       onChange={handleStatusChange}
                       options={statusOptions}
                       customStyle="text-zinc-200 font-semibold"
                       dropStyle={
-                        book.status === "Completed"
+                        game.status === "Completed"
                           ? ["to-emerald-500/10", "text-emerald-500"]
                           : ["to-blue-500/10", "text-blue-500"]
                       }
@@ -151,14 +151,14 @@ export function ManualAddBook({
                       Score
                     </label>
                     <Dropdown
-                      value={book.score?.toString() || "-"}
+                      value={game.score?.toString() || "-"}
                       onChange={(value) => {
                         onUpdate({ score: Number(value) });
                       }}
                       options={scoreOptions}
                       customStyle="text-zinc-200 font-semibold"
                       dropStyle={
-                        book.status === "Completed"
+                        game.status === "Completed"
                           ? ["to-emerald-500/10", "text-emerald-500"]
                           : ["to-blue-500/10", "text-blue-500"]
                       }
@@ -173,13 +173,13 @@ export function ManualAddBook({
                   </label>
                   <div className="bg-zinc-800/50 rounded-lg pl-3 pt-2 pr-1 pb-1 max-h-25 overflow-auto focus-within:ring-2 focus-within:ring-zinc-600/60 transition-all duration-200">
                     <AutoTextarea
-                      value={book.note || ""}
+                      value={game.note || ""}
                       onChange={(e) => {
                         onUpdate({ note: e.target.value });
                       }}
                       minHeight={100}
                       maxHeight={100}
-                      placeholder="Add your thoughts about this book..."
+                      placeholder="Add your thoughts about this game..."
                       className="text-gray-300 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500"
                     />
                   </div>

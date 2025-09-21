@@ -2,71 +2,56 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Book } from "lucide-react";
 //
-import {
-  BookProps,
-  OpenLibraryProps,
-  AllBooksProps,
-  GoogleBooksProps,
-  WikidataProps,
-} from "@/types/book";
+import { GameProps, IGDBInitProps, IGDBProps } from "@/types/game";
 //
 import {
-  cleanName,
-  mapGoogleDataToBook,
-  mapOpenLibDataToBook,
-  mapWikidataToBook,
-  resetBookValues,
-} from "@/app/books/utils/bookMapping";
+  mapIGDBDataToGame,
+  mapIGDBDlcsDataToGame,
+  resetGameValues,
+} from "@/app/games/utils/gameMapping";
 //
-import { BookDetails } from "../BookDetails";
-import { ShowMultBooks } from "./ShowMultBooks";
-import { ManualAddBook } from "./ManualAddBook";
+import { GameDetails } from "../GameDetails";
+import { ShowMultGames } from "./ShowMultGames";
+import { ManualAddGame } from "./ManualAddGame";
 //
-import { useBookSearch } from "@/app/books/hooks/useBookSearch";
+import { useGameSearch } from "@/app/games/hooks/useGameSearch";
 
-interface AddBookProps {
+interface AddGameProps {
   isOpen: boolean;
   onClose: () => void;
-  existingBooks: BookProps[];
-  onAddBook: (book: BookProps) => void;
-  titleFromAbove?: string;
+  existingGames: GameProps[];
+  onAddGame: (game: GameProps) => void;
+  titleFromAbove?: {
+    dlcIndex: number;
+    mainTitle: string;
+    dlcs: IGDBInitProps[];
+  } | null;
 }
 
-const BOOKLIMIT = 5;
-const bookSeriesCache = new Map<string, Partial<BookProps>>();
+const GAMELIMIT = 10;
 
-export function AddBook({
+export function AddGame({
   isOpen,
   onClose,
-  existingBooks,
-  onAddBook,
+  existingGames,
+  onAddGame,
   titleFromAbove,
-}: AddBookProps) {
+}: AddGameProps) {
   //failure reasons && their fixes -- for user
   const [failedReason, setFailedReason] = useState("");
   //
   const [isAddManual, setIsAddManual] = useState(false);
   const [activeModal, setActiveModal] = useState<
-    "bookDetails" | "multOptions" | "manualAdd" | null
+    "gameDetails" | "multOptions" | "manualAdd" | null
   >(null);
   //
   const titleToSearch = useRef<HTMLInputElement>(null);
   const [isDupTitle, setIsDupTitle] = useState(false);
   //
-  const [newBook, setNewBook] = useState<Partial<BookProps>>({});
-  const [allNewBooks, setAllNewBooks] = useState<AllBooksProps>({
-    OpenLibBooks: [],
-    GoogleBooksProps: [],
-  });
-  const [allSeries, setAllSeries] = useState<WikidataProps[]>([]);
-  const [curSeries, setCurSeries] = useState<number>(0);
+  const [allNewGames, setAllNewGames] = useState<IGDBProps[]>([]);
+  const [newGame, setNewGame] = useState<Partial<GameProps>>({});
   //
-  const {
-    searchForBooks,
-    searchForSeriesInfo,
-    searchForBackupBooks,
-    isBookSearching,
-  } = useBookSearch();
+  const { searchForGame, searchForGameDlc, isGameSearching } = useGameSearch();
 
   const reset = useCallback(() => {
     setFailedReason("");
@@ -74,11 +59,8 @@ export function AddBook({
     setIsAddManual(false);
     //
     setActiveModal(null);
-    setNewBook({});
-    setAllNewBooks({
-      OpenLibBooks: [],
-      GoogleBooksProps: [],
-    });
+    setAllNewGames([]);
+    setNewGame({});
     if (titleToSearch.current) {
       titleToSearch.current.value = "";
       titleToSearch.current.focus();
@@ -86,192 +68,147 @@ export function AddBook({
   }, []);
 
   const isDuplicate = useCallback(
-    (key: string) => {
-      if (!existingBooks) return null;
-      const duplicate = existingBooks.find(
-        (book: BookProps) => book.key === key
+    (igdbId: number) => {
+      if (!existingGames) return null;
+      const duplicate = existingGames.find(
+        (game: GameProps) => game.igdbId === igdbId
       );
       return duplicate ? duplicate.title : null;
     },
-    [existingBooks]
+    [existingGames]
   );
 
   const handleTitleSearch = useCallback(async () => {
     const titleSearching = titleToSearch.current?.value.trim();
     if (!titleSearching) return null;
-
-    const response = await searchForBooks(titleSearching, BOOKLIMIT);
-    const olData = response?.[0];
-    if (!olData) return null;
-    //save books
-    setAllNewBooks({
-      OpenLibBooks: response,
-      GoogleBooksProps: [],
-    }); //all
-    // console.log(response?.[0].title, ": ", response?.[0].key);
-    setNewBook(mapOpenLibDataToBook(response?.[0])); //main
+    //
+    const response = await searchForGame(titleSearching, GAMELIMIT);
+    const mainGame = response?.[0];
+    if (!mainGame) return null;
+    //
+    setNewGame(mapIGDBDataToGame(mainGame));
+    setAllNewGames(response);
     return {
-      title: olData.title,
-      olKey: olData.key,
+      title: mainGame.title,
+      igdbId: mainGame.igdbId,
     };
-  }, [searchForBooks]);
+  }, [searchForGame]);
 
-  const handleSeriesSearch = useCallback(
-    async (olKey: string) => {
-      // check for cache
-      if (bookSeriesCache.has(olKey)) {
-        setNewBook(bookSeriesCache.get(olKey) || {});
-        return;
-      }
-      // make call
-      const seriesData = await searchForSeriesInfo(olKey);
-      if (!seriesData || seriesData.length === 0) return null;
-      //
-      setAllSeries(seriesData);
-      const mappedData = mapWikidataToBook(seriesData[0]);
-      setNewBook((prev) => {
-        const updated = {
-          ...prev,
-          title: cleanName(prev.title, mappedData.seriesTitle),
-          ...mappedData,
-        };
-        bookSeriesCache.set(olKey, updated);
-        return updated; //setting newBook
-      });
-      return mappedData;
-    },
-    [searchForSeriesInfo]
-  );
-
-  const handleBookSearch = useCallback(async () => {
-    setActiveModal("bookDetails");
-    // make call to open lib
+  const handleGameSearch = useCallback(async () => {
+    setActiveModal("gameDetails");
+    //
     const response = await handleTitleSearch();
-    if (!response?.olKey || !response.title) {
-      setFailedReason("Could Not Find Book.");
+    if (!response?.igdbId || !response.title) {
+      setFailedReason("Could Not Find Game.");
       setIsAddManual(true);
       setActiveModal(null);
       return;
     }
     //check for duplicate
-    const duplicate = isDuplicate(response.olKey);
+    const duplicate = isDuplicate(response.igdbId);
     if (duplicate) {
-      setFailedReason(`Already Have Book: ${duplicate}`);
+      setFailedReason(`Already Have Game: ${duplicate}`);
       setIsDupTitle(true);
       setActiveModal(null);
       return;
     }
-    // do series search for main book
-    if (response.olKey) await handleSeriesSearch(response.olKey);
-  }, [isDuplicate, handleTitleSearch, handleSeriesSearch]);
+  }, [isDuplicate, handleTitleSearch]);
 
-  const handleBackUpBookSearch = useCallback(async () => {
-    const titleSearching = titleToSearch.current?.value.trim();
-    if (!titleSearching) return null;
-
-    const booksInfo = await searchForBackupBooks(titleSearching, BOOKLIMIT);
-    if (!booksInfo || booksInfo.length === 0) return null;
-    setAllNewBooks((prev) => ({
-      ...prev,
-      GoogleBooksProps: booksInfo,
-    }));
-  }, [searchForBackupBooks]);
-
-  const handlePickFromMultBooks = useCallback(
-    async (book: OpenLibraryProps | GoogleBooksProps) => {
-      // ol
-      if ("key" in book) {
-        //check if clicked book is duplicate
-        const key = book.key;
-        if (!key) return;
-        const duplicate = isDuplicate(key);
-        if (duplicate) {
-          setFailedReason(`Already Have Book: ${duplicate}`);
-          setIsDupTitle(true);
-          return;
-        }
-        //
-        setNewBook(mapOpenLibDataToBook(book));
-        if (key) await handleSeriesSearch(key);
-      }
-      // google -- NOT CALLING WIKI FOR GOOGLE
-      else if ("id" in book) {
-        //check if clicked book is duplicate
-        const key = book.id;
-        if (!key) return;
-        const duplicate = isDuplicate(key);
-        if (duplicate) {
-          setFailedReason(`Already Have Book: ${duplicate}`);
-          setIsDupTitle(true);
-          return;
-        }
-        //
-        setNewBook(mapGoogleDataToBook(book));
-      }
-      setActiveModal("bookDetails");
+  const handleDlcSearch = useCallback(
+    async (igdbId: number) => {
+      // make call
+      const response = await searchForGameDlc(igdbId);
+      const mainDlc = response?.[0];
+      if (!mainDlc) return null;
+      //
+      const mappedData = mapIGDBDlcsDataToGame(
+        mainDlc,
+        titleFromAbove?.mainTitle || ""
+      );
+      setNewGame((prev) => ({
+        ...prev,
+        ...mappedData,
+      }));
     },
-    [handleSeriesSearch, isDuplicate]
+    [searchForGameDlc, titleFromAbove]
   );
 
-  const handleBookDetailsUpdates = useCallback(
+  const handleDlcDetailsSearch = useCallback(async () => {
+    setActiveModal("gameDetails");
+    //
+    const selectedDlc = titleFromAbove?.dlcs[titleFromAbove.dlcIndex];
+    const { igdbId, title } = {
+      igdbId: selectedDlc?.id,
+      title: selectedDlc?.name,
+    };
+    if (!igdbId || !title) {
+      setFailedReason("igdbId error for dlc details.");
+      setIsAddManual(true);
+      setActiveModal(null);
+      return;
+    }
+    //
+    await handleDlcSearch(igdbId);
+    setNewGame((prev) => ({
+      ...prev,
+      ...{
+        mainTitle: titleFromAbove?.mainTitle,
+        dlcIndex: titleFromAbove?.dlcIndex,
+        dlcs: titleFromAbove?.dlcs,
+      },
+    }));
+    //check for duplicate
+    const duplicate = isDuplicate(igdbId);
+    if (duplicate) {
+      setFailedReason(`Already Have Dlc: ${duplicate}`);
+      setIsDupTitle(true);
+      setActiveModal(null);
+      return;
+    }
+  }, [titleFromAbove, isDuplicate, handleDlcSearch]);
+
+  const handlePickFromMultGames = useCallback((game: IGDBProps) => {
+    try {
+      setNewGame(mapIGDBDataToGame(game));
+    } finally {
+      setActiveModal("gameDetails");
+    }
+  }, []);
+
+  const handleGameDetailsUpdates = useCallback(
     async (
-      _bookId: number,
-      updates?: Partial<BookProps>,
+      _gameId: number,
+      updates?: Partial<GameProps>,
       showMore?: boolean
     ) => {
       if (showMore) {
         setActiveModal("multOptions");
-        if (!allNewBooks.GoogleBooksProps.length) {
-          await handleBackUpBookSearch();
-        }
         return;
       }
-      setNewBook((prev) => ({ ...prev, ...updates }));
+      setNewGame((prev) => ({ ...prev, ...updates }));
     },
-    [allNewBooks, handleBackUpBookSearch]
+    []
   );
 
-  const handleBookAdd = async () => {
+  const handleGameAdd = async () => {
     // double check not adding duplicate
-    if (newBook.key && isDupTitle) {
+    if (newGame.igdbId && isDupTitle) {
       return;
     }
-
-    let defaultStatus = newBook.status;
-    if (!defaultStatus) {
-      defaultStatus = "Want to Read";
+    //
+    let isStatus = newGame.status;
+    if (!isStatus) {
+      isStatus = "Playing";
     }
-    const finalBook = {
-      ...newBook,
-      status: defaultStatus,
+    const finalGame = {
+      ...newGame,
+      status: isStatus,
     };
-    onAddBook(finalBook as BookProps);
+    onAddGame(finalGame as GameProps);
     onClose();
   };
 
-  const handleSeriesChange = useCallback(
-    (option: "left" | "right") => {
-      let newSeries = curSeries;
-      if (option === "left") {
-        newSeries = curSeries === 0 ? allSeries.length - 1 : curSeries - 1;
-      } else if (option === "right") {
-        newSeries = curSeries === allSeries.length - 1 ? 0 : curSeries + 1;
-      }
-      setCurSeries(newSeries);
-      const mappedData = mapWikidataToBook(allSeries[newSeries]);
-      setNewBook((prev) => {
-        const updated = {
-          ...prev,
-          title: cleanName(prev.title, mappedData.seriesTitle),
-          ...mappedData,
-        };
-        return updated;
-      });
-    },
-    [allSeries, curSeries]
-  );
-
-  const handleBookDetailsClose = () => {
+  const handleGameDetailsClose = () => {
     setActiveModal(null);
     if (titleFromAbove) {
       onClose();
@@ -281,18 +218,18 @@ export function AddBook({
   const handleMultOptionClose = useCallback((action: "manualAdd" | null) => {
     switch (action) {
       case "manualAdd":
-        setNewBook((prev) => resetBookValues(prev));
+        setNewGame((prev) => resetGameValues(prev));
         setActiveModal("manualAdd");
         return;
       default:
-        setActiveModal("bookDetails");
+        setActiveModal("gameDetails");
         return;
     }
   }, []);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      handleBookSearch();
+      handleGameSearch();
     }
   };
 
@@ -309,19 +246,10 @@ export function AddBook({
     reset();
   }, [isOpen, reset]);
 
-  // useEffect(() => {
-  //   if (activeModal === null && !failedReason) {
-  //     reset();
-  //   }
-  // }, [activeModal, reset, failedReason]);
-
-  // for when to search book without modal
+  // for when to search game without modal
   useEffect(() => {
     if (titleFromAbove) {
-      if (titleToSearch.current) {
-        titleToSearch.current.value = titleFromAbove;
-      }
-      handleBookSearch();
+      handleDlcDetailsSearch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [titleFromAbove]);
@@ -330,30 +258,30 @@ export function AddBook({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-10 animate-in fade-in duration-200">
-      {/* maybe not allow user to close modal as new book coming? */}
+      {/* maybe not allow user to close modal as new game coming? */}
       <div className="fixed inset-0" onClick={onClose} />
       {!titleFromAbove ? (
         <div className="bg-zinc-900/95 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 shadow-2xl w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
           <h2 className="text-xl font-semibold mb-4 text-zinc-100 flex justify-center items-center gap-2">
             <Book className="w-5 h-5 text-emerald-400" />
-            Search for New Book
+            Search for New Game
           </h2>
           <div className="flex gap-3">
             <input
               type="text"
               ref={titleToSearch}
-              placeholder="Search for book..."
+              placeholder="Search for game..."
               onKeyDown={handleKeyPress}
               onInput={eraseErrMsg}
-              disabled={isBookSearching}
+              disabled={isGameSearching}
               className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-400 focus:border-zinc-500/50 focus:ring-1 focus:ring-zinc-700/20 outline-none transition-all duration-200"
             />
           </div>
           <div className="flex justify-between mx-2">
-            {failedReason && !isBookSearching && (
+            {failedReason && !isGameSearching && (
               <div className="mt-3 text-zinc-400 text-sm">{failedReason}</div>
             )}
-            {isAddManual && !isBookSearching && (
+            {isAddManual && !isGameSearching && (
               <button
                 className="mt-3 text-zinc-400 text-sm hover:cursor-pointer underline"
                 onClick={() => setActiveModal("manualAdd")}
@@ -371,42 +299,39 @@ export function AddBook({
           style={{ display: "none" }}
         />
       )}
-      {activeModal === "bookDetails" && (
-        <BookDetails
-          isOpen={activeModal === "bookDetails"}
-          book={newBook as BookProps}
-          onClose={handleBookDetailsClose}
-          onUpdate={handleBookDetailsUpdates}
-          addBook={handleBookAdd}
+      {activeModal === "gameDetails" && (
+        <GameDetails
+          isOpen={activeModal === "gameDetails"}
+          game={newGame as GameProps}
+          onClose={handleGameDetailsClose}
+          onUpdate={handleGameDetailsUpdates}
+          addGame={handleGameAdd}
           isLoading={{
-            isTrue: isBookSearching,
+            isTrue: isGameSearching,
             style: "h-8 w-8 border-emerald-400",
             text: "Searching...",
           }}
-          showBookInSeries={
-            allSeries.length > 1 ? handleSeriesChange : undefined
-          }
         />
       )}
       {activeModal === "multOptions" && (
-        <ShowMultBooks
+        <ShowMultGames
           isOpen={activeModal === "multOptions"}
           onClose={handleMultOptionClose}
-          books={allNewBooks}
+          games={allNewGames}
           prompt={titleToSearch.current?.value || ""}
-          onClickedBook={handlePickFromMultBooks}
-          isLoading={isBookSearching}
+          onClickedGame={handlePickFromMultGames}
+          isLoading={isGameSearching}
         />
       )}
       {activeModal === "manualAdd" && (
-        <ManualAddBook
+        <ManualAddGame
           isOpen={activeModal === "manualAdd"}
           onClose={() => setActiveModal(null)}
-          book={newBook}
-          onUpdate={(updates: Partial<BookProps>) =>
-            setNewBook((prev) => ({ ...prev, ...updates }))
+          game={newGame}
+          onUpdate={(updates: Partial<GameProps>) =>
+            setNewGame((prev) => ({ ...prev, ...updates }))
           }
-          addBook={handleBookAdd}
+          addGame={handleGameAdd}
         />
       )}
     </div>

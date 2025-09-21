@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 //
-import { MovieProps } from "@/types/movie";
+import { GameProps } from "@/types/game";
 import {
   formatDateShort,
   getStatusBorderGradient,
@@ -12,65 +12,67 @@ import { statusOptions, scoreOptions } from "@/utils/dropDownDetails";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { Loading } from "@/app/components/ui/Loading";
-import {
-  Trash2,
-  Plus,
-  X,
-  ChevronsUp,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-interface MovieDetailsProps {
-  movie: MovieProps;
+import { Trash2, Plus, X, ChevronsUp } from "lucide-react";
+interface GameDetailsProps {
+  game: GameProps;
   isOpen: boolean;
   onClose: () => void;
   isLoading?: { isTrue: boolean; style: string; text: string };
   onUpdate: (
-    movieId: number,
-    updates?: Partial<MovieProps>,
+    gameId: number,
+    updates?: Partial<GameProps>,
     takeAction?: boolean
   ) => void;
-  addMovie?: () => void;
-  showSequelPrequel?: (sequelTitle: string) => void;
-  showAnotherSeries?: (seriesDir: "left" | "right") => void;
+  addGame?: () => void;
+  showDlc?: (igdbId: number, dlcIndex: number) => void;
 }
 
-export function MovieDetails({
+export function GameDetails({
   isOpen,
   onClose,
-  movie,
+  game,
   onUpdate,
-  addMovie,
+  addGame,
   isLoading,
-  showAnotherSeries, //when wiki gives more then 1 option
-  showSequelPrequel,
-}: MovieDetailsProps) {
-  const [localNote, setLocalNote] = useState(movie.note || "");
+  showDlc,
+}: GameDetailsProps) {
+  const [localNote, setLocalNote] = useState(game.note || "");
 
   const handleStatusChange = (value: string) => {
-    const newStatus = value as "Completed" | "Want to Read";
-    const statusLoad: Partial<MovieProps> = {
+    const newStatus = value as "Playing" | "Completed";
+    const statusLoad: Partial<GameProps> = {
       status: newStatus,
     };
     if (newStatus === "Completed") {
       statusLoad.dateCompleted = new Date();
-    } else if (movie.dateCompleted) {
+    } else if (game.dateCompleted) {
       statusLoad.dateCompleted = null;
     }
-    onUpdate(movie.id, statusLoad);
+    onUpdate(game.id, statusLoad);
   };
 
-  const openSeriesMovie = (seriesDir: string) => {
-    if (!showSequelPrequel) return;
-    const targetTitle = seriesDir === "sequel" ? movie.sequel : movie.prequel;
-    if (targetTitle) {
-      showSequelPrequel(targetTitle);
+  const openGameDlcs = (dir: string) => {
+    if (!showDlc) return;
+    let targetIgdbId;
+    let dlcIndex;
+    if (game.dlcs) {
+      if (dir === "next" && game.dlcIndex < game.dlcs.length) {
+        dlcIndex = game.dlcIndex + 1;
+        targetIgdbId = game.dlcs[dlcIndex].id;
+      } else {
+        dlcIndex = game.dlcIndex - 1;
+        targetIgdbId = game.dlcs[dlcIndex].id;
+      }
+    }
+    //
+    if (targetIgdbId && dlcIndex !== undefined) {
+      showDlc(targetIgdbId, dlcIndex);
     }
   };
 
   const saveNote = () => {
-    if (localNote !== movie.note) {
-      onUpdate(movie.id, { note: localNote });
+    if (localNote !== game.note) {
+      onUpdate(game.id, { note: localNote });
     }
   };
 
@@ -89,26 +91,51 @@ export function MovieDetails({
   const handleDelete = () => {
     onClose();
     const shouldDelete = true;
-    onUpdate(movie.id, undefined, shouldDelete);
+    onUpdate(game.id, undefined, shouldDelete);
   };
 
   const handleModalClose = () => {
-    if (addMovie) return;
+    if (addGame) return;
     onClose();
   };
 
-  const handleAddMovie = () => {
-    if (!addMovie) return;
-    addMovie();
+  const handleAddGame = () => {
+    if (!addGame) return;
+    addGame();
     onClose();
   };
 
   const handleNeedYear = () => {
     const needYear = true;
-    onUpdate(movie.id, undefined, needYear);
+    onUpdate(game.id, undefined, needYear);
   };
 
-  if (!isOpen || !movie) return null;
+  const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
+    //detects which side of the div was clicked
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const elementWidth = rect.width;
+    const isRightSide = clickX > elementWidth / 2;
+
+    //
+    if (
+      game.curBackdropIndex !== undefined &&
+      game.backdropUrls !== undefined
+    ) {
+      let newCoverIndex = game.curBackdropIndex;
+      if (isRightSide) {
+        newCoverIndex = (game.curBackdropIndex + 1) % game.backdropUrls.length;
+      } else {
+        newCoverIndex =
+          game.curBackdropIndex === 0
+            ? game.backdropUrls.length - 1
+            : game.curBackdropIndex - 1;
+      }
+      onUpdate(game.id, { curBackdropIndex: newCoverIndex });
+    }
+  };
+
+  if (!isOpen || !game) return null;
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-black/40 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
@@ -116,7 +143,7 @@ export function MovieDetails({
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
-          movie.status
+          game.status
         )} py-2 px-2 lg:min-w-[45%] lg:max-w-[45%]`}
       >
         {/* ACTUAL DETAIL CARD */}
@@ -126,32 +153,12 @@ export function MovieDetails({
           )}
           <div className={`px-8.5 py-7 border-0 rounded-2xl overflow-hidden`}>
             {/* ACTION BUTTONS */}
-            {addMovie ? (
+            {addGame ? (
               <div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
-                {showAnotherSeries && (
-                  <div className="flex gap-1 bg-zinc-800/50 rounded-lg">
-                    {/* LEFT BUTTON */}
-                    <button
-                      className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
-                    hover:cursor-pointer transition-all group"
-                      onClick={() => showAnotherSeries("left")}
-                    >
-                      <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
-                    </button>
-                    {/* RIGHT BUTTON */}
-                    <button
-                      className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
-                    hover:cursor-pointer transition-all group"
-                      onClick={() => showAnotherSeries("right")}
-                    >
-                      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
-                    </button>
-                  </div>
-                )}
                 {/* ADD */}
                 <button
                   className="py-1.5 px-5 rounded-lg bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer transition-all group"
-                  onClick={handleAddMovie}
+                  onClick={handleAddGame}
                   title={"Add Book"}
                 >
                   <Plus className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors duration-0" />
@@ -179,7 +186,7 @@ export function MovieDetails({
               <button
                 className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/0 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group z-10"
                 onClick={handleDelete}
-                title={"Delete Movie"}
+                title={"Delete Game"}
               >
                 <Trash2 className="w-4 h-4 text-gray-400/5 group-hover:text-red-500 transition-colors duration-200" />
               </button>
@@ -188,14 +195,14 @@ export function MovieDetails({
             <div className="flex gap-8">
               {/* LEFT SIDE -- PIC */}
               <div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg">
-                {movie.posterUrl !== undefined ? (
+                {game.posterUrl !== undefined ? (
                   <>
                     <Image
-                      src={movie.posterUrl}
-                      alt={movie.title || "Untitled"}
+                      src={game.posterUrl}
+                      alt={game.title || "Untitled"}
                       width={248}
                       height={372}
-                      className="min-w-[62] min-h-93 object-fill"
+                      className="min-w-62 min-h-93 object-fill"
                     />
                     <div
                       className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
@@ -210,13 +217,25 @@ export function MovieDetails({
                 )}
               </div>
               {/* RIGHT SIDE -- DETAILS */}
-              <div className="flex flex-col flex-1 min-h-93 min-w-62 relative">
+              <div
+                className="flex flex-col flex-1 min-h-93 min-w-62 relative hover:cursor-pointer"
+                onClick={
+                  game.backdropUrls && game.backdropUrls?.length > 1
+                    ? handleCoverChange
+                    : undefined
+                }
+                title={
+                  game.backdropUrls
+                    ? `${game.curBackdropIndex}/${game.backdropUrls?.length}`
+                    : ""
+                }
+              >
                 {/* BACKDROP */}
-                {movie.backdropUrl && (
+                {game.backdropUrls && (
                   <div className="absolute -top-7 left-20 -right-25 h-[70%] -z-10 overflow-hidden rounded-2xl">
                     <div className="relative h-full">
                       <Image
-                        src={movie.backdropUrl}
+                        src={game.backdropUrls[game.curBackdropIndex]}
                         alt="Backdrop"
                         fill
                         className="object-cover opacity-30"
@@ -245,32 +264,30 @@ export function MovieDetails({
                 )}
                 <div
                   className={`flex flex-col ${
-                    movie.seriesTitle
-                      ? "justify-center"
-                      : "justify-center mt-12"
+                    game.mainTitle ? "justify-center" : "justify-center mt-12"
                   } flex-1`}
                 >
                   {/* SERIES TITLE */}
-                  {movie.seriesTitle && (
+                  {game.mainTitle && (
                     <span className="font-semibold text-zinc-100/80 text-xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-0">
-                      {movie.seriesTitle}
+                      {game.mainTitle}
                     </span>
                   )}
                   {/* TITLE */}
                   <div className="w-fit mb-1.5 max-w-full">
                     <div className="font-bold text-zinc-100/90 text-3xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-1.5">
-                      {movie.title || "Untitled"}
+                      {game.title || "Untitled"}
                     </div>
                     <div
                       className={`w-full h-0.5 bg-gradient-to-r ${getStatusBorderGradient(
-                        movie.status
+                        game.status
                       )} to-zinc-800 rounded-full`}
                     ></div>
                   </div>
                   {/* DIRECTOR AND DATES */}
                   <div className="flex justify-start items-center gap-2 w-full mb-3">
                     <span className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 leading-6">
-                      {movie.director || "Unknown Director"}
+                      {game.studio || "Unknown Director"}
                     </span>
                     {/* ◎ ◈ ୭ ✿ ✧ */}
                     <div className="font-medium text-zinc-200/70 text-md leading-6">
@@ -280,9 +297,9 @@ export function MovieDetails({
                       className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
                       title="Date Published"
                     >
-                      {movie.dateReleased || "Unknown"}
+                      {game.dateReleased || "Unknown"}
                     </span>
-                    {movie.status === "Completed" && (
+                    {game.status === "Completed" && (
                       <div className="flex items-center gap-2">
                         <div className="font-medium text-zinc-200/70 text-md leading-6">
                           •
@@ -291,7 +308,7 @@ export function MovieDetails({
                           className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
                           title="Date Completed"
                         >
-                          {formatDateShort(movie.dateCompleted)}
+                          {formatDateShort(game.dateCompleted)}
                         </span>
                       </div>
                     )}
@@ -304,12 +321,12 @@ export function MovieDetails({
                         Status
                       </label>
                       <Dropdown
-                        value={movie.status}
+                        value={game.status}
                         onChange={handleStatusChange}
                         options={statusOptions}
                         customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={
-                          movie.status === "Completed"
+                          game.status === "Completed"
                             ? ["to-emerald-500/10", "text-emerald-500"]
                             : ["to-blue-500/10", "text-blue-500"]
                         }
@@ -321,14 +338,14 @@ export function MovieDetails({
                         Score
                       </label>
                       <Dropdown
-                        value={movie.score?.toString() || "-"}
+                        value={game.score?.toString() || "-"}
                         onChange={(value) => {
-                          onUpdate(movie.id, { score: Number(value) });
+                          onUpdate(game.id, { score: Number(value) });
                         }}
                         options={scoreOptions}
                         customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={
-                          movie.status === "Completed"
+                          game.status === "Completed"
                             ? ["to-emerald-500/10", "text-emerald-500"]
                             : ["to-blue-500/10", "text-blue-500"]
                         }
@@ -347,7 +364,7 @@ export function MovieDetails({
                         onChange={handleNoteChange}
                         onKeyDown={handleKeyDown}
                         onBlur={saveNote}
-                        placeholder="Add your thoughts about this movie..."
+                        placeholder="Add your thoughts about this game..."
                         className="text-gray-300 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500"
                       />
                     </div>
@@ -356,61 +373,60 @@ export function MovieDetails({
                 {/* PREQUEL AND SEQUEL */}
                 <div className="grid grid-cols-[1fr_3rem_1fr] pr-1.5 select-none w-full">
                   <div className="truncate text-left">
-                    {movie.prequel && (
+                    {game.dlcIndex - 1 >= 0 && game.dlcs !== undefined && (
                       <div
                         className={`text-sm text-zinc-400/80 ${
-                          !addMovie
-                            ? "hover:underline hover:cursor-pointer"
-                            : ""
+                          !addGame ? "hover:underline hover:cursor-pointer" : ""
                         }`}
                       >
                         <label className="text-xs font-medium text-zinc-400 block">
                           <span className="inline-flex items-center gap-1">
                             <span>←</span>
-                            <span>Prequel</span>
+                            <span>Previous</span>
                           </span>
                         </label>
                         <span
                           onClick={() => {
-                            if (!addMovie) openSeriesMovie("prequel");
+                            if (!addGame) openGameDlcs("prev");
                           }}
                         >
-                          {movie.prequel}
+                          {game.dlcs[game.dlcIndex - 1].name}
                         </span>
                       </div>
                     )}
                   </div>
                   <div className="flex justify-center items-end">
-                    {movie.placeInSeries && (
+                    {game.dlcIndex !== 0 && (
                       <label className="text-xs font-medium text-zinc-400/85 block">
-                        {movie.placeInSeries}
+                        {game.dlcIndex}
                       </label>
                     )}
                   </div>
                   <div className="truncate text-right">
-                    {movie.sequel && (
-                      <div
-                        className={`text-sm text-zinc-400/80 ${
-                          !addMovie
-                            ? "hover:underline hover:cursor-pointer"
-                            : ""
-                        }`}
-                      >
-                        <label className="text-xs font-medium text-zinc-400 block">
-                          <span className="inline-flex items-center gap-1">
-                            <span>Sequel</span>
-                            <span>→</span>
-                          </span>
-                        </label>
-                        <span
-                          onClick={() => {
-                            if (!addMovie) openSeriesMovie("sequel");
-                          }}
+                    {game.dlcs !== undefined &&
+                      game.dlcIndex + 1 < game.dlcs?.length && (
+                        <div
+                          className={`text-sm text-zinc-400/80 ${
+                            !addGame
+                              ? "hover:underline hover:cursor-pointer"
+                              : ""
+                          }`}
                         >
-                          {movie.sequel}
-                        </span>
-                      </div>
-                    )}
+                          <label className="text-xs font-medium text-zinc-400 block">
+                            <span className="inline-flex items-center gap-1">
+                              <span>Next</span>
+                              <span>→</span>
+                            </span>
+                          </label>
+                          <span
+                            onClick={() => {
+                              if (!addGame) openGameDlcs("next");
+                            }}
+                          >
+                            {game.dlcs[game.dlcIndex + 1].name}
+                          </span>
+                        </div>
+                      )}
                   </div>
                 </div>
               </div>

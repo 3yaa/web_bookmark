@@ -1,16 +1,16 @@
-import { ShowProps } from "@/types/show";
+import { GameProps } from "@/types/game";
 import { useEffect, useState, useCallback } from "react";
 
 const SHOWS_STORAGE_KEY = "mouthful_games";
 
-export function useShowData() {
-  const [shows, setShows] = useState<ShowProps[]>([]);
+export function useGameData() {
+  const [games, setShows] = useState<GameProps[]>([]);
   const [showDataLoading, setShowDataLoading] = useState(true);
 
-  const isProcessingShow = showDataLoading;
+  const isProcessingGame = showDataLoading;
 
   // Helper functions for localStorage
-  const loadShowsFromStorage = useCallback((): ShowProps[] => {
+  const loadShowsFromStorage = useCallback((): GameProps[] => {
     try {
       const stored = localStorage.getItem(SHOWS_STORAGE_KEY);
       return stored ? JSON.parse(stored) : [];
@@ -20,7 +20,7 @@ export function useShowData() {
     }
   }, []);
 
-  const saveShowsToStorage = useCallback((shows: ShowProps[]) => {
+  const saveShowsToStorage = useCallback((shows: GameProps[]) => {
     try {
       localStorage.setItem(SHOWS_STORAGE_KEY, JSON.stringify(shows));
     } catch (error) {
@@ -43,10 +43,10 @@ export function useShowData() {
   }, [loadShowsFromStorage]);
 
   // CREATE
-  const addShow = useCallback(
-    async (show: ShowProps) => {
+  const addGame = useCallback(
+    async (show: GameProps) => {
       // req data
-      if (!show.title || !show.status || !show.tmdbId) {
+      if (!show.title || !show.status || !show.igdbId) {
         return;
       }
 
@@ -54,7 +54,7 @@ export function useShowData() {
         setShowDataLoading(true);
 
         // Generate a temporary ID if not provided
-        const newShow: ShowProps = {
+        const newShow: GameProps = {
           ...show,
           id: show.id || Date.now(), // Use timestamp as temporary ID
         };
@@ -74,8 +74,8 @@ export function useShowData() {
   );
 
   // UPDATE
-  const updateShow = useCallback(
-    async (showId: number, updates: Partial<ShowProps>) => {
+  const updateGame = useCallback(
+    async (showId: number, updates: Partial<GameProps>) => {
       // only updates these
       const allowedFields = ["score", "status", "note", "dateCompleted"];
       const invalidFields = Object.keys(updates).filter(
@@ -99,7 +99,7 @@ export function useShowData() {
   );
 
   // DELETE
-  const deleteShow = useCallback(
+  const deleteGame = useCallback(
     async (showId: number) => {
       try {
         setShowDataLoading(true);
@@ -125,10 +125,10 @@ export function useShowData() {
   }, []);
 
   return {
-    shows,
-    addShow,
-    updateShow,
-    deleteShow,
-    isProcessingShow,
+    games,
+    addGame,
+    updateGame,
+    deleteGame,
+    isProcessingGame,
   };
 }

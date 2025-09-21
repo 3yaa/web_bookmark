@@ -251,13 +251,21 @@ export default function BookList() {
                   <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-[0.25rem] border border-zinc-600/30"></div>
                 )}
               </div>
-              <div className="flex flex-col">
-                <span className="font-semibold text-zinc-400 text-[70%] group-hover:text-emerald-400">
-                  {book.seriesTitle
-                    ? `${book.seriesTitle} ᭡ ${book.placeInSeries}`
-                    : ""}
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="font-semibold text-zinc-400 text-[70%] group-hover:text-emerald-400 flex gap-1">
+                  {book.seriesTitle ? (
+                    <>
+                      <span className="block max-w-[88%] whitespace-nowrap text-ellipsis overflow-hidden flex-shrink">
+                        {book.seriesTitle}
+                      </span>
+                      <span>᭡</span>
+                      <span>{book.placeInSeries}</span>
+                    </>
+                  ) : (
+                    ""
+                  )}
                 </span>
-                <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-emerald-400 transition-colors duration-200 truncate">
+                <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-emerald-400 transition-colors duration-200 truncate max-w-53">
                   {book.title || "-"}
                 </span>
               </div>

@@ -37,7 +37,7 @@ export const getStatusBorderColor = (status: MediaStatus) => {
 };
 
 //everything else
-export const getStatusBorderGradient = (status: MediaStatus) => {
+export const getStatusBorderGradient = (status: Partial<MediaStatus>) => {
   switch (status) {
     case "Completed":
       return "from-emerald-500/50";

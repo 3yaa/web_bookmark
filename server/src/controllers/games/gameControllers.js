@@ -139,7 +139,6 @@ export const patchGame = async (req, res) => {
   }
 };
 
-// NEED TO VALIDATE NON-NULLABLE DATA
 export const createGame = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -174,9 +173,9 @@ export const createGame = async (req, res) => {
   		date_completed,
   		note,
   		igdb_id,
-  		user_id,
+  		user_id
 		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
 		) RETURNING *
 	`;
     const values = [

@@ -62,3 +62,30 @@ export const getGameStatusBorderGradient = (status: Partial<MediaStatus>) => {
       return "from-zinc-600/40";
   }
 };
+
+export const getTvStatusBorderGradient = (status: Partial<MediaStatus>) => {
+  switch (status) {
+    case "Completed":
+      return "from-emerald-500/50";
+    case "Want to Watch":
+      return "from-blue-500/50";
+    case "Dropped":
+      return "from-red-500/40";
+    default:
+      return "from-zinc-600/40";
+  }
+};
+
+// STATUS TEXT COLORS
+export const getStatusTextColor = (status: MediaStatus) => {
+  switch (status) {
+    case "Completed":
+      return "text-emerald-500/80";
+    case "Want to Watch":
+      return "text-blue-500/85";
+    case "Dropped":
+      return "text-red-500/75";
+    default:
+      return "text-zinc-600";
+  }
+};

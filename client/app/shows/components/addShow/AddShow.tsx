@@ -136,7 +136,7 @@ export function AddShow({
   const handleShowAdd = async () => {
     let isStatus = newShow.status;
     if (!isStatus) {
-      isStatus = "Want to Read";
+      isStatus = "Want to Watch";
     }
     const finalShow = {
       ...newShow,

@@ -11,7 +11,7 @@ export function resetMovieValues(show: Partial<ShowProps>): Partial<ShowProps> {
     studio: undefined,
     posterUrl: undefined,
     dateReleased: undefined,
-    status: "Want to Read",
+    status: "Want to Watch",
   };
 }
 
@@ -22,6 +22,8 @@ export function mapTMDBToShow(dataTMDB: TMDBProps): Partial<ShowProps> {
     dateReleased: parseInt(dataTMDB.released_date || "0"),
     posterUrl: dataTMDB.poster_url,
     backdropUrl: dataTMDB.backdrop_url,
+    curSeasonIndex: 0,
+    curEpisode: 1,
   };
 }
 

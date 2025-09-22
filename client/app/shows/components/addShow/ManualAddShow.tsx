@@ -24,7 +24,7 @@ export function ManualAddShow({
   if (!isOpen) return null;
 
   const handleStatusChange = (value: string) => {
-    const newStatus = value as "Completed" | "Want to Read";
+    const newStatus = value as "Completed" | "Want to Watch";
     const statusLoad: Partial<ShowProps> = {
       status: newStatus,
     };
@@ -39,7 +39,7 @@ export function ManualAddShow({
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
-          show.status ?? "Want to Read"
+          show.status ?? "Want to Watch"
         )} py-2 px-2`}
       >
         {/* ACTUAL DETAIL CARD */}
@@ -135,7 +135,7 @@ export function ManualAddShow({
                       Status
                     </label>
                     <Dropdown
-                      value={show.status || "Want to Read"}
+                      value={show.status || "Want to Watch"}
                       onChange={handleStatusChange}
                       options={statusOptions}
                       customStyle="text-zinc-200 font-semibold"

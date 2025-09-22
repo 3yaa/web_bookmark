@@ -9,7 +9,7 @@ export interface ShowProps {
   score?: number;
   dateCompleted?: Date | null;
   note?: string;
-  status: "Completed" | "Want to Read" | "Dropped"; //!--REQUIRED
+  status: "Completed" | "Want to Watch" | "Dropped"; //!--REQUIRED
   // from tmdb
   tmdbId: string; //!--REQUIRED
   title: string; //!--REQUIRED
@@ -19,6 +19,8 @@ export interface ShowProps {
   backdropUrl?: string;
   // from tmdb-tv
   seasons?: TMDBSeasonProps[];
+  curSeasonIndex: number;
+  curEpisode: number;
 }
 
 export interface TMDBProps {

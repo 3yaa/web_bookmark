@@ -5,14 +5,24 @@ import Image from "next/image";
 import { ShowProps } from "@/types/show";
 import {
   formatDateShort,
-  getStatusBorderGradient,
+  getTvStatusBorderGradient,
+  getStatusTextColor,
 } from "@/utils/formattingUtils";
-import { statusOptions, scoreOptions } from "@/utils/dropDownDetails";
+import { tvStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 //
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { Loading } from "@/app/components/ui/Loading";
-import { Trash2, Plus, X, ChevronsUp } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  X,
+  ChevronsUp,
+  ChevronRight,
+  ChevronLeft,
+  ChevronsRight,
+  ChevronsLeft,
+} from "lucide-react";
 interface ShowDetailsProps {
   show: ShowProps;
   isOpen: boolean;
@@ -37,7 +47,7 @@ export function ShowDetails({
   const [localNote, setLocalNote] = useState(show.note || "");
 
   const handleStatusChange = (value: string) => {
-    const newStatus = value as "Completed" | "Want to Read";
+    const newStatus = value as "Completed" | "Want to Watch";
     const statusLoad: Partial<ShowProps> = {
       status: newStatus,
     };
@@ -65,6 +75,7 @@ export function ShowDetails({
 
   const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setLocalNote(e.target.value);
+    console.log(show.seasons);
   };
 
   const handleDelete = () => {
@@ -89,6 +100,62 @@ export function ShowDetails({
     onUpdate(show.id, undefined, needYear);
   };
 
+  const handleSeasonChange = (dir: string) => {
+    if (!show.seasons) return;
+    //
+    let { curSeasonIndex: seasonIndex, curEpisode: curEp } = show;
+    const seasons = show.seasons;
+    //
+    const isFirstSeason = seasonIndex === 0;
+    const isLastSeason = seasonIndex === seasons.length - 1;
+    //
+    if (dir === "left") {
+      if (isFirstSeason) return;
+      //
+      seasonIndex -= 1;
+    } else if (dir === "right") {
+      if (isLastSeason) return;
+      //
+      seasonIndex += 1;
+    }
+    curEp = 1;
+    onUpdate(show.id, { curSeasonIndex: seasonIndex, curEpisode: curEp });
+  };
+
+  const handleEpisodeChange = (dir: string) => {
+    if (!show.seasons) return;
+    //
+    let { curSeasonIndex: seasonIndex, curEpisode: curEp } = show;
+    const seasons = show.seasons;
+    //
+    const isFirstEpisode = seasonIndex === 0 && curEp === 1;
+    const isLastEpisode =
+      seasonIndex === seasons.length - 1 &&
+      curEp === seasons[seasonIndex].episode_count;
+    //
+    if (dir === "left") {
+      if (isFirstEpisode) return;
+      // go back season's last ep
+      if (curEp === 1) {
+        seasonIndex -= 1;
+        curEp = seasons[seasonIndex].episode_count;
+      } else {
+        curEp -= 1;
+      }
+    } else if (dir === "right") {
+      if (isLastEpisode) return;
+      // go to next season's first ep
+      if (curEp === seasons[seasonIndex].episode_count) {
+        seasonIndex += 1;
+        curEp = 1;
+      } else {
+        curEp += 1;
+      }
+    }
+
+    onUpdate(show.id, { curSeasonIndex: seasonIndex, curEpisode: curEp });
+  };
+
   if (!isOpen || !show) return null;
 
   return (
@@ -96,7 +163,7 @@ export function ShowDetails({
       <div className="fixed inset-0" onClick={handleModalClose} />
       {/* BACKGROUND BORDER GRADIENT */}
       <div
-        className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
+        className={`rounded-2xl bg-gradient-to-b ${getTvStatusBorderGradient(
           show.status
         )} py-2 px-2 lg:min-w-[45%] lg:max-w-[45%]`}
       >
@@ -211,7 +278,7 @@ export function ShowDetails({
                       {show.title || "Untitled"}
                     </div>
                     <div
-                      className={`w-full h-0.5 bg-gradient-to-r ${getStatusBorderGradient(
+                      className={`w-full h-0.5 bg-gradient-to-r ${getTvStatusBorderGradient(
                         show.status
                       )} to-zinc-800 rounded-full`}
                     ></div>
@@ -245,7 +312,6 @@ export function ShowDetails({
                       </div>
                     )}
                   </div>
-                  <div></div>
                   {/* STATUS AND SCORE */}
                   <div className=" flex justify-start gap-4 mb-2.5 max-w-[94%]">
                     <div className="flex-[0.77] lg:min-w-[165px]">
@@ -255,8 +321,8 @@ export function ShowDetails({
                       <Dropdown
                         value={show.status}
                         onChange={handleStatusChange}
-                        options={statusOptions}
-                        customStyle="text-zinc-200/80 font-semibold"
+                        options={tvStatusOptions}
+                        customStyle="text-zinc-300/75 font-semibold"
                         dropStyle={
                           show.status === "Completed"
                             ? ["to-emerald-500/10", "text-emerald-500"]
@@ -275,7 +341,7 @@ export function ShowDetails({
                           onUpdate(show.id, { score: Number(value) });
                         }}
                         options={scoreOptions}
-                        customStyle="text-zinc-200/80 font-semibold"
+                        customStyle="text-zinc-300/75 font-semibold"
                         dropStyle={
                           show.status === "Completed"
                             ? ["to-emerald-500/10", "text-emerald-500"]
@@ -283,6 +349,102 @@ export function ShowDetails({
                         }
                         dropDuration={0.4}
                       />
+                    </div>
+                  </div>
+                  {/* SEASON && EP */}
+                  <div className="space-y-1 mb-2">
+                    <label className="text-sm font-medium text-zinc-400 block">
+                      Currently
+                    </label>
+                    <div className="flex gap-3 max-w-[97.6%]">
+                      {/* SEASON CONTROLS */}
+                      <div className="flex-[1.05] bg-gradient-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/20">
+                        <div className="flex items-center justify-between pl-1">
+                          <span className="text-[15px] text-zinc-300/70 font-bold">
+                            <span className="text-[14.5px] text-zinc-400/85 font-medium mr-2">
+                              Season:
+                            </span>
+                            <span
+                              className={`underline ${getStatusTextColor(
+                                show.status
+                              )}`}
+                            >
+                              {show.curSeasonIndex + 1}
+                            </span>
+                            <span className="">
+                              /{show.seasons && show.seasons.length}
+                            </span>
+                          </span>
+                          <div className="flex gap-1.5">
+                            <button
+                              className="group flex justify-center items-center w-8 h-8 rounded-lg bg-zinc-800/80 border border-zinc-700/25 hover:bg-zinc-700/35 hover:border-zinc-700/40 active:bg-zinc-700/40 active:scale-95 transition-all duration-150 hover:cursor-pointer disabled:hover:bg-zinc-700/50 disabled:border-zinc-600/25 disabled:opacity-40 disabled:cursor-default"
+                              onClick={() => handleSeasonChange("left")}
+                              disabled={show.curSeasonIndex === 0}
+                            >
+                              <ChevronsLeft className="w-4 h-4 text-zinc-300/80 group-active:text-zinc-200/80 transition-colors" />
+                            </button>
+                            <button
+                              className="group flex justify-center items-center w-8 h-8 rounded-lg bg-zinc-800/80 border border-zinc-700/25 hover:bg-zinc-700/35 hover:border-zinc-700/40 active:bg-zinc-700/40 active:scale-95 transition-all duration-150 hover:cursor-pointer disabled:hover:bg-zinc-700/50 disabled:border-zinc-600/25 disabled:opacity-40 disabled:cursor-default"
+                              onClick={() => handleSeasonChange("right")}
+                              disabled={
+                                show.seasons &&
+                                show.curSeasonIndex === show.seasons.length - 1
+                              }
+                            >
+                              <ChevronsRight className="w-4 h-4 text-zinc-300/80 group-active:text-zinc-200/80 transition-colors" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* EPISODE CONTROLS */}
+                      <div className="flex-[1.05] bg-gradient-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/20">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[15px] text-zinc-300/70 font-bold">
+                            <span className="text-[14.5px] text-zinc-400/85 font-medium mr-2">
+                              Episodes:
+                            </span>
+                            <span
+                              className={`underline ${getStatusTextColor(
+                                show.status
+                              )}`}
+                            >
+                              {show.curEpisode}
+                            </span>
+                            <span className="">
+                              /
+                              {show.seasons &&
+                                show.seasons[show.curSeasonIndex].episode_count}
+                            </span>
+                          </span>
+                          <div className="flex gap-1.5">
+                            <button
+                              className="group flex justify-center items-center w-8 h-8 rounded-lg bg-zinc-800/80 border border-zinc-700/25 hover:bg-zinc-700/35 hover:border-zinc-700/40 active:bg-zinc-700/40 active:scale-95 transition-all duration-150 hover:cursor-pointer disabled:hover:bg-zinc-700/50 disabled:border-zinc-600/25 disabled:opacity-40 disabled:cursor-default"
+                              onClick={() => handleEpisodeChange("left")}
+                              disabled={
+                                show.curSeasonIndex === 0 &&
+                                show.curEpisode === 1
+                              }
+                            >
+                              <ChevronLeft className="w-4 h-4 text-zinc-300/80 group-active:text-zinc-200/80 transition-colors" />
+                            </button>
+                            <button
+                              className="group flex justify-center items-center w-8 h-8 rounded-lg bg-zinc-800/80 border border-zinc-700/25 hover:bg-zinc-700/35 hover:border-zinc-700/40 active:bg-zinc-700/40 active:scale-95 transition-all duration-150 hover:cursor-pointer disabled:hover:bg-zinc-700/50 disabled:border-zinc-600/25 disabled:opacity-40 disabled:cursor-default"
+                              onClick={() => handleEpisodeChange("right")}
+                              disabled={
+                                show.seasons &&
+                                show.curSeasonIndex ===
+                                  show.seasons.length - 1 &&
+                                show.curEpisode ===
+                                  show.seasons[show.curSeasonIndex]
+                                    .episode_count
+                              }
+                            >
+                              <ChevronRight className="w-4 h-4 text-zinc-300/80 group-active:text-zinc-200/80 transition-colors" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   {/* NOTES */}

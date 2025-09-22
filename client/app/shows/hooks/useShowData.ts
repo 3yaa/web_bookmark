@@ -232,7 +232,14 @@ export function useShowData() {
   const updateShow = useCallback(
     async (showId: number, updates: Partial<ShowProps>) => {
       // only updates these
-      const allowedFields = ["score", "status", "note", "dateCompleted"];
+      const allowedFields = [
+        "score",
+        "status",
+        "note",
+        "dateCompleted",
+        "curSeasonIndex",
+        "curEpisode",
+      ];
       const invalidFields = Object.keys(updates).filter(
         (field) => !allowedFields.includes(field)
       );

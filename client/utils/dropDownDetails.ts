@@ -14,6 +14,20 @@ export const statusOptions = [
   },
 ];
 
+export const tvStatusOptions = [
+  {
+    value: "Want to Watch",
+    label: "Want to Watch",
+    className: "text-blue-500",
+  },
+  { value: "Completed", label: "Completed", className: "text-green-600" },
+  {
+    value: "Dropped",
+    label: "Dropped",
+    className: "text-red-500",
+  },
+];
+
 export const gameStatusOptions = [
   {
     value: "Playing",

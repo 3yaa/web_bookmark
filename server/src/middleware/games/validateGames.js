@@ -155,21 +155,6 @@ export const validateGameCreate = (req, res, next) => {
       message: "Date published must be a 4-digit year (e.g., 2001)",
     });
   }
-  // dlcs
-  if (dlcs) {
-    try {
-      // If dlcs is already a string, parse it to validate, then stringify it properly
-      const parsedDlcs = typeof dlcs === "string" ? JSON.parse(dlcs) : dlcs;
-      formattedDlcs = JSON.stringify(parsedDlcs);
-    } catch (jsonError) {
-      console.error("Invalid DLCs JSON format:", jsonError);
-      return res.status(400).json({
-        success: false,
-        message: "Invalid DLCs data format",
-        error: "DLCs must be valid JSON",
-      });
-    }
-  }
 
   next();
 };

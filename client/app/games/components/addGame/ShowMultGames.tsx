@@ -97,7 +97,7 @@ export function ShowMultGames({
                 </span>
                 {game.developer && (
                   <span className="text-sm text-gray-400 truncate max-w-135">
-                    {game.developer[0].name}
+                    {game.developer[0]?.name || "Unknown Studio"}
                   </span>
                 )}
                 {game.released_year && (

@@ -5,14 +5,15 @@ import Image from "next/image";
 import { GameProps } from "@/types/game";
 import {
   formatDateShort,
-  getStatusBorderGradient,
+  getGameStatusBorderGradient,
 } from "@/utils/formattingUtils";
-import { statusOptions, scoreOptions } from "@/utils/dropDownDetails";
+import { gameStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 //
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { Loading } from "@/app/components/ui/Loading";
 import { Trash2, Plus, X, ChevronsUp } from "lucide-react";
+import { BackdropImage } from "../../components/ui/Backdrop";
 interface GameDetailsProps {
   game: GameProps;
   isOpen: boolean;
@@ -25,6 +26,10 @@ interface GameDetailsProps {
   ) => void;
   addGame?: () => void;
   showDlc?: (igdbId: number, dlcIndex: number) => void;
+  //
+  backdropUrls?: string[];
+  backdropIndex?: number;
+  updateBackdropIndex?: (newIndex: number) => void;
 }
 
 export function GameDetails({
@@ -35,6 +40,9 @@ export function GameDetails({
   addGame,
   isLoading,
   showDlc,
+  backdropUrls,
+  backdropIndex,
+  updateBackdropIndex,
 }: GameDetailsProps) {
   const [localNote, setLocalNote] = useState(game.note || "");
 
@@ -111,6 +119,7 @@ export function GameDetails({
   };
 
   const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
+    if (!updateBackdropIndex) return;
     //detects which side of the div was clicked
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
@@ -118,20 +127,15 @@ export function GameDetails({
     const isRightSide = clickX > elementWidth / 2;
 
     //
-    if (
-      game.curBackdropIndex !== undefined &&
-      game.backdropUrls !== undefined
-    ) {
-      let newCoverIndex = game.curBackdropIndex;
+    if (backdropIndex !== undefined && backdropUrls !== undefined) {
+      let newCoverIndex = backdropIndex;
       if (isRightSide) {
-        newCoverIndex = (game.curBackdropIndex + 1) % game.backdropUrls.length;
+        newCoverIndex = (backdropIndex + 1) % backdropUrls.length;
       } else {
         newCoverIndex =
-          game.curBackdropIndex === 0
-            ? game.backdropUrls.length - 1
-            : game.curBackdropIndex - 1;
+          backdropIndex === 0 ? backdropUrls.length - 1 : backdropIndex - 1;
       }
-      onUpdate(game.id, { curBackdropIndex: newCoverIndex });
+      updateBackdropIndex(newCoverIndex);
     }
   };
 
@@ -142,7 +146,7 @@ export function GameDetails({
       <div className="fixed inset-0" onClick={handleModalClose} />
       {/* BACKGROUND BORDER GRADIENT */}
       <div
-        className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
+        className={`rounded-2xl bg-gradient-to-b ${getGameStatusBorderGradient(
           game.status
         )} py-2 px-2 lg:min-w-[45%] lg:max-w-[45%]`}
       >
@@ -194,73 +198,53 @@ export function GameDetails({
 
             <div className="flex gap-8">
               {/* LEFT SIDE -- PIC */}
-              <div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg">
+              <div className="flex items-center justify-center max-w-62 min-h-93 overflow-hidden">
                 {game.posterUrl !== undefined ? (
                   <>
                     <Image
                       src={game.posterUrl}
                       alt={game.title || "Untitled"}
-                      width={248}
-                      height={372}
-                      className="min-w-62 min-h-93 object-fill"
+                      width={1920}
+                      height={1080}
+                      className="min-w-62 object-contain rounded-lg"
                     />
-                    <div
+                    {/* <div
                       className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
                       style={{
                         background:
                           "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0) 50%, rgba(24,24,27,0.5) 100%)",
                       }}
-                    />
+                    /> */}
                   </>
                 ) : (
                   <div className="min-w-62 min-h-93 bg-gradient-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
                 )}
               </div>
               {/* RIGHT SIDE -- DETAILS */}
-              <div
-                className="flex flex-col flex-1 min-h-93 min-w-62 relative hover:cursor-pointer"
-                onClick={
-                  game.backdropUrls && game.backdropUrls?.length > 1
-                    ? handleCoverChange
-                    : undefined
-                }
-                title={
-                  game.backdropUrls
-                    ? `${game.curBackdropIndex}/${game.backdropUrls?.length}`
-                    : ""
-                }
-              >
+              <div className="flex flex-col flex-1 min-w-62 min-h-93 relative">
                 {/* BACKDROP */}
-                {game.backdropUrls && (
-                  <div className="absolute -top-7 left-20 -right-25 h-[70%] -z-10 overflow-hidden rounded-2xl">
-                    <div className="relative h-full">
-                      <Image
-                        src={game.backdropUrls[game.curBackdropIndex]}
-                        alt="Backdrop"
-                        fill
-                        className="object-cover opacity-30"
-                        style={{
-                          objectPosition: "center -10px", // image positioning
-                        }}
+                {(() => {
+                  const backdropUrl =
+                    addGame && backdropIndex !== undefined
+                      ? backdropUrls?.[backdropIndex]
+                      : game.backdropUrl;
+
+                  return (
+                    backdropUrl && (
+                      <BackdropImage
+                        src={backdropUrl}
+                        width={1920}
+                        height={1080}
                       />
-                      {/* HORIZONTAL */}
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          background:
-                            "linear-gradient(to right, rgba(24,24,27,1) 0%, rgba(24,24,27,0.1) 30%, transparent 50%, rgba(24,24,27,0.2) 100%)",
-                        }}
-                      />
-                      {/* VERTICAL GRADIENT */}
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          background:
-                            "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0.8) 50%, rgba(24,24,27,1) 75%, rgba(24,24,27,1) 100%)",
-                        }}
-                      />
-                    </div>
-                  </div>
+                    )
+                  );
+                })()}
+                {addGame && backdropUrls && backdropUrls?.length > 1 && (
+                  <div
+                    className="absolute top-0 -left-8 -right-8 h-40 hover:cursor-pointer z-5"
+                    onClick={handleCoverChange}
+                    title={`${backdropIndex}/${backdropUrls?.length}`}
+                  />
                 )}
                 <div
                   className={`flex flex-col ${
@@ -268,7 +252,7 @@ export function GameDetails({
                   } flex-1`}
                 >
                   {/* SERIES TITLE */}
-                  {game.mainTitle && (
+                  {game.mainTitle && game.dlcIndex != 0 && (
                     <span className="font-semibold text-zinc-100/80 text-xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-0">
                       {game.mainTitle}
                     </span>
@@ -279,7 +263,7 @@ export function GameDetails({
                       {game.title || "Untitled"}
                     </div>
                     <div
-                      className={`w-full h-0.5 bg-gradient-to-r ${getStatusBorderGradient(
+                      className={`w-full h-0.5 bg-gradient-to-r ${getGameStatusBorderGradient(
                         game.status
                       )} to-zinc-800 rounded-full`}
                     ></div>
@@ -323,7 +307,7 @@ export function GameDetails({
                       <Dropdown
                         value={game.status}
                         onChange={handleStatusChange}
-                        options={statusOptions}
+                        options={gameStatusOptions}
                         customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={
                           game.status === "Completed"

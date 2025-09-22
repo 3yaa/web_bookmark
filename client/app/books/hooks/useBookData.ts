@@ -108,29 +108,30 @@ export function useBookData() {
   // UPDATE
   const updateBook = useCallback(
     async (bookId: number, updates: Partial<BookProps>) => {
-      // only updates these
-      const allowedFields = [
-        "score",
-        "status",
-        "note",
-        "dateCompleted",
-        "curCoverIndex",
-      ];
-      const invalidFields = Object.keys(updates).filter(
-        (field) => !allowedFields.includes(field)
-      );
-      if (invalidFields.length > 0) {
-        console.warn("Invalid fields attempted:", invalidFields);
-        return;
-      }
-      // update local immediately
-      setBooks((prevBooks) =>
-        prevBooks.map((book) =>
-          book.id === bookId ? { ...book, ...updates } : book
-        )
-      );
-      // update db
       try {
+        setBookDataLoading(true);
+        // only updates these
+        const allowedFields = [
+          "score",
+          "status",
+          "note",
+          "dateCompleted",
+          "curCoverIndex",
+        ];
+        const invalidFields = Object.keys(updates).filter(
+          (field) => !allowedFields.includes(field)
+        );
+        if (invalidFields.length > 0) {
+          console.warn("Invalid fields attempted:", invalidFields);
+          return;
+        }
+        // update local immediately
+        setBooks((prevBooks) =>
+          prevBooks.map((book) =>
+            book.id === bookId ? { ...book, ...updates } : book
+          )
+        );
+        // update db
         const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books/${bookId}`;
         const options = {
           method: "PATCH",
@@ -145,6 +146,8 @@ export function useBookData() {
         }
       } catch (e) {
         console.error("Error updating book", e);
+      } finally {
+        setBookDataLoading(false);
       }
     },
     [authFetch]
@@ -155,7 +158,11 @@ export function useBookData() {
     async (bookId: number) => {
       try {
         setBookDataLoading(true);
-        //
+        // update locally
+        setBooks((prevBooks) => {
+          return prevBooks.filter((book) => book.id !== bookId);
+        });
+        // update db
         const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books/${bookId}`;
         const options = {
           method: "DELETE",
@@ -167,12 +174,6 @@ export function useBookData() {
         if (!response.ok) {
           throw new Error(`HTTP error--status: ${response.status}`);
         }
-        //
-        const resJson = await response.json();
-        const deletedBook = resJson.data;
-        setBooks((prevBooks) => {
-          return prevBooks.filter((book) => book.id !== deletedBook.id);
-        });
       } catch (e) {
         console.error("Error deleting book", e);
       } finally {

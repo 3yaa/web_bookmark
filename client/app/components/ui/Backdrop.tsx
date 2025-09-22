@@ -1,0 +1,38 @@
+import Image from "next/image";
+
+interface BackdropImageProps {
+  src: string;
+  width: number;
+  height: number;
+}
+
+export const BackdropImage = ({ src, width, height }: BackdropImageProps) => (
+  <div className="absolute -top-7 left-20 -right-25 h-[70%] -z-10 overflow-hidden">
+    <div className="relative h-full">
+      <Image
+        src={src}
+        alt="Backdrop"
+        width={width}
+        height={height}
+        className="object-cover opacity-30"
+        style={{ objectPosition: "center -10px" }}
+      />
+      {/* HORIZONTAL */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(to right, rgba(24,24,27,1) 0%, rgba(24,24,27,0.2) 30%, transparent 50%, rgba(24,24,27,0.2) 100%)",
+        }}
+      />
+      {/* VERTICAL */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0.8) 50%, rgba(24,24,27,1) 75%, rgba(24,24,27,1) 100%)",
+        }}
+      />
+    </div>
+  </div>
+);

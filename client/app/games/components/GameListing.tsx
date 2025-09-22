@@ -46,7 +46,6 @@ export default function GameList() {
           } else {
             mainTitle = selectedGame.mainTitle;
           }
-          console.log(mainTitle, "---", dlcIndex);
           // need to call external API
           setTitleToAdd({
             dlcIndex: dlcIndex,
@@ -113,11 +112,9 @@ export default function GameList() {
     <div className="min-h-screen">
       <div className="w-full md:w-[70%] lg:w-[60%] mx-auto">
         {/* HEADING */}
-        <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_7rem_0.9fr_6rem_8rem_10rem_8rem_1fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
+        <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
           <span className="font-semibold text-zinc-300 text-sm">#</span>
-          <span className="font-semibold text-zinc-300 text-sm pl-2.5">
-            Cover
-          </span>
+          <span className="font-semibold text-zinc-300 text-sm">Cover</span>
           {/* TITLE */}
           <div
             className="flex justify-start items-center gap-1 hover:cursor-pointer"
@@ -229,7 +226,7 @@ export default function GameList() {
           sortedGames.map((game, index) => (
             <div
               key={game.id}
-              className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_7rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
+              className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
                 game.status
               )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
                 index === 0 ? "pt-1.5 rounded-bl-none" : "rounded-l-none"
@@ -242,17 +239,17 @@ export default function GameList() {
               <span className="font-medium text-zinc-300 text-sm">
                 {index + 1}
               </span>
-              <div className="w-12.5 h-18">
+              <div className="w-12.5">
                 {game.posterUrl !== undefined ? (
                   <Image
                     src={game.posterUrl}
                     alt={game.title || "Untitled"}
-                    width={50}
-                    height={75}
-                    className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
+                    width={1920}
+                    height={1080}
+                    className="w-full object rounded-[0.25rem] border border-zinc-600/30"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-[0.25rem] border border-zinc-600/30"></div>
+                  <div className="w-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-[0.25rem] border border-zinc-600/30"></div>
                 )}
               </div>
               <div className="flex flex-col min-w-0 flex-1">

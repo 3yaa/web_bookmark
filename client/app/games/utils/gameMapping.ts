@@ -31,8 +31,6 @@ export function mapIGDBDataToGame(dataGame: IGDBProps): Partial<GameProps> {
       })) || []),
     ],
     dlcIndex: 0,
-    backdropUrls: dataGame.screenshot_urls?.map((item) => item.ss_url) || [],
-    curBackdropIndex: 1,
   };
 }
 
@@ -46,8 +44,6 @@ export function mapIGDBDlcsDataToGame(
     dateReleased: dataDlc.released_year,
     posterUrl: dataDlc.cover_url,
     studio: dataDlc.developer?.[0]?.name,
-    backdropUrls: dataDlc.screenshot_urls?.map((item) => item.ss_url) || [],
-    curBackdropIndex: 1,
   };
 }
 

@@ -22,7 +22,7 @@ export const formatDate = (value?: string | Date | null): string => {
 
 // STATUS BORDER COLORS
 
-//for booklisting
+//for listing
 export const getStatusBorderColor = (status: MediaStatus) => {
   switch (status) {
     case "Completed":
@@ -42,6 +42,19 @@ export const getStatusBorderGradient = (status: Partial<MediaStatus>) => {
     case "Completed":
       return "from-emerald-500/50";
     case "Want to Read":
+      return "from-blue-500/50";
+    case "Dropped":
+      return "from-red-500/40";
+    default:
+      return "from-zinc-600/40";
+  }
+};
+
+export const getGameStatusBorderGradient = (status: Partial<MediaStatus>) => {
+  switch (status) {
+    case "Completed":
+      return "from-emerald-500/50";
+    case "Playing":
       return "from-blue-500/50";
     case "Dropped":
       return "from-red-500/40";

@@ -1,126 +1,147 @@
+import { useAuthFetch } from "@/hooks/useAuthFetch";
 import { GameProps } from "@/types/game";
 import { useEffect, useState, useCallback } from "react";
 
-const SHOWS_STORAGE_KEY = "mouthful_games";
-
 export function useGameData() {
-  const [games, setShows] = useState<GameProps[]>([]);
-  const [showDataLoading, setShowDataLoading] = useState(true);
+  const { authFetch, isAuthLoading } = useAuthFetch();
+  const [games, setGames] = useState<GameProps[]>([]);
+  const [gameDataLoading, setGameDataLoading] = useState(true);
 
-  const isProcessingGame = showDataLoading;
-
-  // Helper functions for localStorage
-  const loadShowsFromStorage = useCallback((): GameProps[] => {
-    try {
-      const stored = localStorage.getItem(SHOWS_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch (error) {
-      console.error("Error loading shows from localStorage:", error);
-      return [];
-    }
-  }, []);
-
-  const saveShowsToStorage = useCallback((shows: GameProps[]) => {
-    try {
-      localStorage.setItem(SHOWS_STORAGE_KEY, JSON.stringify(shows));
-    } catch (error) {
-      console.error("Error saving shows to localStorage:", error);
-    }
-  }, []);
+  const isProcessingGame = gameDataLoading || isAuthLoading;
 
   // READ
-  const getShows = useCallback(async () => {
+  const getGames = useCallback(async () => {
     try {
-      setShowDataLoading(true);
-      const storedShows = loadShowsFromStorage();
-      setShows(storedShows);
+      setGameDataLoading(true);
+      //
+      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/games`;
+      const response = await authFetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error--status: ${response.status}`);
+      }
+      //
+      const resJson = await response.json();
+      const games = resJson.data || [];
+      setGames(games);
     } catch (e) {
-      console.error("Error loading shows", e);
-      setShows([]);
+      console.error("Error loading games", e);
+      setGames([]);
     } finally {
-      setShowDataLoading(false);
+      setGameDataLoading(false);
     }
-  }, [loadShowsFromStorage]);
+  }, [authFetch]);
 
   // CREATE
   const addGame = useCallback(
-    async (show: GameProps) => {
+    async (game: GameProps) => {
       // req data
-      if (!show.title || !show.status || !show.igdbId) {
+      if (!game.title || !game.status || !game.igdbId) {
         return;
       }
-
+      //
       try {
-        setShowDataLoading(true);
-
-        // Generate a temporary ID if not provided
-        const newShow: GameProps = {
-          ...show,
-          id: show.id || Date.now(), // Use timestamp as temporary ID
+        setGameDataLoading(true);
+        //
+        const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/games`;
+        const options = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(game),
         };
-
-        setShows((prev) => {
-          const updated = [...prev, newShow];
-          saveShowsToStorage(updated);
-          return updated;
-        });
+        const response = await authFetch(url, options);
+        if (!response.ok) {
+          throw new Error(`HTTP error--status: ${response.status}`);
+        }
+        //
+        const resJson = await response.json();
+        const newGame = resJson.data;
+        setGames((prev) => [...prev, newGame]);
       } catch (e) {
-        console.error("Error adding show", e);
+        console.error("Error adding game", e);
       } finally {
-        setShowDataLoading(false);
+        setGameDataLoading(false);
       }
     },
-    [saveShowsToStorage]
+    [authFetch]
   );
 
   // UPDATE
   const updateGame = useCallback(
-    async (showId: number, updates: Partial<GameProps>) => {
-      // only updates these
-      const allowedFields = ["score", "status", "note", "dateCompleted"];
-      const invalidFields = Object.keys(updates).filter(
-        (field) => !allowedFields.includes(field)
-      );
-      if (invalidFields.length > 0) {
-        console.warn("Invalid fields attempted:", invalidFields);
-        return;
-      }
-
-      // update local immediately
-      setShows((prevShows) => {
-        const updated = prevShows.map((show) =>
-          show.id === showId ? { ...show, ...updates } : show
+    async (gameId: number, updates: Partial<GameProps>) => {
+      try {
+        setGameDataLoading(true);
+        // only updates these
+        const allowedFields = ["score", "status", "note", "dateCompleted"];
+        const invalidFields = Object.keys(updates).filter(
+          (field) => !allowedFields.includes(field)
         );
-        saveShowsToStorage(updated);
-        return updated;
-      });
+        if (invalidFields.length > 0) {
+          console.warn("Invalid fields attempted:", invalidFields);
+          return;
+        }
+        // update locally
+        setGames((prev) =>
+          prev.map((game) =>
+            game.id === gameId ? { ...game, ...updates } : game
+          )
+        );
+        // update db
+        const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/games/${gameId}`;
+        const options = {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updates),
+        };
+        const response = await authFetch(url, options);
+        if (!response.ok) {
+          throw new Error(`HTTP error--status: ${response.status}`);
+        }
+      } catch (e) {
+        console.error("Error updating book", e);
+      } finally {
+        setGameDataLoading(false);
+      }
     },
-    [saveShowsToStorage]
+    [authFetch]
   );
 
   // DELETE
   const deleteGame = useCallback(
-    async (showId: number) => {
+    async (gameId: number) => {
       try {
-        setShowDataLoading(true);
-
-        setShows((prevShows) => {
-          const updated = prevShows.filter((show) => show.id !== showId);
-          saveShowsToStorage(updated);
-          return updated;
+        setGameDataLoading(true);
+        // update locally
+        setGames((prev) => {
+          return prev.filter((game) => game.id !== gameId);
         });
+        // update db
+        const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/games/${gameId}`;
+        const options = {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+        const response = await authFetch(url, options);
+        if (!response.ok) {
+          throw new Error(`HTTP error--status: ${response.status}`);
+        }
       } catch (e) {
-        console.error("Error deleting show", e);
+        console.error("Error deleting book", e);
       } finally {
-        setShowDataLoading(false);
+        setGameDataLoading(false);
       }
     },
-    [saveShowsToStorage]
+    [authFetch]
   );
 
-  // Load shows on component mount
+  // Load games on component mount
   useEffect(() => {
-    getShows();
+    getGames();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

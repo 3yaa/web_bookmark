@@ -50,6 +50,8 @@ export function AddGame({
   //
   const [allNewGames, setAllNewGames] = useState<IGDBProps[]>([]);
   const [newGame, setNewGame] = useState<Partial<GameProps>>({});
+  const [backdropUrls, setBackdropUrls] = useState<string[]>([]);
+  const [backdropIndex, setBackdropIndex] = useState<number>(0);
   //
   const { searchForGame, searchForGameDlc, isGameSearching } = useGameSearch();
 
@@ -57,6 +59,9 @@ export function AddGame({
     setFailedReason("");
     setIsDupTitle(false);
     setIsAddManual(false);
+    //
+    setBackdropUrls([]);
+    setBackdropIndex(0);
     //
     setActiveModal(null);
     setAllNewGames([]);
@@ -86,6 +91,7 @@ export function AddGame({
     const mainGame = response?.[0];
     if (!mainGame) return null;
     //
+    setBackdropUrls(mainGame.screenshot_urls?.map((ss) => ss.ss_url) || []);
     setNewGame(mapIGDBDataToGame(mainGame));
     setAllNewGames(response);
     return {
@@ -114,7 +120,7 @@ export function AddGame({
     }
   }, [isDuplicate, handleTitleSearch]);
 
-  const handleDlcSearch = useCallback(
+  const handleDlcTitleSearch = useCallback(
     async (igdbId: number) => {
       // make call
       const response = await searchForGameDlc(igdbId);
@@ -125,6 +131,7 @@ export function AddGame({
         mainDlc,
         titleFromAbove?.mainTitle || ""
       );
+      setBackdropUrls(mainDlc.screenshot_urls?.map((ss) => ss.ss_url) || []);
       setNewGame((prev) => ({
         ...prev,
         ...mappedData,
@@ -133,7 +140,7 @@ export function AddGame({
     [searchForGameDlc, titleFromAbove]
   );
 
-  const handleDlcDetailsSearch = useCallback(async () => {
+  const handleDlcSearch = useCallback(async () => {
     setActiveModal("gameDetails");
     //
     const selectedDlc = titleFromAbove?.dlcs[titleFromAbove.dlcIndex];
@@ -148,7 +155,7 @@ export function AddGame({
       return;
     }
     //
-    await handleDlcSearch(igdbId);
+    await handleDlcTitleSearch(igdbId);
     setNewGame((prev) => ({
       ...prev,
       ...{
@@ -165,7 +172,7 @@ export function AddGame({
       setActiveModal(null);
       return;
     }
-  }, [titleFromAbove, isDuplicate, handleDlcSearch]);
+  }, [titleFromAbove, isDuplicate, handleDlcTitleSearch]);
 
   const handlePickFromMultGames = useCallback((game: IGDBProps) => {
     try {
@@ -202,6 +209,7 @@ export function AddGame({
     }
     const finalGame = {
       ...newGame,
+      backdropUrl: backdropUrls[backdropIndex],
       status: isStatus,
     };
     onAddGame(finalGame as GameProps);
@@ -209,6 +217,7 @@ export function AddGame({
   };
 
   const handleGameDetailsClose = () => {
+    reset();
     setActiveModal(null);
     if (titleFromAbove) {
       onClose();
@@ -249,7 +258,7 @@ export function AddGame({
   // for when to search game without modal
   useEffect(() => {
     if (titleFromAbove) {
-      handleDlcDetailsSearch();
+      handleDlcSearch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [titleFromAbove]);
@@ -311,6 +320,9 @@ export function AddGame({
             style: "h-8 w-8 border-emerald-400",
             text: "Searching...",
           }}
+          backdropUrls={backdropUrls}
+          backdropIndex={backdropIndex}
+          updateBackdropIndex={(newIndex: number) => setBackdropIndex(newIndex)}
         />
       )}
       {activeModal === "multOptions" && (

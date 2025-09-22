@@ -14,6 +14,20 @@ export const statusOptions = [
   },
 ];
 
+export const gameStatusOptions = [
+  {
+    value: "Playing",
+    label: "Playing",
+    className: "text-blue-500",
+  },
+  { value: "Completed", label: "Completed", className: "text-green-600" },
+  {
+    value: "Dropped",
+    label: "Dropped",
+    className: "text-red-500",
+  },
+];
+
 // SCORE
 
 const getScoreLabel = (score: number): string => {

@@ -9,15 +9,14 @@ export interface GameProps {
   score?: number;
   dateCompleted?: Date | null;
   note?: string;
-  status: "Playing" | "Completed"; //!--REQUIRED
+  status: "Playing" | "Completed" | "Dropped"; //!--REQUIRED
   // from rawg
   igdbId: number; //!--REQUIRED
   title: string; //!--REQUIRED
   studio?: string;
   dateReleased?: number;
   posterUrl?: string;
-  backdropUrls?: string[];
-  curBackdropIndex: number;
+  backdropUrl?: string;
   //
   dlcIndex: number;
   mainTitle?: string;

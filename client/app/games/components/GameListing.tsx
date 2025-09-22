@@ -239,7 +239,7 @@ export default function GameList() {
               <span className="font-medium text-zinc-300 text-sm">
                 {index + 1}
               </span>
-              <div className="w-12.5">
+              <div className="w-12.5 h-18">
                 {game.posterUrl !== undefined ? (
                   <Image
                     src={game.posterUrl}

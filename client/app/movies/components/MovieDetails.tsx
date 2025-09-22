@@ -20,6 +20,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { BackdropImage } from "@/app/components/ui/Backdrop";
 interface MovieDetailsProps {
   movie: MovieProps;
   isOpen: boolean;
@@ -83,6 +84,7 @@ export function MovieDetails({
   };
 
   const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    console.log(movie.posterUrl);
     setLocalNote(e.target.value);
   };
 
@@ -193,8 +195,8 @@ export function MovieDetails({
                     <Image
                       src={movie.posterUrl}
                       alt={movie.title || "Untitled"}
-                      width={248}
-                      height={372}
+                      width={1280}
+                      height={720}
                       className="min-w-[62] min-h-93 object-fill"
                     />
                     <div
@@ -213,35 +215,11 @@ export function MovieDetails({
               <div className="flex flex-col flex-1 min-h-93 min-w-62 relative">
                 {/* BACKDROP */}
                 {movie.backdropUrl && (
-                  <div className="absolute -top-7 left-20 -right-25 h-[70%] -z-10 overflow-hidden rounded-2xl">
-                    <div className="relative h-full">
-                      <Image
-                        src={movie.backdropUrl}
-                        alt="Backdrop"
-                        fill
-                        className="object-cover opacity-30"
-                        style={{
-                          objectPosition: "center -10px", // image positioning
-                        }}
-                      />
-                      {/* HORIZONTAL */}
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          background:
-                            "linear-gradient(to right, rgba(24,24,27,1) 0%, rgba(24,24,27,0.1) 30%, transparent 50%, rgba(24,24,27,0.2) 100%)",
-                        }}
-                      />
-                      {/* VERTICAL GRADIENT */}
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          background:
-                            "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0.8) 50%, rgba(24,24,27,1) 75%, rgba(24,24,27,1) 100%)",
-                        }}
-                      />
-                    </div>
-                  </div>
+                  <BackdropImage
+                    src={movie.backdropUrl}
+                    width={1280}
+                    height={720}
+                  />
                 )}
                 <div
                   className={`flex flex-col ${

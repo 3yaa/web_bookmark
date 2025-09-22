@@ -92,6 +92,7 @@ export function BookDetails({
     if (localNote !== book.note) {
       onUpdate(book.id, { note: localNote });
     }
+    console.log(book.coverUrl);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

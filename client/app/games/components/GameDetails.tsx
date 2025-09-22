@@ -206,15 +206,15 @@ export function GameDetails({
                       alt={game.title || "Untitled"}
                       width={1920}
                       height={1080}
-                      className="min-w-62 object-contain rounded-lg"
+                      className="min-w-62 min-h-93 object-cover rounded-lg"
                     />
-                    {/* <div
+                    <div
                       className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
                       style={{
                         background:
                           "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0) 50%, rgba(24,24,27,0.5) 100%)",
                       }}
-                    /> */}
+                    />
                   </>
                 ) : (
                   <div className="min-w-62 min-h-93 bg-gradient-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>

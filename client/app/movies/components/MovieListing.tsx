@@ -232,8 +232,8 @@ export default function MovieList() {
                   <Image
                     src={movie.posterUrl}
                     alt={movie.title || "Untitled"}
-                    width={50}
-                    height={75}
+                    width={1280}
+                    height={720}
                     className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
                   />
                 ) : (

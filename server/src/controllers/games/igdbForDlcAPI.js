@@ -32,13 +32,13 @@ export async function useIgdbForDlcAPI(req, res) {
         title: dlc.name,
         released_year: new Date(dlc.first_release_date * 1000).getFullYear(),
         cover_url: dlc.cover
-          ? `https://images.igdb.com/igdb/image/upload/t_original/${dlc.cover.image_id}.jpg`
+          ? `https://images.igdb.com/igdb/image/upload/t_1080p/${dlc.cover.image_id}.jpg`
           : null,
         developer: (dlc.involved_companies || [])
           .filter((company) => company.developer)
           .map((company) => ({ name: company.company.name })),
         screenshot_urls: (dlc.screenshots || []).map((ss) => ({
-          ss_url: `https://images.igdb.com/igdb/image/upload/t_original/${ss.image_id}.jpg`,
+          ss_url: `https://images.igdb.com/igdb/image/upload/t_1080p/${ss.image_id}.jpg`,
         })),
       };
     });

@@ -32,14 +32,14 @@ export async function useIgdbForGameAPI(req, res) {
         title: game.name,
         released_year: new Date(game.first_release_date * 1000).getFullYear(),
         cover_url: game.cover
-          ? `https://images.igdb.com/igdb/image/upload/t_original/${game.cover.image_id}.jpg`
+          ? `https://images.igdb.com/igdb/image/upload/t_1080p/${game.cover.image_id}.jpg`
           : null,
         developer: (game.involved_companies || [])
           .filter((company) => company.developer)
           .map((company) => ({ name: company.company.name })),
         expansions: game.expansions,
         screenshot_urls: (game.screenshots || []).map((ss) => ({
-          ss_url: `https://images.igdb.com/igdb/image/upload/t_original/${ss.image_id}.jpg`,
+          ss_url: `https://images.igdb.com/igdb/image/upload/t_1080p/${ss.image_id}.jpg`,
         })),
       };
     });

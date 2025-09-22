@@ -17,7 +17,7 @@ import { externalGamesAPIRouter } from "./src/routes/games/externalGamesAPIRoute
 //
 import { booksRouter } from "./src/routes/books/booksRoute.js";
 import { moviesRouter } from "./src/routes/movies/moviesRoute.js";
-
+import { gamesRouter } from "./src/routes/games/gamesRoute.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -45,6 +45,7 @@ app.use("/books-api", externalBooksAPIRouter);
 app.use("/games-api", externalGamesAPIRouter);
 app.use("/movies", moviesRouter);
 app.use("/books", booksRouter);
+app.use("/games", gamesRouter);
 
 app.listen(PORT, () => {
   console.log(`server running on PORT: ${PORT}`);

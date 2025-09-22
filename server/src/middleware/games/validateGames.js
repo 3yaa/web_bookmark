@@ -1,22 +1,22 @@
 const MAX_SCORE = 11;
 const MAX_NOTE_LENGTH = 1000;
-const VALID_STATUSES = ["Want to Watch", "Completed", "Dropped"];
+const VALID_STATUSES = ["Playing", "Completed", "Dropped"];
 
-export const validateMovieId = (req, res, next) => {
-  const movieId = req.params.id;
+export const validateGameId = (req, res, next) => {
+  const gameId = req.params.id;
 
-  if (!movieId || isNaN(movieId) || parseInt(movieId) <= 0) {
+  if (!gameId || isNaN(gameId) || parseInt(gameId) <= 0) {
     return res.status(400).json({
       success: false,
-      message: "Invalid Movie ID format",
+      message: "Invalid Game ID format",
     });
   }
 
-  req.params.id = parseInt(movieId);
+  req.params.id = parseInt(gameId);
   next();
 };
 
-export const validateMovieData = (req, res, next) => {
+export const validateGameData = (req, res, next) => {
   const { score, note, dateCompleted } = req.body;
   // for score
   if (score !== undefined) {
@@ -72,7 +72,7 @@ export const validateMovieData = (req, res, next) => {
 };
 
 //
-export const validateMoviePatch = (req, res, next) => {
+export const validateGamePatch = (req, res, next) => {
   const updates = req.body;
   const allowedFields = ["score", "status", "note", "dateCompleted"];
   // for status
@@ -80,7 +80,7 @@ export const validateMoviePatch = (req, res, next) => {
     return res.status(400).json({
       success: false,
       message:
-        "Invalid status field provided ('Want to Watch' | 'Completed' | 'Dropped')",
+        "Invalid status field provided ('Playing' | 'Completed' | 'Dropped')",
     });
   }
   // check if exists
@@ -90,7 +90,6 @@ export const validateMoviePatch = (req, res, next) => {
       message: "No update field provided",
     });
   }
-
   // check if allowed
   const invalidFields = Object.keys(updates).filter(
     (field) => !allowedFields.includes(field)
@@ -113,32 +112,32 @@ export const validateMoviePatch = (req, res, next) => {
   next();
 };
 
-export const validateMovieCreate = (req, res, next) => {
-  const { title, datePublished, status, imdbId } = req.body;
+export const validateGameCreate = (req, res, next) => {
+  const { title, datePublished, status, igdbId } = req.body;
   // REQUIRED FIELDS
   // title
   if (!title || title.trim() === "") {
     return res.status(400).json({
       success: false,
-      message: "No title to create movie",
+      message: "No title to create game",
     });
   }
-  // imdbId
-  if (!imdbId) {
+  // igdbId
+  if (!igdbId) {
     return res.status(400).json({
       success: false,
-      message: "No imdbId to create movie",
+      message: "No igdbId to create game",
     });
   }
   // status
   if (!status) {
-    req.body.status = "Want to Watch";
+    req.body.status = "Playing";
   } else {
     if (!VALID_STATUSES.includes(status)) {
       return res.status(400).json({
         success: false,
         message:
-          "Invalid status provided ('Want to Watch' | 'Completed' | 'Dropped')",
+          "Invalid status provided ('Playing' | 'Completed' | 'Dropped')",
       });
     }
   }

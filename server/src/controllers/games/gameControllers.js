@@ -186,7 +186,7 @@ export const createGame = async (req, res) => {
       dateReleased,
       mainTitle,
       dlcIndex,
-      dlcs,
+      dlcs ? JSON.stringify(dlcs) : null,
       status,
       score,
       dateCompleted,

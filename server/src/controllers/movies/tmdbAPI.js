@@ -29,7 +29,7 @@ export async function useTmdbAPI(req, res) {
     const movie = movies[0];
     const processedMovie = {
       poster_url: movie.poster_path
-        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+        ? `https://image.tmdb.org/t/p/w1280${movie.poster_path}`
         : null,
       backdrop_url: movie.backdrop_path
         ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}`

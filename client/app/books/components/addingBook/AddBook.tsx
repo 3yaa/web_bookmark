@@ -23,6 +23,7 @@ import { ShowMultBooks } from "./ShowMultBooks";
 import { ManualAddBook } from "./ManualAddBook";
 //
 import { useBookSearch } from "@/app/books/hooks/useBookSearch";
+import { filterCovers } from "@/app/games/utils/filterCovers";
 
 interface AddBookProps {
   isOpen: boolean;
@@ -59,7 +60,11 @@ export function AddBook({
     GoogleBooksProps: [],
   });
   const [allSeries, setAllSeries] = useState<WikidataProps[]>([]);
-  const [curSeries, setCurSeries] = useState<number>(0);
+  const [curSeries, setCurSeries] = useState(0);
+  //
+  const [coverUrls, setCoverUrls] = useState<string[]>([]);
+  const [coverIndex, setCoverIndex] = useState(0);
+  const [cleaningCover, setCleaningCover] = useState(false);
   //
   const {
     searchForBooks,
@@ -75,6 +80,8 @@ export function AddBook({
     //
     setActiveModal(null);
     setNewBook({});
+    setCoverUrls([]);
+    setCoverIndex(0);
     setAllNewBooks({
       OpenLibBooks: [],
       GoogleBooksProps: [],
@@ -104,6 +111,12 @@ export function AddBook({
     const olData = response?.[0];
     if (!olData) return null;
     //save books
+    try {
+      setCleaningCover(true);
+      setCoverUrls((await filterCovers(olData.cover_urls)) || []);
+    } finally {
+      setCleaningCover(false);
+    }
     setAllNewBooks({
       OpenLibBooks: response,
       GoogleBooksProps: [],
@@ -179,6 +192,8 @@ export function AddBook({
 
   const handlePickFromMultBooks = useCallback(
     async (book: OpenLibraryProps | GoogleBooksProps) => {
+      setCoverUrls([]);
+      setCoverIndex(0);
       // ol
       if ("key" in book) {
         //check if clicked book is duplicate
@@ -191,7 +206,14 @@ export function AddBook({
           return;
         }
         //
+        try {
+          setCleaningCover(true);
+          setCoverUrls((await filterCovers(book.cover_urls)) || []);
+        } finally {
+          setCleaningCover(false);
+        }
         setNewBook(mapOpenLibDataToBook(book));
+        setActiveModal("bookDetails");
         if (key) await handleSeriesSearch(key);
       }
       // google -- NOT CALLING WIKI FOR GOOGLE
@@ -207,8 +229,8 @@ export function AddBook({
         }
         //
         setNewBook(mapGoogleDataToBook(book));
+        setActiveModal("bookDetails");
       }
-      setActiveModal("bookDetails");
     },
     [handleSeriesSearch, isDuplicate]
   );
@@ -243,6 +265,7 @@ export function AddBook({
     }
     const finalBook = {
       ...newBook,
+      coverUrl: coverUrls[coverIndex],
       status: defaultStatus,
     };
     onAddBook(finalBook as BookProps);
@@ -379,13 +402,16 @@ export function AddBook({
           onUpdate={handleBookDetailsUpdates}
           addBook={handleBookAdd}
           isLoading={{
-            isTrue: isBookSearching,
+            isTrue: isBookSearching || cleaningCover,
             style: "h-8 w-8 border-emerald-400",
-            text: "Searching...",
+            text: cleaningCover ? "Cleaning cover..." : "Searching...",
           }}
           showBookInSeries={
             allSeries.length > 1 ? handleSeriesChange : undefined
           }
+          coverUrls={coverUrls}
+          coverIndex={coverIndex}
+          updateCoverIndex={(newIndex: number) => setCoverIndex(newIndex)}
         />
       )}
       {activeModal === "multOptions" && (

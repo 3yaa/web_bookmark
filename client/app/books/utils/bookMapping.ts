@@ -5,13 +5,6 @@ import {
   WikidataProps,
 } from "@/types/book";
 
-export function getCoverUrl(
-  coverOLID?: string,
-  size: "S" | "M" | "L" = "L"
-): string {
-  return `https://covers.openlibrary.org/b/olid/${coverOLID}-${size}.jpg`;
-}
-
 export function resetBookValues(book: Partial<BookProps>): Partial<BookProps> {
   return {
     id: book.id,
@@ -22,8 +15,6 @@ export function resetBookValues(book: Partial<BookProps>): Partial<BookProps> {
     note: undefined,
     author: undefined,
     coverUrl: undefined,
-    coverEditions: undefined,
-    curCoverIndex: undefined,
     datePublished: undefined,
     seriesTitle: undefined,
     placeInSeries: undefined,
@@ -33,13 +24,13 @@ export function resetBookValues(book: Partial<BookProps>): Partial<BookProps> {
   };
 }
 
-export function mapOpenLibDataToBook(dataOL: OpenLibraryProps): Partial<BookProps> {
+export function mapOpenLibDataToBook(
+  dataOL: OpenLibraryProps
+): Partial<BookProps> {
   return {
     key: dataOL.key,
     title: dataOL.title,
     author: dataOL.author_name?.[0],
-    coverEditions: dataOL.edition_key,
-    curCoverIndex: 0,
     datePublished: dataOL.first_publish_year,
   };
 }

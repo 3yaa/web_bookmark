@@ -246,6 +246,7 @@ export default function GameList() {
                     alt={game.title || "Untitled"}
                     width={1920}
                     height={1080}
+                    priority
                     className="w-full object rounded-[0.25rem] border border-zinc-600/30"
                   />
                 ) : (

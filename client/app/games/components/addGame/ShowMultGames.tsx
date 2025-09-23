@@ -73,7 +73,7 @@ export function ShowMultGames({
           {games.map((game, index) => (
             <button
               key={`${game.igdbId}-${index}`}
-              className="relative w-full text-left p-2 rounded-xl bg-zinc-800/60 hover:bg-zinc-600/40 transition flex gap-5"
+              className="relative w-full text-left p-2 rounded-xl bg-zinc-800/60 hover:bg-zinc-600/40 transition flex gap-5 hover:cursor-pointer"
               onClick={() => onClickedGame(game)}
             >
               {/* COVER */}

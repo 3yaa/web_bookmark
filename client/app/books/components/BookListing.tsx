@@ -11,7 +11,6 @@ import { AddBook } from "./addingBook/AddBook";
 import { BookDetails } from "./BookDetails";
 // utils and ui components
 import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
-import { getCoverUrl } from "@/app/books/utils/bookMapping";
 import { Loading } from "@/app/components/ui/Loading";
 import { NavMenu } from "./NavMenu";
 
@@ -230,21 +229,13 @@ export default function BookList() {
                 {index + 1}
               </span>
               <div className="w-12.5 h-18">
-                {book.curCoverIndex !== undefined &&
-                book.curCoverIndex !== null ? (
-                  <Image
-                    src={getCoverUrl(book.coverEditions?.[book.curCoverIndex])}
-                    alt={book.title || "Untitled"}
-                    width={50}
-                    height={75}
-                    className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
-                  />
-                ) : book.coverUrl ? (
+                {book.coverUrl ? (
                   <Image
                     src={book.coverUrl}
                     alt={book.title || "Untitled"}
-                    width={50}
-                    height={75}
+                    width={248}
+                    height={372}
+                    priority
                     className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
                   />
                 ) : (

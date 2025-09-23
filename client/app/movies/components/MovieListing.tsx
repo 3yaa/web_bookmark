@@ -234,6 +234,7 @@ export default function MovieList() {
                     alt={movie.title || "Untitled"}
                     width={1280}
                     height={720}
+                    priority
                     className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
                   />
                 ) : (

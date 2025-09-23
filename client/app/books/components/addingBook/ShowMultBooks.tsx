@@ -5,7 +5,6 @@ import {
 } from "@/types/book";
 import { X, DiamondPlus } from "lucide-react";
 import Image from "next/image";
-import { getCoverUrl } from "../../utils/bookMapping";
 import { Loading } from "@/app/components/ui/Loading";
 
 interface MultSearchProps {
@@ -122,7 +121,7 @@ export function ShowMultBooks({
             combinedBooks.map((item, index) => (
               <button
                 key={`${item.source}-${index}`}
-                className="relative w-full text-left p-2 rounded-xl bg-zinc-800/60 hover:bg-zinc-600/40 transition flex gap-5"
+                className="relative w-full text-left p-2 rounded-xl bg-zinc-800/60 hover:bg-zinc-600/40 transition flex gap-5 hover:cursor-pointer"
                 onClick={() => onClickedBook(item.book)}
               >
                 {/* SOURCE */}
@@ -132,14 +131,14 @@ export function ShowMultBooks({
                 {/* COVER */}
                 <div className="w-12.5 h-18">
                   {item.source === "OpenLib" &&
-                  (item.book as OpenLibraryProps).edition_key !== undefined ? (
+                  (item.book as OpenLibraryProps).cover_urls !== undefined ? (
                     <Image
-                      src={getCoverUrl(
-                        (item.book as OpenLibraryProps).edition_key?.at(0)
-                      )}
+                      src={
+                        (item.book as OpenLibraryProps).cover_urls?.at(0) || ""
+                      }
                       alt={item.book.title || "Untitled"}
-                      width={50}
-                      height={75}
+                      width={248}
+                      height={372}
                       className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
                     />
                   ) : item.source === "GoogleB" &&
@@ -147,8 +146,8 @@ export function ShowMultBooks({
                     <Image
                       src={(item.book as GoogleBooksProps).cover_url!}
                       alt={item.book.title || "Untitled"}
-                      width={50}
-                      height={75}
+                      width={248}
+                      height={372}
                       className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
                     />
                   ) : (

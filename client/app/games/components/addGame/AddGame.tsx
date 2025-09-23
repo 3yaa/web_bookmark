@@ -51,7 +51,7 @@ export function AddGame({
   const [allNewGames, setAllNewGames] = useState<IGDBProps[]>([]);
   const [newGame, setNewGame] = useState<Partial<GameProps>>({});
   const [backdropUrls, setBackdropUrls] = useState<string[]>([]);
-  const [backdropIndex, setBackdropIndex] = useState<number>(0);
+  const [backdropIndex, setBackdropIndex] = useState(0);
   //
   const { searchForGame, searchForGameDlc, isGameSearching } = useGameSearch();
 

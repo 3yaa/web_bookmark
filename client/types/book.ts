@@ -16,8 +16,6 @@ export interface BookProps {
   title: string; //!--REQUIRED
   author?: string;
   coverUrl?: string;
-  coverEditions?: string[];
-  curCoverIndex?: number;
   datePublished?: number;
   // from WikidataProps
   seriesTitle?: string;
@@ -38,7 +36,7 @@ export interface OpenLibraryProps {
   author_name?: string[];
   first_publish_year?: number;
   // covers
-  edition_key?: string[];
+  cover_urls?: string[];
 }
 
 export interface GoogleBooksProps {

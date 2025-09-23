@@ -72,7 +72,7 @@ export function useMovieSearch() {
       setIsSearching(true);
       setError(null);
       //
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies-api/movies-wikidata?imdbId=${imdbId}`;
+      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies-api/wikidata?imdbId=${imdbId}`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);

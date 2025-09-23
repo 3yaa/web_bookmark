@@ -8,7 +8,6 @@ import {
   bookStatusOptions,
   scoreOptions,
 } from "../../../utils/dropDownDetails";
-import { getCoverUrl } from "@/app/books/utils/bookMapping";
 //
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { Dropdown } from "@/app/components/ui/Dropdown";
@@ -34,6 +33,10 @@ interface BookDetailsProps {
   addBook?: () => void;
   showSequelPrequel?: (sequelTitle: string) => void;
   showBookInSeries?: (seriesDir: "left" | "right") => void;
+  //
+  coverUrls?: string[];
+  coverIndex?: number;
+  updateCoverIndex?: (newIndex: number) => void;
 }
 
 export function BookDetails({
@@ -45,6 +48,9 @@ export function BookDetails({
   isLoading,
   showBookInSeries, //when wiki gives more then 1 option
   showSequelPrequel,
+  coverUrls,
+  coverIndex,
+  updateCoverIndex,
 }: BookDetailsProps) {
   const [localNote, setLocalNote] = useState(book.note || "");
 
@@ -62,6 +68,7 @@ export function BookDetails({
   };
 
   const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
+    if (!updateCoverIndex) return;
     //detects which side of the div was clicked
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
@@ -69,17 +76,15 @@ export function BookDetails({
     const isRightSide = clickX > elementWidth / 2;
 
     //
-    if (book.curCoverIndex !== undefined && book.coverEditions !== undefined) {
-      let newCoverIndex = book.curCoverIndex;
+    if (coverIndex !== undefined && coverUrls !== undefined) {
+      let newCoverIndex = coverIndex;
       if (isRightSide) {
-        newCoverIndex = (book.curCoverIndex + 1) % book.coverEditions.length;
+        newCoverIndex = (coverIndex + 1) % coverUrls.length;
       } else {
         newCoverIndex =
-          book.curCoverIndex === 0
-            ? book.coverEditions.length - 1
-            : book.curCoverIndex - 1;
+          coverIndex === 0 ? coverUrls.length - 1 : coverIndex - 1;
       }
-      onUpdate(book.id, { curCoverIndex: newCoverIndex });
+      updateCoverIndex(newCoverIndex);
     }
   };
 
@@ -222,34 +227,33 @@ export function BookDetails({
             <div className="flex gap-8">
               {/* LEFT SIDE -- PIC */}
               <div
-                className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg hover:cursor-pointer"
+                className={`flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg ${
+                  coverUrls ? "hover:cursor-pointer" : ""
+                }`}
                 onClick={
-                  book.coverEditions && book.coverEditions?.length > 1
+                  coverUrls && coverUrls?.length > 1
                     ? handleCoverChange
                     : undefined
                 }
-                title={
-                  book.coverEditions
-                    ? `${book.curCoverIndex}/${book.coverEditions?.length}`
-                    : ""
-                }
+                title={coverUrls ? `${coverIndex}/${coverUrls?.length}` : ""}
               >
-                {book.curCoverIndex !== undefined &&
-                book.coverEditions !== null ? (
+                {coverIndex !== undefined &&
+                coverUrls !== undefined &&
+                coverUrls[coverIndex] ? (
                   <Image
-                    src={getCoverUrl(book.coverEditions?.[book.curCoverIndex])}
+                    src={coverUrls[coverIndex]}
                     alt={book.title || "Untitled"}
                     width={248}
                     height={372}
-                    className="min-w-62 min-h-93 object-fill"
+                    className="min-w-62 min-h-93 object-cover"
                   />
-                ) : book.coverUrl ? (
+                ) : book.coverUrl && book.coverUrl.trim() !== "" ? (
                   <Image
                     src={book.coverUrl}
                     alt={book.title || "Untitled"}
                     width={248}
                     height={372}
-                    className="min-w-62 min-h-93 object-fill"
+                    className="min-w-62 min-h-93 object-cover"
                   />
                 ) : (
                   <div className="min-w-62 min-h-93 bg-gradient-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>

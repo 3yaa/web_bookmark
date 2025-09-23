@@ -1,7 +1,6 @@
 import { BookProps } from "@/types/book";
 import { useEffect, useState, useCallback } from "react";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
-import { validateAndFilterCovers } from "@/app/books/utils/cleanUpCover";
 
 export function useBookData() {
   const { authFetch, isAuthLoading } = useAuthFetch();
@@ -71,22 +70,13 @@ export function useBookData() {
       try {
         setBookDataLoading(true);
         //
-        const [validCovers] = await Promise.all([
-          validateAndFilterCovers(book.coverEditions),
-          // You could add other async validations here if needed
-        ]);
-        const cleanedBook = {
-          ...book,
-          coverEditions: validCovers,
-        };
-        //
         const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books`;
         const options = {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(cleanedBook),
+          body: JSON.stringify(book),
         };
         const response = await authFetch(url, options);
         if (!response.ok) {
@@ -110,13 +100,7 @@ export function useBookData() {
     async (bookId: number, updates: Partial<BookProps>) => {
       try {
         // only updates these
-        const allowedFields = [
-          "score",
-          "status",
-          "note",
-          "dateCompleted",
-          "curCoverIndex",
-        ];
+        const allowedFields = ["score", "status", "note", "dateCompleted"];
         const invalidFields = Object.keys(updates).filter(
           (field) => !allowedFields.includes(field)
         );

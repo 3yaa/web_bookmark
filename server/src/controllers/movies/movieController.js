@@ -90,6 +90,10 @@ export const getMovie = async (req, res) => {
   }
 };
 
+const camelToSnakeMapping = {
+  dateCompleted: "date_completed",
+};
+
 export const patchMovie = async (req, res) => {
   try {
     const movieId = req.params.id;
@@ -99,7 +103,7 @@ export const patchMovie = async (req, res) => {
     // breaks all the keys into key=$i
     const setClause = Object.keys(updates)
       .map((key, index) => {
-        const columnName = key;
+        const columnName = camelToSnakeMapping[key] || key;
         return `${columnName}=$${index + 1}`;
       })
       .join(", ");

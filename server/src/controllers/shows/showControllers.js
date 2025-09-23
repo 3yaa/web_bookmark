@@ -90,6 +90,12 @@ export const getShow = async (req, res) => {
   }
 };
 
+const camelToSnakeMapping = {
+  curSeasonIndex: "cur_season_index",
+  curEpisode: "cur_episode",
+  dateCompleted: "date_completed",
+};
+
 export const patchShow = async (req, res) => {
   try {
     const showId = req.params.id;
@@ -99,7 +105,7 @@ export const patchShow = async (req, res) => {
     // breaks all the keys into key=$i
     const setClause = Object.keys(updates)
       .map((key, index) => {
-        const columnName = key;
+        const columnName = camelToSnakeMapping[key] || key;
         return `${columnName}=$${index + 1}`;
       })
       .join(", ");

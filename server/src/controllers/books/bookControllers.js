@@ -91,6 +91,11 @@ export const getBook = async (req, res) => {
   }
 };
 
+const camelToSnakeMapping = {
+  curCoverIndex: "cur_cover_index",
+  dateCompleted: "date_completed",
+};
+
 export const patchBook = async (req, res) => {
   try {
     const bookId = req.params.id;
@@ -100,7 +105,7 @@ export const patchBook = async (req, res) => {
     // breaks all the keys into key=$i
     const setClause = Object.keys(updates)
       .map((key, index) => {
-        const columnName = key;
+        const columnName = camelToSnakeMapping[key] || key;
         return `${columnName}=$${index + 1}`;
       })
       .join(", ");

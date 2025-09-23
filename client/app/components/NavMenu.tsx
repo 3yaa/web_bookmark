@@ -14,11 +14,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 
 const menuItems = [
-  { label: "Home", icon: Home, path: "/" },
   { label: "Movies", icon: Video, path: "/movies" },
   { label: "Shows", icon: Tv, path: "/shows" },
   { label: "Books", icon: Book, path: "/books" },
   { label: "Games", icon: Gamepad2, path: "/games" },
+  { label: "Home", icon: Home, path: "/" },
   // { label: "Profile", icon: User, path: "" },
 ];
 
@@ -50,12 +50,46 @@ export function NavMenu() {
 
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        if (isOpen) {
-          setIsOpen(false);
-        } else {
-          setIsOpen(true);
-        }
+      switch (event.key) {
+        case "Escape":
+          if (isOpen) {
+            setIsOpen(false);
+          } else {
+            setIsOpen(true);
+          }
+          return;
+        case "5":
+          if (isOpen) {
+            router.push("/");
+            setIsOpen(false);
+          }
+          return;
+        case "1":
+          if (isOpen) {
+            router.push("/movies");
+            setIsOpen(false);
+          }
+          return;
+        case "2":
+          if (isOpen) {
+            router.push("/shows");
+            setIsOpen(false);
+          }
+          return;
+        case "3":
+          if (isOpen) {
+            router.push("/books");
+            setIsOpen(false);
+          }
+          return;
+        case "4":
+          if (isOpen) {
+            router.push("/games");
+            setIsOpen(false);
+          }
+          return;
+        default:
+          return;
       }
     }
 
@@ -64,7 +98,7 @@ export function NavMenu() {
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [isOpen]);
+  }, [isOpen, router]);
 
   return (
     <div
@@ -135,7 +169,7 @@ export function NavMenu() {
           hover:bg-graident-to-bl hover:from-zinc-800/60 hover:to-transparent
           backdrop-blur-xl 
           shadow-md  hover:scale-105 active:scale-95 
-          transition-all duration-200 relative z-10 hover:cursor-pointer`}
+          transition-all duration-200 relative z-10 hover:cursor-pointer focus:outline-none`}
       >
         {isOpen ? (
           <X className="w-5 h-5 text-zinc-300" />

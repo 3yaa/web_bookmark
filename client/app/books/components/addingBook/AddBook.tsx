@@ -349,6 +349,17 @@ export function AddBook({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [titleFromAbove]);
 
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    //
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [onClose]);
+
   if (!isOpen) return null;
 
   return (

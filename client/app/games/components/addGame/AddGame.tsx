@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Book } from "lucide-react";
+import { Gamepad2 } from "lucide-react";
 //
 import { GameProps, IGDBInitProps, IGDBProps } from "@/types/game";
 //
@@ -263,6 +263,17 @@ export function AddGame({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [titleFromAbove]);
 
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    //
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [onClose]);
+
   if (!isOpen) return null;
 
   return (
@@ -272,7 +283,7 @@ export function AddGame({
       {!titleFromAbove ? (
         <div className="bg-zinc-900/95 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 shadow-2xl w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
           <h2 className="text-xl font-semibold mb-4 text-zinc-100 flex justify-center items-center gap-2">
-            <Book className="w-5 h-5 text-emerald-400" />
+            <Gamepad2 className="w-5 h-5 text-emerald-400" />
             Search for New Game
           </h2>
           <div className="flex gap-3">

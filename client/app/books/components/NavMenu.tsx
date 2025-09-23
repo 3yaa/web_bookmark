@@ -19,12 +19,12 @@ export function NavMenu() {
       {/* Main button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-neutral-900 hover:bg-neutral-800 p-2.5 px-5 rounded-lg w-48 
+        className="bg-neutral-900 hover:bg-neutral-800 p-2.5 px-5 rounded-lg 
                    shadow-lg border border-neutral-700/60
                    transition-all duration-200 text-gray-300/70 
                    hover:scale-105 active:scale-95 flex items-center justify-between border-t-0 border-r-0 rounded-tl-none rounded-br-none"
       >
-        <span className="tracking-wide text-sm font-medium">Menu</span>
+        {/* <span className="tracking-wide text-sm font-medium">Menu</span> */}
         <Menu className="w-5 h-5" />
       </button>
 

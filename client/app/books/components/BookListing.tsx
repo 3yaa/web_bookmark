@@ -85,6 +85,17 @@ export default function BookList() {
   }, []);
 
   useEffect(() => {
+    const handleEnter = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        setActiveModal("addBook");
+      }
+    };
+    //
+    window.addEventListener("keydown", handleEnter);
+    return () => window.removeEventListener("keydown", handleEnter);
+  }, [activeModal]);
+
+  useEffect(() => {
     if (activeModal) {
       document.body.style.overflow = "hidden";
     } else {

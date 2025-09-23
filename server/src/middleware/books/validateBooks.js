@@ -87,13 +87,7 @@ export const validateBookData = (req, res, next) => {
 //
 export const validateBookPatch = (req, res, next) => {
   const updates = req.body;
-  const allowedFields = [
-    "score",
-    "status",
-    "note",
-    "dateCompleted",
-    "curCoverIndex",
-  ];
+  const allowedFields = ["score", "status", "note", "dateCompleted"];
   // for status
   if (updates.status && !VALID_STATUSES.includes(updates.status)) {
     return res.status(400).json({
@@ -120,17 +114,6 @@ export const validateBookPatch = (req, res, next) => {
       message: "Invalid update field provided",
     });
   }
-
-  const convertedUpdates = { ...updates };
-  if (updates.dateCompleted !== undefined) {
-    convertedUpdates.date_completed = updates.dateCompleted;
-    delete convertedUpdates.dateCompleted;
-  }
-  if (updates.curCoverIndex !== undefined) {
-    convertedUpdates.cur_cover_index = updates.curCoverIndex;
-    delete convertedUpdates.curCoverIndex;
-  }
-  req.body = convertedUpdates;
 
   next();
 };
@@ -178,13 +161,6 @@ export const validateBookCreate = (req, res, next) => {
       message: "Date published must be a 4-digit year (e.g., 2001)",
     });
   }
-  // cover editions
-  // if (coverEditions && coverEditions.length > MAX_COVER_EDITIONS) {
-  //   return res.status(400).json({
-  //     success: false,
-  //     message: "Invalid length of cover editions (<=15)",
-  //   });
-  // }
 
   next();
 };

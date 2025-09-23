@@ -101,12 +101,6 @@ export const validateGamePatch = (req, res, next) => {
     });
   }
 
-  const convertedUpdates = { ...updates };
-  if (updates.dateCompleted !== undefined) {
-    convertedUpdates.date_completed = updates.dateCompleted;
-    delete convertedUpdates.dateCompleted;
-  }
-
   req.body = convertedUpdates;
 
   next();

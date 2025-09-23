@@ -39,5 +39,4 @@ export interface TMDBTvProps {
 interface TMDBSeasonProps {
   season_number: number;
   episode_count: number;
-  // poster_url?: string;
 }

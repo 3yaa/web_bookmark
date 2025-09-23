@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 //
 import { ShowProps } from "@/types/show";
@@ -45,6 +45,17 @@ export function ShowDetails({
   isLoading,
 }: ShowDetailsProps) {
   const [localNote, setLocalNote] = useState(show.note || "");
+  const [editingMode, setEditingMode] = useState({
+    season: false,
+    episode: false,
+  });
+  const [inputValues, setInputValues] = useState<{
+    season: number | "";
+    episode: number | "";
+  }>({
+    season: show.curSeasonIndex + 1,
+    episode: show.curEpisode,
+  });
 
   const handleStatusChange = (value: string) => {
     const newStatus = value as "Completed" | "Want to Watch";
@@ -98,6 +109,96 @@ export function ShowDetails({
   const handleNeedYear = () => {
     const needYear = true;
     onUpdate(show.id, undefined, needYear);
+  };
+
+  const handleInputClick = (type: string) => {
+    if (type === "season") {
+      setEditingMode({ ...editingMode, season: true });
+    } else if (type === "episode") {
+      setEditingMode({ ...editingMode, episode: true });
+    }
+  };
+
+  const handleInputKeyDown = (key: string, type: string) => {
+    if (key === "Enter") {
+      handleInputSubmit(type);
+    } else if (key === "Escape") {
+      setEditingMode({ ...editingMode, [type]: false });
+    }
+  };
+
+  const handleInputSubmit = (type: string) => {
+    if (!show.seasons) return;
+
+    if (type === "season") {
+      // empty input
+      let seasonNum =
+        inputValues.season === ""
+          ? show.curSeasonIndex + 1
+          : inputValues.season;
+      // force clamp top
+      seasonNum =
+        seasonNum > show.seasons.length ? show.seasons.length : seasonNum;
+      //
+      if (seasonNum >= 1 && seasonNum <= show.seasons.length) {
+        setEditingMode({ ...editingMode, season: false });
+        onUpdate(show.id, {
+          curSeasonIndex: seasonNum - 1,
+          curEpisode: 1,
+        });
+      } else {
+        setInputValues({ ...inputValues, season: show.curSeasonIndex + 1 });
+        setEditingMode({ ...editingMode, season: false });
+      }
+    } else if (type === "episode") {
+      const maxEpisodes = show.seasons[show.curSeasonIndex].episode_count;
+      // empty input
+      let episodeNum =
+        inputValues.episode === "" ? show.curEpisode : inputValues.episode;
+      // force clamp top
+      episodeNum = episodeNum > maxEpisodes ? maxEpisodes : episodeNum;
+      //
+      if (episodeNum >= 1 && episodeNum <= maxEpisodes) {
+        setEditingMode({ ...editingMode, episode: false });
+        onUpdate(show.id, { curEpisode: episodeNum });
+      } else {
+        setInputValues({ ...inputValues, episode: show.curEpisode });
+        setEditingMode({ ...editingMode, episode: false });
+      }
+    }
+  };
+
+  const handleSeasonInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow empty string so user can clear and retype
+    if (value === "") {
+      setInputValues({
+        ...inputValues,
+        season: "",
+      });
+    } else {
+      const numValue = parseInt(value);
+      setInputValues({
+        ...inputValues,
+        season: isNaN(numValue) ? "" : Math.max(1, numValue),
+      });
+    }
+  };
+
+  const handleEpisodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "") {
+      setInputValues({
+        ...inputValues,
+        episode: "",
+      });
+    } else {
+      const numValue = parseInt(value);
+      setInputValues({
+        ...inputValues,
+        episode: isNaN(numValue) ? "" : Math.max(1, numValue),
+      });
+    }
   };
 
   const handleSeasonChange = (dir: string) => {
@@ -155,6 +256,13 @@ export function ShowDetails({
 
     onUpdate(show.id, { curSeasonIndex: seasonIndex, curEpisode: curEp });
   };
+
+  useEffect(() => {
+    setInputValues({
+      season: show.curSeasonIndex + 1,
+      episode: show.curEpisode,
+    });
+  }, [show.curSeasonIndex, show.curEpisode]);
 
   if (!isOpen || !show) return null;
 
@@ -358,19 +466,59 @@ export function ShowDetails({
                     </label>
                     <div className="flex gap-3 max-w-[97.6%]">
                       {/* SEASON CONTROLS */}
-                      <div className="flex-[1.05] bg-gradient-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/20">
+                      <div className="flex-[1.05] bg-gradient-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/20 select-none">
                         <div className="flex items-center justify-between pl-1">
-                          <span className="text-[15px] text-zinc-300/70 font-bold">
+                          <span
+                            className="text-[15px] text-zinc-300/70 font-bold hover:cursor-pointer"
+                            onClick={() => handleInputClick("season")}
+                          >
                             <span className="text-[14.5px] text-zinc-400/85 font-medium mr-2">
                               Season:
                             </span>
-                            <span
-                              className={`underline ${getStatusTextColor(
-                                show.status
-                              )}`}
-                            >
-                              {show.curSeasonIndex + 1}
-                            </span>
+                            {editingMode.season ? (
+                              <input
+                                type="number"
+                                value={
+                                  inputValues.season === ""
+                                    ? ""
+                                    : inputValues.season
+                                }
+                                onChange={handleSeasonInputChange}
+                                //
+                                onKeyDown={(
+                                  e: React.KeyboardEvent<HTMLInputElement>
+                                ) => {
+                                  handleInputKeyDown(e.key, "season");
+                                }}
+                                // WHEN LOSES FOCUS
+                                onBlur={() => {
+                                  handleInputSubmit("season");
+                                }}
+                                //
+                                className="max-w-8 text-center focus:outline-none focus:ring-0 border-0 "
+                                style={
+                                  inputValues.season !== ""
+                                    ? {
+                                        width: `${Math.min(
+                                          8,
+                                          inputValues.season.toString().length
+                                        )}ch`,
+                                      }
+                                    : { width: "1ch" }
+                                }
+                                autoFocus
+                                min="1"
+                                max={show.seasons ? show.seasons.length : 1}
+                              />
+                            ) : (
+                              <span
+                                className={`underline ${getStatusTextColor(
+                                  show.status
+                                )}`}
+                              >
+                                {show.curSeasonIndex + 1}
+                              </span>
+                            )}
                             <span className="">
                               /{show.seasons && show.seasons.length}
                             </span>
@@ -398,19 +546,64 @@ export function ShowDetails({
                       </div>
 
                       {/* EPISODE CONTROLS */}
-                      <div className="flex-[1.05] bg-gradient-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/20">
+                      <div className="flex-[1.05] bg-gradient-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/20 select-none">
                         <div className="flex items-center justify-between">
-                          <span className="text-[15px] text-zinc-300/70 font-bold">
+                          <span
+                            className="text-[15px] text-zinc-300/70 font-bold hover:cursor-pointer"
+                            onClick={() => handleInputClick("episode")}
+                          >
                             <span className="text-[14.5px] text-zinc-400/85 font-medium mr-2">
                               Episodes:
                             </span>
-                            <span
-                              className={`underline ${getStatusTextColor(
-                                show.status
-                              )}`}
-                            >
-                              {show.curEpisode}
-                            </span>
+                            {editingMode.episode ? (
+                              <input
+                                type="number"
+                                value={
+                                  inputValues.episode === ""
+                                    ? ""
+                                    : inputValues.episode
+                                }
+                                onChange={handleEpisodeInputChange}
+                                //
+                                onKeyDown={(
+                                  e: React.KeyboardEvent<HTMLInputElement>
+                                ) => {
+                                  handleInputKeyDown(e.key, "episode");
+                                }}
+                                // WHEN LOSES FOCUS
+                                onBlur={() => {
+                                  handleInputSubmit("episode");
+                                }}
+                                //
+                                className="max-w-8 text-center focus:outline-none focus:ring-0 border-0 "
+                                style={
+                                  inputValues.episode !== ""
+                                    ? {
+                                        width: `${Math.min(
+                                          8,
+                                          inputValues.episode.toString().length
+                                        )}ch`,
+                                      }
+                                    : { width: "1ch" }
+                                }
+                                autoFocus
+                                min="1"
+                                max={
+                                  show.seasons
+                                    ? show.seasons[show.curSeasonIndex]
+                                        .episode_count
+                                    : 1
+                                }
+                              />
+                            ) : (
+                              <span
+                                className={`underline ${getStatusTextColor(
+                                  show.status
+                                )}`}
+                              >
+                                {show.curEpisode}
+                              </span>
+                            )}
                             <span className="">
                               /
                               {show.seasons &&

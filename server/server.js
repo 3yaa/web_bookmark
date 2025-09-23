@@ -17,6 +17,7 @@ import { externalGamesAPIRouter } from "./src/routes/games/externalGamesAPIRoute
 //
 import { booksRouter } from "./src/routes/books/booksRoute.js";
 import { moviesRouter } from "./src/routes/movies/moviesRoute.js";
+import { showsRouter } from "./src/routes/shows/showRoute.js";
 import { gamesRouter } from "./src/routes/games/gamesRoute.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -44,6 +45,7 @@ app.use("/movies-api", externalMoviesAPIRouter);
 app.use("/books-api", externalBooksAPIRouter);
 app.use("/games-api", externalGamesAPIRouter);
 app.use("/movies", moviesRouter);
+app.use("/shows", showsRouter);
 app.use("/books", booksRouter);
 app.use("/games", gamesRouter);
 

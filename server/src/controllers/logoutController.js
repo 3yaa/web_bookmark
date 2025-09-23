@@ -33,7 +33,7 @@ export const logoutUser = async (req, res) => {
     res.clearCookie("jwt", { httpOnly: true, sameSite: "none", secure: true });
     res.sendStatus(204);
   } catch (error) {
-    console.error("Error log out:", error);
+    console.error("Error log out: ", error);
     res.status(500).json({
       success: false,
       message: "Error log out",

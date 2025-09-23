@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { pool } from "../../src/config/db.js";
+import { pool } from "../config/db.js";
 
 dotenv.config();
 
@@ -77,7 +77,7 @@ export const loginUser = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Error logging in:", error);
+    console.error("Error logging in: ", error);
     res.status(500).json({
       success: false,
       message: "Error logging in",

@@ -13,7 +13,7 @@ export const refreshToken = async (req, res) => {
       .update(refreshToken)
       .digest("hex");
 
-    // Get user by hashed refresh token
+    // get user by hashed refresh token
     const result = await pool.query(
       "SELECT id, username, email, refresh_token_expires FROM users WHERE refresh_token_hash = $1",
       [hashedToken]
@@ -58,7 +58,7 @@ export const refreshToken = async (req, res) => {
       accessToken: accessToken,
     });
   } catch (error) {
-    console.error("Error Refresh token:", error);
+    console.error("Error Refresh token: ", error);
     res.status(500).json({
       success: false,
       message: "Error refresh token",

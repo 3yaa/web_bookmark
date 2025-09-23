@@ -4,10 +4,7 @@ import cors from "cors";
 //
 import { corsOptions } from "./src/config/cors.js";
 //
-import { registerRouter } from "./src/routes/registerRouter.js";
-import { refreshRouter } from "./src/routes/refreshRouter.js";
 import { authRouter } from "./src/routes/authRouter.js";
-import { logoutRouter } from "./src/routes/logoutRouter.js";
 import { verifyJWT } from "./src/middleware/validateJWT.js";
 //
 import { externalBooksAPIRouter } from "./src/routes/books/externalBooksAPIRouter.js";
@@ -31,10 +28,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // auth router
-app.use("/register", registerRouter);
 app.use("/auth", authRouter);
-app.use("/refresh", refreshRouter);
-app.use("/logout", logoutRouter);
 
 // auth
 app.use(verifyJWT);

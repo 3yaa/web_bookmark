@@ -38,7 +38,7 @@ export function useMovieData() {
       if (!movie.title || !movie.status || !movie.imdbId) {
         return;
       }
-      // 
+      //
       try {
         setMovieDataLoading(true);
         //
@@ -70,23 +70,23 @@ export function useMovieData() {
   // UPDATE
   const updateMovie = useCallback(
     async (movieId: number, updates: Partial<MovieProps>) => {
-      // only updates these
-      const allowedFields = ["score", "status", "note", "dateCompleted"];
-      const invalidFields = Object.keys(updates).filter(
-        (field) => !allowedFields.includes(field)
-      );
-      if (invalidFields.length > 0) {
-        console.warn("Invalid fields attempted:", invalidFields);
-        return;
-      }
-      // update local immediately
-      setMovies((prevMovies) =>
-        prevMovies.map((movie) =>
-          movie.id === movieId ? { ...movie, ...updates } : movie
-        )
-      );
-      // update db
       try {
+        // only updates these
+        const allowedFields = ["score", "status", "note", "dateCompleted"];
+        const invalidFields = Object.keys(updates).filter(
+          (field) => !allowedFields.includes(field)
+        );
+        if (invalidFields.length > 0) {
+          console.warn("Invalid fields attempted:", invalidFields);
+          return;
+        }
+        // update local immediately
+        setMovies((prevMovies) =>
+          prevMovies.map((movie) =>
+            movie.id === movieId ? { ...movie, ...updates } : movie
+          )
+        );
+        // update db
         const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies/${movieId}`;
         const options = {
           method: "PATCH",

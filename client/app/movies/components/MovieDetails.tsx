@@ -197,7 +197,7 @@ export function MovieDetails({
                       alt={movie.title || "Untitled"}
                       width={1280}
                       height={720}
-                      className="min-w-[62] min-h-93 object-fill"
+                      className="min-w-62 min-h-93 object-fill"
                     />
                     <div
                       className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"

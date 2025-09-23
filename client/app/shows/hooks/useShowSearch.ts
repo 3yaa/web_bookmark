@@ -27,7 +27,6 @@ export function useShowSearch() {
       const resJson = await response.json();
       const show = resJson.data || null;
       //
-      console.log("---", show);
       return show;
     } catch (e) {
       setError(e instanceof Error ? e.message : "An error occurred");
@@ -55,7 +54,6 @@ export function useShowSearch() {
       const resJson = await response.json();
       const seasonInfo = resJson.data || null;
       //
-      console.log("++", seasonInfo);
       return seasonInfo;
     } catch (e) {
       setError(e instanceof Error ? e.message : "An error occurred");

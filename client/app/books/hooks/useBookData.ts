@@ -109,7 +109,6 @@ export function useBookData() {
   const updateBook = useCallback(
     async (bookId: number, updates: Partial<BookProps>) => {
       try {
-        setBookDataLoading(true);
         // only updates these
         const allowedFields = [
           "score",
@@ -146,8 +145,6 @@ export function useBookData() {
         }
       } catch (e) {
         console.error("Error updating book", e);
-      } finally {
-        setBookDataLoading(false);
       }
     },
     [authFetch]

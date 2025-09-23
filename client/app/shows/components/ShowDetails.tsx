@@ -13,6 +13,7 @@ import { tvStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { Loading } from "@/app/components/ui/Loading";
+import { BackdropImage } from "@/app/components/ui/Backdrop";
 import {
   Trash2,
   Plus,
@@ -23,6 +24,7 @@ import {
   ChevronsRight,
   ChevronsLeft,
 } from "lucide-react";
+
 interface ShowDetailsProps {
   show: ShowProps;
   isOpen: boolean;
@@ -329,9 +331,9 @@ export function ShowDetails({
                     <Image
                       src={show.posterUrl}
                       alt={show.title || "Untitled"}
-                      width={248}
-                      height={372}
-                      className="min-w-[62] min-h-93 object-fill"
+                      width={1280}
+                      height={720}
+                      className="min-w-62 min-h-93 object-fill"
                     />
                     <div
                       className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
@@ -349,35 +351,11 @@ export function ShowDetails({
               <div className="flex flex-col flex-1 min-h-93 min-w-62 relative">
                 {/* BACKDROP */}
                 {show.backdropUrl && (
-                  <div className="absolute -top-7 left-20 -right-25 h-[70%] -z-10 overflow-hidden rounded-2xl">
-                    <div className="relative h-full">
-                      <Image
-                        src={show.backdropUrl}
-                        alt="Backdrop"
-                        fill
-                        className="object-cover opacity-30"
-                        style={{
-                          objectPosition: "center -10px", // image positioning
-                        }}
-                      />
-                      {/* HORIZONTAL */}
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          background:
-                            "linear-gradient(to right, rgba(24,24,27,1) 0%, rgba(24,24,27,0.1) 30%, transparent 50%, rgba(24,24,27,0.2) 100%)",
-                        }}
-                      />
-                      {/* VERTICAL GRADIENT */}
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          background:
-                            "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0.8) 50%, rgba(24,24,27,1) 75%, rgba(24,24,27,1) 100%)",
-                        }}
-                      />
-                    </div>
-                  </div>
+                  <BackdropImage
+                    src={show.backdropUrl}
+                    width={1280}
+                    height={720}
+                  />
                 )}
                 <div className={`flex flex-col justify-center flex-1`}>
                   {/* TITLE */}
@@ -516,11 +494,11 @@ export function ShowDetails({
                                   show.status
                                 )}`}
                               >
-                                {show.curSeasonIndex + 1}
+                                {(show.curSeasonIndex ?? 0) + 1}
                               </span>
                             )}
                             <span className="">
-                              /{show.seasons && show.seasons.length}
+                              /{show.seasons?.length ?? 0}
                             </span>
                           </span>
                           <div className="flex gap-1.5">
@@ -601,13 +579,13 @@ export function ShowDetails({
                                   show.status
                                 )}`}
                               >
-                                {show.curEpisode}
+                                {show.curEpisode ?? 1}
                               </span>
                             )}
                             <span className="">
                               /
-                              {show.seasons &&
-                                show.seasons[show.curSeasonIndex].episode_count}
+                              {show.seasons?.[show.curSeasonIndex]
+                                ?.episode_count ?? 0}
                             </span>
                           </span>
                           <div className="flex gap-1.5">

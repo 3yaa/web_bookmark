@@ -71,7 +71,6 @@ export function useGameData() {
   const updateGame = useCallback(
     async (gameId: number, updates: Partial<GameProps>) => {
       try {
-        setGameDataLoading(true);
         // only updates these
         const allowedFields = ["score", "status", "note", "dateCompleted"];
         const invalidFields = Object.keys(updates).filter(
@@ -102,8 +101,6 @@ export function useGameData() {
         }
       } catch (e) {
         console.error("Error updating book", e);
-      } finally {
-        setGameDataLoading(false);
       }
     },
     [authFetch]

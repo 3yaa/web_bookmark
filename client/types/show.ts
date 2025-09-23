@@ -9,7 +9,7 @@ export interface ShowProps {
   score?: number;
   dateCompleted?: Date | null;
   note?: string;
-  status: "Completed" | "Want to Watch" | "Dropped"; //!--REQUIRED
+  status: "Completed" | "Want to Watch" | "Dropped" | "Watching"; //!--REQUIRED
   // from tmdb
   tmdbId: string; //!--REQUIRED
   title: string; //!--REQUIRED

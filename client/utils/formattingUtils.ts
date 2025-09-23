@@ -86,6 +86,6 @@ export const getStatusTextColor = (status: MediaStatus) => {
     case "Dropped":
       return "text-red-500/75";
     default:
-      return "text-zinc-600";
+      return "text-zinc-500";
   }
 };

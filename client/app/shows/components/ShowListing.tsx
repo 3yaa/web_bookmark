@@ -212,7 +212,8 @@ export default function ShowList() {
                     alt={show.title || "Untitled"}
                     width={50}
                     height={75}
-                    className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
+                    priority
+                    className="object-fill rounded-[0.25rem] border border-zinc-600/30"
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-[0.25rem] border border-zinc-600/30"></div>

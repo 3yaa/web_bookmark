@@ -227,7 +227,7 @@ export function BookDetails({
                     alt={book.title || "Untitled"}
                     width={248}
                     height={372}
-                    className="min-w-[62] min-h-93 object-fill"
+                    className="min-w-62 min-h-93 object-fill"
                   />
                 ) : book.coverUrl ? (
                   <Image

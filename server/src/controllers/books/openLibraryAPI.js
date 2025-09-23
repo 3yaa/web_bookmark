@@ -32,7 +32,9 @@ export async function useOpenLibraryAPI(req, res) {
       title: book.title,
       author_name: book.author_name,
       first_publish_year: book.first_publish_year,
-      edition_key: book.edition_key,
+      cover_urls: book.edition_key.map((key) => {
+        return `https://covers.openlibrary.org/b/olid/${key}-L.jpg`;
+      }),
     }));
     //
     res.status(200).json({

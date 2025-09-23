@@ -5,7 +5,7 @@ import cors from "cors";
 import { corsOptions } from "./src/config/cors.js";
 //
 import { authRouter } from "./src/routes/authRouter.js";
-import { verifyJWT } from "./src/middleware/validateJWT.js";
+import { authenticateToken } from "./src/middleware/authenticateToken.js";
 //
 import { externalBooksAPIRouter } from "./src/routes/books/externalBooksAPIRouter.js";
 import { externalMoviesAPIRouter } from "./src/routes/movies/externalMoviesAPIRoute.js";
@@ -31,7 +31,7 @@ app.use(cookieParser());
 app.use("/auth", authRouter);
 
 // auth
-app.use(verifyJWT);
+app.use(authenticateToken);
 
 // books api routers
 app.use("/shows-api", externalShowsAPIRouter);

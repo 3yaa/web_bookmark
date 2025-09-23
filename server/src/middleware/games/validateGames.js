@@ -113,7 +113,7 @@ export const validateGamePatch = (req, res, next) => {
 };
 
 export const validateGameCreate = (req, res, next) => {
-  const { title, datePublished, status, igdbId } = req.body;
+  const { title, dateReleased, status, igdbId } = req.body;
   // REQUIRED FIELDS
   // title
   if (!title || title.trim() === "") {
@@ -144,11 +144,11 @@ export const validateGameCreate = (req, res, next) => {
   // NON REQUIRED
   // date published
   if (
-    datePublished &&
-    (typeof datePublished !== "number" ||
-      !Number.isInteger(datePublished) ||
-      datePublished < 1000 ||
-      datePublished > 9999)
+    dateReleased &&
+    (typeof dateReleased !== "number" ||
+      !Number.isInteger(dateReleased) ||
+      dateReleased < 1000 ||
+      dateReleased > 9999)
   ) {
     return res.status(400).json({
       success: false,

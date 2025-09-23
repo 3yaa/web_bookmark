@@ -114,7 +114,7 @@ export const validateMoviePatch = (req, res, next) => {
 };
 
 export const validateMovieCreate = (req, res, next) => {
-  const { title, datePublished, status, imdbId } = req.body;
+  const { title, dateReleased, status, imdbId } = req.body;
   // REQUIRED FIELDS
   // title
   if (!title || title.trim() === "") {
@@ -145,11 +145,11 @@ export const validateMovieCreate = (req, res, next) => {
   // NON REQUIRED
   // date published
   if (
-    datePublished &&
-    (typeof datePublished !== "number" ||
-      !Number.isInteger(datePublished) ||
-      datePublished < 1000 ||
-      datePublished > 9999)
+    dateReleased &&
+    (typeof dateReleased !== "number" ||
+      !Number.isInteger(dateReleased) ||
+      dateReleased < 1000 ||
+      dateReleased > 9999)
   ) {
     return res.status(400).json({
       success: false,

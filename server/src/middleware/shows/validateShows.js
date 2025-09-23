@@ -1,6 +1,6 @@
 const MAX_SCORE = 11;
 const MAX_NOTE_LENGTH = 1000;
-const VALID_STATUSES = ["Want to Watch", "Completed", "Dropped"];
+const VALID_STATUSES = ["Watching", "Want to Watch", "Completed", "Dropped"];
 
 export const validateShowId = (req, res, next) => {
   const showId = req.params.id;
@@ -87,7 +87,7 @@ export const validateShowPatch = (req, res, next) => {
     return res.status(400).json({
       success: false,
       message:
-        "Invalid status field provided ('Want to Watch' | 'Completed' | 'Dropped')",
+        "Invalid status field provided ('Watching' | 'Want to Watch' | 'Completed' | 'Dropped')",
     });
   }
   // check if exists
@@ -120,7 +120,7 @@ export const validateShowPatch = (req, res, next) => {
 };
 
 export const validateShowCreate = (req, res, next) => {
-  const { title, datePublished, status, tmdbId } = req.body;
+  const { title, dateReleased, status, tmdbId } = req.body;
   // REQUIRED FIELDS
   // title
   if (!title || title.trim() === "") {
@@ -144,18 +144,18 @@ export const validateShowCreate = (req, res, next) => {
       return res.status(400).json({
         success: false,
         message:
-          "Invalid status provided ('Want to Watch' | 'Completed' | 'Dropped')",
+          "Invalid status provided ('Watching' | 'Want to Watch' | 'Completed' | 'Dropped')",
       });
     }
   }
   // NON REQUIRED
   // date published
   if (
-    datePublished &&
-    (typeof datePublished !== "number" ||
-      !Number.isInteger(datePublished) ||
-      datePublished < 1000 ||
-      datePublished > 9999)
+    dateReleased &&
+    (typeof dateReleased !== "number" ||
+      !Number.isInteger(dateReleased) ||
+      dateReleased < 1000 ||
+      dateReleased > 9999)
   ) {
     return res.status(400).json({
       success: false,

@@ -29,9 +29,10 @@ export const getShows = async (req, res) => {
 			WHERE user_id=$1 
 			ORDER BY 
 				CASE status
-					WHEN 'Playing' THEN 1
-					WHEN 'Completed' THEN 2
-					WHEN 'Dropped' THEN 3
+					WHEN 'Watching' THEN 1
+					WHEN 'Want to Watch' THEN 2
+          WHEN 'Completed' THEN 3
+					WHEN 'Dropped' THEN 4
 					ELSE 4
 				END,
 				date_created DESC

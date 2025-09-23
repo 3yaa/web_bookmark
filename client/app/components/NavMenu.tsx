@@ -131,8 +131,8 @@ export function NavMenu() {
       <button
         className={`flex items-center justify-center w-14 h-14 rounded-full 
           border border-zinc-800/50 
-          bg-gradient-to-bl from-zinc-transparent to-zinc-800/80 
-          hover:bg-graident-to-bl hover:from-zinc-800/80 hover:to-transparent
+          bg-gradient-to-bl from-zinc-transparent to-zinc-800/60 
+          hover:bg-graident-to-bl hover:from-zinc-800/60 hover:to-transparent
           backdrop-blur-xl 
           shadow-md  hover:scale-105 active:scale-95 
           transition-all duration-200 relative z-10 hover:cursor-pointer`}

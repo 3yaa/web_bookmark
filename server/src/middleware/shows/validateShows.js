@@ -120,7 +120,7 @@ export const validateShowPatch = (req, res, next) => {
 };
 
 export const validateShowCreate = (req, res, next) => {
-  const { title, datePublished, status, igdbId } = req.body;
+  const { title, datePublished, status, tmdbId } = req.body;
   // REQUIRED FIELDS
   // title
   if (!title || title.trim() === "") {
@@ -129,11 +129,11 @@ export const validateShowCreate = (req, res, next) => {
       message: "No title to create show",
     });
   }
-  // igdbId
-  if (!igdbId) {
+  // tmdbId
+  if (!tmdbId) {
     return res.status(400).json({
       success: false,
-      message: "No igdbId to create show",
+      message: "No tmdbId to create show",
     });
   }
   // status

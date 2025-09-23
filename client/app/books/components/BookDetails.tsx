@@ -20,6 +20,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { BackdropImageBook } from "@/app/components/ui/BackdropBook";
 interface BookDetailsProps {
   book: BookProps;
   isOpen: boolean;
@@ -164,7 +165,7 @@ export function BookDetails({
           {isLoading?.isTrue && (
             <Loading customStyle={isLoading.style} text={isLoading.text} />
           )}
-          <div className={`px-8.5 py-7 border-0 rounded-2xl`}>
+          <div className={`px-8.5 py-7 border-0 rounded-2xl overflow-hidden`}>
             {/* ACTION BUTTONS */}
             {addBook ? (
               <div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
@@ -267,7 +268,14 @@ export function BookDetails({
                 />
               </div>
               {/* RIGHT SIDE -- DETAILS */}
-              <div className="flex flex-col flex-1 min-h-93 min-w-62">
+              <div className="flex flex-col flex-1 min-h-93 min-w-62 relative">
+                {book.coverUrl && (
+                  <BackdropImageBook
+                    src={book.coverUrl}
+                    width={1280}
+                    height={720}
+                  />
+                )}
                 <div className="flex flex-col justify-center flex-1">
                   {/* SERIES TITLE */}
                   {book.seriesTitle && (

@@ -178,7 +178,7 @@ export function GameDetails({
                 >
                   <Plus className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors duration-0" />
                 </button>
-                {/* NEED YEAR */}
+                {/* MORE VIEW */}
                 <button
                   className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer
                     transition-all group"

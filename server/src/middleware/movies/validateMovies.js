@@ -137,18 +137,21 @@ export const validateMovieCreate = (req, res, next) => {
     }
   }
   // NON REQUIRED
-  // date published
-  if (
-    dateReleased &&
-    (typeof dateReleased !== "number" ||
-      !Number.isInteger(dateReleased) ||
-      dateReleased < 1000 ||
-      dateReleased > 9999)
-  ) {
-    return res.status(400).json({
-      success: false,
-      message: "Date published must be a 4-digit year (e.g., 2001)",
-    });
+  // date released
+  if (dateReleased !== undefined) {
+    const parsedYear = parseInt(dateReleased);
+    if (
+      isNaN(parsedYear) ||
+      !Number.isInteger(parsedYear) ||
+      parsedYear < 1000 ||
+      parsedYear > 9999
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Date released must be a 4-digit year (e.g., 2001)",
+      });
+    }
+    req.body.dateReleased = parsedYear;
   }
 
   next();

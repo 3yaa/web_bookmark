@@ -149,17 +149,20 @@ export const validateBookCreate = (req, res, next) => {
   }
   // NON REQUIRED
   // date published
-  if (
-    datePublished &&
-    (typeof datePublished !== "number" ||
-      !Number.isInteger(datePublished) ||
-      datePublished < 1000 ||
-      datePublished > 9999)
-  ) {
-    return res.status(400).json({
-      success: false,
-      message: "Date published must be a 4-digit year (e.g., 2001)",
-    });
+  if (datePublished !== undefined) {
+    const parsedYear = parseInt(datePublished);
+    if (
+      isNaN(parsedYear) ||
+      !Number.isInteger(parsedYear) ||
+      parsedYear < 1000 ||
+      parsedYear > 9999
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Date released must be a 4-digit year (e.g., 2001)",
+      });
+    }
+    req.body.datePublished = parsedYear;
   }
 
   next();

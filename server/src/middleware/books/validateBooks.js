@@ -179,12 +179,12 @@ export const validateBookCreate = (req, res, next) => {
     });
   }
   // cover editions
-  if (coverEditions && coverEditions.length > MAX_COVER_EDITIONS) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid length of cover editions (<=15)",
-    });
-  }
+  // if (coverEditions && coverEditions.length > MAX_COVER_EDITIONS) {
+  //   return res.status(400).json({
+  //     success: false,
+  //     message: "Invalid length of cover editions (<=15)",
+  //   });
+  // }
 
   next();
 };

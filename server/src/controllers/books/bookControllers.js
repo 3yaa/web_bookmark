@@ -5,8 +5,6 @@ const convertBookToCamelCase = (book) => ({
   title: book.title,
   author: book.author,
   coverUrl: book.cover_url,
-  coverEditions: book.cover_editions,
-  curCoverIndex: book.cur_cover_index,
   datePublished: book.date_published,
   seriesTitle: book.series_title,
   placeInSeries: book.place_in_series,
@@ -92,7 +90,6 @@ export const getBook = async (req, res) => {
 };
 
 const camelToSnakeMapping = {
-  curCoverIndex: "cur_cover_index",
   dateCompleted: "date_completed",
 };
 
@@ -154,8 +151,6 @@ export const createBook = async (req, res) => {
       title,
       author,
       coverUrl,
-      coverEditions,
-      curCoverIndex,
       datePublished,
       seriesTitle,
       placeInSeries,
@@ -173,8 +168,6 @@ export const createBook = async (req, res) => {
       title,
       author,  
       cover_url,
-      cover_editions,
-      cur_cover_index,
       date_published,
       series_title,
       place_in_series,
@@ -195,8 +188,6 @@ export const createBook = async (req, res) => {
       title,
       author,
       coverUrl,
-      coverEditions,
-      curCoverIndex,
       datePublished,
       seriesTitle,
       placeInSeries,

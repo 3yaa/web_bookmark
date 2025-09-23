@@ -12,7 +12,6 @@ import { BookDetails } from "./BookDetails";
 // utils and ui components
 import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
-import { NavMenu } from "./NavMenu";
 
 export default function BookList() {
   //
@@ -291,7 +290,6 @@ export default function BookList() {
             </div>
           ))}
       </div>
-      <NavMenu />
       {/* ADD BUTTON */}
       <div className="fixed bottom-10 right-12 z-10">
         <button

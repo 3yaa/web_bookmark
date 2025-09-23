@@ -18,7 +18,7 @@ const statusConfig = {
     bgStyle: "to-blue-500/10",
   },
   Completed: {
-    textStyle: "text-green-600",
+    textStyle: "text-emerald-500/80",
     bgStyle: "to-emerald-500/10",
   },
   Dropped: {

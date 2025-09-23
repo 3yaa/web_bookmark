@@ -9,7 +9,7 @@ export interface MovieProps {
   score?: number;
   dateCompleted?: Date | null;
   note?: string;
-  status: "Completed" | "Want to Read" | "Dropped"; //!--REQUIRED
+  status: "Completed" | "Want to Watch" | "Dropped"; //!--REQUIRED
   // from omdb
   imdbId: string; //!--REQUIRED
   title: string; //!--REQUIRED

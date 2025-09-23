@@ -7,7 +7,7 @@ import {
   formatDateShort,
   getStatusBorderGradient,
 } from "@/utils/formattingUtils";
-import { statusOptions, scoreOptions } from "@/utils/dropDownDetails";
+import { movieStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 //
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { Dropdown } from "@/app/components/ui/Dropdown";
@@ -49,7 +49,7 @@ export function MovieDetails({
   const [localNote, setLocalNote] = useState(movie.note || "");
 
   const handleStatusChange = (value: string) => {
-    const newStatus = value as "Completed" | "Want to Read";
+    const newStatus = value as "Completed" | "Want to Watch";
     const statusLoad: Partial<MovieProps> = {
       status: newStatus,
     };
@@ -284,7 +284,7 @@ export function MovieDetails({
                       <Dropdown
                         value={movie.status}
                         onChange={handleStatusChange}
-                        options={statusOptions}
+                        options={movieStatusOptions}
                         customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={
                           movie.status === "Completed"

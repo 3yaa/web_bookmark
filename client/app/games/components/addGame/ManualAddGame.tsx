@@ -4,7 +4,7 @@ import { GameProps } from "@/types/game";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
-import { statusOptions, scoreOptions } from "@/utils/dropDownDetails";
+import { gameStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 interface ManualAddGameProps {
   isOpen: boolean;
   onClose: () => void;
@@ -136,7 +136,7 @@ export function ManualAddGame({
                     <Dropdown
                       value={game.status || "Want to Read"}
                       onChange={handleStatusChange}
-                      options={statusOptions}
+                      options={gameStatusOptions}
                       customStyle="text-zinc-200 font-semibold"
                       dropStyle={
                         game.status === "Completed"

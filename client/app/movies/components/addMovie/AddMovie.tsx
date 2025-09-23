@@ -170,7 +170,7 @@ export function AddMovie({
   const handleMovieAdd = async () => {
     let isStatus = newMovie.status;
     if (!isStatus) {
-      isStatus = "Want to Read";
+      isStatus = "Want to Watch";
     }
     const finalMovie = {
       ...newMovie,

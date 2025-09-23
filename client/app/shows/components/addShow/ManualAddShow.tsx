@@ -4,7 +4,7 @@ import { ShowProps } from "@/types/show";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
-import { scoreOptions, statusOptions } from "@/utils/dropDownDetails";
+import { scoreOptions, showStatusOptions } from "@/utils/dropDownDetails";
 
 interface ManualAddShowProps {
   isOpen: boolean;
@@ -137,7 +137,7 @@ export function ManualAddShow({
                     <Dropdown
                       value={show.status || "Want to Watch"}
                       onChange={handleStatusChange}
-                      options={statusOptions}
+                      options={showStatusOptions}
                       customStyle="text-zinc-200 font-semibold"
                       dropStyle={
                         show.status === "Completed"

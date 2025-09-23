@@ -1,46 +1,66 @@
 // STATUS
 
-export const statusOptions = [
-  {
-    value: "Want to Read",
-    label: "Want to Read",
-    className: "text-blue-500",
+const statusConfig = {
+  "Want to Read": {
+    textStyle: "text-blue-500",
+    bgStyle: "to-blue-500/10",
   },
-  { value: "Completed", label: "Completed", className: "text-green-600" },
-  {
-    value: "Dropped",
-    label: "Dropped",
-    className: "text-red-500",
+  "Want to Watch": {
+    textStyle: "text-blue-500",
+    bgStyle: "to-blue-500/10",
   },
-];
+  Watching: {
+    textStyle: "text-indigo-500",
+    bgStyle: "to-indigo-600/10",
+  },
+  Playing: {
+    textStyle: "text-blue-500/80",
+    bgStyle: "to-blue-500/10",
+  },
+  Completed: {
+    textStyle: "text-green-600",
+    bgStyle: "to-emerald-500/10",
+  },
+  Dropped: {
+    textStyle: "text-red-500/80",
+    bgStyle: "to-red-500/10",
+  },
+} as const;
 
-export const tvStatusOptions = [
-  {
-    value: "Want to Watch",
-    label: "Want to Watch",
-    className: "text-blue-500",
-  },
-  { value: "Completed", label: "Completed", className: "text-green-600" },
-  {
-    value: "Dropped",
-    label: "Dropped",
-    className: "text-red-500",
-  },
-];
+const createStatusOptions = <T extends keyof typeof statusConfig>(
+  statuses: T[]
+) =>
+  statuses.map((status) => ({
+    value: status,
+    label: status,
+    ...statusConfig[status],
+  }));
 
-export const gameStatusOptions = [
-  {
-    value: "Playing",
-    label: "Playing",
-    className: "text-blue-500",
-  },
-  { value: "Completed", label: "Completed", className: "text-green-600" },
-  {
-    value: "Dropped",
-    label: "Dropped",
-    className: "text-red-500",
-  },
-];
+// Export status options
+export const bookStatusOptions = createStatusOptions([
+  "Want to Read",
+  "Completed",
+  "Dropped",
+]);
+
+export const movieStatusOptions = createStatusOptions([
+  "Want to Watch",
+  "Completed",
+  "Dropped",
+]);
+
+export const showStatusOptions = createStatusOptions([
+  "Watching",
+  "Want to Watch",
+  "Completed",
+  "Dropped",
+]);
+
+export const gameStatusOptions = createStatusOptions([
+  "Playing",
+  "Completed",
+  "Dropped",
+]);
 
 // SCORE
 

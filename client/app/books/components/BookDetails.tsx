@@ -4,7 +4,10 @@ import Image from "next/image";
 //
 import { BookProps } from "@/types/book";
 import { formatDate, getStatusBorderGradient } from "@/utils/formattingUtils";
-import { statusOptions, scoreOptions } from "../../../utils/dropDownDetails";
+import {
+  bookStatusOptions,
+  scoreOptions,
+} from "../../../utils/dropDownDetails";
 import { getCoverUrl } from "@/app/books/utils/bookMapping";
 //
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
@@ -306,7 +309,7 @@ export function BookDetails({
                       <Dropdown
                         value={book.status}
                         onChange={handleStatusChange}
-                        options={statusOptions}
+                        options={bookStatusOptions}
                         customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={
                           book.status === "Completed"

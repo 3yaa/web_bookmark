@@ -5,10 +5,10 @@ import Image from "next/image";
 import { ShowProps } from "@/types/show";
 import {
   formatDateShort,
-  getTvStatusBorderGradient,
   getStatusTextColor,
+  getStatusBorderGradient,
 } from "@/utils/formattingUtils";
-import { tvStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
+import { showStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 //
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { Dropdown } from "@/app/components/ui/Dropdown";
@@ -273,7 +273,7 @@ export function ShowDetails({
       <div className="fixed inset-0" onClick={handleModalClose} />
       {/* BACKGROUND BORDER GRADIENT */}
       <div
-        className={`rounded-2xl bg-gradient-to-b ${getTvStatusBorderGradient(
+        className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
           show.status
         )} py-2 px-2 lg:min-w-[45%] lg:max-w-[45%]`}
       >
@@ -364,7 +364,7 @@ export function ShowDetails({
                       {show.title || "Untitled"}
                     </div>
                     <div
-                      className={`w-full h-0.5 bg-gradient-to-r ${getTvStatusBorderGradient(
+                      className={`w-full h-0.5 bg-gradient-to-r ${getStatusBorderGradient(
                         show.status
                       )} to-zinc-800 rounded-full`}
                     ></div>
@@ -407,13 +407,8 @@ export function ShowDetails({
                       <Dropdown
                         value={show.status}
                         onChange={handleStatusChange}
-                        options={tvStatusOptions}
+                        options={showStatusOptions}
                         customStyle="text-zinc-300/75 font-semibold"
-                        dropStyle={
-                          show.status === "Completed"
-                            ? ["to-emerald-500/10", "text-emerald-500"]
-                            : ["to-blue-500/10", "text-blue-500"]
-                        }
                         dropDuration={0.24}
                       />
                     </div>
@@ -428,11 +423,6 @@ export function ShowDetails({
                         }}
                         options={scoreOptions}
                         customStyle="text-zinc-300/75 font-semibold"
-                        dropStyle={
-                          show.status === "Completed"
-                            ? ["to-emerald-500/10", "text-emerald-500"]
-                            : ["to-blue-500/10", "text-blue-500"]
-                        }
                         dropDuration={0.4}
                       />
                     </div>

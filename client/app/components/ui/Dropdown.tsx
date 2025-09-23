@@ -5,6 +5,8 @@ import { Portal } from "@/utils/portal";
 interface Option {
   value: string;
   label: string;
+  bgStyle?: string;
+  textStyle?: string;
 }
 
 interface DropdownProps {
@@ -21,8 +23,6 @@ export function Dropdown({
   value,
   options,
   onChange,
-  // 0: the selected dropdown bg | 1: the selected dropdown text color
-  dropStyle = ["to-emerald-500/10", "text-emerald-500"],
   customStyle = "text-zinc-200 font-semibold",
   disabled = false,
   dropDuration = 0.3,
@@ -138,12 +138,14 @@ export function Dropdown({
                 className={`w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-zinc-200 focus:outline-none border-b border-zinc-800/90 last:border-none transition-all duration-200 ease-out cursor-pointer
                 ${
                   option.value === value
-                    ? `rounded-md bg-gradient-to-r from-transparent ${dropStyle[0]}`
+                    ? `rounded-md bg-gradient-to-r from-transparent ${option.bgStyle}`
                     : "hover:bg-zinc-800/70 hover:text-white"
                 }`}
               >
                 <span
-                  className={`${option.value === value ? `${dropStyle[1]}` : ""}
+                  className={`${
+                    option.value === value ? `${option.textStyle}` : ""
+                  }
                   `}
                 >
                   {option.label}

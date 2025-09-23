@@ -4,7 +4,7 @@ import { MovieProps } from "@/types/movie";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
-import { scoreOptions, statusOptions } from "@/utils/dropDownDetails";
+import { scoreOptions, movieStatusOptions } from "@/utils/dropDownDetails";
 
 interface ManualAddMovieProps {
   isOpen: boolean;
@@ -24,7 +24,7 @@ export function ManualAddMovie({
   if (!isOpen) return null;
 
   const handleStatusChange = (value: string) => {
-    const newStatus = value as "Completed" | "Want to Read";
+    const newStatus = value as "Completed" | "Want to Watch";
     const statusLoad: Partial<MovieProps> = {
       status: newStatus,
     };
@@ -139,7 +139,7 @@ export function ManualAddMovie({
                     <Dropdown
                       value={movie.status || "Want to Read"}
                       onChange={handleStatusChange}
-                      options={statusOptions}
+                      options={movieStatusOptions}
                       customStyle="text-zinc-200 font-semibold"
                       dropStyle={
                         movie.status === "Completed"

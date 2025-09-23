@@ -4,7 +4,7 @@ import { BookProps } from "@/types/book";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
-import { statusOptions, scoreOptions } from "@/utils/dropDownDetails";
+import { bookStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 interface ManualAddBookProps {
   isOpen: boolean;
   onClose: () => void;
@@ -136,7 +136,7 @@ export function ManualAddBook({
                     <Dropdown
                       value={book.status || "Want to Read"}
                       onChange={handleStatusChange}
-                      options={statusOptions}
+                      options={bookStatusOptions}
                       customStyle="text-zinc-200 font-semibold"
                       dropStyle={
                         book.status === "Completed"

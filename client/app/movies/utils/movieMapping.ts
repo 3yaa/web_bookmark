@@ -17,7 +17,7 @@ export function resetMovieValues(
     placeInSeries: undefined,
     prequel: undefined,
     sequel: undefined,
-    status: "Want to Read",
+    status: "Want to Watch",
   };
 }
 

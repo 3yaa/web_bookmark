@@ -5,7 +5,7 @@ import Image from "next/image";
 import { GameProps } from "@/types/game";
 import {
   formatDateShort,
-  getGameStatusBorderGradient,
+  getStatusBorderGradient,
 } from "@/utils/formattingUtils";
 import { gameStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 //
@@ -146,7 +146,7 @@ export function GameDetails({
       <div className="fixed inset-0" onClick={handleModalClose} />
       {/* BACKGROUND BORDER GRADIENT */}
       <div
-        className={`rounded-2xl bg-gradient-to-b ${getGameStatusBorderGradient(
+        className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
           game.status
         )} py-2 px-2 lg:min-w-[45%] lg:max-w-[45%]`}
       >
@@ -263,7 +263,7 @@ export function GameDetails({
                       {game.title || "Untitled"}
                     </div>
                     <div
-                      className={`w-full h-0.5 bg-gradient-to-r ${getGameStatusBorderGradient(
+                      className={`w-full h-0.5 bg-gradient-to-r ${getStatusBorderGradient(
                         game.status
                       )} to-zinc-800 rounded-full`}
                     ></div>

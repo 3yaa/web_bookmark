@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 //
 import { GameProps } from "@/types/game";
@@ -138,6 +138,17 @@ export function GameDetails({
       updateBackdropIndex(newCoverIndex);
     }
   };
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    //
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [onClose]);
 
   if (!isOpen || !game) return null;
 

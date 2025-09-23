@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 //
 import { BookProps } from "@/types/book";
@@ -131,6 +131,17 @@ export function BookDetails({
     const showMoreBooks = true;
     onUpdate(book.id, undefined, showMoreBooks);
   };
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    //
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [onClose]);
 
   if (!isOpen || !book) return null;
 

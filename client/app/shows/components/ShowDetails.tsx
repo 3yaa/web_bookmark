@@ -78,11 +78,11 @@ export function ShowDetails({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleNoteKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); // Prevent new line
+      e.preventDefault(); //prevents new line
       saveNote();
-      e.currentTarget.blur(); // Optional: remove focus
+      e.currentTarget.blur(); //lose focus
     }
   };
 
@@ -113,15 +113,24 @@ export function ShowDetails({
     onUpdate(show.id, undefined, needYear);
   };
 
-  const handleInputClick = (type: string) => {
-    if (type === "season") {
-      setEditingMode({ ...editingMode, season: true });
-    } else if (type === "episode") {
-      setEditingMode({ ...editingMode, episode: true });
+  const handleInputClick = (type: "season" | "episode") => {
+    if (editingMode[type]) {
+      setEditingMode({ season: false, episode: false });
+      return;
     }
+    //
+    setEditingMode({
+      season: type === "season",
+      episode: type === "episode",
+    });
+    //
+    setInputValues({
+      season: show.curSeasonIndex + 1,
+      episode: show.curEpisode,
+    });
   };
 
-  const handleInputKeyDown = (key: string, type: string) => {
+  const handleInputKeyDown = (key: string, type: "season" | "episode") => {
     if (key === "Enter") {
       handleInputSubmit(type);
     } else if (key === "Escape") {
@@ -129,7 +138,7 @@ export function ShowDetails({
     }
   };
 
-  const handleInputSubmit = (type: string) => {
+  const handleInputSubmit = (type: "season" | "episode") => {
     if (!show.seasons) return;
 
     if (type === "season") {
@@ -258,6 +267,17 @@ export function ShowDetails({
 
     onUpdate(show.id, { curSeasonIndex: seasonIndex, curEpisode: curEp });
   };
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    //
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [onClose]);
 
   useEffect(() => {
     setInputValues({
@@ -458,6 +478,9 @@ export function ShowDetails({
                                 ) => {
                                   handleInputKeyDown(e.key, "season");
                                 }}
+                                onClick={(e: React.MouseEvent) => {
+                                  e.stopPropagation();
+                                }}
                                 // WHEN LOSES FOCUS
                                 onBlur={() => {
                                   handleInputSubmit("season");
@@ -538,6 +561,9 @@ export function ShowDetails({
                                 ) => {
                                   handleInputKeyDown(e.key, "episode");
                                 }}
+                                onClick={(e: React.MouseEvent) => {
+                                  e.stopPropagation();
+                                }}
                                 // WHEN LOSES FOCUS
                                 onBlur={() => {
                                   handleInputSubmit("episode");
@@ -617,7 +643,7 @@ export function ShowDetails({
                       <AutoTextarea
                         value={localNote}
                         onChange={handleNoteChange}
-                        onKeyDown={handleKeyDown}
+                        onKeyDown={handleNoteKeyDown}
                         onBlur={saveNote}
                         placeholder="Add your thoughts about this show..."
                         className="text-gray-300 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500"

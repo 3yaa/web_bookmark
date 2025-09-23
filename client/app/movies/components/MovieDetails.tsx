@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 //
 import { MovieProps } from "@/types/movie";
@@ -109,6 +109,17 @@ export function MovieDetails({
     const needYear = true;
     onUpdate(movie.id, undefined, needYear);
   };
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    //
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [onClose]);
 
   if (!isOpen || !movie) return null;
 

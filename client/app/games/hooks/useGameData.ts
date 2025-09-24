@@ -14,7 +14,7 @@ export function useGameData() {
     try {
       setGameDataLoading(true);
       //
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/games`;
+      const url = `/api/games`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
@@ -42,7 +42,7 @@ export function useGameData() {
       try {
         setGameDataLoading(true);
         //
-        const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/games`;
+        const url = `/api/games`;
         const options = {
           method: "POST",
           headers: {
@@ -87,7 +87,7 @@ export function useGameData() {
           )
         );
         // update db
-        const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/games/${gameId}`;
+        const url = `/api/games/${gameId}`;
         const options = {
           method: "PATCH",
           headers: {
@@ -116,7 +116,7 @@ export function useGameData() {
           return prev.filter((game) => game.id !== gameId);
         });
         // update db
-        const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/games/${gameId}`;
+        const url = `/api/games/${gameId}`;
         const options = {
           method: "DELETE",
           headers: {

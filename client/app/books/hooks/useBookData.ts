@@ -42,7 +42,7 @@ export function useBookData() {
     try {
       setBookDataLoading(true);
       //
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books`;
+      const url = `/api/books`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
@@ -70,7 +70,7 @@ export function useBookData() {
       try {
         setBookDataLoading(true);
         //
-        const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books`;
+        const url = `/api/books`;
         const options = {
           method: "POST",
           headers: {
@@ -115,7 +115,7 @@ export function useBookData() {
           )
         );
         // update db
-        const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books/${bookId}`;
+        const url = `/api/books/${bookId}`;
         const options = {
           method: "PATCH",
           headers: {
@@ -144,7 +144,7 @@ export function useBookData() {
           return prevBooks.filter((book) => book.id !== bookId);
         });
         // update db
-        const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books/${bookId}`;
+        const url = `/api/books/${bookId}`;
         const options = {
           method: "DELETE",
           headers: {

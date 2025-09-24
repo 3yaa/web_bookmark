@@ -18,7 +18,7 @@ export function useShowSearch() {
       setIsSearching(true);
       setError(null);
       //
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/shows-api/tmdb?title=${title}&year=${year}`;
+      const url = `/api/shows-api/tmdb?title=${title}&year=${year}`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
@@ -45,7 +45,7 @@ export function useShowSearch() {
       setIsSearching(true);
       setError(null);
       //
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/shows-api/tmdb-tv?tmdbId=${tmdbId}`;
+      const url = `/api/shows-api/tmdb-tv?tmdbId=${tmdbId}`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);

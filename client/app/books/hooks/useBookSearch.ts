@@ -22,7 +22,7 @@ export function useBookSearch() {
       setIsSearching(true);
       setError(null);
       // make call
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books-api/open-library?query=${query}&limit=${limit}`;
+      const url = `/api/books-api/open-library?query=${query}&limit=${limit}`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
@@ -49,7 +49,7 @@ export function useBookSearch() {
       setIsSearching(true);
       setError(null);
       //
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books-api/wikidata?openLibraryID=${olid}`;
+      const url = `/api/books-api/wikidata?openLibraryID=${olid}`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
@@ -77,7 +77,7 @@ export function useBookSearch() {
       setIsSearching(true);
       setError(null);
       //
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/books-api/google-books?query=${query}&limit=${limit}`;
+      const url = `/api/books-api/google-books?query=${query}&limit=${limit}`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);

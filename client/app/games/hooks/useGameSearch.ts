@@ -17,7 +17,7 @@ export function useGameSearch() {
       setIsSearching(true);
       setError(null);
       //
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/games-api/igdb?title=${title}&limit=${limit}`;
+      const url = `/api/games-api/igdb?title=${title}&limit=${limit}`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
@@ -43,7 +43,7 @@ export function useGameSearch() {
       setIsSearching(true);
       setError(null);
       //
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/games-api/igdb-dlc?igdbId=${igdbId}`;
+      const url = `/api/games-api/igdb-dlc?igdbId=${igdbId}`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);

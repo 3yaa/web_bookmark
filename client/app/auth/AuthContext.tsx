@@ -71,10 +71,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // make call
     const refreshPromise = (async () => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/auth/refresh`,
-          { credentials: "include" }
-        );
+        const response = await fetch(`/api/auth/refresh`, {
+          credentials: "include",
+        });
         if (!response.ok) {
           if (response.status === 401 || response.status === 403) {
             setAuthToken(null);

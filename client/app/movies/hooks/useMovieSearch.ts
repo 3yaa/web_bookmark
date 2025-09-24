@@ -18,7 +18,7 @@ export function useMovieSearch() {
       setIsSearching(true);
       setError(null);
       // make call
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies-api/omdb?title=${title}&year=${year}`;
+      const url = `/api/movies-api/omdb?title=${title}&year=${year}`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
@@ -45,7 +45,7 @@ export function useMovieSearch() {
       setIsSearching(true);
       setError(null);
       //
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies-api/tmdb?imdbId=${imdbId}`;
+      const url = `/api/movies-api/tmdb?imdbId=${imdbId}`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
@@ -72,7 +72,7 @@ export function useMovieSearch() {
       setIsSearching(true);
       setError(null);
       //
-      const url = `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/movies-api/wikidata?imdbId=${imdbId}`;
+      const url = `/api/movies-api/wikidata?imdbId=${imdbId}`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);

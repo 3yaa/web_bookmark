@@ -14,13 +14,10 @@ export function Logout() {
     setError("");
     //
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/auth/logout`,
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
+      const response = await fetch(`/api/auth/logout`, {
+        method: "GET",
+        credentials: "include",
+      });
       if (!response.ok && response.status !== 204) {
         throw new Error(`Logout failed`);
       }

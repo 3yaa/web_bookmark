@@ -8,8 +8,8 @@ import { RouteGuard } from "@/app/auth/RouteGuard";
 const geist = Geist({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: "bookmark",
-  description: "fix yo shi",
+  title: "Mouthful",
+  description: "Manage all your libraries in one place",
 };
 
 export default function RootLayout({

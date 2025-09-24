@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/app/auth/AuthContext";
 import { NavMenu } from "./components/NavMenu";
+import { RouteGuard } from "@/app/auth/RouteGuard";
 
 const geist = Geist({ subsets: ["latin"], display: "swap" });
 
@@ -20,7 +21,7 @@ export default function RootLayout({
     <html lang="en" className={`${geist.className}`}>
       <body className="antialiased bg-zinc-950 text-zinc-100">
         <AuthProvider>
-          {children}
+          <RouteGuard>{children}</RouteGuard>
           <NavMenu />
         </AuthProvider>
       </body>

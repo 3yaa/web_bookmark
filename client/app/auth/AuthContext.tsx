@@ -7,6 +7,7 @@ import {
   useCallback,
   useRef,
 } from "react";
+import { usePathname } from "next/navigation";
 
 interface AuthContextType {
   authToken: string | null;
@@ -27,6 +28,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isInitializing, setIsInitializing] = useState(true);
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
   const refreshPromiseRef = useRef<Promise<string | null> | null>(null);
+  const pathname = usePathname();
+  const isAuthPage = pathname === "/login" || pathname === "/register";
 
   // parse jwt to find expiration time
   const parseTokenExpiry = useCallback((token: string): number | null => {
@@ -103,6 +106,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // on mount get token
   useEffect(() => {
     const initializeAuth = async () => {
+      if (isAuthPage) {
+        setIsInitializing(false);
+        return;
+      }
       try {
         await refreshToken();
       } catch (e) {

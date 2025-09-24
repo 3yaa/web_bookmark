@@ -225,11 +225,13 @@ export default function MovieList() {
           sortedMovies.map((movie, index) => (
             <div
               key={movie.id}
-              className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-950/40 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
+              className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
                 movie.status
               )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
                 index === 0 ? "pt-1.5 rounded-bl-none" : "rounded-l-none"
-              } hover:cursor-pointer`}
+              }
+              ${index === sortedMovies.length - 1 && "rounded-bl-md"}  
+                 hover:cursor-pointer`}
               onClick={() => {
                 setActiveModal("movieDetails");
                 setSelectedMovie(movie);

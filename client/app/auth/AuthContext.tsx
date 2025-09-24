@@ -13,6 +13,7 @@ interface AuthContextType {
   setAuthToken: (authToken: string | null) => void;
   isAuthenticated: boolean;
   isRefreshing: boolean;
+  isInitializing: boolean;
   refreshToken: () => Promise<string | null>;
 }
 
@@ -23,8 +24,9 @@ export const AuthTokenContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null); // timer to schedule refresh before expiration
-  const refreshPromiseRef = useRef<Promise<string | null> | null>(null); // stores cur refresh promise to prevent race condition
+  const [isInitializing, setIsInitializing] = useState(true);
+  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const refreshPromiseRef = useRef<Promise<string | null> | null>(null);
 
   // parse jwt to find expiration time
   const parseTokenExpiry = useCallback((token: string): number | null => {
@@ -48,9 +50,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!expiryTime) return;
       //schedules to call the refreshfunc after refreshtime
       const refreshTime = expiryTime - Date.now() - 1 * 60 * 1000;
-      refreshTimerRef.current = setTimeout(() => {
-        refreshFunc();
-      }, refreshTime);
+      if (refreshTime > 0) {
+        refreshTimerRef.current = setTimeout(() => {
+          refreshFunc();
+        }, refreshTime);
+      }
     },
     [parseTokenExpiry]
   );
@@ -65,11 +69,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const refreshPromise = (async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/refresh`,
+          `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/auth/refresh`,
           { credentials: "include" }
         );
         if (!response.ok) {
-          if (response.status === 401) {
+          if (response.status === 401 || response.status === 403) {
             setAuthToken(null);
             throw new Error("session expired");
           }
@@ -96,13 +100,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return refreshPromise;
   }, [scheduleNextRefresh]);
 
-  // on mouth get token
+  // on mount get token
   useEffect(() => {
     const initializeAuth = async () => {
       try {
         await refreshToken();
       } catch (e) {
         console.log("No valid session found: ", e);
+      } finally {
+        setIsInitializing(false);
       }
     };
     //
@@ -151,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthToken: setAuthTokenWithScheduling,
     isAuthenticated: !!authToken,
     isRefreshing,
+    isInitializing,
     refreshToken,
   };
 

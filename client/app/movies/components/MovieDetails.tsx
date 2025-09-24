@@ -124,7 +124,7 @@ export function MovieDetails({
   if (!isOpen || !movie) return null;
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-black/40 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
+    <div className="fixed inset-0 bg-gradient-to-br from-zinc-950/60 via-zinc-950/80 to-zinc-950/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
       <div className="fixed inset-0" onClick={handleModalClose} />
       {/* BACKGROUND BORDER GRADIENT */}
       <div
@@ -133,7 +133,7 @@ export function MovieDetails({
         )} py-2 px-2 lg:min-w-[45%] lg:max-w-[45%]`}
       >
         {/* ACTUAL DETAIL CARD */}
-        <div className="bg-gradient-to-br bg-zinc-900 backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 w-full max-h-[calc(100vh-3rem)]">
+        <div className="bg-gradient-to-br bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 w-full max-h-[calc(100vh-3rem)]">
           {isLoading?.isTrue && (
             <Loading customStyle={isLoading.style} text={isLoading.text} />
           )}

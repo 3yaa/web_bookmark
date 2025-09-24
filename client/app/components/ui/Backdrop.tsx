@@ -22,7 +22,7 @@ export const BackdropImage = ({ src, width, height }: BackdropImageProps) => (
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to right, rgba(24,24,27,1) 0%, rgba(24,24,27,0.2) 30%, transparent 50%, rgba(24,24,27,0.2) 100%)",
+            "linear-gradient(to right, rgba(18,18,18,1) 0%, rgba(18,18,18,0.2) 30%, transparent 50%, rgba(18,18,18,0.2) 100%)",
         }}
       />
       {/* VERTICAL */}
@@ -30,7 +30,7 @@ export const BackdropImage = ({ src, width, height }: BackdropImageProps) => (
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0.8) 50%, rgba(24,24,27,1) 75%, rgba(24,24,27,1) 100%)",
+            "linear-gradient(to bottom, transparent 0%, rgba(18,18,18,0.8) 50%, rgba(18,18,18,1) 75%, rgba(18,18,18,1) 100%)",
         }}
       />
     </div>

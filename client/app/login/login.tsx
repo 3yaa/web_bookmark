@@ -22,13 +22,13 @@ export function Login() {
     e.preventDefault();
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/auth`,
+        `${process.env.NEXT_PUBLIC_MOUTHFUL_URL}/auth/login`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include", 
+          credentials: "include",
           body: JSON.stringify({
             email: formData.email,
             password: formData.password,
@@ -40,7 +40,7 @@ export function Login() {
       }
       const data = await response.json();
       setAuthToken(data.accessToken);
-      router.push("/books");
+      router.push("/");
     } catch (error) {
       console.log("login failed: ", error);
     }

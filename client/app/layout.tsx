@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geist.className}`}>
-      <body className="antialiased bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-800 text-zinc-100">
+      <body className="antialiased bg-zinc-950 text-zinc-100">
         <AuthProvider>
           {children}
           <NavMenu />
@@ -27,5 +27,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-// fixed bottom-10 right-12 z-10

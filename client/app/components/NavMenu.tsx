@@ -11,7 +11,8 @@ import {
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 
 const menuItems = [
   { label: "Movies", icon: Video, path: "/movies" },
@@ -19,13 +20,13 @@ const menuItems = [
   { label: "Books", icon: Book, path: "/books" },
   { label: "Games", icon: Gamepad2, path: "/games" },
   { label: "Home", icon: Home, path: "/" },
-  // { label: "Profile", icon: User, path: "" },
 ];
 
 export function NavMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathName = usePathname();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -100,6 +101,10 @@ export function NavMenu() {
     };
   }, [isOpen, router]);
 
+  if (pathName === "/") {
+    return null;
+  }
+
   return (
     <div
       ref={menuRef}
@@ -114,7 +119,7 @@ export function NavMenu() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, scale: 0.97 }}
             transition={{ type: "spring", stiffness: 240, damping: 28 }}
-            className="mb-3 w-40 rounded-xl bg-gradient-to-tr from-zinc-transparent via-zinc-800/20 to-zinc-800/60 backdrop-blur-xl 
+            className="mb-3 w-40 rounded-xl bg-gradient-to-bl from-zinc-transparent via-zinc-800/20 to-zinc-800/60 backdrop-blur-xl 
                        border border-zinc-800/50 ring-1 ring-zinc-800/50 overflow-hidden"
           >
             <ul className="flex flex-col-reverse">
@@ -128,17 +133,15 @@ export function NavMenu() {
                     exit={{ opacity: 0, x: -10 }}
                     transition={{ delay: i * 0.05, duration: 0.1 }}
                   >
-                    <button
+                    <Link
+                      href={item.path}
                       onClick={(e) => {
-                        e.stopPropagation(); // Prevent event bubbling
-                        if (item.path) {
-                          router.push(item.path);
-                        }
-                        setIsOpen(false); // Close menu after selection
+                        e.stopPropagation();
+                        setIsOpen(false);
                       }}
                       className="w-full flex items-center justify-between pl-4.5 pr-5 py-3
                                  text-sm font-medium text-zinc-300 
-                                 hover:text-emerald-500 hover:bg-gradient-to-r  from-emerald-500/8
+                                 hover:text-emerald-500 hover:bg-gradient-to-r from-emerald-500/8
                                  transition-all group hover:cursor-pointer"
                     >
                       <div className="flex items-center gap-3">
@@ -152,7 +155,7 @@ export function NavMenu() {
                                                translate-x-[-4px] group-hover:translate-x-0 
                                                transition-all duration-200"
                       />
-                    </button>
+                    </Link>
                   </motion.li>
                 );
               })}
@@ -168,7 +171,7 @@ export function NavMenu() {
           bg-gradient-to-bl from-zinc-transparent to-zinc-800/60 
           hover:bg-graident-to-bl hover:from-zinc-800/60 hover:to-transparent
           backdrop-blur-xl 
-          shadow-md  hover:scale-105 active:scale-95 
+          shadow-md hover:scale-105 active:scale-95 
           transition-all duration-200 relative z-10 hover:cursor-pointer focus:outline-none`}
       >
         {isOpen ? (

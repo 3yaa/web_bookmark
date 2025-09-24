@@ -1,4 +1,7 @@
-const allowedOrigins = ["http://localhost:3000"];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://mouthful-bkm.vercel.app",
+];
 
 export const corsOptions = {
   origin: (origin, callback) => {

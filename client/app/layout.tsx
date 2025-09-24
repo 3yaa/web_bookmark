@@ -10,6 +10,9 @@ const geist = Geist({ subsets: ["latin"], display: "swap" });
 export const metadata: Metadata = {
   title: "Mouthful",
   description: "Manage all your libraries in one place",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({

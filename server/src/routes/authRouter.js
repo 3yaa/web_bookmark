@@ -11,7 +11,7 @@ import { validateRegister, isEmailDup } from "../middleware/validateAuth.js";
 const authRouter = express.Router();
 // login
 authRouter.post("/login", validateLogin, loginUser);
-authRouter.post("/logout", logoutUser);
+authRouter.get("/logout", logoutUser);
 // check auth
 authRouter.get("/check", validateRefreshTokenCookie, checkAuth);
 authRouter.get("/refresh", validateRefreshTokenCookie, refreshToken);

@@ -92,7 +92,7 @@ export function AddGame({
     if (!mainGame) return null;
     //
     setBackdropUrls(mainGame.screenshot_urls?.map((ss) => ss.ss_url) || []);
-    setNewGame(mapIGDBDataToGame(mainGame));
+    setNewGame({ ...mapIGDBDataToGame(mainGame), status: "Playing" });
     setAllNewGames(response);
     return {
       title: mainGame.title,
@@ -135,6 +135,7 @@ export function AddGame({
       setNewGame((prev) => ({
         ...prev,
         ...mappedData,
+        status: "Playing",
       }));
     },
     [searchForGameDlc, titleFromAbove]
@@ -176,7 +177,7 @@ export function AddGame({
 
   const handlePickFromMultGames = useCallback((game: IGDBProps) => {
     try {
-      setNewGame(mapIGDBDataToGame(game));
+      setNewGame({ ...mapIGDBDataToGame(game), status: "Playing" });
     } finally {
       setActiveModal("gameDetails");
     }
@@ -281,7 +282,7 @@ export function AddGame({
       {/* maybe not allow user to close modal as new game coming? */}
       <div className="fixed inset-0" onClick={onClose} />
       {!titleFromAbove ? (
-        <div className="bg-zinc-900/95 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 shadow-2xl w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
+        <div className="bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 shadow-2xl w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
           <h2 className="text-xl font-semibold mb-4 text-zinc-100 flex justify-center items-center gap-2">
             <Gamepad2 className="w-5 h-5 text-emerald-400" />
             Search for New Game

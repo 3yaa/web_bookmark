@@ -5,7 +5,7 @@ interface LoadingProps {
 }
 
 export function Loading({
-  customBg = "bg-zinc-900",
+  customBg = "bg-[#121212]",
   customStyle,
   text,
 }: LoadingProps) {

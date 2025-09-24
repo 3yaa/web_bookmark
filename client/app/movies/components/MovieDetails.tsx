@@ -124,7 +124,7 @@ export function MovieDetails({
   if (!isOpen || !movie) return null;
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-zinc-950/60 via-zinc-950/80 to-zinc-950/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
+    <div className="fixed inset-0 bg-gradient-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
       <div className="fixed inset-0" onClick={handleModalClose} />
       {/* BACKGROUND BORDER GRADIENT */}
       <div
@@ -174,7 +174,7 @@ export function MovieDetails({
                   className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer
                     transition-all group"
                   onClick={handleNeedYear}
-                  title={"See More Options"}
+                  title={"Search with year"}
                 >
                   <ChevronsUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
                 </button>
@@ -200,7 +200,7 @@ export function MovieDetails({
 
             <div className="flex gap-8">
               {/* LEFT SIDE -- PIC */}
-              <div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg">
+              <div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg select-none">
                 {movie.posterUrl !== undefined ? (
                   <>
                     <Image

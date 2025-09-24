@@ -43,7 +43,7 @@ export function ManualAddMovie({
         )} py-2 px-2`}
       >
         {/* ACTUAL DETAIL CARD */}
-        <div className="bg-gradient-to-br bg-zinc-900 backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 lg:min-w-3xl lg:max-w-3xl w-full max-h-[calc(100vh-3rem)]">
+        <div className="bg-gradient-to-br bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 lg:min-w-3xl lg:max-w-3xl w-full max-h-[calc(100vh-3rem)]">
           <div className="px-8.5 py-7 border-0 rounded-2xl">
             {/* ACTION BUTTONS */}
             <div className="absolute right-3 top-3 flex items-center gap-2">

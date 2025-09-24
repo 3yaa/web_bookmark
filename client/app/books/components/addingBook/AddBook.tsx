@@ -133,7 +133,10 @@ export function AddBook({
     async (olKey: string) => {
       // check for cache
       if (bookSeriesCache.has(olKey)) {
-        setNewBook(bookSeriesCache.get(olKey) || {});
+        setNewBook({
+          ...(bookSeriesCache.get(olKey) || {}),
+          status: "Want to Read",
+        });
         return;
       }
       // make call
@@ -147,6 +150,7 @@ export function AddBook({
           ...prev,
           title: cleanName(prev.title, mappedData.seriesTitle),
           ...mappedData,
+          status: "Want to Read" as const,
         };
         bookSeriesCache.set(olKey, updated);
         return updated; //setting newBook
@@ -206,14 +210,14 @@ export function AddBook({
           return;
         }
         //
+        setActiveModal("bookDetails");
         try {
           setCleaningCover(true);
           setCoverUrls((await filterCovers(book.cover_urls)) || []);
         } finally {
           setCleaningCover(false);
         }
-        setNewBook(mapOpenLibDataToBook(book));
-        setActiveModal("bookDetails");
+        setNewBook({ ...mapOpenLibDataToBook(book), status: "Want to Read" });
         if (key) await handleSeriesSearch(key);
       }
       // google -- NOT CALLING WIKI FOR GOOGLE
@@ -228,8 +232,8 @@ export function AddBook({
           return;
         }
         //
-        setNewBook(mapGoogleDataToBook(book));
         setActiveModal("bookDetails");
+        setNewBook({ ...mapGoogleDataToBook(book), status: "Want to Read" });
       }
     },
     [handleSeriesSearch, isDuplicate]
@@ -295,6 +299,7 @@ export function AddBook({
   );
 
   const handleBookDetailsClose = () => {
+    reset();
     setActiveModal(null);
     if (titleFromAbove) {
       onClose();
@@ -367,7 +372,7 @@ export function AddBook({
       {/* maybe not allow user to close modal as new book coming? */}
       <div className="fixed inset-0" onClick={onClose} />
       {!titleFromAbove ? (
-        <div className="bg-zinc-900/95 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 shadow-2xl w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
+        <div className="bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 shadow-2xl w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
           <h2 className="text-xl font-semibold mb-4 text-zinc-100 flex justify-center items-center gap-2">
             <Book className="w-5 h-5 text-emerald-400" />
             Search for New Book

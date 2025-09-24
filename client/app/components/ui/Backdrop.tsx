@@ -7,7 +7,7 @@ interface BackdropImageProps {
 }
 
 export const BackdropImage = ({ src, width, height }: BackdropImageProps) => (
-  <div className="absolute -top-7 left-20 -right-25 h-[70%] -z-10 overflow-hidden">
+  <div className="absolute -top-7 left-20 -right-25 h-[70%] -z-10 overflow-hidden select-none">
     <div className="relative h-full">
       <Image
         src={src}

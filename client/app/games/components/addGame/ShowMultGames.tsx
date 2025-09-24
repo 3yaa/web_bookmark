@@ -25,7 +25,7 @@ export function ShowMultGames({
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
       {/* Modal content */}
-      <div className="relative bg-zinc-900/95 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] flex flex-col shadow-xl">
+      <div className="relative bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] flex flex-col shadow-xl">
         {isLoading && (
           <Loading
             customStyle={"border-emerald-400 h-8 w-8"}

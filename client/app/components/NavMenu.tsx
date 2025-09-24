@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useLogout } from "@/hooks/useLogout";
@@ -46,7 +46,6 @@ export function NavMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const pathName = usePathname();
   const { isAuthenticated } = useAuth();
   const { logout, isLoggingOut } = useLogout();
 
@@ -60,13 +59,6 @@ export function NavMenu() {
           isAction: true,
         }
       : { label: "Login", icon: LogIn, path: "/login" };
-
-    // If on home path, only show login/logout
-    if (pathName === "/") {
-      return [authItem];
-    }
-
-    // Otherwise show all items plus appropriate auth item
     return [...allMenuItems, authItem];
   };
 

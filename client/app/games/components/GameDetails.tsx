@@ -153,7 +153,7 @@ export function GameDetails({
   if (!isOpen || !game) return null;
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-zinc-950/60 via-zinc-950/80 to-zinc-950/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
+    <div className="fixed inset-0 bg-gradient-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
       <div className="fixed inset-0" onClick={handleModalClose} />
       {/* BACKGROUND BORDER GRADIENT */}
       <div

@@ -30,7 +30,7 @@ export const getMovies = async (req, res) => {
 			WHERE user_id=$1 
 			ORDER BY
 				CASE status
-					WHEN 'Want to Read' THEN 1
+					WHEN 'Want to Watch' THEN 1
 					WHEN 'Completed' THEN 2
 					WHEN 'Dropped' THEN 3
 					ELSE 4

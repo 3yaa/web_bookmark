@@ -101,8 +101,6 @@ export const validateGamePatch = (req, res, next) => {
     });
   }
 
-  req.body = convertedUpdates;
-
   next();
 };
 

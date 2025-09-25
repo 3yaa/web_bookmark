@@ -102,8 +102,6 @@ export const validateMoviePatch = (req, res, next) => {
     });
   }
 
-  req.body = convertedUpdates;
-
   next();
 };
 

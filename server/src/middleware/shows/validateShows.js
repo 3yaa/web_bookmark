@@ -108,8 +108,6 @@ export const validateShowPatch = (req, res, next) => {
     });
   }
 
-  req.body = convertedUpdates;
-
   next();
 };
 

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 //
 import { GameProps } from "@/types/game";
@@ -107,11 +107,11 @@ export function GameDetails({
     onClose();
   };
 
-  const handleAddGame = () => {
+  const handleAddGame = useCallback(() => {
     if (!addGame) return;
     addGame();
     onClose();
-  };
+  }, [addGame, onClose]);
 
   const handleNeedYear = () => {
     const needYear = true;
@@ -140,15 +140,22 @@ export function GameDetails({
   };
 
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
+    const handleLeave = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
+      } else if (e.key === "Enter") {
+        const activeElement = document.activeElement;
+        const isInTextarea = activeElement?.tagName === "TEXTAREA";
+        const isInInput = activeElement?.tagName === "INPUT";
+        if (!isInTextarea && !isInInput) {
+          handleAddGame();
+        }
       }
     };
     //
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
+    window.addEventListener("keydown", handleLeave);
+    return () => window.removeEventListener("keydown", handleLeave);
+  }, [onClose, handleAddGame]);
 
   if (!isOpen || !game) return null;
 

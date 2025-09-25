@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 //
 import { BookProps } from "@/types/book";
@@ -101,7 +101,6 @@ export function BookDetails({
     if (localNote !== book.note) {
       onUpdate(book.id, { note: localNote });
     }
-    console.log(book.coverUrl);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -127,11 +126,11 @@ export function BookDetails({
     onClose();
   };
 
-  const handleAddBook = () => {
+  const handleAddBook = useCallback(() => {
     if (!addBook) return;
     addBook();
     onClose();
-  };
+  }, [addBook, onClose]);
 
   const handleMoreBook = () => {
     const showMoreBooks = true;
@@ -139,15 +138,22 @@ export function BookDetails({
   };
 
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
+    const handleLeave = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
+      } else if (e.key === "Enter") {
+        const activeElement = document.activeElement;
+        const isInTextarea = activeElement?.tagName === "TEXTAREA";
+        const isInInput = activeElement?.tagName === "INPUT";
+        if (!isInTextarea && !isInInput) {
+          handleAddBook();
+        }
       }
     };
     //
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
+    window.addEventListener("keydown", handleLeave);
+    return () => window.removeEventListener("keydown", handleLeave);
+  }, [onClose, handleAddBook]);
 
   if (!isOpen || !book) return null;
 

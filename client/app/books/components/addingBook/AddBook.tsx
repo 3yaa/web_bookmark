@@ -320,6 +320,7 @@ export function AddBook({
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
+      e.stopPropagation();
       handleBookSearch();
     }
   };

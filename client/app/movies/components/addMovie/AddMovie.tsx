@@ -210,6 +210,7 @@ export function AddMovie({
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
+      e.stopPropagation();
       handleMovieSearch();
     }
   };

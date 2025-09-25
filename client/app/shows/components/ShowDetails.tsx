@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 //
 import { ShowProps } from "@/types/show";
@@ -61,15 +61,20 @@ export function ShowDetails({
 
   const handleStatusChange = (value: string) => {
     const newStatus = value as "Completed" | "Want to Watch";
-    const statusLoad: Partial<ShowProps> = {
+    const updatesViaStatus: Partial<ShowProps> = {
       status: newStatus,
     };
     if (newStatus === "Completed") {
-      statusLoad.dateCompleted = new Date();
+      updatesViaStatus.dateCompleted = new Date();
+      if (show.seasons) {
+        updatesViaStatus.curEpisode =
+          show.seasons[show.seasons.length - 1].episode_count;
+        updatesViaStatus.curSeasonIndex = show.seasons.length - 1;
+      }
     } else if (show.dateCompleted) {
-      statusLoad.dateCompleted = null;
+      updatesViaStatus.dateCompleted = null;
     }
-    onUpdate(show.id, statusLoad);
+    onUpdate(show.id, updatesViaStatus);
   };
 
   const saveNote = () => {
@@ -88,7 +93,6 @@ export function ShowDetails({
 
   const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setLocalNote(e.target.value);
-    console.log(show.seasons);
   };
 
   const handleDelete = () => {
@@ -102,11 +106,11 @@ export function ShowDetails({
     onClose();
   };
 
-  const handleAddShow = () => {
+  const handleAddShow = useCallback(() => {
     if (!addShow) return;
     addShow();
     onClose();
-  };
+  }, [addShow, onClose]);
 
   const handleNeedYear = () => {
     const needYear = true;
@@ -269,15 +273,23 @@ export function ShowDetails({
   };
 
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
+    const handleLeave = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
+      } else if (e.key === "Enter") {
+        const activeElement = document.activeElement;
+        const isInTextarea = activeElement?.tagName === "TEXTAREA";
+        const isInInput = activeElement?.tagName === "INPUT";
+        const isInEditingMode = editingMode.season || editingMode.episode;
+        if (!isInTextarea && !isInInput && !isInEditingMode) {
+          handleAddShow();
+        }
       }
     };
     //
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
+    window.addEventListener("keydown", handleLeave);
+    return () => window.removeEventListener("keydown", handleLeave);
+  }, [onClose, editingMode, handleAddShow]);
 
   useEffect(() => {
     setInputValues({

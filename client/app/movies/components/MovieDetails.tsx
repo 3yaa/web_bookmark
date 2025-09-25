@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 //
 import { MovieProps } from "@/types/movie";
@@ -84,7 +84,6 @@ export function MovieDetails({
   };
 
   const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    console.log(movie.posterUrl);
     setLocalNote(e.target.value);
   };
 
@@ -99,11 +98,11 @@ export function MovieDetails({
     onClose();
   };
 
-  const handleAddMovie = () => {
+  const handleAddMovie = useCallback(() => {
     if (!addMovie) return;
     addMovie();
     onClose();
-  };
+  }, [addMovie, onClose]);
 
   const handleNeedYear = () => {
     const needYear = true;
@@ -111,15 +110,22 @@ export function MovieDetails({
   };
 
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
+    const handleLeave = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
+      } else if (e.key === "Enter") {
+        const activeElement = document.activeElement;
+        const isInTextarea = activeElement?.tagName === "TEXTAREA";
+        const isInInput = activeElement?.tagName === "INPUT";
+        if (!isInTextarea && !isInInput) {
+          handleAddMovie();
+        }
       }
     };
     //
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
+    window.addEventListener("keydown", handleLeave);
+    return () => window.removeEventListener("keydown", handleLeave);
+  }, [onClose, handleAddMovie]);
 
   if (!isOpen || !movie) return null;
 

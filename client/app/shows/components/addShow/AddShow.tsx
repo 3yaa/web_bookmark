@@ -160,6 +160,7 @@ export function AddShow({
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
+      e.stopPropagation();
       handleShowSearch();
     }
   };

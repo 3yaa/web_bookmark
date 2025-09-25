@@ -239,6 +239,7 @@ export function AddGame({
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
+      e.stopPropagation();
       handleGameSearch();
     }
   };

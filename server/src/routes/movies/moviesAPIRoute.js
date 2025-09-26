@@ -7,10 +7,10 @@ import {
   validateImdbIdAPI,
 } from "../../middleware/movies/validateMoviesAPI.js";
 
-const externalMoviesAPIRouter = express.Router();
+const moviesAPIRouter = express.Router();
 
-externalMoviesAPIRouter.get("/omdb", validateMoviesAPI, useOmdbAPI);
-externalMoviesAPIRouter.get("/tmdb", validateImdbIdAPI, useTmdbAPI);
-externalMoviesAPIRouter.get("/wikidata", validateImdbIdAPI, useWikidataAPI);
+moviesAPIRouter.get("/omdb", validateMoviesAPI, useOmdbAPI);
+moviesAPIRouter.get("/tmdb", validateImdbIdAPI, useTmdbAPI);
+moviesAPIRouter.get("/wikidata", validateImdbIdAPI, useWikidataAPI);
 
-export { externalMoviesAPIRouter };
+export { moviesAPIRouter };

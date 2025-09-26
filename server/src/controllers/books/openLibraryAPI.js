@@ -4,9 +4,9 @@ dotenv.config();
 
 export async function useOpenLibraryAPI(req, res) {
   try {
-    const { query, limit } = req.query;
-    const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(
-      query
+    const { title, limit } = req.query;
+    const url = `https://openlibrary.org/search.json?title=${encodeURIComponent(
+      title
     )}&lang=en&fields=key,title,author_name,first_publish_year,subject,edition_key,cover_edition_key&limit=${limit}`;
     const headers = new Headers({
       "User-Agent": `Media Manager/0.3 (${process.env.PAGE_CONTACT})`,

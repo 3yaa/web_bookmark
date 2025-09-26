@@ -1,10 +1,10 @@
 export const validateBooksAPI = (req, res, next) => {
-  const { query, limit } = req.query;
+  const { title, limit } = req.query;
 
-  if (!query) {
+  if (!title) {
     return res.status(400).json({
       success: false,
-      message: "query parameter is required",
+      message: "title parameter is required",
     });
   }
 
@@ -30,7 +30,7 @@ export const validateBooksAPI = (req, res, next) => {
     });
   }
 
-  req.query.query = query.trim();
+  req.query.title = title.trim();
   req.query.limit = parseInt(limit);
 
   next();

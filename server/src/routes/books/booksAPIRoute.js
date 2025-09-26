@@ -7,18 +7,14 @@ import {
   validateSeriesAPI,
 } from "../../middleware/books/validateBooksAPI.js";
 
-const externalBooksAPIRouter = express.Router();
+const booksAPIRouter = express.Router();
 
-externalBooksAPIRouter.get(
+booksAPIRouter.get(
   "/open-library",
-  validateBooksAPI,
+
   useOpenLibraryAPI
 );
-externalBooksAPIRouter.get(
-  "/google-books",
-  validateBooksAPI,
-  useGoogleBooksAPI
-);
-externalBooksAPIRouter.get("/wikidata", validateSeriesAPI, useWikidataAPI);
+booksAPIRouter.get("/google-books", validateBooksAPI, useGoogleBooksAPI);
+booksAPIRouter.get("/wikidata", validateSeriesAPI, useWikidataAPI);
 
-export { externalBooksAPIRouter };
+export { booksAPIRouter };

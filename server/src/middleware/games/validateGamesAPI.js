@@ -32,6 +32,7 @@ export const validateGameAPI = (req, res, next) => {
   //
   req.query.title = title.trim();
   req.query.limit = parseInt(limit);
+  
   next();
 };
 

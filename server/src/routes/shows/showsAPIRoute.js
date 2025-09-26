@@ -6,9 +6,9 @@ import {
   validateTMDBIdAPI,
 } from "../../middleware/shows/validateShowsAPI.js";
 
-const externalShowsAPIRouter = express.Router();
+const showsAPIRouter = express.Router();
 
-externalShowsAPIRouter.get("/tmdb", validateShowsAPI, useTmdbSearchAPI);
-externalShowsAPIRouter.get("/tmdb-tv", validateTMDBIdAPI, useTmdbTvAPI);
+showsAPIRouter.get("/tmdb", validateShowsAPI, useTmdbSearchAPI);
+showsAPIRouter.get("/tmdb-tv", validateTMDBIdAPI, useTmdbTvAPI);
 
-export { externalShowsAPIRouter };
+export { showsAPIRouter };

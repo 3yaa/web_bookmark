@@ -7,10 +7,10 @@ import { corsOptions } from "./src/config/cors.js";
 import { authRouter } from "./src/routes/authRouter.js";
 import { authenticateToken } from "./src/middleware/authenticateToken.js";
 //
-import { externalBooksAPIRouter } from "./src/routes/books/externalBooksAPIRouter.js";
-import { externalMoviesAPIRouter } from "./src/routes/movies/externalMoviesAPIRoute.js";
-import { externalShowsAPIRouter } from "./src/routes/shows/externalShowAPIRouter.js";
-import { externalGamesAPIRouter } from "./src/routes/games/externalGamesAPIRouter.js";
+import { booksAPIRouter } from "./src/routes/books/booksAPIRoute.js";
+import { moviesAPIRouter } from "./src/routes/movies/moviesAPIRoute.js";
+import { showsAPIRouter } from "./src/routes/shows/showsAPIRoute.js";
+import { gamesAPIRouter } from "./src/routes/games/gamesAPIRoute.js";
 //
 import { booksRouter } from "./src/routes/books/booksRoute.js";
 import { moviesRouter } from "./src/routes/movies/moviesRoute.js";
@@ -34,10 +34,10 @@ app.use("/auth", authRouter);
 app.use(authenticateToken);
 
 // books api routers
-app.use("/shows-api", externalShowsAPIRouter);
-app.use("/movies-api", externalMoviesAPIRouter);
-app.use("/books-api", externalBooksAPIRouter);
-app.use("/games-api", externalGamesAPIRouter);
+app.use("/shows-api", showsAPIRouter);
+app.use("/movies-api", moviesAPIRouter);
+app.use("/books-api", booksAPIRouter);
+app.use("/games-api", gamesAPIRouter);
 app.use("/movies", moviesRouter);
 app.use("/shows", showsRouter);
 app.use("/books", booksRouter);

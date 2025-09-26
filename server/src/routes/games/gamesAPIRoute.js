@@ -6,9 +6,9 @@ import {
   validateIgdbId,
 } from "../../middleware/games/validateGamesAPI.js";
 
-const externalGamesAPIRouter = express.Router();
+const gamesAPIRouter = express.Router();
 
-externalGamesAPIRouter.get("/igdb", validateGameAPI, useIgdbForGameAPI);
-externalGamesAPIRouter.get("/igdb-dlc", validateIgdbId, useIgdbForDlcAPI);
+gamesAPIRouter.get("/igdb", validateGameAPI, useIgdbForGameAPI);
+gamesAPIRouter.get("/igdb-dlc", validateIgdbId, useIgdbForDlcAPI);
 
-export { externalGamesAPIRouter };
+export { gamesAPIRouter };

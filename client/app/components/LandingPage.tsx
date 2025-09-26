@@ -23,7 +23,7 @@ export default function LandingPage() {
           raysSpeed={0.5}
           lightSpread={1.2}
           rayLength={2}
-          pulsating
+          // pulsating
           fadeDistance={0.9}
           saturation={1.0}
           followMouse
@@ -70,8 +70,8 @@ export default function LandingPage() {
                 {section.name}
               </span>
               {/* Subtle hover wash */}
-              <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-white/20 transition-colors duration-500" />
-              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 bg-gradient-to-tr from-white/5 to-transparent transition-opacity duration-500" />
+              <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-white/20 transition-colors duration-300" />
+              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 bg-gradient-to-tr from-white/5 to-transparent transition-opacity duration-300" />
             </motion.div>
           </Link>
         ))}

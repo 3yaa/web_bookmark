@@ -1,10 +1,7 @@
 import { useState } from "react";
-import {
-  OpenLibraryProps,
-  GoogleBooksProps,
-  WikidataProps,
-} from "@/types/book";
+import { OpenLibraryProps, WikidataProps } from "@/types/book";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
+import { extractTitle } from "../utils/extractTitle";
 
 export function useBookSearch() {
   const { authFetch, isAuthLoading } = useAuthFetch();
@@ -21,8 +18,11 @@ export function useBookSearch() {
     try {
       setIsSearching(true);
       setError(null);
+      //
+      const title = extractTitle(query);
+      console.log(title);
       // make call
-      const url = `/api/books-api/open-library?query=${query}&limit=${limit}`;
+      const url = `/api/books-api/open-library?query=${query}&title=${title}&limit=${limit}`;
       const response = await authFetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
@@ -69,38 +69,37 @@ export function useBookSearch() {
   };
 
   // GOOGLE BOOKS API -- BOOK BACKUP
-  const searchForBackupBooks = async (
-    query: string,
-    limit: number
-  ): Promise<GoogleBooksProps[] | null> => {
-    try {
-      setIsSearching(true);
-      setError(null);
-      //
-      const url = `/api/books-api/google-books?query=${query}&limit=${limit}`;
-      const response = await authFetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error--status: ${response.status}`);
-      }
-      //
-      const resJson = await response.json();
-      const books = resJson.data || null;
-      //
-      return books;
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "An error occurred");
-      console.error("Getting google books failed: ", e);
-      return null;
-    } finally {
-      setIsSearching(false);
-    }
-  };
+  // const searchForBackupBooks = async (
+  //   query: string,
+  //   limit: number
+  // ): Promise<GoogleBooksProps[] | null> => {
+  //   try {
+  //     setIsSearching(true);
+  //     setError(null);
+  //     //
+  //     const url = `/api/books-api/google-books?query=${query}&limit=${limit}`;
+  //     const response = await authFetch(url);
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error--status: ${response.status}`);
+  //     }
+  //     //
+  //     const resJson = await response.json();
+  //     const books = resJson.data || null;
+  //     //
+  //     return books;
+  //   } catch (e) {
+  //     setError(e instanceof Error ? e.message : "An error occurred");
+  //     console.error("Getting google books failed: ", e);
+  //     return null;
+  //   } finally {
+  //     setIsSearching(false);
+  //   }
+  // };
 
   return {
     error,
     isBookSearching,
     searchForBooks,
     searchForSeriesInfo,
-    searchForBackupBooks,
   };
 }

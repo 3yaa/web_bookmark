@@ -2,17 +2,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Book } from "lucide-react";
 //
-import {
-  BookProps,
-  OpenLibraryProps,
-  AllBooksProps,
-  GoogleBooksProps,
-  WikidataProps,
-} from "@/types/book";
+import { BookProps, OpenLibraryProps, WikidataProps } from "@/types/book";
 //
 import {
   cleanName,
-  mapGoogleDataToBook,
   mapOpenLibDataToBook,
   mapWikidataToBook,
   resetBookValues,
@@ -33,7 +26,7 @@ interface AddBookProps {
   titleFromAbove?: string;
 }
 
-const BOOKLIMIT = 5;
+const BOOKLIMIT = 10;
 const bookSeriesCache = new Map<string, Partial<BookProps>>();
 
 export function AddBook({
@@ -55,10 +48,7 @@ export function AddBook({
   const [isDupTitle, setIsDupTitle] = useState(false);
   //
   const [newBook, setNewBook] = useState<Partial<BookProps>>({});
-  const [allNewBooks, setAllNewBooks] = useState<AllBooksProps>({
-    OpenLibBooks: [],
-    GoogleBooksProps: [],
-  });
+  const [allNewBooks, setAllNewBooks] = useState<OpenLibraryProps[]>([]);
   const [allSeries, setAllSeries] = useState<WikidataProps[]>([]);
   const [curSeries, setCurSeries] = useState(0);
   //
@@ -66,12 +56,8 @@ export function AddBook({
   const [coverIndex, setCoverIndex] = useState(0);
   const [cleaningCover, setCleaningCover] = useState(false);
   //
-  const {
-    searchForBooks,
-    searchForSeriesInfo,
-    searchForBackupBooks,
-    isBookSearching,
-  } = useBookSearch();
+  const { searchForBooks, searchForSeriesInfo, isBookSearching } =
+    useBookSearch();
 
   const reset = useCallback(() => {
     setFailedReason("");
@@ -82,10 +68,7 @@ export function AddBook({
     setNewBook({});
     setCoverUrls([]);
     setCoverIndex(0);
-    setAllNewBooks({
-      OpenLibBooks: [],
-      GoogleBooksProps: [],
-    });
+    setAllNewBooks([]);
     if (titleToSearch.current) {
       titleToSearch.current.value = "";
       titleToSearch.current.focus();
@@ -117,10 +100,7 @@ export function AddBook({
     } finally {
       setCleaningCover(false);
     }
-    setAllNewBooks({
-      OpenLibBooks: response,
-      GoogleBooksProps: [],
-    }); //all
+    setAllNewBooks(response); //all
     // console.log(response?.[0].title, ": ", response?.[0].key);
     setNewBook(mapOpenLibDataToBook(response?.[0])); //main
     return {
@@ -182,59 +162,41 @@ export function AddBook({
     if (response.olKey) await handleSeriesSearch(response.olKey);
   }, [isDuplicate, handleTitleSearch, handleSeriesSearch]);
 
-  const handleBackUpBookSearch = useCallback(async () => {
-    const titleSearching = titleToSearch.current?.value.trim();
-    if (!titleSearching) return null;
+  // const handleBackUpBookSearch = useCallback(async () => {
+  //   const titleSearching = titleToSearch.current?.value.trim();
+  //   if (!titleSearching) return null;
 
-    const booksInfo = await searchForBackupBooks(titleSearching, BOOKLIMIT);
-    if (!booksInfo || booksInfo.length === 0) return null;
-    setAllNewBooks((prev) => ({
-      ...prev,
-      GoogleBooksProps: booksInfo,
-    }));
-  }, [searchForBackupBooks]);
+  //   const booksInfo = await searchForBackupBooks(titleSearching, BOOKLIMIT);
+  //   if (!booksInfo || booksInfo.length === 0) return null;
+  //   setAllNewBooks((prev) => ({
+  //     ...prev,
+  //     GoogleBooksProps: booksInfo,
+  //   }));
+  // }, [searchForBackupBooks]);
 
   const handlePickFromMultBooks = useCallback(
-    async (book: OpenLibraryProps | GoogleBooksProps) => {
+    async (book: OpenLibraryProps) => {
       setCoverUrls([]);
       setCoverIndex(0);
-      // ol
-      if ("key" in book) {
-        //check if clicked book is duplicate
-        const key = book.key;
-        if (!key) return;
-        const duplicate = isDuplicate(key);
-        if (duplicate) {
-          setFailedReason(`Already Have Book: ${duplicate}`);
-          setIsDupTitle(true);
-          return;
-        }
-        //
-        setActiveModal("bookDetails");
-        try {
-          setCleaningCover(true);
-          setCoverUrls((await filterCovers(book.cover_urls)) || []);
-        } finally {
-          setCleaningCover(false);
-        }
-        setNewBook({ ...mapOpenLibDataToBook(book), status: "Want to Read" });
-        if (key) await handleSeriesSearch(key);
+      //check if clicked book is duplicate
+      const key = book.key;
+      if (!key) return;
+      const duplicate = isDuplicate(key);
+      if (duplicate) {
+        setFailedReason(`Already Have Book: ${duplicate}`);
+        setIsDupTitle(true);
+        return;
       }
-      // google -- NOT CALLING WIKI FOR GOOGLE
-      else if ("id" in book) {
-        //check if clicked book is duplicate
-        const key = book.id;
-        if (!key) return;
-        const duplicate = isDuplicate(key);
-        if (duplicate) {
-          setFailedReason(`Already Have Book: ${duplicate}`);
-          setIsDupTitle(true);
-          return;
-        }
-        //
-        setActiveModal("bookDetails");
-        setNewBook({ ...mapGoogleDataToBook(book), status: "Want to Read" });
+      //
+      setActiveModal("bookDetails");
+      try {
+        setCleaningCover(true);
+        setCoverUrls((await filterCovers(book.cover_urls)) || []);
+      } finally {
+        setCleaningCover(false);
       }
+      setNewBook({ ...mapOpenLibDataToBook(book), status: "Want to Read" });
+      if (key) await handleSeriesSearch(key);
     },
     [handleSeriesSearch, isDuplicate]
   );
@@ -247,14 +209,14 @@ export function AddBook({
     ) => {
       if (showMore) {
         setActiveModal("multOptions");
-        if (!allNewBooks.GoogleBooksProps.length) {
-          await handleBackUpBookSearch();
-        }
+        // if (!allNewBooks.GoogleBooksProps.length) {
+        //   await handleBackUpBookSearch();
+        // }
         return;
       }
       setNewBook((prev) => ({ ...prev, ...updates }));
     },
-    [allNewBooks, handleBackUpBookSearch]
+    []
   );
 
   const handleBookAdd = async () => {

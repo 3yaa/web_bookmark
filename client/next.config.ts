@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/b/olid/**",
       },
+      {
+        protocol: "https",
+        hostname: "ia600505.us.archive.org",
+        port: "",
+        pathname: "/view_archive.php?archive=/**",
+      },
       // GOOGLE BOOKS
       {
         protocol: "http",

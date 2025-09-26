@@ -242,7 +242,11 @@ export function BookDetails({
                     ? handleCoverChange
                     : undefined
                 }
-                title={coverUrls ? `${coverIndex}/${coverUrls?.length}` : ""}
+                title={
+                  coverUrls && coverIndex !== undefined
+                    ? `${coverIndex + 1}/${coverUrls?.length}`
+                    : ""
+                }
               >
                 {coverIndex !== undefined &&
                 coverUrls !== undefined &&

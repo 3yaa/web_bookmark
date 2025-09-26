@@ -70,44 +70,56 @@ export function ShowMultGames({
         )}
 
         <div className="overflow-y-auto space-y-2.5">
-          {games.map((game, index) => (
-            <button
-              key={`${game.igdbId}-${index}`}
-              className="relative w-full text-left p-2 rounded-xl bg-zinc-800/60 hover:bg-zinc-600/40 transition flex gap-5 hover:cursor-pointer"
-              onClick={() => onClickedGame(game)}
-            >
-              {/* COVER */}
-              <div className="w-12.5 h-18">
-                {game.cover_url ? (
-                  <Image
-                    src={game.cover_url!}
-                    alt={game.title || "Untitled"}
-                    width={50}
-                    height={75}
-                    className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-[0.25rem] border border-zinc-600/30"></div>
-                )}
-              </div>
-              {/* DETAILS */}
-              <div className="flex flex-col">
-                <span className="text-lg font-medium text-zinc-100 truncate max-w-132">
-                  {game.title}
-                </span>
-                {game.developer && (
-                  <span className="text-sm text-gray-400 truncate max-w-135">
-                    {game.developer[0]?.name || "Unknown Studio"}
+          {games.length === 0 ? (
+            <p className="text-gray-400">No games found.</p>
+          ) : (
+            games.map((game, index) => (
+              <button
+                key={`${game.igdbId}-${index}`}
+                className="relative w-full text-left p-2 rounded-xl bg-zinc-800/60 hover:bg-zinc-600/40 transition flex gap-5 hover:cursor-pointer"
+                onClick={() => onClickedGame(game)}
+              >
+                {/* COVER */}
+                <div className="w-12.5 h-18">
+                  {game.cover_url ? (
+                    <Image
+                      src={game.cover_url!}
+                      alt={game.title || "Untitled"}
+                      width={50}
+                      height={75}
+                      className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-[0.25rem] border border-zinc-600/30"></div>
+                  )}
+                </div>
+                {/* DETAILS */}
+                <div className="flex flex-col">
+                  <span className="text-lg font-medium text-zinc-100 truncate max-w-132">
+                    {game.title || "Untitled"}
                   </span>
-                )}
-                {game.released_year && (
-                  <span className="text-xs text-gray-500 truncate max-w-135">
-                    First published: {game.released_year}
-                  </span>
-                )}
-              </div>
-            </button>
-          ))}
+                  {game.developer ? (
+                    <span className="text-sm text-gray-400 truncate max-w-135">
+                      {game.developer[0]?.name || "Unknown Studio"}
+                    </span>
+                  ) : (
+                    <span className="text-sm text-gray-400 truncate max-w-135">
+                      Unknown Studio
+                    </span>
+                  )}
+                  {game.released_year ? (
+                    <span className="text-xs text-gray-500 truncate max-w-135">
+                      First released: {game.released_year}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-gray-500 truncate max-w-135">
+                      First released: Unknown
+                    </span>
+                  )}
+                </div>
+              </button>
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -24,10 +24,10 @@ export interface BookProps {
   sequel?: string;
 }
 
-export interface AllBooksProps {
-  OpenLibBooks: OpenLibraryProps[];
-  GoogleBooksProps: GoogleBooksProps[];
-}
+// export interface AllBooksProps {
+//   OpenLibBooks: OpenLibraryProps[];
+//   GoogleBooksProps: GoogleBooksProps[];
+// }
 
 export interface OpenLibraryProps {
   key: string; // call to WikidataProps || check dup

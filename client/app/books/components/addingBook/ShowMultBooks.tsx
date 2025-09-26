@@ -1,8 +1,4 @@
-import {
-  AllBooksProps,
-  OpenLibraryProps,
-  GoogleBooksProps,
-} from "@/types/book";
+import { OpenLibraryProps } from "@/types/book";
 import { X, DiamondPlus } from "lucide-react";
 import Image from "next/image";
 import { Loading } from "@/app/components/ui/Loading";
@@ -11,8 +7,8 @@ interface MultSearchProps {
   isOpen: boolean;
   onClose: (action: "manualAdd" | null) => void;
   prompt: string;
-  books: AllBooksProps;
-  onClickedBook: (book: OpenLibraryProps | GoogleBooksProps) => void;
+  books: OpenLibraryProps[];
+  onClickedBook: (book: OpenLibraryProps) => void;
   isLoading?: boolean;
 }
 
@@ -26,46 +22,7 @@ export function ShowMultBooks({
 }: MultSearchProps) {
   if (!isOpen) return null;
 
-  // Combine and alternate books from both sources
-  const combinedBooks: Array<{
-    book: OpenLibraryProps | GoogleBooksProps;
-    source: "OpenLib" | "GoogleB";
-  }> = [];
-  const totalLength = books.OpenLibBooks.length + books.GoogleBooksProps.length;
-  let openLibI = 0;
-  let googleI = 0;
-
-  for (let i = 0; i < totalLength; i++) {
-    if (i % 2 === 0) {
-      if (openLibI < books.OpenLibBooks.length) {
-        combinedBooks.push({
-          book: books.OpenLibBooks[openLibI],
-          source: "OpenLib",
-        });
-        openLibI++;
-      } else if (googleI < books.GoogleBooksProps.length) {
-        combinedBooks.push({
-          book: books.GoogleBooksProps[googleI],
-          source: "GoogleB",
-        });
-        googleI++;
-      }
-    } else {
-      if (googleI < books.GoogleBooksProps.length) {
-        combinedBooks.push({
-          book: books.GoogleBooksProps[googleI],
-          source: "GoogleB",
-        });
-        googleI++;
-      } else if (openLibI < books.OpenLibBooks.length) {
-        combinedBooks.push({
-          book: books.OpenLibBooks[openLibI],
-          source: "OpenLib",
-        });
-        openLibI++;
-      }
-    }
-  }
+  console.log(books.forEach((book) => console.log(book.cover_urls?.[0])));
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
@@ -115,39 +72,28 @@ export function ShowMultBooks({
         )}
 
         <div className="overflow-y-auto space-y-2.5">
-          {combinedBooks.length === 0 ? (
+          {books.length === 0 ? (
             <p className="text-gray-400">No books found.</p>
           ) : (
-            combinedBooks.map((item, index) => (
+            books.map((book, index) => (
               <button
-                key={`${item.source}-${index}`}
+                key={`${book.key}-${index}`}
                 className="relative w-full text-left p-2 rounded-xl bg-zinc-800/60 hover:bg-zinc-600/40 transition flex gap-5 hover:cursor-pointer"
-                onClick={() => onClickedBook(item.book)}
+                onClick={() => onClickedBook(book)}
               >
-                {/* SOURCE */}
-                <div className="absolute right-2 bottom-1.5 text-xs text-gray-500">
-                  {item.source}
-                </div>
                 {/* COVER */}
                 <div className="w-12.5 h-18">
-                  {item.source === "OpenLib" &&
-                  (item.book as OpenLibraryProps).cover_urls !== undefined ? (
+                  {book.cover_urls && book.cover_urls[0] ? (
                     <Image
-                      src={
-                        (item.book as OpenLibraryProps).cover_urls?.at(0) || ""
-                      }
-                      alt={item.book.title || "Untitled"}
+                      src={book.cover_urls[0]}
+                      alt={book.title || "Untitled"}
                       width={248}
                       height={372}
-                      className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
-                    />
-                  ) : item.source === "GoogleB" &&
-                    (item.book as GoogleBooksProps).cover_url ? (
-                    <Image
-                      src={(item.book as GoogleBooksProps).cover_url!}
-                      alt={item.book.title || "Untitled"}
-                      width={248}
-                      height={372}
+                      onClick={() => {
+                        if (book.cover_urls) {
+                          console.log(book.cover_urls[0]);
+                        }
+                      }}
                       className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
                     />
                   ) : (
@@ -157,17 +103,24 @@ export function ShowMultBooks({
                 {/* DETAILS */}
                 <div className="flex flex-col">
                   <span className="text-lg font-medium text-zinc-100 truncate max-w-132">
-                    {item.book.title}
+                    {book.title || "Untitled"}
                   </span>
-                  {item.book.author_name &&
-                    item.book.author_name.length > 0 && (
-                      <span className="text-sm text-gray-400 truncate max-w-135">
-                        {item.book.author_name.join(", ")}
-                      </span>
-                    )}
-                  {item.book.first_publish_year && (
+                  {book.author_name && book.author_name.length > 0 ? (
+                    <span className="text-sm text-gray-400 truncate max-w-135">
+                      {book.author_name.join(", ")}
+                    </span>
+                  ) : (
+                    <span className="text-sm text-gray-400 truncate max-w-135">
+                      Unknown Author
+                    </span>
+                  )}
+                  {book.first_publish_year ? (
                     <span className="text-xs text-gray-500 truncate max-w-135">
-                      First published: {item.book.first_publish_year}
+                      First published: ({book.first_publish_year})
+                    </span>
+                  ) : (
+                    <span className="text-xs text-gray-500 truncate max-w-135">
+                      First published: (Unknown)
                     </span>
                   )}
                 </div>

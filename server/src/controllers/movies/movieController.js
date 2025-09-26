@@ -20,6 +20,36 @@ const convertMovieToCamelCase = (movie) => ({
   userId: movie.user_id,
 });
 
+export const getRandomMovies = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const result = await pool.query(
+      `
+      SELECT * FROM movies
+      WHERE user_id=$1 AND status='Want to Watch'
+      ORDER BY RANDOM()
+      LIMIT 10
+      `,
+      [userId]
+    );
+
+    const convertedMovies = result.rows.map(convertMovieToCamelCase);
+
+    res.json({
+      success: true,
+      data: convertedMovies,
+    });
+  } catch (error) {
+    console.error("Error fetching random movies: ", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching random movies",
+      error: error.message,
+    });
+  }
+};
+
 export const getMovies = async (req, res) => {
   try {
     const userId = req.user.id;

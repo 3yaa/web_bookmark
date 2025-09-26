@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  getRandomShows,
   getShows,
   getShow,
   patchShow,
@@ -15,6 +16,7 @@ import {
 
 const showsRouter = express.Router();
 
+showsRouter.get("/random", getRandomShows);
 showsRouter.get("/", getShows);
 showsRouter.get("/:id", validateShowId, getShow);
 showsRouter.post("/", validateShowCreate, validateShowData, createShow);

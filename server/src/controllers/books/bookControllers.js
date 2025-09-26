@@ -19,6 +19,36 @@ const convertBookToCamelCase = (book) => ({
   userId: book.user_id,
 });
 
+export const getRandomBooks = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const result = await pool.query(
+      `
+      SELECT * FROM books
+      WHERE user_id=$1 AND status='Want to Read'
+      ORDER BY RANDOM()
+      LIMIT 10
+      `,
+      [userId]
+    );
+
+    const convertedBooks = result.rows.map(convertBookToCamelCase);
+
+    res.json({
+      success: true,
+      data: convertedBooks,
+    });
+  } catch (error) {
+    console.error("Error fetching random books: ", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching random books",
+      error: error.message,
+    });
+  }
+};
+
 export const getBooks = async (req, res) => {
   try {
     const userId = req.user.id;

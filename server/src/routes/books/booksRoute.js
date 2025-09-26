@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  getRandomBooks,
   getBooks,
   getBook,
   patchBook,
@@ -15,6 +16,7 @@ import {
 
 const booksRouter = express.Router();
 
+booksRouter.get("/random", getRandomBooks);
 booksRouter.get("/", getBooks);
 booksRouter.get("/:id", validateBookId, getBook);
 booksRouter.post("/", validateBookCreate, validateBookData, createBook);

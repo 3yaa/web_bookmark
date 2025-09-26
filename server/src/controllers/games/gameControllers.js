@@ -19,6 +19,36 @@ const convertGameToCamelCase = (game) => ({
   userId: game.user_id,
 });
 
+export const getRandomGames = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const result = await pool.query(
+      `
+      SELECT * FROM games
+      WHERE user_id=$1 AND status='Playing'
+      ORDER BY RANDOM()
+      LIMIT 10
+      `,
+      [userId]
+    );
+
+    const convertedGames = result.rows.map(convertGameToCamelCase);
+
+    res.json({
+      success: true,
+      data: convertedGames,
+    });
+  } catch (error) {
+    console.error("Error fetching random games: ", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching random games",
+      error: error.message,
+    });
+  }
+};
+
 export const getGames = async (req, res) => {
   try {
     const userId = req.user.id;

@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  getRandomMovies,
   getMovies,
   getMovie,
   patchMovie,
@@ -15,6 +16,7 @@ import {
 
 const moviesRouter = express.Router();
 
+moviesRouter.get("/random", getRandomMovies);
 moviesRouter.get("/", getMovies);
 moviesRouter.get("/:id", validateMovieId, getMovie);
 moviesRouter.post("/", validateMovieCreate, validateMovieData, createMovie);

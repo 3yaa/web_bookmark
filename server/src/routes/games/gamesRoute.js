@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  getRandomGames,
   getGames,
   getGame,
   patchGame,
@@ -15,6 +16,7 @@ import {
 
 const gamesRouter = express.Router();
 
+gamesRouter.get("/random", getRandomGames);
 gamesRouter.get("/", getGames);
 gamesRouter.get("/:id", validateGameId, getGame);
 gamesRouter.post("/", validateGameCreate, validateGameData, createGame);

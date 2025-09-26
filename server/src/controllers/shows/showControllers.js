@@ -19,6 +19,36 @@ const convertShowToCamelCase = (show) => ({
   userId: show.user_id,
 });
 
+export const getRandomShows = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const result = await pool.query(
+      `
+      SELECT * FROM shows
+      WHERE user_id=$1 AND status='Want to Watch'
+      ORDER BY RANDOM()
+      LIMIT 10
+      `,
+      [userId]
+    );
+
+    const convertedShows = result.rows.map(convertShowToCamelCase);
+
+    res.json({
+      success: true,
+      data: convertedShows,
+    });
+  } catch (error) {
+    console.error("Error fetching random shows: ", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching random shows",
+      error: error.message,
+    });
+  }
+};
+
 export const getShows = async (req, res) => {
   try {
     const userId = req.user.id;

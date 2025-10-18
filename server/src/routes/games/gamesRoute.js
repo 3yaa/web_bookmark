@@ -13,13 +13,20 @@ import {
   validateGamePatch,
   validateGameCreate,
 } from "../../middleware/games/validateGames.js";
+import { checkDuplicate } from "../../middleware/checkDuplicates.js";
 
 const gamesRouter = express.Router();
 
 gamesRouter.get("/random", getRandomGames);
 gamesRouter.get("/", getGames);
 gamesRouter.get("/:id", validateGameId, getGame);
-gamesRouter.post("/", validateGameCreate, validateGameData, createGame);
+gamesRouter.post(
+  "/",
+  validateGameCreate,
+  validateGameData,
+  checkDuplicate("games", "igdbId"),
+  createGame
+);
 gamesRouter.patch(
   "/:id",
   validateGameId,

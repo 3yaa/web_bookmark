@@ -35,31 +35,15 @@ import { pool } from "../config/db.js";
 //   };
 // };
 
-export const checkDuplicate = async (tableName, idName, id, title) => {
+export const checkDuplicate = async (tableName, idName, id) => {
   try {
     const result = await pool.query(
-      `
-      SELECT * FROM ${tableName}
-      WHERE ${idName} = $1
-      LIMIT 1
-    `,
+      `SELECT * FROM ${tableName} WHERE ${idName} = $1 LIMIT 1`,
       [id]
     );
-
-    if (result.rows.length > 0) {
-      return res.status(409).json({
-        success: false,
-        title: title,
-        message: `Book ${title} already in your library`,
-        error: "Duplicate found",
-      });
-    }
+    return result.rows.length > 0;
   } catch (error) {
-    console.error("Error fetching book to check for duplicate: ", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching book to check for duplicate",
-      error: error.message,
-    });
+    console.error("Error checking for duplicate: ", error);
+    throw error;
   }
 };

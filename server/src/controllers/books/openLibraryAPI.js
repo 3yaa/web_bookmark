@@ -40,7 +40,17 @@ export async function useOpenLibraryAPI(req, res) {
       }),
     }));
     // check for duplicate
-    checkDuplicate("books", "key", processedBooks.key, processedBooks.title);
+    for (const book of processedBooks) {
+      const isDuplicate = await checkDuplicate("books", "key", book.key);
+      if (isDuplicate) {
+        return res.status(409).json({
+          success: false,
+          title: book.title,
+          message: `Book "${book.title}" already in your library`,
+          error: "Duplicate found",
+        });
+      }
+    }
     //
     res.status(200).json({
       success: true,

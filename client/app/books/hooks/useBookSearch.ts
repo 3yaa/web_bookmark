@@ -14,16 +14,22 @@ export function useBookSearch() {
   const searchForBooks = async (
     query: string,
     limit: number
-  ): Promise<OpenLibraryProps[] | null> => {
+  ): Promise<
+    OpenLibraryProps[] | null | { isDuplicate: boolean; title: string }
+  > => {
     try {
       setIsSearching(true);
       setError(null);
       //
       const title = extractTitle(query);
-      console.log(title);
       // make call
       const url = `/api/books-api/open-library?query=${query}&title=${title}&limit=${limit}`;
       const response = await authFetch(url);
+      // if duplicate
+      if (response.status === 409) {
+        const data = await response.json();
+        return { isDuplicate: true, title: data.title };
+      }
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
       }

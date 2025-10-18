@@ -32,7 +32,6 @@ const bookSeriesCache = new Map<string, Partial<BookProps>>();
 export function AddBook({
   isOpen,
   onClose,
-  existingBooks,
   onAddBook,
   titleFromAbove,
 }: AddBookProps) {
@@ -75,22 +74,17 @@ export function AddBook({
     }
   }, []);
 
-  const isDuplicate = useCallback(
-    (key: string) => {
-      if (!existingBooks) return null;
-      const duplicate = existingBooks.find(
-        (book: BookProps) => book.key === key
-      );
-      return duplicate ? duplicate.title : null;
-    },
-    [existingBooks]
-  );
-
   const handleTitleSearch = useCallback(async () => {
     const titleSearching = titleToSearch.current?.value.trim();
     if (!titleSearching) return null;
 
     const response = await searchForBooks(titleSearching, BOOKLIMIT);
+    if (response && "isDuplicate" in response) {
+      return {
+        isDuplicate: true,
+        title: response.title,
+      };
+    }
     const olData = response?.[0];
     if (!olData) return null;
     //save books
@@ -144,23 +138,23 @@ export function AddBook({
     setActiveModal("bookDetails");
     // make call to open lib
     const response = await handleTitleSearch();
+    // dup logic
+    if (response && "isDuplicate" in response) {
+      setFailedReason(`Already Have Book: ${response.title}`);
+      setIsDupTitle(true);
+      setActiveModal(null);
+      return;
+    }
+    // empty logic
     if (!response?.olKey || !response.title) {
       setFailedReason("Could Not Find Book.");
       setIsAddManual(true);
       setActiveModal(null);
       return;
     }
-    //check for duplicate
-    const duplicate = isDuplicate(response.olKey);
-    if (duplicate) {
-      setFailedReason(`Already Have Book: ${duplicate}`);
-      setIsDupTitle(true);
-      setActiveModal(null);
-      return;
-    }
     // do series search for main book
     if (response.olKey) await handleSeriesSearch(response.olKey);
-  }, [isDuplicate, handleTitleSearch, handleSeriesSearch]);
+  }, [handleTitleSearch, handleSeriesSearch]);
 
   // const handleBackUpBookSearch = useCallback(async () => {
   //   const titleSearching = titleToSearch.current?.value.trim();
@@ -181,7 +175,8 @@ export function AddBook({
       //check if clicked book is duplicate
       const key = book.key;
       if (!key) return;
-      const duplicate = isDuplicate(key);
+
+      const duplicate = false;
       if (duplicate) {
         setFailedReason(`Already Have Book: ${duplicate}`);
         setIsDupTitle(true);
@@ -198,7 +193,7 @@ export function AddBook({
       setNewBook({ ...mapOpenLibDataToBook(book), status: "Want to Read" });
       if (key) await handleSeriesSearch(key);
     },
-    [handleSeriesSearch, isDuplicate]
+    [handleSeriesSearch]
   );
 
   const handleBookDetailsUpdates = useCallback(

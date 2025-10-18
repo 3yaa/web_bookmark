@@ -62,6 +62,4 @@ export const checkDuplicate = async (tableName, idName, id, title) => {
       error: error.message,
     });
   }
-  //
-  next();
 };

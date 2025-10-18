@@ -13,20 +13,13 @@ import {
   validateMoviePatch,
   validateMovieCreate,
 } from "../../middleware/movies/validateMovies.js";
-import { checkDuplicate } from "../../middleware/checkDuplicates.js";
 
 const moviesRouter = express.Router();
 
 moviesRouter.get("/random", getRandomMovies);
 moviesRouter.get("/", getMovies);
 moviesRouter.get("/:id", validateMovieId, getMovie);
-moviesRouter.post(
-  "/",
-  validateMovieCreate,
-  validateMovieData,
-  checkDuplicate("movies", "imdbId"),
-  createMovie
-);
+moviesRouter.post("/", validateMovieCreate, validateMovieData, createMovie);
 moviesRouter.patch(
   "/:id",
   validateMovieId,

@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import { checkDuplicate } from "../../utils/checkDuplicate.js";
 
 dotenv.config();
 
@@ -38,6 +39,8 @@ export async function useOpenLibraryAPI(req, res) {
         return `https://covers.openlibrary.org/b/olid/${key}-L.jpg`;
       }),
     }));
+    // check for duplicate
+    checkDuplicate("books", "key", processedBooks.key, processedBooks.title);
     //
     res.status(200).json({
       success: true,

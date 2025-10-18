@@ -13,20 +13,13 @@ import {
   validateShowPatch,
   validateShowCreate,
 } from "../../middleware/shows/validateShows.js";
-import { checkDuplicate } from "../../middleware/checkDuplicates.js";
 
 const showsRouter = express.Router();
 
 showsRouter.get("/random", getRandomShows);
 showsRouter.get("/", getShows);
 showsRouter.get("/:id", validateShowId, getShow);
-showsRouter.post(
-  "/",
-  validateShowCreate,
-  validateShowData,
-  checkDuplicate("shows", "tmdbId"),
-  createShow
-);
+showsRouter.post("/", validateShowCreate, validateShowData, createShow);
 showsRouter.patch(
   "/:id",
   validateShowId,

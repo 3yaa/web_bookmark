@@ -9,7 +9,7 @@ export const checkDuplicate = (tableName, idName) => {
       const result = await pool.query(
         `
       SELECT * FROM ${tableName}
-      WHERE ${id} = $1
+      WHERE ${idName} = $1
       LIMIT 1
     `,
         [id]

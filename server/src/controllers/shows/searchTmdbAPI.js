@@ -35,7 +35,7 @@ export async function useTmdbSearchAPI(req, res) {
     // check duplicate
     const isDuplicate = await checkDuplicate(
       "shows",
-      "tmdbId",
+      "tmdb_id",
       processedShow.tmdbId
     );
     if (isDuplicate) {

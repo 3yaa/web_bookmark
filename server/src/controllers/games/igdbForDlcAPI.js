@@ -46,7 +46,7 @@ export async function useIgdbForDlcAPI(req, res) {
     // check for duplicate
     const isDuplicate = await checkDuplicate(
       "games",
-      "igdbId",
+      "igdb_id",
       processedDlc.igdbId
     );
     if (isDuplicate) {

@@ -46,7 +46,7 @@ export async function useIgdbForGameAPI(req, res) {
     });
     // check for duplicate
     for (const game of processedGames) {
-      const isDuplicate = await checkDuplicate("games", "igdbId", game.igdbId);
+      const isDuplicate = await checkDuplicate("games", "igdb_id", game.igdbId);
       if (isDuplicate) {
         return res.status(409).json({
           success: false,

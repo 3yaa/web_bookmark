@@ -42,7 +42,7 @@ export async function useOmdbAPI(req, res) {
     // check for duplicate
     const isDuplicate = await checkDuplicate(
       "movies",
-      "imdbId",
+      "imdb_id",
       processedMovie.imdbId
     );
     if (isDuplicate) {

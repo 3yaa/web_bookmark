@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import { checkDuplicate } from "../../utils/checkDuplicate.js";
 
 dotenv.config();
 
@@ -38,6 +39,20 @@ export async function useOmdbAPI(req, res) {
       // imdbVotes: movie.imdbVotes,
       // genre: movie.Genre,
     };
+    // check for duplicate
+    const isDuplicate = await checkDuplicate(
+      "movies",
+      "imdbId",
+      processedMovie.imdbId
+    );
+    if (isDuplicate) {
+      return res.status(409).json({
+        success: false,
+        title: processedMovie.title,
+        message: `Movie "${processedMovie.title}" already in your library`,
+        error: "Duplicate found",
+      });
+    }
     //
     res.status(200).json({
       success: true,

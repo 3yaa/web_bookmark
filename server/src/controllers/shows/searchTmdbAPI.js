@@ -32,6 +32,20 @@ export async function useTmdbSearchAPI(req, res) {
         ? `https://image.tmdb.org/t/p/w1280${show.backdrop_path}`
         : null,
     };
+    // check duplicate
+    const isDuplicate = await checkDuplicate(
+      "shows",
+      "tmdbId",
+      processedShow.tmdbId
+    );
+    if (isDuplicate) {
+      return res.status(409).json({
+        success: false,
+        title: processedShow.title,
+        message: `Show "${processedShow.title}" already in your library`,
+        error: "Duplicate found",
+      });
+    }
     //
     res.status(200).json({
       success: true,

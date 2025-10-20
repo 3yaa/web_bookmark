@@ -1,4 +1,5 @@
 import { makeIgdbRequestWithRety } from "./igdbInternal/igdbAPI.js";
+import { checkDuplicate } from "../../utils/checkDuplicate.js";
 
 export async function useIgdbForGameAPI(req, res) {
   try {
@@ -43,6 +44,18 @@ export async function useIgdbForGameAPI(req, res) {
         })),
       };
     });
+    // check for duplicate
+    for (const game of processedGames) {
+      const isDuplicate = await checkDuplicate("games", "igdbId", game.igdbId);
+      if (isDuplicate) {
+        return res.status(409).json({
+          success: false,
+          title: game.title,
+          message: `Game "${game.title}" already in your library`,
+          error: "Duplicate found",
+        });
+      }
+    }
     //
     res.status(200).json({
       success: true,

@@ -21,7 +21,6 @@ interface AddShowProps {
 export function AddShow({
   isOpen,
   onClose,
-  existingShows,
   onAddShow,
   titleFromAbove,
 }: AddShowProps) {
@@ -36,6 +35,7 @@ export function AddShow({
   //
   const titleToSearch = useRef<HTMLInputElement>(null);
   const yearToSearch = useRef<HTMLInputElement>(null);
+  const [isDupTitle, setIsDupTitle] = useState(false);
   //
   const [newShow, setNewShow] = useState<Partial<ShowProps>>({});
   //
@@ -44,6 +44,7 @@ export function AddShow({
 
   const reset = useCallback(() => {
     setFailedReason("");
+    setIsDupTitle(false);
     setIsAddManual(false);
     setNeedYear(false);
     //
@@ -58,17 +59,6 @@ export function AddShow({
     }
   }, []);
 
-  const isDuplicate = useCallback(
-    (tmdbId: string) => {
-      if (!existingShows) return null;
-      const duplicate = existingShows.find(
-        (show: ShowProps) => show.tmdbId === tmdbId
-      );
-      return duplicate ? duplicate.title : null;
-    },
-    [existingShows]
-  );
-
   const handleTitleSearch = useCallback(async () => {
     const titleSearching = titleToSearch.current?.value.trim();
     if (!titleSearching) return null;
@@ -78,6 +68,12 @@ export function AddShow({
       : undefined;
     //
     const showData = await searchForShow(titleSearching, yearSearching);
+    if (showData && "isDuplicate" in showData) {
+      return {
+        isDuplicate: true,
+        title: showData.title,
+      };
+    }
     if (!showData) return null;
     //format show
     setNewShow(mapTMDBToShow(showData));
@@ -104,6 +100,13 @@ export function AddShow({
     setActiveModal("showDetails");
     // make call to open lib
     const response = await handleTitleSearch();
+    // dup logic --- NEEDS TO BE ABOVE EMPTY LOGIC CAUSE REPSONSE IS EMPTY
+    if (response && "isDuplicate" in response) {
+      setFailedReason(`Already Have Show: ${response.title}`);
+      setIsDupTitle(true);
+      setActiveModal(null);
+      return;
+    }
     if (!response?.tmdbId || !response.title) {
       setFailedReason("Could Not Find Show.");
       setNeedYear(true);
@@ -111,16 +114,9 @@ export function AddShow({
       setActiveModal(null);
       return;
     }
-    //check for duplicate
-    const duplicate = isDuplicate(response.tmdbId);
-    if (duplicate) {
-      setFailedReason(`Already Have Show: ${duplicate}`);
-      setActiveModal(null);
-      return;
-    }
     // search for season info
     if (response.tmdbId) await handleSeasonInfoSearch(response.tmdbId);
-  }, [isDuplicate, handleTitleSearch, handleSeasonInfoSearch]);
+  }, [handleTitleSearch, handleSeasonInfoSearch]);
 
   const handleShowDetailsUpdates = useCallback(
     async (_id: number, updates?: Partial<ShowProps>, needYear?: boolean) => {
@@ -138,6 +134,11 @@ export function AddShow({
   );
 
   const handleShowAdd = async () => {
+    // double check not adding duplicate
+    if (newShow.tmdbId && isDupTitle) {
+      return;
+    }
+    //
     let isStatus = newShow.status;
     if (!isStatus) {
       isStatus = "Want to Watch";
@@ -169,6 +170,7 @@ export function AddShow({
     if (failedReason) {
       setFailedReason("");
       setIsAddManual(false);
+      setIsDupTitle(false);
     }
   };
 

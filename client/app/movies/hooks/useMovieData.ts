@@ -3,11 +3,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 
 export function useMovieData() {
-  const { authFetch, isAuthLoading } = useAuthFetch();
+  const { authFetch } = useAuthFetch();
   const [movies, setMovies] = useState<MovieProps[]>([]);
   const [movieDataLoading, setMovieDataLoading] = useState(true);
-
-  const isProcessingMovie = movieDataLoading || isAuthLoading;
 
   // READ
   const getMovies = useCallback(async () => {
@@ -149,6 +147,6 @@ export function useMovieData() {
     addMovie,
     updateMovie,
     deleteMovie,
-    isProcessingMovie,
+    isProcessingMovie: movieDataLoading,
   };
 }

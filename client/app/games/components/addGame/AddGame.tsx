@@ -33,7 +33,6 @@ const GAMELIMIT = 10;
 export function AddGame({
   isOpen,
   onClose,
-  existingGames,
   onAddGame,
   titleFromAbove,
 }: AddGameProps) {
@@ -72,22 +71,17 @@ export function AddGame({
     }
   }, []);
 
-  const isDuplicate = useCallback(
-    (igdbId: number) => {
-      if (!existingGames) return null;
-      const duplicate = existingGames.find(
-        (game: GameProps) => game.igdbId === igdbId
-      );
-      return duplicate ? duplicate.title : null;
-    },
-    [existingGames]
-  );
-
   const handleTitleSearch = useCallback(async () => {
     const titleSearching = titleToSearch.current?.value.trim();
     if (!titleSearching) return null;
     //
     const response = await searchForGame(titleSearching, GAMELIMIT);
+    if (response && "isDuplicate" in response) {
+      return {
+        isDuplicate: true,
+        title: response.title,
+      };
+    }
     const mainGame = response?.[0];
     if (!mainGame) return null;
     //
@@ -104,26 +98,32 @@ export function AddGame({
     setActiveModal("gameDetails");
     //
     const response = await handleTitleSearch();
+    // dup logic --- NEEDS TO BE ABOVE EMPTY LOGIC CAUSE REPSONSE IS EMPTY
+    if (response && "isDuplicate" in response) {
+      setFailedReason(`Already Have Game: ${response.title}`);
+      setIsDupTitle(true);
+      setActiveModal(null);
+      return;
+    }
+    // empty logic
     if (!response?.igdbId || !response.title) {
       setFailedReason("Could Not Find Game.");
       setIsAddManual(true);
       setActiveModal(null);
       return;
     }
-    //check for duplicate
-    const duplicate = isDuplicate(response.igdbId);
-    if (duplicate) {
-      setFailedReason(`Already Have Game: ${duplicate}`);
-      setIsDupTitle(true);
-      setActiveModal(null);
-      return;
-    }
-  }, [isDuplicate, handleTitleSearch]);
+  }, [handleTitleSearch]);
 
   const handleDlcTitleSearch = useCallback(
     async (igdbId: number) => {
       // make call
       const response = await searchForGameDlc(igdbId);
+      if (response && "isDuplicate" in response) {
+        return {
+          isDuplicate: true,
+          title: response.title,
+        };
+      }
       const mainDlc = response?.[0];
       if (!mainDlc) return null;
       //
@@ -156,7 +156,14 @@ export function AddGame({
       return;
     }
     //
-    await handleDlcTitleSearch(igdbId);
+    const response = await handleDlcTitleSearch(igdbId);
+    //check for duplicate
+    if (response && "isDuplicate" in response) {
+      setFailedReason(`Already Have Game: ${response.title}`);
+      setIsDupTitle(true);
+      setActiveModal(null);
+      return;
+    }
     setNewGame((prev) => ({
       ...prev,
       ...{
@@ -165,15 +172,7 @@ export function AddGame({
         dlcs: titleFromAbove?.dlcs,
       },
     }));
-    //check for duplicate
-    const duplicate = isDuplicate(igdbId);
-    if (duplicate) {
-      setFailedReason(`Already Have Dlc: ${duplicate}`);
-      setIsDupTitle(true);
-      setActiveModal(null);
-      return;
-    }
-  }, [titleFromAbove, isDuplicate, handleDlcTitleSearch]);
+  }, [titleFromAbove, handleDlcTitleSearch]);
 
   const handlePickFromMultGames = useCallback((game: IGDBProps) => {
     try {

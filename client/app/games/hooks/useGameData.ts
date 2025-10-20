@@ -3,11 +3,9 @@ import { GameProps } from "@/types/game";
 import { useEffect, useState, useCallback } from "react";
 
 export function useGameData() {
-  const { authFetch, isAuthLoading } = useAuthFetch();
+  const { authFetch } = useAuthFetch();
   const [games, setGames] = useState<GameProps[]>([]);
   const [gameDataLoading, setGameDataLoading] = useState(true);
-
-  const isProcessingGame = gameDataLoading || isAuthLoading;
 
   // READ
   const getGames = useCallback(async () => {
@@ -147,6 +145,6 @@ export function useGameData() {
     addGame,
     updateGame,
     deleteGame,
-    isProcessingGame,
+    isProcessingGame: gameDataLoading,
   };
 }

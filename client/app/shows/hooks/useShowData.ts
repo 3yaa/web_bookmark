@@ -3,11 +3,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 
 export function useShowData() {
-  const { authFetch, isAuthLoading } = useAuthFetch();
+  const { authFetch } = useAuthFetch();
   const [shows, setShows] = useState<ShowProps[]>([]);
   const [showDataLoading, setShowDataLoading] = useState(true);
-
-  const isProcessingShow = showDataLoading || isAuthLoading;
 
   // READ
   const getShows = useCallback(async () => {
@@ -154,6 +152,6 @@ export function useShowData() {
     addShow,
     updateShow,
     deleteShow,
-    isProcessingShow,
+    isProcessingShow: showDataLoading,
   };
 }

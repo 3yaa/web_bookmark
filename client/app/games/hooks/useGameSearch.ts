@@ -12,13 +12,18 @@ export function useGameSearch() {
   const searchForGame = async (
     title: string,
     limit: number
-  ): Promise<IGDBProps[] | null> => {
+  ): Promise<IGDBProps[] | null | { isDuplicate: boolean; title: string }> => {
     try {
       setIsSearching(true);
       setError(null);
       //
       const url = `/api/games-api/igdb?title=${title}&limit=${limit}`;
       const response = await authFetch(url);
+      // if duplicate
+      if (response.status === 409) {
+        const data = await response.json();
+        return { isDuplicate: true, title: data.title };
+      }
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
       }
@@ -38,13 +43,20 @@ export function useGameSearch() {
 
   const searchForGameDlc = async (
     igdbId: number
-  ): Promise<IGDBDlcProps[] | null> => {
+  ): Promise<
+    IGDBDlcProps[] | null | { isDuplicate: boolean; title: string }
+  > => {
     try {
       setIsSearching(true);
       setError(null);
       //
       const url = `/api/games-api/igdb-dlc?igdbId=${igdbId}`;
       const response = await authFetch(url);
+      // if duplicate
+      if (response.status === 409) {
+        const data = await response.json();
+        return { isDuplicate: true, title: data.title };
+      }
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
       }

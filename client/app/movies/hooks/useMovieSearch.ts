@@ -13,13 +13,18 @@ export function useMovieSearch() {
   const searchForMovie = async (
     title: string,
     year?: number | undefined
-  ): Promise<OMDbProps | null> => {
+  ): Promise<OMDbProps | null | { isDuplicate: boolean; title: string }> => {
     try {
       setIsSearching(true);
       setError(null);
       // make call
       const url = `/api/movies-api/omdb?title=${title}&year=${year}`;
       const response = await authFetch(url);
+      // if duplicate
+      if (response.status === 409) {
+        const data = await response.json();
+        return { isDuplicate: true, title: data.title };
+      }
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
       }

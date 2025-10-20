@@ -138,7 +138,7 @@ export function AddBook({
     setActiveModal("bookDetails");
     // make call to open lib
     const response = await handleTitleSearch();
-    // dup logic
+    // dup logic --- NEEDS TO BE ABOVE EMPTY LOGIC CAUSE REPSONSE IS EMPTY
     if (response && "isDuplicate" in response) {
       setFailedReason(`Already Have Book: ${response.title}`);
       setIsDupTitle(true);

@@ -13,13 +13,18 @@ export function useShowSearch() {
   const searchForShow = async (
     title: string,
     year?: number | undefined
-  ): Promise<TMDBProps | null> => {
+  ): Promise<TMDBProps | null | { isDuplicate: boolean; title: string }> => {
     try {
       setIsSearching(true);
       setError(null);
       //
       const url = `/api/shows-api/tmdb?title=${title}&year=${year}`;
       const response = await authFetch(url);
+      // if duplicate
+      if (response.status === 409) {
+        const data = await response.json();
+        return { isDuplicate: true, title: data.title };
+      }
       if (!response.ok) {
         throw new Error(`HTTP error--status: ${response.status}`);
       }

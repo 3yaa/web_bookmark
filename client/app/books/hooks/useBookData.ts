@@ -3,11 +3,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 
 export function useBookData() {
-  const { authFetch, isAuthLoading } = useAuthFetch();
+  const { authFetch } = useAuthFetch();
   const [books, setBooks] = useState<BookProps[]>([]);
   const [bookDataLoading, setBookDataLoading] = useState(true);
-
-  const isProcessingBook = bookDataLoading || isAuthLoading;
 
   // move this to server
   // const linkBook = useCallback(
@@ -175,6 +173,6 @@ export function useBookData() {
     addBook,
     updateBook,
     deleteBook,
-    isProcessingBook,
+    isProcessingBook: bookDataLoading,
   };
 }

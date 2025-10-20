@@ -26,7 +26,6 @@ interface AddMovieProps {
 export function AddMovie({
   isOpen,
   onClose,
-  existingMovies,
   onAddMovie,
   titleFromAbove,
 }: AddMovieProps) {
@@ -41,6 +40,7 @@ export function AddMovie({
   //
   const titleToSearch = useRef<HTMLInputElement>(null);
   const yearToSearch = useRef<HTMLInputElement>(null);
+  const [isDupTitle, setIsDupTitle] = useState(false);
   //
   const [newMovie, setNewMovie] = useState<Partial<MovieProps>>({});
   const [allSeries, setAllSeries] = useState<WikidataProps[]>([]);
@@ -55,6 +55,7 @@ export function AddMovie({
 
   const reset = useCallback(() => {
     setFailedReason("");
+    setIsDupTitle(false);
     setIsAddManual(false);
     setNeedYear(false);
     //
@@ -69,17 +70,6 @@ export function AddMovie({
     }
   }, []);
 
-  const isDuplicate = useCallback(
-    (imdbId: string) => {
-      if (!existingMovies) return null;
-      const duplicate = existingMovies.find(
-        (movie: MovieProps) => movie.imdbId === imdbId
-      );
-      return duplicate ? duplicate.title : null;
-    },
-    [existingMovies]
-  );
-
   const handleTitleSearch = useCallback(async () => {
     const titleSearching = titleToSearch.current?.value.trim();
     if (!titleSearching) return null;
@@ -89,6 +79,12 @@ export function AddMovie({
       : undefined;
     //
     const movieData = await searchForMovie(titleSearching, yearSearching);
+    if (movieData && "isDuplicate" in movieData) {
+      return {
+        isDuplicate: true,
+        title: movieData.title,
+      };
+    }
     if (!movieData) return null;
     //format movie
     setNewMovie(mapOMDbToMovie(movieData));
@@ -129,6 +125,14 @@ export function AddMovie({
     setActiveModal("movieDetails");
     // make call to open lib
     const response = await handleTitleSearch();
+    // dup logic --- NEEDS TO BE ABOVE EMPTY LOGIC CAUSE REPSONSE IS EMPTY
+    if (response && "isDuplicate" in response) {
+      setFailedReason(`Already Have Movie: ${response.title}`);
+      setIsDupTitle(true);
+      setActiveModal(null);
+      return;
+    }
+    // empty
     if (!response?.imdbId || !response.title) {
       setFailedReason("Could Not Find Movie.");
       setNeedYear(true);
@@ -136,18 +140,11 @@ export function AddMovie({
       setActiveModal(null);
       return;
     }
-    //check for duplicate
-    const duplicate = isDuplicate(response.imdbId);
-    if (duplicate) {
-      setFailedReason(`Already Have Movie: ${duplicate}`);
-      setActiveModal(null);
-      return;
-    }
     // seearch for poster
     if (response.imdbId) await handlePosterSearch(response.imdbId);
     // do series search for main movie
     if (response.imdbId) await handleSeriesSearch(response.imdbId);
-  }, [isDuplicate, handleTitleSearch, handlePosterSearch, handleSeriesSearch]);
+  }, [handleTitleSearch, handlePosterSearch, handleSeriesSearch]);
 
   const handleMovieDetailsUpdates = useCallback(
     async (
@@ -169,6 +166,11 @@ export function AddMovie({
   );
 
   const handleMovieAdd = async () => {
+    // double check not adding duplicate
+    if (newMovie.imdbId && isDupTitle) {
+      return;
+    }
+    //
     let isStatus = newMovie.status;
     if (!isStatus) {
       isStatus = "Want to Watch";
@@ -219,6 +221,7 @@ export function AddMovie({
     if (failedReason) {
       setFailedReason("");
       setIsAddManual(false);
+      setIsDupTitle(false);
     }
   };
 

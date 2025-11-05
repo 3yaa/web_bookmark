@@ -55,7 +55,7 @@ export function RouteGuard({ children }: RouteGuardProps) {
   ]);
 
   // Always block rendering until auth state is ready
-  if (isInitializing || isRefreshing) {
+  if (isInitializing) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-black">
         <Loading customStyle="h-12 w-12 border-gray-400" customBg="bg-black" />

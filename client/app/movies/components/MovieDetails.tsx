@@ -7,7 +7,10 @@ import {
   formatDateShort,
   getStatusBorderGradient,
 } from "@/utils/formattingUtils";
-import { movieStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
+import {
+  movieStatusOptions,
+  scoreOptions,
+} from "@/utils/dropDownDetails";
 //
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { Dropdown } from "@/app/components/ui/Dropdown";
@@ -108,6 +111,12 @@ export function MovieDetails({
     const needYear = true;
     onUpdate(movie.id, undefined, needYear);
   };
+
+  // need to reset local note -- since changing movie (seuqel/prequel) doesn't remount
+  useEffect(() => {
+    setLocalNote(movie.note || "");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [movie.id]);
 
   useEffect(() => {
     const handleLeave = (e: KeyboardEvent) => {

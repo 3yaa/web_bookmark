@@ -137,6 +137,12 @@ export function BookDetails({
     onUpdate(book.id, undefined, showMoreBooks);
   };
 
+  // need to reset local note -- since changing book (seuqel/prequel) doesn't remount
+  useEffect(() => {
+    setLocalNote(book.note || "");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [book.id]);
+
   useEffect(() => {
     const handleLeave = (e: KeyboardEvent) => {
       if (e.key === "Escape") {

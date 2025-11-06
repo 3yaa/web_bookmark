@@ -22,24 +22,16 @@ export function AutoTextarea({
     const textarea = ref.current;
     if (!textarea) return;
 
-    // Only adjust if the content actually changed
-    const currentHeight = textarea.scrollHeight;
-    const currentTextareaHeight = parseInt(textarea.style.height) || 0;
-
-    // Check if we need to resize
-    const needsResize =
-      currentHeight !== currentTextareaHeight ||
-      currentHeight < minHeight ||
-      currentHeight > maxHeight;
-
-    if (!needsResize) return;
-
     // Store current state
     const selectionStart = textarea.selectionStart;
     const selectionEnd = textarea.selectionEnd;
     const isActive = document.activeElement === textarea;
 
-    // Calculate new height
+    // Reset height to auto to get accurate scrollHeight
+    textarea.style.height = "auto";
+
+    // Calculate new height based on content
+    const currentHeight = textarea.scrollHeight;
     const newHeight = Math.min(Math.max(currentHeight, minHeight), maxHeight);
     const willOverflow = currentHeight > maxHeight;
 

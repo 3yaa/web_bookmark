@@ -385,7 +385,6 @@ export function BookDetails({
                     </label>
                     <div className="bg-zinc-800/50 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-21.5 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200">
                       <AutoTextarea
-                        key={book.id}
                         value={localNote}
                         onChange={handleNoteChange}
                         onKeyDown={handleKeyDown}

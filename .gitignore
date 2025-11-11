@@ -6,12 +6,11 @@
 # Dependencies
 node_modules/
 */node_modules/
-.next/
 
-# Next.js (client)
-client/.next/
-client/out/
-client/.swc/
+# Next.js 
+.next/
+out/
+.swc/
 
 # Express/Node.js build (server)
 server/dist/

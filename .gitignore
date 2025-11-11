@@ -6,6 +6,7 @@
 # Dependencies
 node_modules/
 */node_modules/
+.next/
 
 # Next.js (client)
 client/.next/

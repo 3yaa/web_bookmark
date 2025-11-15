@@ -228,7 +228,7 @@ export default function GameList() {
         {!isProcessingGame && sortedGames.length === 0 && (
           <div className="text-center py-12">
             <p className="text-zinc-400 italic text-lg">
-              No games yet — add one above!
+              No games yet — add one!
             </p>
           </div>
         )}

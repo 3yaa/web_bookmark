@@ -128,7 +128,7 @@ export default function DesktopListing({
       {!isProcessingShow && shows.length === 0 && (
         <div className="text-center py-12">
           <p className="text-zinc-400 italic text-lg">
-            No shows yet — add one above!
+            No shows yet — add one!
           </p>
         </div>
       )}

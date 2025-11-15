@@ -11,19 +11,25 @@ import { ShowDetails } from "../ShowDetails";
 // utils and ui components
 import DesktopListing from "./DesktopListing";
 import MobileListing from "./MobileListing";
+import { MediaStatus } from "@/types/media";
 
 export default function ShowList() {
   //
   const { shows, addShow, updateShow, deleteShow, isProcessingShow } =
     useShowData();
+  const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
-  const sortedShows = useSortShows(shows, sortConfig);
   //
   const [selectedShow, setSelectedShow] = useState<ShowProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
     "showDetails" | "addShow" | null
   >(null);
+  //
+  const filteredShows = statusFilter
+    ? shows.filter((show) => show.status === statusFilter)
+    : shows;
+  const sortedShows = useSortShows(filteredShows, sortConfig);
 
   const handleShowUpdates = useCallback(
     async (
@@ -53,6 +59,14 @@ export default function ShowList() {
         return null;
       }
     });
+  };
+
+  const handleStatusFilterConfig = (status: MediaStatus) => {
+    if (statusFilter === status) {
+      setStatusFilter(null);
+      return;
+    }
+    setStatusFilter(status);
   };
 
   const handleModalClose = useCallback(() => {
@@ -105,8 +119,10 @@ export default function ShowList() {
           shows={sortedShows}
           isProcessingShow={isProcessingShow}
           sortConfig={sortConfig}
-          onSortConfig={handleSortConfig}
+          curStatusFilter={statusFilter}
           onShowClicked={handleShowClicked}
+          onSortConfig={handleSortConfig}
+          onStatusFilter={handleStatusFilterConfig}
         />
       </div>
       {/* ADD BUTTON */}

@@ -1,52 +1,221 @@
 import Image from "next/image";
-import { ChevronDown, ChevronUp } from "lucide-react";
-// utils and ui components
 import {
-  formatDateShort,
-  getStatusBg,
-  getStatusBorderColor,
-} from "@/utils/formattingUtils";
+  SlidersHorizontal,
+  ChartNoAxesColumn,
+  Settings2,
+  ChevronDown,
+  ChevronUp,
+  Circle,
+} from "lucide-react";
+// utils and ui components
+import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { ShowProps, SortConfig } from "@/types/show";
+import { calcCurProgress } from "../../utils/progressCalc";
+import { useState } from "react";
+import { MediaStatus } from "@/types/media";
 
 interface MobileListingProps {
   shows: ShowProps[];
   isProcessingShow: boolean;
   sortConfig: SortConfig | null;
-  onSortConfig: (sortType: SortConfig["type"]) => void;
+  curStatusFilter: MediaStatus | null;
   onShowClicked: (show: ShowProps) => void;
+  onSortConfig: (sortType: SortConfig["type"]) => void;
+  onStatusFilter: (status: MediaStatus) => void;
 }
 
 export default function MobileListing({
   shows,
   isProcessingShow,
   sortConfig,
+  curStatusFilter,
   onSortConfig,
   onShowClicked,
+  onStatusFilter,
 }: MobileListingProps) {
+  const [openSortOption, setOpenSortOption] = useState(false);
+  const [openStatusOption, setStatusOption] = useState(false);
   return (
     <div className="w-full mx-auto font-inter tracking-tight">
+      {/* HEADING */}
+      <div className="sticky top-0 z-10 bg-zinc-900/35 backdrop-blur-xl px-5 py-1.5 shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-md">
+        {/* STATUS FILTER */}
+        <div
+          className={`${
+            openStatusOption ? "bg-zinc-800/60 p-1 rounded-md" : "p-1"
+          }`}
+        >
+          <Settings2
+            onClick={() => setStatusOption(!openStatusOption)}
+            className="text-zinc-400 w-5 h-5 transition-colors"
+          />
+          {/* STATUS FILTER OPTIONS */}
+          {openStatusOption && (
+            <div className="fixed z-10 left-5 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-[145px]">
+              <div
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                onClick={() => onStatusFilter("Want to Watch")}
+              >
+                <span>Want to Watch</span>
+                {curStatusFilter === "Want to Watch" ? (
+                  <div className="relative w-4 h-4">
+                    <Circle className="w-4 h-4 text-slate-500 absolute" />
+                    <div className="w-2 h-2 bg-slate-500 rounded-full absolute top-1 left-1" />
+                  </div>
+                ) : (
+                  <Circle className="w-4 h-4 text-zinc-600" />
+                )}
+              </div>
+              <div
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                onClick={() => onStatusFilter("Watching")}
+              >
+                <span>Watching</span>
+                {curStatusFilter === "Watching" ? (
+                  <div className="relative w-4 h-4">
+                    <Circle className="w-4 h-4 text-slate-500 absolute" />
+                    <div className="w-2 h-2 bg-slate-500 rounded-full absolute top-1 left-1" />
+                  </div>
+                ) : (
+                  <Circle className="w-4 h-4 text-zinc-600" />
+                )}
+              </div>
+              <div
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                onClick={() => onStatusFilter("Completed")}
+              >
+                <span>Completed</span>
+                {curStatusFilter === "Completed" ? (
+                  <div className="relative w-4 h-4">
+                    <Circle className="w-4 h-4 text-slate-500 absolute" />
+                    <div className="w-2 h-2 bg-slate-500 rounded-full absolute top-1 left-1" />
+                  </div>
+                ) : (
+                  <Circle className="w-4 h-4 text-zinc-600" />
+                )}
+              </div>
+              <div
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                onClick={() => onStatusFilter("Dropped")}
+              >
+                <span>Dropped</span>
+                {curStatusFilter === "Dropped" ? (
+                  <div className="relative w-4 h-4">
+                    <Circle className="w-4 h-4 text-slate-500 absolute" />
+                    <div className="w-2 h-2 bg-slate-500 rounded-full absolute top-1 left-1" />
+                  </div>
+                ) : (
+                  <Circle className="w-4 h-4 text-zinc-600" />
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        {/* STAT */}
+        <div className="flex items-center gap-1 text-slate-400 text-sm font-medium">
+          <ChartNoAxesColumn className="w-4 h-4 text-slate-500" />
+          <span>{shows.length} Entries</span>
+        </div>
+        {/* SORT */}
+        <div
+          className={`${
+            openSortOption
+              ? "bg-zinc-800/60 py-1 px-1.5 rounded-md"
+              : "py-1 px-1.5"
+          }`}
+        >
+          <SlidersHorizontal
+            onClick={() => setOpenSortOption(!openSortOption)}
+            className="text-zinc-400 w-5 h-5 transition-colors"
+          />
+          {/* SORT OPTIONS */}
+          {openSortOption && (
+            <div className="fixed z-10 right-5 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-[145px]">
+              <div
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                onClick={() => onSortConfig("title")}
+              >
+                <span>Title</span>
+                {sortConfig?.type === "title" &&
+                  (sortConfig?.order === "desc" ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronUp className="w-4 h-4" />
+                  ))}
+              </div>
+              <div
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                onClick={() => onSortConfig("score")}
+              >
+                <span>Score</span>
+                {sortConfig?.type === "score" &&
+                  (sortConfig?.order === "desc" ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronUp className="w-4 h-4" />
+                  ))}
+              </div>
+              <div
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                onClick={() => onSortConfig("studio")}
+              >
+                <span>Studio</span>
+                {sortConfig?.type === "studio" &&
+                  (sortConfig?.order === "desc" ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronUp className="w-4 h-4" />
+                  ))}
+              </div>
+              <div
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                onClick={() => onSortConfig("dateReleased")}
+              >
+                <span>Date Released</span>
+                {sortConfig?.type === "dateReleased" &&
+                  (sortConfig?.order === "desc" ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronUp className="w-4 h-4" />
+                  ))}
+              </div>
+              <div
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors rounded-b-md"
+                onClick={() => onSortConfig("dateCompleted")}
+              >
+                <span>Date Completed</span>
+                {sortConfig?.type === "dateCompleted" &&
+                  (sortConfig?.order === "desc" ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronUp className="w-4 h-4" />
+                  ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
       {/* LOADER */}
       <div className="relative bg-black/20 backdrop-blur-xl">
         {isProcessingShow && (
           <Loading customStyle="mt-72 h-12 w-12 border-zinc-500/40" text="" />
         )}
       </div>
-
+      {/* EMPTY */}
       {!isProcessingShow && shows.length === 0 && (
         <div className="text-center py-12">
           <p className="text-zinc-500 italic text-lg">
-            No shows yet — add one above!
+            No shows yet — add one!
           </p>
         </div>
       )}
-
       {/* LISTING */}
       {!isProcessingShow &&
-        shows.map((show, index) => (
+        shows.map((show) => (
           <div
             key={show.id}
-            className={`mx-auto flex bg-zinc-900/65 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm rounded-md border-b border-b-zinc-700/20`}
+            className={`mx-auto flex bg-zinc-900/35 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm rounded-md border-b border-b-zinc-700/20`}
             onClick={() => onShowClicked(show)}
           >
             <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">
@@ -112,11 +281,11 @@ export default function MobileListing({
                   style={{
                     width: `${
                       show.seasons?.[show.curSeasonIndex]?.episode_count
-                        ? show.curEpisode === 0
-                          ? 1
-                          : (show.curEpisode /
-                              show.seasons[show.curSeasonIndex].episode_count) *
-                            100
+                        ? calcCurProgress(
+                            show.seasons,
+                            show.curSeasonIndex,
+                            show.curEpisode
+                          )
                         : 0
                     }%`,
                   }}

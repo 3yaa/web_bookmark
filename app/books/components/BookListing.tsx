@@ -216,7 +216,7 @@ export default function BookList() {
         {!isProcessingBook && sortedBooks.length === 0 && (
           <div className="text-center py-12">
             <p className="text-zinc-400 italic text-lg">
-              No books yet — add one above!
+              No books yet — add one!
             </p>
           </div>
         )}

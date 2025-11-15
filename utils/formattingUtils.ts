@@ -1,6 +1,6 @@
-import { MediaStatus } from "@/types/media";
-
 // FORMATTING NUMBER TIMESTAMP INTO DATES
+
+import { MediaStatus } from "@/types/media";
 
 export const formatDateShort = (value?: string | Date | null): string => {
   if (!value) return "";

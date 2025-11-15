@@ -36,7 +36,7 @@ export interface TMDBTvProps {
   studio?: string;
 }
 
-interface TMDBSeasonProps {
+export interface TMDBSeasonProps {
   season_number: number;
   episode_count: number;
 }

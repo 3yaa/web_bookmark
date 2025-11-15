@@ -63,7 +63,7 @@ export default function MobileListing({
                 <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
               )}
             </div>
-            <div className="pl-3 pr-5 py-3 flex flex-col w-full">
+            <div className="pl-3 pr-5 pt-3 flex flex-col w-full">
               {/* TITLE/SCORE */}
               <div className="flex justify-between items-start">
                 <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">
@@ -74,8 +74,9 @@ export default function MobileListing({
                 </span>
               </div>
 
-              <div className="flex justify-between items-center pb-1.5 pt-1">
-                <div className="text-zinc-500 text-xs font-medium flex space-x-1 ">
+              <div className="flex justify-between items-center pt-1">
+                {/* STUDIO/RELEASE DATE */}
+                <div className="text-zinc-500 text-xs font-medium flex space-x-1 -mt-3">
                   <span className="truncate max-w-35">
                     {show.studio || "-"},
                   </span>
@@ -83,7 +84,7 @@ export default function MobileListing({
                 </div>
 
                 {/* SEASON / EPISODES */}
-                <div className="text-zinc-400 text-xs font-medium flex justify-end">
+                <div className="text-zinc-400 text-xs font-medium flex justify-end pt-2.5">
                   <span className="pr-1">
                     S{show.curSeasonIndex + 1 || "-"}
                   </span>
@@ -118,7 +119,7 @@ export default function MobileListing({
                 />
               </div>
 
-              <p className="pt-2 text-zinc-500 text-sm text-center line-clamp-1 whitespace-normal overflow-hidden leading-snug font-normal">
+              <p className="pt-2 text-zinc-500 text-sm text-center line-clamp-2 whitespace-normal overflow-hidden leading-snug font-normal">
                 {show.note || "No notes"}
               </p>
             </div>

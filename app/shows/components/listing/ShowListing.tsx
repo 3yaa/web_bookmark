@@ -110,7 +110,7 @@ export default function ShowList() {
         />
       </div>
       {/* ADD BUTTON */}
-      <div className="fixed bottom-10 right-12 z-10">
+      <div className="fixed lg:bottom-10 lg:right-12 bottom-5 right-4 z-10">
         <button
           onClick={() => setActiveModal("addShow")}
           className="bg-emerald-700 hover:bg-emerald-600 p-4.5 rounded-full shadow-lg shadow-emerald-700/20 hover:shadow-emerald-500/30 transition-all duration-200 text-white font-medium flex items-center gap-2 hover:scale-105 active:scale-95 border border-emerald-600/20"

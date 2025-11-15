@@ -3,7 +3,7 @@ import { MediaStatus } from "@/types/media";
 // FORMATTING NUMBER TIMESTAMP INTO DATES
 
 export const formatDateShort = (value?: string | Date | null): string => {
-  if (!value) return "-";
+  if (!value) return "";
   const date = value instanceof Date ? value : new Date(value);
   return date.toLocaleDateString("en-US", {
     month: "short",

@@ -74,17 +74,19 @@ export default function MobileListing({
                 </span>
               </div>
 
-              <div className="flex justify-between items-center pt-1">
-                {/* STUDIO/RELEASE DATE */}
-                <div className="text-zinc-500 text-xs font-medium flex space-x-1 -mt-3">
-                  <span className="truncate max-w-35">
-                    {show.studio || "-"},
-                  </span>
-                  <span>{show.dateReleased || "-"}</span>
-                </div>
+              {/* STUDIO/RELEASE DATE */}
+              <div className="text-zinc-500 text-xs font-medium flex space-x-1 pt-0.5">
+                <span className="truncate max-w-35">{show.studio || "-"},</span>
+                <span>{show.dateReleased || "-"}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                {/* COMPLETION DATE */}
+                <span className="text-zinc-500 text-[0.65rem] font-medium mt-1">
+                  {formatDateShort(show.dateCompleted)}
+                </span>
 
                 {/* SEASON / EPISODES */}
-                <div className="text-zinc-400 text-xs font-medium flex justify-end pt-2.5">
+                <div className="text-zinc-400 text-xs font-medium mb-0.5">
                   <span className="pr-1">
                     S{show.curSeasonIndex + 1 || "-"}
                   </span>
@@ -119,8 +121,8 @@ export default function MobileListing({
                 />
               </div>
 
-              <p className="pt-2 text-zinc-500 text-sm text-center line-clamp-2 whitespace-normal overflow-hidden leading-snug font-normal">
-                {show.note || "No notes"}
+              <p className="pt-1 text-zinc-500 text-sm line-clamp-2 whitespace-normal overflow-hidden leading-snug font-normal flex items-center justify-center text-center min-h-[2.5rem]">
+                <span className="line-clamp-2">{show.note || "No notes"}</span>
               </p>
             </div>
           </div>

@@ -75,11 +75,11 @@ export default function MobileListing({
               </div>
 
               {/* STUDIO/RELEASE DATE */}
-              <div className="text-zinc-500 text-xs font-medium flex space-x-1 pt-0.5">
+              <div className="text-zinc-500 text-xs font-medium flex space-x-1 pt-1">
                 <span className="truncate max-w-35">{show.studio || "-"},</span>
                 <span>{show.dateReleased || "-"}</span>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center pt-0.5">
                 {/* COMPLETION DATE */}
                 <span className="text-zinc-500 text-[0.65rem] font-medium mt-1">
                   {formatDateShort(show.dateCompleted)}
@@ -112,16 +112,18 @@ export default function MobileListing({
                   style={{
                     width: `${
                       show.seasons?.[show.curSeasonIndex]?.episode_count
-                        ? (show.curEpisode /
-                            show.seasons[show.curSeasonIndex].episode_count) *
-                          100
+                        ? show.curEpisode === 0
+                          ? 1
+                          : (show.curEpisode /
+                              show.seasons[show.curSeasonIndex].episode_count) *
+                            100
                         : 0
                     }%`,
                   }}
                 />
               </div>
-
-              <p className="pt-1 text-zinc-500 text-sm line-clamp-2 whitespace-normal overflow-hidden leading-snug font-normal flex items-center justify-center text-center min-h-[2.5rem]">
+              {/* NOTES */}
+              <p className="pt-1 text-zinc-500 text-sm line-clamp-2 whitespace-normal overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2.5rem]">
                 <span className="line-clamp-2">{show.note || "No notes"}</span>
               </p>
             </div>

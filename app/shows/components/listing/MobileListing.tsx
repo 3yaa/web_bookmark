@@ -39,7 +39,7 @@ export default function MobileListing({
   return (
     <div className="w-full mx-auto font-inter tracking-tight">
       {/* HEADING */}
-      <div className="sticky top-0 z-10 bg-zinc-900/35 backdrop-blur-xl px-5 py-3 shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center">
+      <div className="sticky top-0 z-10 bg-zinc-900/35 backdrop-blur-xl px-3 py-2 shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md">
         {/* STATUS FILTER */}
         <div
           className={`${

@@ -83,3 +83,26 @@ export const getStatusTextColor = (status: MediaStatus) => {
       return "text-zinc-500";
   }
 };
+
+export const getStatusBg = (status: Partial<MediaStatus>) => {
+  switch (status) {
+    case "Completed":
+      return "bg-emerald-500/50";
+    case "Dropped":
+      return "bg-red-500/40";
+    // movie && show
+    case "Want to Watch":
+      return "bg-blue-500/60";
+    // show
+    case "Watching":
+      return "bg-indigo-600/50";
+    // book
+    case "Want to Read":
+      return "bg-blue-500/50";
+    // game
+    case "Playing":
+      return "bg-blue-500/50";
+    default:
+      return "bg-zinc-600/40";
+  }
+};

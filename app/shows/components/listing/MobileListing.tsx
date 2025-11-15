@@ -25,7 +25,7 @@ export default function MobileListing({
   onShowClicked,
 }: MobileListingProps) {
   return (
-    <div className="w-full mx-auto">
+    <div className="w-full mx-auto font-inter tracking-tight">
       {/* LOADER */}
       <div className="relative bg-black/20 backdrop-blur-xl">
         {isProcessingShow && (
@@ -35,46 +35,47 @@ export default function MobileListing({
 
       {!isProcessingShow && shows.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-zinc-500 italic text-lg tracking-wide">
+          <p className="text-zinc-500 italic text-lg">
             No shows yet — add one above!
           </p>
         </div>
       )}
+
       {/* LISTING */}
       {!isProcessingShow &&
         shows.map((show, index) => (
           <div
             key={show.id}
-            className={`mx-auto flex items-center bg-zinc-900/65 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm rounded-md border-b border-b-zinc-700/20`}
+            className={`mx-auto flex bg-zinc-900/65 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm rounded-md border-b border-b-zinc-700/20`}
             onClick={() => onShowClicked(show)}
           >
-            <div className="w-19">
-              {show.posterUrl !== undefined ? (
+            <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">
+              {show.posterUrl ? (
                 <Image
                   src={show.posterUrl}
                   alt={show.title || "Untitled"}
                   width={100}
                   height={75}
                   priority
-                  className="object-fill rounded-[0.25rem] border border-zinc-600/30"
+                  className="object-fill w-full h-full rounded-md border border-zinc-700/40"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-[0.25rem] border border-zinc-600/30"></div>
+                <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
               )}
             </div>
-            <div className="pt-2 px-5 flex flex-col w-full">
+            <div className="pl-3 pr-5 py-3 flex flex-col w-full">
               {/* TITLE/SCORE */}
               <div className="flex justify-between items-start">
-                <span className="text-zinc-200 font-medium text-base leading-tight tracking-tight max-w-52 truncate">
+                <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">
                   {show.title || "-"}
                 </span>
-                <span className="text-zinc-400 text-sm font-semibold bg-zinc-800/60 px-2 py-0.5 rounded-md shadow-inner shadow-black/40 -mt-1.5">
+                <span className="text-zinc-400 text-sm font-semibold bg-zinc-800/60 px-2.5 py-1 rounded-md shadow-inner shadow-black/40 -mt-1.5">
                   {show.score || "-"}
                 </span>
               </div>
 
               <div className="flex justify-between items-center pb-1.5 pt-1">
-                <div className="text-zinc-500 text-xs flex space-x-1 ">
+                <div className="text-zinc-500 text-xs font-medium flex space-x-1 ">
                   <span className="truncate max-w-35">
                     {show.studio || "-"},
                   </span>
@@ -82,7 +83,7 @@ export default function MobileListing({
                 </div>
 
                 {/* SEASON / EPISODES */}
-                <div className="text-zinc-400 text-xs flex justify-end">
+                <div className="text-zinc-400 text-xs font-medium flex justify-end">
                   <span className="pr-1">
                     S{show.curSeasonIndex + 1 || "-"}
                   </span>
@@ -100,7 +101,7 @@ export default function MobileListing({
               </div>
 
               {/* PROGRESS BAR */}
-              <div className="w-full bg-zinc-800/80 rounded-md h-1.5 overflow-hidden">
+              <div className="mt-1.5 w-full bg-zinc-800/80 rounded-md h-1.5 overflow-hidden">
                 <div
                   className={`${getStatusBg(
                     show.status
@@ -117,7 +118,7 @@ export default function MobileListing({
                 />
               </div>
 
-              <p className="pt-1.5 text-zinc-500 text-sm text-center line-clamp-1 whitespace-normal overflow-hidden leading-snug">
+              <p className="pt-2 text-zinc-500 text-sm text-center line-clamp-1 whitespace-normal overflow-hidden leading-snug font-normal">
                 {show.note || "No notes"}
               </p>
             </div>

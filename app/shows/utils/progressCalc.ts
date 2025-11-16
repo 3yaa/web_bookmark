@@ -5,7 +5,7 @@ export const calcCurProgress = (
   curSeasonIndex: number,
   curEp: number
 ) => {
-  if (curSeasonIndex === 0 && curEp === 1) return 0;
+  if (curSeasonIndex === 0 && curEp === 1) return 1;
 
   let completedEps = 0;
   let totalEps = 0;

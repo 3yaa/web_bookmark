@@ -29,7 +29,7 @@ export const MobileBackdropImage = ({
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "linear-gradient(to right, rgba(9,9,9,1) 0%, rgba(9,9,9,0.2) 30%, transparent 50%, rgba(9,9,9,0.2) 100%)",
+            "linear-gradient(to right, rgba(9,9,9,1) 10%, rgba(9,9,9,0.2) 30%, transparent 50%, rgba(9,9,9,0.2) 100%)",
         }}
       />
 

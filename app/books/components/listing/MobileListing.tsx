@@ -13,7 +13,6 @@ import { Loading } from "@/app/components/ui/Loading";
 import { BookProps, SortConfig } from "@/types/book";
 import React, { useState } from "react";
 import { MediaStatus } from "@/types/media";
-import { MobileBackdropImage } from "@/app/components/ui/BackdropMobile";
 import { useNav } from "@/app/components/NavContext";
 
 interface MobileListingProps {
@@ -261,14 +260,6 @@ export default function MobileListing({
               )}
             </div>
             <div className="pl-3 pr-5 pt-3 flex flex-col w-full min-w-0">
-              {/* BACKDROP */}
-              {book.coverUrl && (
-                <MobileBackdropImage
-                  src={book.coverUrl}
-                  width={1280}
-                  height={720}
-                />
-              )}
               {/* TITLE/SCORE */}
               <div className="flex justify-between items-start">
                 <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">

@@ -114,6 +114,15 @@ export default function ShowList() {
     };
   }, [activeModal]);
 
+  useEffect(() => {
+    // Force a reflow on mount to establish sticky positioning
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+      // Force browser to calculate sticky positioning immediately
+      void document.body.offsetHeight; // Using void to suppress eslint warning
+    }
+  }, []);
+
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">

@@ -46,17 +46,13 @@ export default function MobileListing({
     onShowClicked(show);
   };
 
-  // const handleOptionClose = () => {
-  //   if (openSortOption || openStatusOption) {
-  //     setOpenSortOption(false);
-  //     setOpenStatusOption(false);
-  //   }
-  // };
-
   return (
-    <div className="w-full mx-auto font-inter tracking-tight">
+    <div
+      className="w-full mx-auto font-inter tracking-tight"
+      style={{ overscrollBehaviorY: "none" }}
+    >
       {/* HEADING */}
-      <div className="sticky top-0 z-10 bg-zinc-900/35 shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md px-3">
+      <div className="sticky top-0 z-10 bg-zinc-900/35 backdrop-blur-xl shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md px-3 will-change-transform">
         {/* STATUS FILTER */}
         <div
           className={`p-3 ${
@@ -228,7 +224,7 @@ export default function MobileListing({
         </div>
       </div>
       {/* LOADER */}
-      <div className="relative bg-black/20">
+      <div className="relative bg-black/20 backdrop-blur-xl">
         {isProcessingShow && (
           <Loading customStyle="mt-72 h-12 w-12 border-zinc-500/40" text="" />
         )}
@@ -249,7 +245,7 @@ export default function MobileListing({
             className={`mx-auto flex bg-zinc-900/35 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm rounded-md border-b border-b-zinc-700/20`}
             onClick={() => handleShowClicked(show)}
           >
-            <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">
+            <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40 flex-shrink-0">
               {show.posterUrl ? (
                 <Image
                   src={show.posterUrl}

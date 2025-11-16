@@ -14,6 +14,7 @@ import { ShowProps, SortConfig } from "@/types/show";
 import { calcCurProgress } from "../../utils/progressCalc";
 import React, { useState } from "react";
 import { MediaStatus } from "@/types/media";
+import { MobileBackdropImage } from "@/app/components/ui/BackdropMobile";
 
 interface MobileListingProps {
   shows: ShowProps[];
@@ -243,10 +244,12 @@ export default function MobileListing({
       )}
       {/* LISTING */}
       {!isProcessingShow &&
-        shows.map((show) => (
+        shows.map((show, index) => (
           <div
             key={show.id}
-            className={`mx-auto flex bg-zinc-900/35 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm rounded-md border-b border-b-zinc-700/20`}
+            className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
+              index === 0 ? "pt-3" : ""
+            }`}
             onClick={() => handleShowClicked(show)}
           >
             <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">
@@ -264,6 +267,14 @@ export default function MobileListing({
               )}
             </div>
             <div className="pl-3 pr-5 pt-3 flex flex-col w-full">
+              {/* BACKDROP */}
+              {show.backdropUrl && (
+                <MobileBackdropImage
+                  src={show.backdropUrl}
+                  width={1280}
+                  height={720}
+                />
+              )}
               {/* TITLE/SCORE */}
               <div className="flex justify-between items-start">
                 <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">

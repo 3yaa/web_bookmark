@@ -1,4 +1,4 @@
-import Movies from "./components/MovieListing";
+import Movies from "./components/listing/MovieListing";
 
 export default function Page() {
   return <Movies />;

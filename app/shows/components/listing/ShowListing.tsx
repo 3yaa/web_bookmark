@@ -1,5 +1,11 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import { Plus } from "lucide-react";
 import { ShowProps, SortConfig } from "@/types/show";
 // hooks
@@ -26,11 +32,12 @@ export default function ShowList() {
     "showDetails" | "addShow" | null
   >(null);
   //
+  const [isFilterPending, startTransition] = useTransition();
   const filteredShows = useMemo(() => {
-  return statusFilter
-    ? shows.filter((show) => show.status === statusFilter)
-    : shows;
-}, [shows, statusFilter]);
+    return statusFilter
+      ? shows.filter((show) => show.status === statusFilter)
+      : shows;
+  }, [shows, statusFilter]);
   const sortedShows = useSortShows(filteredShows, sortConfig);
 
   const handleShowUpdates = useCallback(
@@ -64,11 +71,13 @@ export default function ShowList() {
   };
 
   const handleStatusFilterConfig = (status: MediaStatus) => {
-    if (statusFilter === status) {
-      setStatusFilter(null);
-      return;
-    }
-    setStatusFilter(status);
+    startTransition(() => {
+      if (statusFilter === status) {
+        setStatusFilter(null);
+      } else {
+        setStatusFilter(status);
+      }
+    });
   };
 
   const handleModalClose = useCallback(() => {
@@ -110,7 +119,7 @@ export default function ShowList() {
       <div className="lg:block hidden">
         <DesktopListing
           shows={sortedShows}
-          isProcessingShow={isProcessingShow}
+          isProcessingShow={isProcessingShow || isFilterPending}
           sortConfig={sortConfig}
           onSortConfig={handleSortConfig}
           onShowClicked={handleShowClicked}
@@ -119,7 +128,7 @@ export default function ShowList() {
       <div className="block lg:hidden">
         <MobileListing
           shows={sortedShows}
-          isProcessingShow={isProcessingShow}
+          isProcessingShow={isProcessingShow || isFilterPending}
           sortConfig={sortConfig}
           curStatusFilter={statusFilter}
           onShowClicked={handleShowClicked}

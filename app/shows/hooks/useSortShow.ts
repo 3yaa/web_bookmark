@@ -6,95 +6,76 @@ export const useSortShows = (
   sortConfig: SortConfig | null
 ) => {
   return useMemo(() => {
-    switch (sortConfig?.type) {
+    // if no sort config, return shows as-is (no copying)
+    if (!sortConfig) return shows;
+
+    // create a shallow copy once
+    const sortedShows = [...shows];
+
+    switch (sortConfig.type) {
       case "title":
-        const sortedTitle = [...shows].sort((a, b) => {
-          // Handle null/undefined titles
+        sortedShows.sort((a, b) => {
           if (!a.title && !b.title) return 0;
-          if (!a.title) return 1; // Put shows without title at the end
+          if (!a.title) return 1;
           if (!b.title) return -1;
 
-          // Sort based on the order configuration
-          if (sortConfig.order === "desc") {
-            return a.title.localeCompare(b.title); // A-Z
-          } else {
-            return b.title.localeCompare(a.title); // Z-A
-          }
+          const comparison = a.title.localeCompare(b.title);
+          return sortConfig.order === "desc" ? comparison : -comparison;
         });
-        return sortedTitle;
-      // for fooking score
+        break;
+
       case "score":
-        const sortedScore = [...shows].sort((a, b) => {
+        sortedShows.sort((a, b) => {
           if (!a.score && !b.score) return 0;
           if (!a.score) return 1;
           if (!b.score) return -1;
 
-          if (sortConfig.order === "asc") {
-            return a.score - b.score;
-          } else {
-            return b.score - a.score;
-          }
+          const comparison = a.score - b.score;
+          return sortConfig.order === "asc" ? comparison : -comparison;
         });
-        return sortedScore;
-      // complete date
+        break;
+
       case "dateCompleted":
-        const sortedCompleted = [...shows].sort((a, b) => {
-          // Handle null/undefined dates
+        sortedShows.sort((a, b) => {
           if (!a.dateCompleted && !b.dateCompleted) return 0;
-          if (!a.dateCompleted) return 1; // Put shows without completion date at the end
+          if (!a.dateCompleted) return 1;
           if (!b.dateCompleted) return -1;
 
-          // Convert to Date objects and sort based on the order configuration
-          const dateA = new Date(a.dateCompleted);
-          const dateB = new Date(b.dateCompleted);
+          const dateA = new Date(a.dateCompleted).getTime();
+          const dateB = new Date(b.dateCompleted).getTime();
 
-          // Check for invalid dates
-          if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
-          if (isNaN(dateA.getTime())) return 1;
-          if (isNaN(dateB.getTime())) return -1;
+          if (isNaN(dateA) && isNaN(dateB)) return 0;
+          if (isNaN(dateA)) return 1;
+          if (isNaN(dateB)) return -1;
 
-          if (sortConfig.order === "asc") {
-            return dateA.getTime() - dateB.getTime(); // Oldest first
-          } else {
-            return dateB.getTime() - dateA.getTime(); // Newest first
-          }
+          const comparison = dateA - dateB;
+          return sortConfig.order === "asc" ? comparison : -comparison;
         });
-        return sortedCompleted;
-      // director
+        break;
+
       case "studio":
-        const sortedDirector = [...shows].sort((a, b) => {
-          // Handle null/undefined directors
+        sortedShows.sort((a, b) => {
           if (!a.studio && !b.studio) return 0;
-          if (!a.studio) return 1; // Put shows without director at the end
+          if (!a.studio) return 1;
           if (!b.studio) return -1;
 
-          // Sort based on the order configuration
-          if (sortConfig.order === "desc") {
-            return a.studio[0].localeCompare(b.studio[0]); // A-Z
-          } else {
-            return b.studio[0].localeCompare(a.studio[0]); // Z-A
-          }
+          const comparison = a.studio[0].localeCompare(b.studio[0]);
+          return sortConfig.order === "desc" ? comparison : -comparison;
         });
-        return sortedDirector;
-      // released date
+        break;
+
       case "dateReleased":
-        const sortedReleased = [...shows].sort((a, b) => {
-          // Handle null/undefined publication years
+        sortedShows.sort((a, b) => {
           if (!a.dateReleased && !b.dateReleased) return 0;
-          if (!a.dateReleased) return 1; // Put shows without released year at the end
+          if (!a.dateReleased) return 1;
           if (!b.dateReleased) return -1;
 
-          // Sort based on the order configuration
-          if (sortConfig.order === "asc") {
-            return a.dateReleased - b.dateReleased; // Oldest year first
-          } else {
-            return b.dateReleased - a.dateReleased; // Newest year first
-          }
+          const comparison = a.dateReleased - b.dateReleased;
+          return sortConfig.order === "asc" ? comparison : -comparison;
         });
-        return sortedReleased;
-      // default order
-      default:
-        return shows;
+        break;
     }
+
+    return sortedShows;
   }, [shows, sortConfig]);
 };

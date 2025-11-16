@@ -5,7 +5,7 @@ import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { BookProps, SortConfig } from "@/types/book";
 
-interface DesktopListingProps {
+interface BookDesktopListingProps {
   books: BookProps[];
   isProcessingBook: boolean;
   sortConfig: SortConfig | null;
@@ -13,13 +13,13 @@ interface DesktopListingProps {
   onBookClicked: (book: BookProps) => void;
 }
 
-export default function DesktopListing({
+export function BookDesktopListing({
   books,
   isProcessingBook,
   sortConfig,
   onSortConfig,
   onBookClicked,
-}: DesktopListingProps) {
+}: BookDesktopListingProps) {
   return (
     <div className="w-full md:w-[70%] lg:w-[60%] mx-auto">
       {/* HEADING */}

@@ -7,25 +7,24 @@ import {
   useTransition,
 } from "react";
 import { Plus } from "lucide-react";
+import { MediaStatus } from "@/types/media";
 import { GameProps, IGDBInitProps, SortConfig } from "@/types/game";
 // hooks
 import { useSortGames } from "@/app/games/hooks/useSortGames";
 import { useGameData } from "@/app/games/hooks/useGameData";
 // components
-import { AddGame } from "../addGame/AddGame";
-import { GameDetails } from "../GameDetails";
-// utils and ui components
-import DesktopListing from "./DesktopListing";
-import MobileListing from "./MobileListing";
-import { MediaStatus } from "@/types/media";
+import { AddGame } from "./addGame/AddGame";
+import { GameDetails } from "./GameDetails";
+import { GameMobileListing } from "./listing/GameMobileListing";
+import { GameDesktopListing } from "./listing/GameDesktopListing";
 
 export default function GameList() {
-  //
   const { games, addGame, updateGame, deleteGame, isProcessingGame } =
     useGameData();
+  // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
-  //
+  // delegation
   const [selectedGame, setSelectedGame] = useState<GameProps | null>(null);
   const [titleToAdd, setTitleToAdd] = useState<{
     dlcIndex: number;
@@ -35,7 +34,8 @@ export default function GameList() {
   const [activeModal, setActiveModal] = useState<
     "gameDetails" | "addGame" | null
   >(null);
-  //
+
+  // change ground truth
   const [isFilterPending, startTransition] = useTransition();
   const filteredGames = useMemo(() => {
     if (statusFilter) {
@@ -153,7 +153,7 @@ export default function GameList() {
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">
-        <DesktopListing
+        <GameDesktopListing
           games={sortedGames}
           isProcessingGame={isProcessingGame}
           sortConfig={sortConfig}
@@ -162,7 +162,7 @@ export default function GameList() {
         />
       </div>
       <div className="block lg:hidden">
-        <MobileListing
+        <GameMobileListing
           games={sortedGames}
           isProcessingGame={isProcessingGame || isFilterPending}
           sortConfig={sortConfig}

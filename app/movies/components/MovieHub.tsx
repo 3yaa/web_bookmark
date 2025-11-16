@@ -7,79 +7,79 @@ import {
   useTransition,
 } from "react";
 import { Plus } from "lucide-react";
-import { BookProps, SortConfig } from "@/types/book";
-// hooks
-import { useSortBooks } from "@/app/books/hooks/useSortBooks";
-import { useBookData } from "@/app/books/hooks/useBookData";
-// components
-import { AddBook } from "../addingBook/AddBook";
-import { BookDetails } from "../BookDetails";
-// utils and ui components
-import DesktopListing from "./DesktopListing";
 import { MediaStatus } from "@/types/media";
-import MobileListing from "./MobileListing";
+import { MovieProps, SortConfig } from "@/types/movie";
+// hooks
+import { useSortMovies } from "@/app/movies/hooks/useSortMovies";
+import { useMovieData } from "@/app/movies/hooks/useMovieData";
+// components
+import { AddMovie } from "./addMovie/AddMovie";
+import { MovieDetails } from "./MovieDetails";
+import { MovieMobileListing } from "./listing/MovieMobileListing";
+import { MovieDesktopListing } from "./listing/MovieDesktopListing";
 
-export default function BookList() {
-  //
-  const { books, addBook, updateBook, deleteBook, isProcessingBook } =
-    useBookData();
+export default function MoviesHub() {
+  const { movies, addMovie, updateMovie, deleteMovie, isProcessingMovie } =
+    useMovieData();
+  // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
-  //
-  const [selectedBook, setSelectedBook] = useState<BookProps | null>(null);
+  //delegation
+  const [selectedMovie, setSelectedMovie] = useState<MovieProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
-    "bookDetails" | "addBook" | null
+    "movieDetails" | "addMovie" | null
   >(null);
-  //
+
+  // change ground truth
   const [isFilterPending, startTransition] = useTransition();
-  const filteredBooks = useMemo(() => {
+  const filteredMovies = useMemo(() => {
     if (statusFilter) {
       return statusFilter
-        ? books.filter((movie) => movie.status === statusFilter)
-        : books;
+        ? movies.filter((movie) => movie.status === statusFilter)
+        : movies;
     }
-    return books;
-  }, [books, statusFilter]);
-  const sortedBooks = useSortBooks(filteredBooks, sortConfig);
+    return movies;
+  }, [movies, statusFilter]);
+  const sortedMovies = useSortMovies(filteredMovies, sortConfig);
 
   const showSequelPrequel = useCallback(
     (targetTitle: string) => {
       if (targetTitle) {
         // !NEEDS TO MAKE THIS CALL WITH THE ENTIRE DB
-        const targetBook = books.find(
-          (book) => book.title.toLowerCase() === targetTitle.toLowerCase()
+        const targetMovie = movies.find(
+          (movie) => movie.title.toLowerCase() === targetTitle.toLowerCase()
         );
 
-        if (targetBook) {
-          setSelectedBook(targetBook);
+        if (targetMovie) {
+          setSelectedMovie(targetMovie);
         } else {
           // need to call external API
           setTitleToUse(targetTitle);
-          setActiveModal("addBook");
+          setActiveModal("addMovie");
         }
         return;
       }
     },
-    [books]
+    [movies]
   );
 
-  const handleBookUpdates = useCallback(
+  const handleMovieUpdates = useCallback(
     async (
-      bookId: number,
-      updates?: Partial<BookProps>,
+      movieId: number,
+      updates?: Partial<MovieProps>,
       shouldDelete?: boolean
     ) => {
       if (updates) {
-        if (selectedBook?.id === bookId) {
-          setSelectedBook({ ...selectedBook, ...updates });
+        if (selectedMovie?.id === movieId) {
+          setSelectedMovie({ ...selectedMovie, ...updates });
         }
-        updateBook(bookId, updates);
+        updateMovie(movieId, updates);
       } else if (shouldDelete) {
-        await deleteBook(bookId);
+        await deleteMovie(movieId);
       }
     },
-    [deleteBook, selectedBook, updateBook]
+    [deleteMovie, selectedMovie, updateMovie]
   );
 
   const handleSortConfig = (sortType: SortConfig["type"]) => {
@@ -107,18 +107,18 @@ export default function BookList() {
   const handleModalClose = useCallback(() => {
     setActiveModal(null);
     setTitleToUse("");
-    setSelectedBook(null);
+    setSelectedMovie(null);
   }, []);
 
-  const handleBookClicked = useCallback((book: BookProps) => {
-    setActiveModal("bookDetails");
-    setSelectedBook(book);
+  const handleMovieClicked = useCallback((movie: MovieProps) => {
+    setActiveModal("movieDetails");
+    setSelectedMovie(movie);
   }, []);
 
   useEffect(() => {
     const handleEnter = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
-        setActiveModal("addBook");
+        setActiveModal("addMovie");
       }
     };
     //
@@ -141,21 +141,21 @@ export default function BookList() {
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">
-        <DesktopListing
-          books={sortedBooks}
-          isProcessingBook={isProcessingBook}
+        <MovieDesktopListing
+          movies={sortedMovies}
+          isProcessingMovie={isProcessingMovie}
           sortConfig={sortConfig}
           onSortConfig={handleSortConfig}
-          onBookClicked={handleBookClicked}
+          onMovieClicked={handleMovieClicked}
         />
       </div>
       <div className="block lg:hidden">
-        <MobileListing
-          books={sortedBooks}
-          isProcessingBook={isProcessingBook || isFilterPending}
+        <MovieMobileListing
+          movies={sortedMovies}
+          isProcessingMovie={isProcessingMovie || isFilterPending}
           sortConfig={sortConfig}
           curStatusFilter={statusFilter}
-          onBookClicked={handleBookClicked}
+          onMovieClicked={handleMovieClicked}
           onSortConfig={handleSortConfig}
           onStatusFilter={handleStatusFilterConfig}
         />
@@ -163,26 +163,26 @@ export default function BookList() {
       {/* ADD BUTTON */}
       <div className="fixed lg:bottom-10 lg:right-12 bottom-4 right-4 z-10">
         <button
-          onClick={() => setActiveModal("addBook")}
+          onClick={() => setActiveModal("addMovie")}
           className="bg-emerald-700 hover:bg-emerald-600 p-4.5 rounded-full shadow-lg shadow-emerald-700/20 hover:shadow-emerald-500/30 transition-all duration-200 text-white font-medium flex items-center gap-2 hover:scale-105 active:scale-95 border border-emerald-600/20"
         >
           <Plus className="w-4 h-4" />
         </button>
-        <AddBook
-          isOpen={activeModal === "addBook"}
+        <AddMovie
+          isOpen={activeModal === "addMovie"}
           onClose={handleModalClose}
-          existingBooks={books}
-          onAddBook={addBook}
+          existingMovies={movies}
+          onAddMovie={addMovie}
           titleFromAbove={titleToUse}
         />
       </div>
-      {/* BOOK DETAILS */}
-      {selectedBook && (
-        <BookDetails
-          isOpen={activeModal === "bookDetails"}
-          book={selectedBook}
+      {/* MOVIE DETAILS */}
+      {selectedMovie && (
+        <MovieDetails
+          isOpen={activeModal === "movieDetails"}
+          movie={selectedMovie}
           onClose={handleModalClose}
-          onUpdate={handleBookUpdates}
+          onUpdate={handleMovieUpdates}
           showSequelPrequel={showSequelPrequel}
         />
       )}

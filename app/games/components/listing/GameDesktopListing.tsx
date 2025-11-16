@@ -5,7 +5,7 @@ import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { GameProps, SortConfig } from "@/types/game";
 
-interface DesktopListingProps {
+interface GameDesktopListingProps {
   games: GameProps[];
   isProcessingGame: boolean;
   sortConfig: SortConfig | null;
@@ -13,13 +13,13 @@ interface DesktopListingProps {
   onGameClicked: (game: GameProps) => void;
 }
 
-export default function DesktopListing({
+export function GameDesktopListing({
   games,
   isProcessingGame,
   sortConfig,
   onSortConfig,
   onGameClicked,
-}: DesktopListingProps) {
+}: GameDesktopListingProps) {
   return (
     <div className="w-full md:w-[70%] lg:w-[60%] mx-auto">
       {/* HEADING */}

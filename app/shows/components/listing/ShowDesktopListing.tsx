@@ -5,7 +5,7 @@ import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { ShowProps, SortConfig } from "@/types/show";
 
-interface DesktopListingProps {
+interface ShowDesktopListingProps {
   shows: ShowProps[];
   isProcessingShow: boolean;
   sortConfig: SortConfig | null;
@@ -13,13 +13,13 @@ interface DesktopListingProps {
   onShowClicked: (show: ShowProps) => void;
 }
 
-export default function DesktopListing({
+export function ShowDesktopListing({
   shows,
   isProcessingShow,
   sortConfig,
   onSortConfig,
   onShowClicked,
-}: DesktopListingProps) {
+}: ShowDesktopListingProps) {
   return (
     <div className="w-full md:w-[70%] lg:w-[60%] mx-auto">
       {/* HEADING */}

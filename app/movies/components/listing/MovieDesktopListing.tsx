@@ -5,7 +5,7 @@ import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { MovieProps, SortConfig } from "@/types/movie";
 
-interface DesktopListingProps {
+interface MovieDesktopListingProps {
   movies: MovieProps[];
   isProcessingMovie: boolean;
   sortConfig: SortConfig | null;
@@ -13,13 +13,13 @@ interface DesktopListingProps {
   onMovieClicked: (movie: MovieProps) => void;
 }
 
-export default function DesktopListing({
+export function MovieDesktopListing({
   movies,
   isProcessingMovie,
   sortConfig,
   onSortConfig,
   onMovieClicked,
-}: DesktopListingProps) {
+}: MovieDesktopListingProps) {
   return (
     <div className="w-full md:w-[70%] lg:w-[60%] mx-auto">
       {/* HEADING */}

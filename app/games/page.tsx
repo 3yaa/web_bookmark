@@ -1,4 +1,4 @@
-import Games from "./components/listing/GameListing";
+import Games from "./components/GameHub";
 
 export default function Page() {
   return <Games />;

@@ -7,58 +7,79 @@ import {
   useTransition,
 } from "react";
 import { Plus } from "lucide-react";
-import { ShowProps, SortConfig } from "@/types/show";
-// hooks
-import { useSortShows } from "@/app/shows/hooks/useSortShow";
-import { useShowData } from "@/app/shows/hooks/useShowData";
-// components
-import { AddShow } from "../addShow/AddShow";
-import { ShowDetails } from "../ShowDetails";
-// utils and ui components
-import DesktopListing from "./DesktopListing";
-import MobileListing from "./MobileListing";
 import { MediaStatus } from "@/types/media";
+import { BookProps, SortConfig } from "@/types/book";
+// hooks
+import { useSortBooks } from "@/app/books/hooks/useSortBooks";
+import { useBookData } from "@/app/books/hooks/useBookData";
+// components
+import { AddBook } from "./addingBook/AddBook";
+import { BookDetails } from "./BookDetails";
+import { BookMobileListing } from "./listing/BookMobileListing";
+import { BookDesktopListing } from "./listing/BookDesktopListing";
 
-export default function ShowList() {
-  //
-  const { shows, addShow, updateShow, deleteShow, isProcessingShow } =
-    useShowData();
+export default function BookList() {
+  const { books, addBook, updateBook, deleteBook, isProcessingBook } =
+    useBookData();
+  // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
-  //
-  const [selectedShow, setSelectedShow] = useState<ShowProps | null>(null);
+  // delegation
+  const [selectedBook, setSelectedBook] = useState<BookProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
-    "showDetails" | "addShow" | null
+    "bookDetails" | "addBook" | null
   >(null);
-  //
+
+  // change ground truth
   const [isFilterPending, startTransition] = useTransition();
-  const filteredShows = useMemo(() => {
+  const filteredBooks = useMemo(() => {
     if (statusFilter) {
       return statusFilter
-        ? shows.filter((show) => show.status === statusFilter)
-        : shows;
+        ? books.filter((movie) => movie.status === statusFilter)
+        : books;
     }
-    return shows;
-  }, [shows, statusFilter]);
-  const sortedShows = useSortShows(filteredShows, sortConfig);
+    return books;
+  }, [books, statusFilter]);
+  const sortedBooks = useSortBooks(filteredBooks, sortConfig);
 
-  const handleShowUpdates = useCallback(
+  const showSequelPrequel = useCallback(
+    (targetTitle: string) => {
+      if (targetTitle) {
+        // !NEEDS TO MAKE THIS CALL WITH THE ENTIRE DB
+        const targetBook = books.find(
+          (book) => book.title.toLowerCase() === targetTitle.toLowerCase()
+        );
+
+        if (targetBook) {
+          setSelectedBook(targetBook);
+        } else {
+          // need to call external API
+          setTitleToUse(targetTitle);
+          setActiveModal("addBook");
+        }
+        return;
+      }
+    },
+    [books]
+  );
+
+  const handleBookUpdates = useCallback(
     async (
-      showId: number,
-      updates?: Partial<ShowProps>,
+      bookId: number,
+      updates?: Partial<BookProps>,
       shouldDelete?: boolean
     ) => {
       if (updates) {
-        if (selectedShow?.id === showId) {
-          setSelectedShow({ ...selectedShow, ...updates });
+        if (selectedBook?.id === bookId) {
+          setSelectedBook({ ...selectedBook, ...updates });
         }
-        updateShow(showId, updates);
+        updateBook(bookId, updates);
       } else if (shouldDelete) {
-        await deleteShow(showId);
+        await deleteBook(bookId);
       }
     },
-    [deleteShow, selectedShow, updateShow]
+    [deleteBook, selectedBook, updateBook]
   );
 
   const handleSortConfig = (sortType: SortConfig["type"]) => {
@@ -86,18 +107,18 @@ export default function ShowList() {
   const handleModalClose = useCallback(() => {
     setActiveModal(null);
     setTitleToUse("");
-    setSelectedShow(null);
+    setSelectedBook(null);
   }, []);
 
-  const handleShowClicked = useCallback((show: ShowProps) => {
-    setActiveModal("showDetails");
-    setSelectedShow(show);
+  const handleBookClicked = useCallback((book: BookProps) => {
+    setActiveModal("bookDetails");
+    setSelectedBook(book);
   }, []);
 
   useEffect(() => {
     const handleEnter = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
-        setActiveModal("addShow");
+        setActiveModal("addBook");
       }
     };
     //
@@ -120,21 +141,21 @@ export default function ShowList() {
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">
-        <DesktopListing
-          shows={sortedShows}
-          isProcessingShow={isProcessingShow || isFilterPending}
+        <BookDesktopListing
+          books={sortedBooks}
+          isProcessingBook={isProcessingBook}
           sortConfig={sortConfig}
           onSortConfig={handleSortConfig}
-          onShowClicked={handleShowClicked}
+          onBookClicked={handleBookClicked}
         />
       </div>
       <div className="block lg:hidden">
-        <MobileListing
-          shows={sortedShows}
-          isProcessingShow={isProcessingShow || isFilterPending}
+        <BookMobileListing
+          books={sortedBooks}
+          isProcessingBook={isProcessingBook || isFilterPending}
           sortConfig={sortConfig}
           curStatusFilter={statusFilter}
-          onShowClicked={handleShowClicked}
+          onBookClicked={handleBookClicked}
           onSortConfig={handleSortConfig}
           onStatusFilter={handleStatusFilterConfig}
         />
@@ -142,26 +163,27 @@ export default function ShowList() {
       {/* ADD BUTTON */}
       <div className="fixed lg:bottom-10 lg:right-12 bottom-4 right-4 z-10">
         <button
-          onClick={() => setActiveModal("addShow")}
+          onClick={() => setActiveModal("addBook")}
           className="bg-emerald-700 hover:bg-emerald-600 p-4.5 rounded-full shadow-lg shadow-emerald-700/20 hover:shadow-emerald-500/30 transition-all duration-200 text-white font-medium flex items-center gap-2 hover:scale-105 active:scale-95 border border-emerald-600/20"
         >
           <Plus className="w-4 h-4" />
         </button>
-        <AddShow
-          isOpen={activeModal === "addShow"}
+        <AddBook
+          isOpen={activeModal === "addBook"}
           onClose={handleModalClose}
-          existingShows={shows}
-          onAddShow={addShow}
+          existingBooks={books}
+          onAddBook={addBook}
           titleFromAbove={titleToUse}
         />
       </div>
-      {/* SHOW DETAILS */}
-      {selectedShow && (
-        <ShowDetails
-          isOpen={activeModal === "showDetails"}
-          show={selectedShow}
+      {/* BOOK DETAILS */}
+      {selectedBook && (
+        <BookDetails
+          isOpen={activeModal === "bookDetails"}
+          book={selectedBook}
           onClose={handleModalClose}
-          onUpdate={handleShowUpdates}
+          onUpdate={handleBookUpdates}
+          showSequelPrequel={showSequelPrequel}
         />
       )}
     </div>

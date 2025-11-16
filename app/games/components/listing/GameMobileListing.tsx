@@ -13,10 +13,10 @@ import { Loading } from "@/app/components/ui/Loading";
 import { GameProps, SortConfig } from "@/types/game";
 import React, { useState } from "react";
 import { MediaStatus } from "@/types/media";
-import { MobileBackdropImage } from "@/app/components/ui/BackdropMobile";
+import { BackdropImageMobile } from "@/app/components/ui/BackdropMobile";
 import { useNav } from "@/app/components/NavContext";
 
-interface MobileListingProps {
+interface GameMobileListingProps {
   games: GameProps[];
   isProcessingGame: boolean;
   sortConfig: SortConfig | null;
@@ -26,7 +26,7 @@ interface MobileListingProps {
   onStatusFilter: (status: MediaStatus) => void;
 }
 
-export default function MobileListing({
+export function GameMobileListing({
   games,
   isProcessingGame,
   sortConfig,
@@ -34,7 +34,7 @@ export default function MobileListing({
   onSortConfig,
   onGameClicked,
   onStatusFilter,
-}: MobileListingProps) {
+}: GameMobileListingProps) {
   const { isNavOpen } = useNav();
   const [openSortOption, setOpenSortOption] = useState(false);
   const [openStatusOption, setOpenStatusOption] = useState(false);
@@ -263,7 +263,7 @@ export default function MobileListing({
             <div className="px-3 pt-3 flex flex-col w-full min-w-0">
               {/* BACKDROP */}
               {game.backdropUrl && (
-                <MobileBackdropImage
+                <BackdropImageMobile
                   src={game.backdropUrl}
                   width={1280}
                   height={720}

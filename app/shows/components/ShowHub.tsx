@@ -7,79 +7,58 @@ import {
   useTransition,
 } from "react";
 import { Plus } from "lucide-react";
-import { MovieProps, SortConfig } from "@/types/movie";
-// hooks
-import { useSortMovies } from "@/app/movies/hooks/useSortMovies";
-import { useMovieData } from "@/app/movies/hooks/useMovieData";
-// components
-import { AddMovie } from "../addMovie/AddMovie";
-import { MovieDetails } from "../MovieDetails";
-// utils and ui components
-import DesktopListing from "./DesktopListing";
-import MobileListing from "./MobileListing";
 import { MediaStatus } from "@/types/media";
+import { ShowProps, SortConfig } from "@/types/show";
+// hooks
+import { useSortShows } from "@/app/shows/hooks/useSortShow";
+import { useShowData } from "@/app/shows/hooks/useShowData";
+// components
+import { AddShow } from "./addShow/AddShow";
+import { ShowDetails } from "./ShowDetails";
+import { ShowMobileListing } from "./listing/ShowMobileListing";
+import { ShowDesktopListing } from "./listing/ShowDesktopListing";
 
-export default function MovieList() {
-  //
-  const { movies, addMovie, updateMovie, deleteMovie, isProcessingMovie } =
-    useMovieData();
+export default function ShowList() {
+  const { shows, addShow, updateShow, deleteShow, isProcessingShow } =
+    useShowData();
+  // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
-  //
-  const [selectedMovie, setSelectedMovie] = useState<MovieProps | null>(null);
+  // delegation
+  const [selectedShow, setSelectedShow] = useState<ShowProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
-    "movieDetails" | "addMovie" | null
+    "showDetails" | "addShow" | null
   >(null);
-  //
+  
+  // change ground truth
   const [isFilterPending, startTransition] = useTransition();
-  const filteredMovies = useMemo(() => {
+  const filteredShows = useMemo(() => {
     if (statusFilter) {
       return statusFilter
-        ? movies.filter((movie) => movie.status === statusFilter)
-        : movies;
+        ? shows.filter((show) => show.status === statusFilter)
+        : shows;
     }
-    return movies;
-  }, [movies, statusFilter]);
-  const sortedMovies = useSortMovies(filteredMovies, sortConfig);
+    return shows;
+  }, [shows, statusFilter]);
+  const sortedShows = useSortShows(filteredShows, sortConfig);
 
-  const showSequelPrequel = useCallback(
-    (targetTitle: string) => {
-      if (targetTitle) {
-        // !NEEDS TO MAKE THIS CALL WITH THE ENTIRE DB
-        const targetMovie = movies.find(
-          (movie) => movie.title.toLowerCase() === targetTitle.toLowerCase()
-        );
-
-        if (targetMovie) {
-          setSelectedMovie(targetMovie);
-        } else {
-          // need to call external API
-          setTitleToUse(targetTitle);
-          setActiveModal("addMovie");
-        }
-        return;
-      }
-    },
-    [movies]
-  );
-
-  const handleMovieUpdates = useCallback(
+  const handleShowUpdates = useCallback(
     async (
-      movieId: number,
-      updates?: Partial<MovieProps>,
+      showId: number,
+      updates?: Partial<ShowProps>,
       shouldDelete?: boolean
     ) => {
       if (updates) {
-        if (selectedMovie?.id === movieId) {
-          setSelectedMovie({ ...selectedMovie, ...updates });
+        if (selectedShow?.id === showId) {
+          setSelectedShow({ ...selectedShow, ...updates });
         }
-        updateMovie(movieId, updates);
+        updateShow(showId, updates);
       } else if (shouldDelete) {
-        await deleteMovie(movieId);
+        await deleteShow(showId);
       }
     },
-    [deleteMovie, selectedMovie, updateMovie]
+    [deleteShow, selectedShow, updateShow]
   );
 
   const handleSortConfig = (sortType: SortConfig["type"]) => {
@@ -107,18 +86,18 @@ export default function MovieList() {
   const handleModalClose = useCallback(() => {
     setActiveModal(null);
     setTitleToUse("");
-    setSelectedMovie(null);
+    setSelectedShow(null);
   }, []);
 
-  const handleMovieClicked = useCallback((movie: MovieProps) => {
-    setActiveModal("movieDetails");
-    setSelectedMovie(movie);
+  const handleShowClicked = useCallback((show: ShowProps) => {
+    setActiveModal("showDetails");
+    setSelectedShow(show);
   }, []);
 
   useEffect(() => {
     const handleEnter = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
-        setActiveModal("addMovie");
+        setActiveModal("addShow");
       }
     };
     //
@@ -141,21 +120,21 @@ export default function MovieList() {
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">
-        <DesktopListing
-          movies={sortedMovies}
-          isProcessingMovie={isProcessingMovie}
+        <ShowDesktopListing
+          shows={sortedShows}
+          isProcessingShow={isProcessingShow || isFilterPending}
           sortConfig={sortConfig}
           onSortConfig={handleSortConfig}
-          onMovieClicked={handleMovieClicked}
+          onShowClicked={handleShowClicked}
         />
       </div>
       <div className="block lg:hidden">
-        <MobileListing
-          movies={sortedMovies}
-          isProcessingMovie={isProcessingMovie || isFilterPending}
+        <ShowMobileListing
+          shows={sortedShows}
+          isProcessingShow={isProcessingShow || isFilterPending}
           sortConfig={sortConfig}
           curStatusFilter={statusFilter}
-          onMovieClicked={handleMovieClicked}
+          onShowClicked={handleShowClicked}
           onSortConfig={handleSortConfig}
           onStatusFilter={handleStatusFilterConfig}
         />
@@ -163,27 +142,26 @@ export default function MovieList() {
       {/* ADD BUTTON */}
       <div className="fixed lg:bottom-10 lg:right-12 bottom-4 right-4 z-10">
         <button
-          onClick={() => setActiveModal("addMovie")}
+          onClick={() => setActiveModal("addShow")}
           className="bg-emerald-700 hover:bg-emerald-600 p-4.5 rounded-full shadow-lg shadow-emerald-700/20 hover:shadow-emerald-500/30 transition-all duration-200 text-white font-medium flex items-center gap-2 hover:scale-105 active:scale-95 border border-emerald-600/20"
         >
           <Plus className="w-4 h-4" />
         </button>
-        <AddMovie
-          isOpen={activeModal === "addMovie"}
+        <AddShow
+          isOpen={activeModal === "addShow"}
           onClose={handleModalClose}
-          existingMovies={movies}
-          onAddMovie={addMovie}
+          existingShows={shows}
+          onAddShow={addShow}
           titleFromAbove={titleToUse}
         />
       </div>
-      {/* MOVIE DETAILS */}
-      {selectedMovie && (
-        <MovieDetails
-          isOpen={activeModal === "movieDetails"}
-          movie={selectedMovie}
+      {/* SHOW DETAILS */}
+      {selectedShow && (
+        <ShowDetails
+          isOpen={activeModal === "showDetails"}
+          show={selectedShow}
           onClose={handleModalClose}
-          onUpdate={handleMovieUpdates}
-          showSequelPrequel={showSequelPrequel}
+          onUpdate={handleShowUpdates}
         />
       )}
     </div>

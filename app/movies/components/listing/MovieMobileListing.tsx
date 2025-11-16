@@ -13,10 +13,10 @@ import { Loading } from "@/app/components/ui/Loading";
 import { MovieProps, SortConfig } from "@/types/movie";
 import React, { useState } from "react";
 import { MediaStatus } from "@/types/media";
-import { MobileBackdropImage } from "@/app/components/ui/BackdropMobile";
+import { BackdropImageMobile } from "@/app/components/ui/BackdropMobile";
 import { useNav } from "@/app/components/NavContext";
 
-interface MobileListingProps {
+interface MovieMobileListingProps {
   movies: MovieProps[];
   isProcessingMovie: boolean;
   sortConfig: SortConfig | null;
@@ -26,7 +26,7 @@ interface MobileListingProps {
   onStatusFilter: (status: MediaStatus) => void;
 }
 
-export default function MobileListing({
+export function MovieMobileListing({
   movies,
   isProcessingMovie,
   sortConfig,
@@ -34,7 +34,7 @@ export default function MobileListing({
   onSortConfig,
   onMovieClicked,
   onStatusFilter,
-}: MobileListingProps) {
+}: MovieMobileListingProps) {
   const { isNavOpen } = useNav();
   const [openSortOption, setOpenSortOption] = useState(false);
   const [openStatusOption, setOpenStatusOption] = useState(false);
@@ -263,7 +263,7 @@ export default function MobileListing({
             <div className="px-3 pt-3 flex flex-col w-full min-w-0">
               {/* BACKDROP */}
               {movie.backdropUrl && (
-                <MobileBackdropImage
+                <BackdropImageMobile
                   src={movie.backdropUrl}
                   width={1280}
                   height={720}

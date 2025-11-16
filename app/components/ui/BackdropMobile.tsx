@@ -1,16 +1,16 @@
 import Image from "next/image";
 
-interface MobileBackdropImageProps {
+interface BackdropImagePropsMobile {
   src: string;
   width: number;
   height: number;
 }
 
-export const MobileBackdropImage = ({
+export const BackdropImageMobile = ({
   src,
   width,
   height,
-}: MobileBackdropImageProps) => (
+}: BackdropImagePropsMobile) => (
   <div className="absolute top-0 left-50 -z-10 overflow-hidden select-none">
     <div className="relative w-full h-full">
       {/* IMAGE */}

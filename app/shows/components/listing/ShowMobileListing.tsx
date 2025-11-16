@@ -10,41 +10,43 @@ import {
 // utils and ui components
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
-import { BookProps, SortConfig } from "@/types/book";
+import { ShowProps, SortConfig } from "@/types/show";
+import { calcCurProgress } from "../../utils/progressCalc";
 import React, { useState } from "react";
 import { MediaStatus } from "@/types/media";
+import { BackdropImageMobile } from "@/app/components/ui/BackdropMobile";
 import { useNav } from "@/app/components/NavContext";
 
-interface MobileListingProps {
-  books: BookProps[];
-  isProcessingBook: boolean;
+interface ShowMobileListingProps {
+  shows: ShowProps[];
+  isProcessingShow: boolean;
   sortConfig: SortConfig | null;
   curStatusFilter: MediaStatus | null;
-  onBookClicked: (book: BookProps) => void;
+  onShowClicked: (show: ShowProps) => void;
   onSortConfig: (sortType: SortConfig["type"]) => void;
   onStatusFilter: (status: MediaStatus) => void;
 }
 
-export default function MobileListing({
-  books,
-  isProcessingBook,
+export function ShowMobileListing({
+  shows,
+  isProcessingShow,
   sortConfig,
   curStatusFilter,
   onSortConfig,
-  onBookClicked,
+  onShowClicked,
   onStatusFilter,
-}: MobileListingProps) {
+}: ShowMobileListingProps) {
   const { isNavOpen } = useNav();
   const [openSortOption, setOpenSortOption] = useState(false);
   const [openStatusOption, setOpenStatusOption] = useState(false);
 
-  const handleBookClicked = (book: BookProps) => {
+  const handleShowClicked = (show: ShowProps) => {
     if (openSortOption || openStatusOption) {
       setOpenSortOption(false);
       setOpenStatusOption(false);
       return;
     }
-    onBookClicked(book);
+    onShowClicked(show);
   };
 
   return (
@@ -141,7 +143,7 @@ export default function MobileListing({
         {/* STAT */}
         <div className="flex items-center gap-1 text-slate-400 text-sm font-medium">
           <ChartNoAxesColumn className="w-4 h-4 text-slate-500" />
-          <span>{books.length} Entries</span>
+          <span>{shows.length} Entries</span>
         </div>
         {/* SORT */}
         <div
@@ -183,10 +185,10 @@ export default function MobileListing({
               </div>
               <div
                 className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
-                onClick={() => onSortConfig("author")}
+                onClick={() => onSortConfig("studio")}
               >
                 <span>Studio</span>
-                {sortConfig?.type === "author" &&
+                {sortConfig?.type === "studio" &&
                   (sortConfig?.order === "desc" ? (
                     <ChevronDown className="w-4 h-4" />
                   ) : (
@@ -195,10 +197,10 @@ export default function MobileListing({
               </div>
               <div
                 className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
-                onClick={() => onSortConfig("datePublished")}
+                onClick={() => onSortConfig("dateReleased")}
               >
                 <span>Date Released</span>
-                {sortConfig?.type === "datePublished" &&
+                {sortConfig?.type === "dateReleased" &&
                   (sortConfig?.order === "desc" ? (
                     <ChevronDown className="w-4 h-4" />
                   ) : (
@@ -223,33 +225,33 @@ export default function MobileListing({
       </div>
       {/* LOADER */}
       <div className="relative bg-black/20 backdrop-blur-xl">
-        {isProcessingBook && (
+        {isProcessingShow && (
           <Loading customStyle="mt-72 h-12 w-12 border-zinc-500/40" text="" />
         )}
       </div>
       {/* EMPTY */}
-      {!isProcessingBook && books.length === 0 && (
+      {!isProcessingShow && shows.length === 0 && (
         <div className="text-center py-12">
           <p className="text-zinc-500 italic text-lg">
-            No books yet — add one!
+            No shows yet — add one!
           </p>
         </div>
       )}
       {/* LISTING */}
-      {!isProcessingBook &&
-        books.map((book) => (
+      {!isProcessingShow &&
+        shows.map((show) => (
           <div
-            key={book.id}
+            key={show.id}
             className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
               isNavOpen ? "pointer-events-none" : ""
             }`}
-            onClick={() => handleBookClicked(book)}
+            onClick={() => handleShowClicked(show)}
           >
             <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">
-              {book.coverUrl ? (
+              {show.posterUrl ? (
                 <Image
-                  src={book.coverUrl}
-                  alt={book.title || "Untitled"}
+                  src={show.posterUrl}
+                  alt={show.title || "Untitled"}
                   width={100}
                   height={75}
                   priority
@@ -260,99 +262,75 @@ export default function MobileListing({
               )}
             </div>
             <div className="px-3 pt-3 flex flex-col w-full min-w-0">
+              {/* BACKDROP */}
+              {show.backdropUrl && (
+                <BackdropImageMobile
+                  src={show.backdropUrl}
+                  width={1280}
+                  height={720}
+                />
+              )}
               {/* TITLE/SCORE */}
               <div className="flex justify-between items-start">
                 <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">
-                  {book.title || "-"}
+                  {show.title || "-"}
                 </span>
                 <span className="text-zinc-400 text-sm font-semibold bg-zinc-800/60 px-2.5 py-1 rounded-md shadow-inner shadow-black/40 -mt-1.5">
-                  {book.score || "-"}
+                  {show.score || "-"}
                 </span>
               </div>
 
               {/* STUDIO/RELEASE DATE */}
               <div className="text-zinc-500 text-xs font-medium flex space-x-1 pt-1">
-                <span className="truncate max-w-35">{book.author || "-"},</span>
-                <span>{book.datePublished || "-"}</span>
+                <span className="truncate max-w-35">{show.studio || "-"},</span>
+                <span>{show.dateReleased || "-"}</span>
               </div>
-              {/* COMPLETION DATE */}
-              <div className={`${book.dateCompleted ? "-mt-1.5" : "pt-2.5"}`}>
-                <span className="flex justify-end text-zinc-500 text-[0.65rem] font-medium">
-                  {formatDateShort(book.dateCompleted)}
+              <div className="flex justify-between items-center pt-0.5">
+                {/* COMPLETION DATE */}
+                <span className="text-zinc-500 text-[0.65rem] font-medium mt-1">
+                  {formatDateShort(show.dateCompleted)}
                 </span>
+
+                {/* SEASON / EPISODES */}
+                <div className="text-zinc-400 text-xs font-medium mb-0.5">
+                  <span className="pr-1">
+                    S{show.curSeasonIndex + 1 || "-"}
+                  </span>
+                  <span>Ep {show.curEpisode || "-"}/</span>
+                  {show.seasons?.[show.curSeasonIndex]?.episode_count ? (
+                    <>
+                      <span>
+                        {show.seasons[show.curSeasonIndex].episode_count}
+                      </span>
+                    </>
+                  ) : (
+                    0
+                  )}
+                </div>
               </div>
-              {/* STATUS BAR */}
-              <div className="mt-1.5 w-full rounded-md h-1.5 overflow-hidden">
+
+              {/* PROGRESS BAR */}
+              <div className="mt-1.5 w-full bg-zinc-800/80 rounded-md h-1.5 overflow-hidden">
                 <div
                   className={`${getStatusBg(
-                    book.status
+                    show.status
                   )} h-1.5 transition-all duration-500 ease-out rounded-md`}
+                  style={{
+                    width: `${
+                      show.seasons?.[show.curSeasonIndex]?.episode_count
+                        ? calcCurProgress(
+                            show.seasons,
+                            show.curSeasonIndex,
+                            show.curEpisode
+                          )
+                        : 0
+                    }%`,
+                  }}
                 />
-              </div>
-              {/* PREQUEL/SEQUEL */}
-              <div
-                className={`${
-                  book.placeInSeries
-                    ? "grid grid-cols-[1fr_2rem_1fr] mt-1"
-                    : "mt-3"
-                }`}
-              >
-                {/* PREQUEL */}
-                <div className="truncate text-left">
-                  {book.prequel && (
-                    <div
-                      className={`flex gap-1 items-center text-[0.60rem] text-zinc-400/80`}
-                      style={{
-                        maxWidth: book.sequel
-                          ? `${Math.min(
-                              Math.min(
-                                book.prequel.length,
-                                book.sequel.length
-                              ) * 0.38,
-                              7.38
-                            )}rem`
-                          : "auto",
-                      }}
-                    >
-                      <span>←</span>
-                      <span className="truncate">{book.prequel}</span>
-                    </div>
-                  )}
-                </div>
-                {/* PLACEMENT */}
-                <div className="flex justify-center items-end">
-                  {book.placeInSeries && (
-                    <label className="text-[0.65rem] font-medium text-zinc-400/85">
-                      {book.placeInSeries}
-                    </label>
-                  )}
-                </div>
-                {/* SEQUEL */}
-                <div className="text-right flex justify-end">
-                  {book.sequel && (
-                    <div
-                      className={`flex gap-1 items-center text-[0.60rem] text-zinc-400/80`}
-                      style={{
-                        maxWidth: book.prequel
-                          ? `${Math.min(
-                              Math.min(
-                                book.prequel.length,
-                                book.sequel.length
-                              ) * 0.38,
-                              7.38
-                            )}rem`
-                          : "auto",
-                      }}
-                    >
-                      <span className="truncate">{book.sequel}</span>
-                      <span>→</span>
-                    </div>
-                  )}
-                </div>
               </div>
               {/* NOTES */}
               <p className="text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2rem] w-full break-words">
-                <span className="line-clamp-2">{book.note || "No notes"}</span>
+                <span className="line-clamp-2">{show.note || "No notes"}</span>
               </p>
             </div>
           </div>

@@ -55,7 +55,22 @@ export function useMovieData() {
         //
         const resJson = await response.json();
         const newMovie = resJson.data;
-        setMovies((prev) => [...prev, newMovie]);
+        setMovies((prev) => {
+          // find the first index of status group
+          const firstIndexOfStatus = prev.findIndex(
+            (m) => m.status === newMovie.status
+          );
+          // if no status group
+          if (firstIndexOfStatus === -1) {
+            return [newMovie, ...prev];
+          }
+          // insert at the beginning of status group
+          return [
+            ...prev.slice(0, firstIndexOfStatus),
+            newMovie,
+            ...prev.slice(firstIndexOfStatus),
+          ];
+        });
       } catch (e) {
         console.error("Error adding movie", e);
       } finally {

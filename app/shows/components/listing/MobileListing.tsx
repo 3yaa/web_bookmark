@@ -54,13 +54,6 @@ export default function MobileListing({
     onShowClicked(show);
   };
 
-  // const handleOptionClose = () => {
-  //   if (openSortOption || openStatusOption) {
-  //     setOpenSortOption(false);
-  //     setOpenStatusOption(false);
-  //   }
-  // };
-
   return (
     <div className="w-full mx-auto font-inter tracking-tight">
       {/* HEADING */}

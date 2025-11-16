@@ -55,7 +55,22 @@ export function useShowData() {
         //
         const resJson = await response.json();
         const newShow = resJson.data;
-        setShows((prev) => [...prev, newShow]);
+        setShows((prev) => {
+          // find the first index of status group
+          const firstIndexOfStatus = prev.findIndex(
+            (m) => m.status === newShow.status
+          );
+          // if no status group
+          if (firstIndexOfStatus === -1) {
+            return [newShow, ...prev];
+          }
+          // insert at the beginning of status group
+          return [
+            ...prev.slice(0, firstIndexOfStatus),
+            newShow,
+            ...prev.slice(firstIndexOfStatus),
+          ];
+        });
       } catch (e) {
         console.error("Error adding show", e);
       } finally {

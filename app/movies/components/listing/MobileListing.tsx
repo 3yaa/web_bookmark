@@ -53,13 +53,6 @@ export default function MobileListing({
     onMovieClicked(movie);
   };
 
-  // const handleOptionClose = () => {
-  //   if (openSortOption || openStatusOption) {
-  //     setOpenSortOption(false);
-  //     setOpenStatusOption(false);
-  //   }
-  // };
-
   return (
     <div className="w-full mx-auto font-inter tracking-tight">
       {/* HEADING */}
@@ -318,18 +311,20 @@ export default function MobileListing({
                     : "mt-3"
                 }`}
               >
+                {/* PREQUEL */}
                 <div className="truncate text-left">
                   {movie.prequel && (
                     <div
                       className={`flex gap-1 items-center text-[0.60rem] text-zinc-400/80`}
                       style={{
                         maxWidth: movie.sequel
-                          ? `${
+                          ? `${Math.min(
                               Math.min(
                                 movie.prequel.length,
                                 movie.sequel.length
-                              ) * 0.35
-                            }rem`
+                              ) * 0.38,
+                              7.38
+                            )}rem`
                           : "auto",
                       }}
                     >
@@ -338,6 +333,7 @@ export default function MobileListing({
                     </div>
                   )}
                 </div>
+                {/* PLACEMENT */}
                 <div className="flex justify-center items-end">
                   {movie.placeInSeries && (
                     <label className="text-[0.65rem] font-medium text-zinc-400/85">
@@ -345,18 +341,20 @@ export default function MobileListing({
                     </label>
                   )}
                 </div>
+                {/* SEQUEL */}
                 <div className="text-right flex justify-end">
                   {movie.sequel && (
                     <div
                       className={`flex gap-1 items-center text-[0.60rem] text-zinc-400/80`}
                       style={{
                         maxWidth: movie.prequel
-                          ? `${
+                          ? `${Math.min(
                               Math.min(
                                 movie.prequel.length,
                                 movie.sequel.length
-                              ) * 0.35
-                            }rem`
+                              ) * 0.38,
+                              7.38
+                            )}rem`
                           : "auto",
                       }}
                     >

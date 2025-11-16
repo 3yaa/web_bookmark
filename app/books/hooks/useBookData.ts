@@ -83,7 +83,22 @@ export function useBookData() {
         //
         const resJson = await response.json();
         const newBook = resJson.data;
-        setBooks((prev) => [...prev, newBook]);
+        setBooks((prev) => {
+          // find the first index of status group
+          const firstIndexOfStatus = prev.findIndex(
+            (m) => m.status === newBook.status
+          );
+          // if no status group
+          if (firstIndexOfStatus === -1) {
+            return [newBook, ...prev];
+          }
+          // insert at the beginning of status group
+          return [
+            ...prev.slice(0, firstIndexOfStatus),
+            newBook,
+            ...prev.slice(firstIndexOfStatus),
+          ];
+        });
       } catch (e) {
         console.error("Error adding book", e);
       } finally {

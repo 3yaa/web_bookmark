@@ -55,7 +55,22 @@ export function useGameData() {
         //
         const resJson = await response.json();
         const newGame = resJson.data;
-        setGames((prev) => [...prev, newGame]);
+        setGames((prev) => {
+          // find the first index of status group
+          const firstIndexOfStatus = prev.findIndex(
+            (m) => m.status === newGame.status
+          );
+          // if no status group
+          if (firstIndexOfStatus === -1) {
+            return [newGame, ...prev];
+          }
+          // insert at the beginning of status group
+          return [
+            ...prev.slice(0, firstIndexOfStatus),
+            newGame,
+            ...prev.slice(firstIndexOfStatus),
+          ];
+        });
       } catch (e) {
         console.error("Error adding game", e);
       } finally {

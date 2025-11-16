@@ -15,6 +15,7 @@ import { calcCurProgress } from "../../utils/progressCalc";
 import React, { useState } from "react";
 import { MediaStatus } from "@/types/media";
 import { MobileBackdropImage } from "@/app/components/ui/BackdropMobile";
+import { useNav } from "@/app/components/NavContext";
 
 interface MobileListingProps {
   shows: ShowProps[];
@@ -35,10 +36,16 @@ export default function MobileListing({
   onShowClicked,
   onStatusFilter,
 }: MobileListingProps) {
+  const { isNavOpen, setIsNavOpen } = useNav();
   const [openSortOption, setOpenSortOption] = useState(false);
   const [openStatusOption, setOpenStatusOption] = useState(false);
 
   const handleShowClicked = (show: ShowProps) => {
+    if (isNavOpen) {
+      setIsNavOpen(false);
+      return;
+    }
+    //
     if (openSortOption || openStatusOption) {
       setOpenSortOption(false);
       setOpenStatusOption(false);

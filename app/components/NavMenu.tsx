@@ -12,12 +12,13 @@ import {
   LogOut,
   type LucideIcon,
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useLogout } from "@/hooks/useLogout";
+import { useNav } from "./NavContext";
 
 type NavigationItem = {
   label: string;
@@ -43,7 +44,7 @@ const allMenuItems: NavigationItem[] = [
 ];
 
 export function NavMenu() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isNavOpen, setIsNavOpen } = useNav();
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { isAuthenticated } = useAuth();
@@ -72,57 +73,57 @@ export function NavMenu() {
         event.target instanceof Node &&
         !menuRef.current.contains(event.target)
       ) {
-        setIsOpen(false);
+        setIsNavOpen(false);
       }
     }
 
-    if (isOpen) {
+    if (isNavOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isNavOpen, setIsNavOpen]);
 
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
       switch (event.key) {
         case "Escape":
-          if (isOpen) {
-            setIsOpen(false);
+          if (isNavOpen) {
+            setIsNavOpen(false);
           } else {
-            setIsOpen(true);
+            setIsNavOpen(true);
           }
           return;
         case "5":
-          if (isOpen) {
+          if (isNavOpen) {
             router.push("/");
-            setIsOpen(false);
+            setIsNavOpen(false);
           }
           return;
         case "1":
-          if (isOpen) {
+          if (isNavOpen) {
             router.push("/movies");
-            setIsOpen(false);
+            setIsNavOpen(false);
           }
           return;
         case "2":
-          if (isOpen) {
+          if (isNavOpen) {
             router.push("/shows");
-            setIsOpen(false);
+            setIsNavOpen(false);
           }
           return;
         case "3":
-          if (isOpen) {
+          if (isNavOpen) {
             router.push("/books");
-            setIsOpen(false);
+            setIsNavOpen(false);
           }
           return;
         case "4":
-          if (isOpen) {
+          if (isNavOpen) {
             router.push("/games");
-            setIsOpen(false);
+            setIsNavOpen(false);
           }
           return;
         default:
@@ -135,17 +136,17 @@ export function NavMenu() {
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [isOpen, router]);
+  }, [isNavOpen, router, setIsNavOpen]);
 
   return (
     <div
       ref={menuRef}
       className="flex fixed bottom-3 left-3 lg:bottom-8 lg:left-8 z-10 flex-col items-start"
-      onClick={() => setIsOpen(!isOpen)}
+      onClick={() => setIsNavOpen(!isNavOpen)}
     >
       {/* Dropdown */}
       <AnimatePresence>
-        {isOpen && (
+        {isNavOpen && (
           <motion.div
             initial={{ opacity: 0, y: 6, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -171,7 +172,7 @@ export function NavMenu() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setIsOpen(false);
+                          setIsNavOpen(false);
                           item.action();
                         }}
                         disabled={isLoggingOut}
@@ -211,7 +212,7 @@ export function NavMenu() {
                         href={item.path}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setIsOpen(false);
+                          setIsNavOpen(false);
                         }}
                         className="w-full flex items-center justify-between pl-4.5 pr-5 py-3
                                    text-sm font-medium text-zinc-300 
@@ -244,14 +245,14 @@ export function NavMenu() {
       {/* MAIN BUTTON */}
       <button
         className={`flex items-center justify-center w-10 h-10 lg:w-14 lg:h-14 rounded-full 
-          border border-zinc-900/50 
+          border border-zinc-950/50 
           bg-gradient-to-bl from-zinc-transparent to-zinc-800/60 
           hover:bg-graident-to-bl hover:from-zinc-800/60 hover:to-transparent
           backdrop-blur-xl 
           shadow-md hover:scale-105 active:scale-95 
           transition-all duration-200 relative z-10 hover:cursor-pointer focus:outline-none`}
       >
-        {isOpen ? (
+        {isNavOpen ? (
           <X className="w-5 h-5 text-zinc-300" />
         ) : (
           <Menu className="w-5 h-5 text-zinc-300" />

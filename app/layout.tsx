@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/app/auth/AuthContext";
 import { NavMenu } from "./components/NavMenu";
 import { RouteGuard } from "@/app/auth/RouteGuard";
+import { NavProvider } from "./components/NavContext";
 
 const geist = Geist({ subsets: ["latin"], display: "swap" });
 
@@ -24,8 +25,10 @@ export default function RootLayout({
     <html lang="en" className={`${geist.className}`}>
       <body className="antialiased bg-zinc-950 text-zinc-100">
         <AuthProvider>
-          <RouteGuard>{children}</RouteGuard>
-          <NavMenu />
+          <NavProvider>
+            <RouteGuard>{children}</RouteGuard>
+            <NavMenu />
+          </NavProvider>
         </AuthProvider>
       </body>
     </html>

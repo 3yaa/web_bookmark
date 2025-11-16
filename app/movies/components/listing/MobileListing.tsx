@@ -14,6 +14,7 @@ import { MovieProps, SortConfig } from "@/types/movie";
 import React, { useState } from "react";
 import { MediaStatus } from "@/types/media";
 import { MobileBackdropImage } from "@/app/components/ui/BackdropMobile";
+import { useNav } from "@/app/components/NavContext";
 
 interface MobileListingProps {
   movies: MovieProps[];
@@ -34,10 +35,16 @@ export default function MobileListing({
   onMovieClicked,
   onStatusFilter,
 }: MobileListingProps) {
+  const { isNavOpen, setIsNavOpen } = useNav();
   const [openSortOption, setOpenSortOption] = useState(false);
   const [openStatusOption, setOpenStatusOption] = useState(false);
 
   const handleMovieClicked = (movie: MovieProps) => {
+    if (isNavOpen) {
+      setIsNavOpen(false);
+      return;
+    }
+    //
     if (openSortOption || openStatusOption) {
       setOpenSortOption(false);
       setOpenStatusOption(false);

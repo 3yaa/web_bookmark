@@ -46,14 +46,21 @@ export default function MobileListing({
     onShowClicked(show);
   };
 
+  // const handleOptionClose = () => {
+  //   if (openSortOption || openStatusOption) {
+  //     setOpenSortOption(false);
+  //     setOpenStatusOption(false);
+  //   }
+  // };
+
   return (
     <div className="w-full mx-auto font-inter tracking-tight">
       {/* HEADING */}
-      <div className="sticky top-0 z-10 bg-zinc-900/35 backdrop-blur-xl px-3 py-2 shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md">
+      <div className="sticky top-0 z-10 bg-zinc-900/35 backdrop-blur-xl shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md px-3">
         {/* STATUS FILTER */}
         <div
-          className={`${
-            openStatusOption ? "bg-zinc-800/60 p-2 rounded-md" : "p-2"
+          className={`py-2 pr-3 pl-3 ${
+            openStatusOption ? "bg-zinc-800/60 rounded-md" : ""
           }`}
         >
           <Settings2
@@ -62,9 +69,9 @@ export default function MobileListing({
           />
           {/* STATUS FILTER OPTIONS */}
           {openStatusOption && (
-            <div className="fixed z-10 left-3 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-[145px]">
+            <div className="fixed z-10 left-3 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-[160px]">
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
                 onClick={() => {
                   onStatusFilter("Want to Watch");
                   setOpenStatusOption(false);
@@ -81,7 +88,7 @@ export default function MobileListing({
                 )}
               </div>
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
                 onClick={() => {
                   onStatusFilter("Watching");
                   setOpenStatusOption(false);
@@ -98,7 +105,7 @@ export default function MobileListing({
                 )}
               </div>
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
                 onClick={() => {
                   onStatusFilter("Completed");
                   setOpenStatusOption(false);
@@ -115,7 +122,7 @@ export default function MobileListing({
                 )}
               </div>
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
                 onClick={() => {
                   onStatusFilter("Dropped");
                   setOpenStatusOption(false);
@@ -141,8 +148,8 @@ export default function MobileListing({
         </div>
         {/* SORT */}
         <div
-          className={`${
-            openSortOption ? "bg-zinc-800/60 py-2 px-2 rounded-md" : "py-2 px-2"
+          className={`py-2 pr-3 pl-3 ${
+            openSortOption ? "bg-zinc-800/60 rounded-md" : ""
           }`}
         >
           <SlidersHorizontal
@@ -151,9 +158,9 @@ export default function MobileListing({
           />
           {/* SORT OPTIONS */}
           {openSortOption && (
-            <div className="fixed z-10 right-3 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-[145px]">
+            <div className="fixed z-10 right-3 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-[165px]">
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
                 onClick={() => onSortConfig("title")}
               >
                 <span>Title</span>
@@ -165,7 +172,7 @@ export default function MobileListing({
                   ))}
               </div>
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
                 onClick={() => onSortConfig("score")}
               >
                 <span>Score</span>
@@ -177,7 +184,7 @@ export default function MobileListing({
                   ))}
               </div>
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
                 onClick={() => onSortConfig("studio")}
               >
                 <span>Studio</span>
@@ -189,7 +196,7 @@ export default function MobileListing({
                   ))}
               </div>
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
                 onClick={() => onSortConfig("dateReleased")}
               >
                 <span>Date Released</span>
@@ -201,7 +208,7 @@ export default function MobileListing({
                   ))}
               </div>
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors rounded-b-md"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors rounded-b-md"
                 onClick={() => onSortConfig("dateCompleted")}
               >
                 <span>Date Completed</span>

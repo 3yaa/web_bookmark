@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { ShowProps, SortConfig } from "@/types/show";
 // hooks
@@ -26,9 +26,11 @@ export default function ShowList() {
     "showDetails" | "addShow" | null
   >(null);
   //
-  const filteredShows = statusFilter
+  const filteredShows = useMemo(() => {
+  return statusFilter
     ? shows.filter((show) => show.status === statusFilter)
     : shows;
+}, [shows, statusFilter]);
   const sortedShows = useSortShows(filteredShows, sortConfig);
 
   const handleShowUpdates = useCallback(

@@ -244,12 +244,10 @@ export default function MobileListing({
       )}
       {/* LISTING */}
       {!isProcessingShow &&
-        shows.map((show, index) => (
+        shows.map((show) => (
           <div
             key={show.id}
-            className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
-              index === 0 ? "pt-3" : ""
-            }`}
+            className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20`}
             onClick={() => handleShowClicked(show)}
           >
             <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">

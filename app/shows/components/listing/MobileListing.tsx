@@ -12,7 +12,7 @@ import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { ShowProps, SortConfig } from "@/types/show";
 import { calcCurProgress } from "../../utils/progressCalc";
-import { useState } from "react";
+import React, { useState } from "react";
 import { MediaStatus } from "@/types/media";
 
 interface MobileListingProps {
@@ -35,7 +35,17 @@ export default function MobileListing({
   onStatusFilter,
 }: MobileListingProps) {
   const [openSortOption, setOpenSortOption] = useState(false);
-  const [openStatusOption, setStatusOption] = useState(false);
+  const [openStatusOption, setOpenStatusOption] = useState(false);
+
+  const handleShowClicked = (show: ShowProps) => {
+    if (openSortOption || openStatusOption) {
+      setOpenSortOption(false);
+      setOpenStatusOption(false);
+      return;
+    }
+    onShowClicked(show);
+  };
+
   return (
     <div className="w-full mx-auto font-inter tracking-tight">
       {/* HEADING */}
@@ -47,15 +57,18 @@ export default function MobileListing({
           }`}
         >
           <Settings2
-            onClick={() => setStatusOption(!openStatusOption)}
+            onClick={() => setOpenStatusOption(!openStatusOption)}
             className="text-zinc-400 w-5 h-5 transition-colors"
           />
           {/* STATUS FILTER OPTIONS */}
           {openStatusOption && (
-            <div className="fixed z-10 left-5 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-[145px]">
+            <div className="fixed z-10 left-3 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-[145px]">
               <div
                 className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
-                onClick={() => onStatusFilter("Want to Watch")}
+                onClick={() => {
+                  onStatusFilter("Want to Watch");
+                  setOpenStatusOption(false);
+                }}
               >
                 <span>Want to Watch</span>
                 {curStatusFilter === "Want to Watch" ? (
@@ -69,7 +82,10 @@ export default function MobileListing({
               </div>
               <div
                 className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
-                onClick={() => onStatusFilter("Watching")}
+                onClick={() => {
+                  onStatusFilter("Watching");
+                  setOpenStatusOption(false);
+                }}
               >
                 <span>Watching</span>
                 {curStatusFilter === "Watching" ? (
@@ -83,7 +99,10 @@ export default function MobileListing({
               </div>
               <div
                 className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
-                onClick={() => onStatusFilter("Completed")}
+                onClick={() => {
+                  onStatusFilter("Completed");
+                  setOpenStatusOption(false);
+                }}
               >
                 <span>Completed</span>
                 {curStatusFilter === "Completed" ? (
@@ -97,7 +116,10 @@ export default function MobileListing({
               </div>
               <div
                 className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
-                onClick={() => onStatusFilter("Dropped")}
+                onClick={() => {
+                  onStatusFilter("Dropped");
+                  setOpenStatusOption(false);
+                }}
               >
                 <span>Dropped</span>
                 {curStatusFilter === "Dropped" ? (
@@ -129,7 +151,7 @@ export default function MobileListing({
           />
           {/* SORT OPTIONS */}
           {openSortOption && (
-            <div className="fixed z-10 right-5 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-[145px]">
+            <div className="fixed z-10 right-3 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-[145px]">
               <div
                 className="flex items-center justify-between px-3 py-2 text-zinc-300 text-sm transition-colors border-b-1 border-zinc-800"
                 onClick={() => onSortConfig("title")}
@@ -214,7 +236,7 @@ export default function MobileListing({
           <div
             key={show.id}
             className={`mx-auto flex bg-zinc-900/35 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm rounded-md border-b border-b-zinc-700/20`}
-            onClick={() => onShowClicked(show)}
+            onClick={() => handleShowClicked(show)}
           >
             <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">
               {show.posterUrl ? (

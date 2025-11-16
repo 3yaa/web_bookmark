@@ -56,7 +56,7 @@ export default function MobileListing({
   return (
     <div className="w-full mx-auto font-inter tracking-tight">
       {/* HEADING */}
-      <div className="sticky top-0 z-10 bg-zinc-900/35 backdrop-blur-xl shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md px-3">
+      <div className="sticky top-0 z-10 bg-zinc-900/35 shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md px-3">
         {/* STATUS FILTER */}
         <div
           className={`p-3 ${
@@ -228,7 +228,7 @@ export default function MobileListing({
         </div>
       </div>
       {/* LOADER */}
-      <div className="relative bg-black/20 backdrop-blur-xl">
+      <div className="relative bg-black/20">
         {isProcessingShow && (
           <Loading customStyle="mt-72 h-12 w-12 border-zinc-500/40" text="" />
         )}

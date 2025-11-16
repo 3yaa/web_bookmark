@@ -35,16 +35,11 @@ export default function MobileListing({
   onMovieClicked,
   onStatusFilter,
 }: MobileListingProps) {
-  const { isNavOpen, setIsNavOpen } = useNav();
+  const { isNavOpen } = useNav();
   const [openSortOption, setOpenSortOption] = useState(false);
   const [openStatusOption, setOpenStatusOption] = useState(false);
 
   const handleMovieClicked = (movie: MovieProps) => {
-    if (isNavOpen) {
-      setIsNavOpen(false);
-      return;
-    }
-    //
     if (openSortOption || openStatusOption) {
       setOpenSortOption(false);
       setOpenStatusOption(false);
@@ -246,7 +241,9 @@ export default function MobileListing({
         movies.map((movie) => (
           <div
             key={movie.id}
-            className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20`}
+            className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
+              isNavOpen ? "pointer-events-none" : ""
+            }`}
             onClick={() => handleMovieClicked(movie)}
           >
             <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">

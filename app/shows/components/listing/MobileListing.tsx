@@ -36,16 +36,11 @@ export default function MobileListing({
   onShowClicked,
   onStatusFilter,
 }: MobileListingProps) {
-  const { isNavOpen, setIsNavOpen } = useNav();
+  const { isNavOpen } = useNav();
   const [openSortOption, setOpenSortOption] = useState(false);
   const [openStatusOption, setOpenStatusOption] = useState(false);
 
   const handleShowClicked = (show: ShowProps) => {
-    if (isNavOpen) {
-      setIsNavOpen(false);
-      return;
-    }
-    //
     if (openSortOption || openStatusOption) {
       setOpenSortOption(false);
       setOpenStatusOption(false);
@@ -247,7 +242,9 @@ export default function MobileListing({
         shows.map((show) => (
           <div
             key={show.id}
-            className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20`}
+            className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
+              isNavOpen ? "pointer-events-none" : ""
+            }`}
             onClick={() => handleShowClicked(show)}
           >
             <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">

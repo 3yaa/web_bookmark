@@ -1,3 +1,0 @@
-1. clean up -> normal needs to add series title
-2. multiple user login
-3. keyboard shortcut fixes

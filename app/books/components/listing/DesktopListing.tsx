@@ -3,22 +3,22 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 // utils and ui components
 import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
-import { MovieProps, SortConfig } from "@/types/movie";
+import { BookProps, SortConfig } from "@/types/book";
 
 interface DesktopListingProps {
-  movies: MovieProps[];
-  isProcessingMovie: boolean;
+  books: BookProps[];
+  isProcessingBook: boolean;
   sortConfig: SortConfig | null;
   onSortConfig: (sortType: SortConfig["type"]) => void;
-  onMovieClicked: (movie: MovieProps) => void;
+  onBookClicked: (book: BookProps) => void;
 }
 
 export default function DesktopListing({
-  movies,
-  isProcessingMovie,
+  books,
+  isProcessingBook,
   sortConfig,
   onSortConfig,
-  onMovieClicked,
+  onBookClicked,
 }: DesktopListingProps) {
   return (
     <div className="w-full md:w-[70%] lg:w-[60%] mx-auto">
@@ -77,38 +77,38 @@ export default function DesktopListing({
               <ChevronUp className="w-4 h-4" />
             ))}
         </div>
-        {/* DIRECTOR */}
+        {/* AUTHOR */}
         <div
           className="flex justify-center items-center gap-1 hover:cursor-pointer"
-          onClick={() => onSortConfig("director")}
+          onClick={() => onSortConfig("author")}
         >
           <span
             className={`text-center font-semibold text-zinc-300 text-sm ${
-              sortConfig?.type === "director" ? "ml-4" : ""
+              sortConfig?.type === "author" ? "ml-4" : ""
             }`}
           >
-            Director
+            Author
           </span>
-          {sortConfig?.type === "director" &&
+          {sortConfig?.type === "author" &&
             (sortConfig?.order === "desc" ? (
               <ChevronDown className="w-4 h-4" />
             ) : (
               <ChevronUp className="w-4 h-4" />
             ))}
         </div>
-        {/* DATE RELEASED */}
+        {/* DATE PUBLISHED */}
         <div
           className="flex justify-center items-center gap-1 hover:cursor-pointer"
-          onClick={() => onSortConfig("dateReleased")}
+          onClick={() => onSortConfig("datePublished")}
         >
           <span
             className={`text-center font-semibold text-zinc-300 text-sm ${
-              sortConfig?.type === "dateReleased" ? "ml-4" : ""
+              sortConfig?.type === "datePublished" ? "ml-4" : ""
             }`}
           >
-            Released
+            Published
           </span>
-          {sortConfig?.type === "dateReleased" &&
+          {sortConfig?.type === "datePublished" &&
             (sortConfig?.order === "desc" ? (
               <ChevronDown className="w-4 h-4" />
             ) : (
@@ -121,41 +121,42 @@ export default function DesktopListing({
       </div>
       {/* LOADER */}
       <div className="relative bg-black/20 backdrop-blur-lg">
-        {isProcessingMovie && (
+        {isProcessingBook && (
           <Loading customStyle={"mt-72 h-12 w-12 border-gray-400"} text="" />
         )}
       </div>
-      {!isProcessingMovie && movies.length === 0 && (
+      {/* NO BOOKS */}
+      {!isProcessingBook && books.length === 0 && (
         <div className="text-center py-12">
           <p className="text-zinc-400 italic text-lg">
-            No movies yet — add one!
+            No books yet — add one!
           </p>
         </div>
       )}
       {/* LISTING */}
-      {!isProcessingMovie &&
-        movies.map((movie, index) => (
+      {!isProcessingBook &&
+        books.map((book, index) => (
           <div
-            key={movie.id}
+            key={book.id}
             className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
-              movie.status
+              book.status
             )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
               index === 0 ? "pt-1.5 rounded-bl-none" : "rounded-l-none"
-            }
-              ${index === movies.length - 1 && "rounded-bl-md"}  
-                 hover:cursor-pointer`}
-            onClick={() => onMovieClicked(movie)}
+            } 
+              ${index === books.length - 1 && "rounded-bl-md"}  
+                hover:cursor-pointer`}
+            onClick={() => onBookClicked}
           >
             <span className="font-medium text-zinc-300 text-sm">
               {index + 1}
             </span>
             <div className="w-12.5 h-18">
-              {movie.posterUrl !== undefined ? (
+              {book.coverUrl ? (
                 <Image
-                  src={movie.posterUrl}
-                  alt={movie.title || "Untitled"}
-                  width={1280}
-                  height={720}
+                  src={book.coverUrl}
+                  alt={book.title || "Untitled"}
+                  width={248}
+                  height={372}
                   priority
                   className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
                 />
@@ -165,38 +166,38 @@ export default function DesktopListing({
             </div>
             <div className="flex flex-col min-w-0 flex-1">
               <span className="font-semibold text-zinc-400 text-[70%] group-hover:text-emerald-400 flex gap-1">
-                {movie.seriesTitle ? (
+                {book.seriesTitle ? (
                   <>
                     <span className="block max-w-[88%] whitespace-nowrap text-ellipsis overflow-hidden flex-shrink">
-                      {movie.seriesTitle}
+                      {book.seriesTitle}
                     </span>
                     <span>᭡</span>
-                    <span>{movie.placeInSeries}</span>
+                    <span>{book.placeInSeries}</span>
                   </>
                 ) : (
                   ""
                 )}
               </span>
               <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-emerald-400 transition-colors duration-200 truncate max-w-53">
-                {movie.title || "-"}
+                {book.title || "-"}
               </span>
             </div>
             <span className="text-center font-semibold text-zinc-300 text-sm">
-              {movie.score || "-"}
+              {book.score || "-"}
             </span>
             <span className="text-center font-medium text-zinc-300 text-sm truncate">
-              {movie.status === "Completed"
-                ? formatDateShort(movie.dateCompleted) || "?"
+              {book.status === "Completed"
+                ? formatDateShort(book.dateCompleted) || "?"
                 : "-"}
             </span>
             <span className="text-center font-semibold text-zinc-300 text-sm truncate">
-              {movie.director || "-"}
+              {book.author || "-"}
             </span>
             <span className="text-center font-medium text-zinc-300 text-sm truncate pl-0.5">
-              {movie.dateReleased || "-"}
+              {book.datePublished || "-"}
             </span>
             <span className="text-zinc-400 text-sm line-clamp-2 whitespace-normal overflow-hidden pl-0.5 text-center">
-              {movie.note || "No notes"}
+              {book.note || "No notes"}
             </span>
           </div>
         ))}

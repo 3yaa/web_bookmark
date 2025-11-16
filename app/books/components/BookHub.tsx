@@ -15,8 +15,8 @@ import { useBookData } from "@/app/books/hooks/useBookData";
 // components
 import { AddBook } from "./addingBook/AddBook";
 import { BookDetails } from "./BookDetails";
-import { BookMobileListing } from "./listing/BookMobileListing";
-import { BookDesktopListing } from "./listing/BookDesktopListing";
+import { BookMobileListing } from "./listingViews/BookMobileListing";
+import { BookDesktopListing } from "./listingViews/BookDesktopListing";
 
 export default function BookList() {
   const { books, addBook, updateBook, deleteBook, isProcessingBook } =

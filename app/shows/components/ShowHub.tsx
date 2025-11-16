@@ -15,8 +15,8 @@ import { useShowData } from "@/app/shows/hooks/useShowData";
 // components
 import { AddShow } from "./addShow/AddShow";
 import { ShowDetails } from "./ShowDetails";
-import { ShowMobileListing } from "./listing/ShowMobileListing";
-import { ShowDesktopListing } from "./listing/ShowDesktopListing";
+import { ShowMobileListing } from "./listingViews/ShowMobileListing";
+import { ShowDesktopListing } from "./listingViews/ShowDesktopListing";
 
 export default function ShowList() {
   const { shows, addShow, updateShow, deleteShow, isProcessingShow } =
@@ -30,7 +30,7 @@ export default function ShowList() {
   const [activeModal, setActiveModal] = useState<
     "showDetails" | "addShow" | null
   >(null);
-  
+
   // change ground truth
   const [isFilterPending, startTransition] = useTransition();
   const filteredShows = useMemo(() => {

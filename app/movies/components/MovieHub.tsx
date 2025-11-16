@@ -15,8 +15,8 @@ import { useMovieData } from "@/app/movies/hooks/useMovieData";
 // components
 import { AddMovie } from "./addMovie/AddMovie";
 import { MovieDetails } from "./MovieDetails";
-import { MovieMobileListing } from "./listing/MovieMobileListing";
-import { MovieDesktopListing } from "./listing/MovieDesktopListing";
+import { MovieMobileListing } from "./listingViews/MovieMobileListing";
+import { MovieDesktopListing } from "./listingViews/MovieDesktopListing";
 
 export default function MoviesHub() {
   const { movies, addMovie, updateMovie, deleteMovie, isProcessingMovie } =

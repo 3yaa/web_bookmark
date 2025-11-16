@@ -59,12 +59,15 @@ export default function MobileListing({
       <div className="sticky top-0 z-10 bg-zinc-900/35 backdrop-blur-xl shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md px-3">
         {/* STATUS FILTER */}
         <div
-          className={`py-2 pr-3 pl-3 ${
+          className={`p-3 ${
             openStatusOption ? "bg-zinc-800/60 rounded-md" : ""
           }`}
         >
           <Settings2
-            onClick={() => setOpenStatusOption(!openStatusOption)}
+            onClick={() => {
+              setOpenStatusOption(!openStatusOption);
+              setOpenSortOption(false);
+            }}
             className="text-zinc-400 w-5 h-5 transition-colors"
           />
           {/* STATUS FILTER OPTIONS */}
@@ -148,12 +151,13 @@ export default function MobileListing({
         </div>
         {/* SORT */}
         <div
-          className={`py-2 pr-3 pl-3 ${
-            openSortOption ? "bg-zinc-800/60 rounded-md" : ""
-          }`}
+          className={`p-3 ${openSortOption ? "bg-zinc-800/60 rounded-md" : ""}`}
         >
           <SlidersHorizontal
-            onClick={() => setOpenSortOption(!openSortOption)}
+            onClick={() => {
+              setOpenSortOption(!openSortOption);
+              setOpenStatusOption(false);
+            }}
             className="text-zinc-400 w-5 h-5 transition-colors"
           />
           {/* SORT OPTIONS */}

@@ -263,7 +263,7 @@ export default function MobileListing({
                 <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
               )}
             </div>
-            <div className="pl-3 pr-5 pt-3 flex flex-col w-full">
+            <div className="pl-3 pr-5 pt-3 flex flex-col w-full min-w-0">
               {/* BACKDROP */}
               {movie.backdropUrl && (
                 <MobileBackdropImage
@@ -304,7 +304,13 @@ export default function MobileListing({
                 />
               </div>
               {/* PREQUEL/SEQUEL */}
-              <div className="grid grid-cols-[1fr_2rem_1fr] mt-1">
+              <div
+                className={`${
+                  movie.placeInSeries
+                    ? "grid grid-cols-[1fr_2rem_1fr] mt-1"
+                    : "mt-3"
+                }`}
+              >
                 <div className="truncate text-left">
                   {movie.prequel && (
                     <div
@@ -354,7 +360,7 @@ export default function MobileListing({
                 </div>
               </div>
               {/* NOTES */}
-              <p className="text-zinc-500 text-sm line-clamp-2 whitespace-normal overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2rem]">
+              <p className="text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2rem] w-full break-words">
                 <span className="line-clamp-2">{movie.note || "No notes"}</span>
               </p>
             </div>

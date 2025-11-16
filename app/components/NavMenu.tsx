@@ -140,7 +140,7 @@ export function NavMenu() {
   return (
     <div
       ref={menuRef}
-      className="hidden lg:flex fixed bottom-8 left-8 z-10 flex-col items-start"
+      className="flex fixed bottom-3 left-3 lg:bottom-8 lg:left-8 z-10 flex-col items-start"
       onClick={() => setIsOpen(!isOpen)}
     >
       {/* Dropdown */}
@@ -243,7 +243,7 @@ export function NavMenu() {
 
       {/* MAIN BUTTON */}
       <button
-        className={`flex items-center justify-center w-14 h-14 rounded-full 
+        className={`flex items-center justify-center w-10 h-10 lg:w-14 lg:h-14 rounded-full 
           border border-zinc-900/50 
           bg-gradient-to-bl from-zinc-transparent to-zinc-800/60 
           hover:bg-graident-to-bl hover:from-zinc-800/60 hover:to-transparent

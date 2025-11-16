@@ -264,7 +264,7 @@ export default function MobileListing({
                 <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
               )}
             </div>
-            <div className="pl-3 pr-5 pt-3 flex flex-col w-full">
+            <div className="pl-3 pr-5 pt-3 flex flex-col w-full min-w-0">
               {/* BACKDROP */}
               {show.backdropUrl && (
                 <MobileBackdropImage
@@ -332,7 +332,7 @@ export default function MobileListing({
                 />
               </div>
               {/* NOTES */}
-              <p className="pt-1 text-zinc-500 text-sm line-clamp-2 whitespace-normal overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2.5rem]">
+              <p className="text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2rem] w-full break-words">
                 <span className="line-clamp-2">{show.note || "No notes"}</span>
               </p>
             </div>

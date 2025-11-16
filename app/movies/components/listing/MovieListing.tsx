@@ -1,5 +1,11 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import { Plus } from "lucide-react";
 import { MovieProps, SortConfig } from "@/types/movie";
 // hooks
@@ -10,20 +16,32 @@ import { AddMovie } from "../addMovie/AddMovie";
 import { MovieDetails } from "../MovieDetails";
 // utils and ui components
 import DesktopListing from "./DesktopListing";
+import MobileListing from "./MobileListing";
+import { MediaStatus } from "@/types/media";
 
 export default function MovieList() {
   //
   const { movies, addMovie, updateMovie, deleteMovie, isProcessingMovie } =
     useMovieData();
+  const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
-  const sortedMovies = useSortMovies(movies, sortConfig);
-
   //
   const [selectedMovie, setSelectedMovie] = useState<MovieProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
     "movieDetails" | "addMovie" | null
   >(null);
+  //
+  const [isFilterPending, startTransition] = useTransition();
+  const filteredMovies = useMemo(() => {
+    if (statusFilter) {
+      return statusFilter
+        ? movies.filter((movie) => movie.status === statusFilter)
+        : movies;
+    }
+    return movies;
+  }, [movies, statusFilter]);
+  const sortedMovies = useSortMovies(filteredMovies, sortConfig);
 
   const showSequelPrequel = useCallback(
     (targetTitle: string) => {
@@ -76,6 +94,16 @@ export default function MovieList() {
     });
   };
 
+  const handleStatusFilterConfig = (status: MediaStatus) => {
+    startTransition(() => {
+      if (statusFilter === status) {
+        setStatusFilter(null);
+      } else {
+        setStatusFilter(status);
+      }
+    });
+  };
+
   const handleModalClose = useCallback(() => {
     setActiveModal(null);
     setTitleToUse("");
@@ -121,17 +149,17 @@ export default function MovieList() {
           onMovieClicked={handleMovieClicked}
         />
       </div>
-      {/* <div className="block lg:hidden">
+      <div className="block lg:hidden">
         <MobileListing
-          shows={sortedShows}
-          isProcessingShow={isProcessingShow || isFilterPending}
+          movies={sortedMovies}
+          isProcessingMovie={isProcessingMovie || isFilterPending}
           sortConfig={sortConfig}
           curStatusFilter={statusFilter}
-          onShowClicked={handleShowClicked}
+          onMovieClicked={handleMovieClicked}
           onSortConfig={handleSortConfig}
           onStatusFilter={handleStatusFilterConfig}
         />
-      </div> */}
+      </div>
       {/* ADD BUTTON */}
       <div className="fixed bottom-10 right-12 z-10">
         <button

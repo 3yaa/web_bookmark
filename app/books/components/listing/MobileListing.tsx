@@ -259,7 +259,7 @@ export default function MobileListing({
                 <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
               )}
             </div>
-            <div className="pl-3 pr-5 pt-3 flex flex-col w-full min-w-0">
+            <div className="px-3 pt-3 flex flex-col w-full min-w-0">
               {/* TITLE/SCORE */}
               <div className="flex justify-between items-start">
                 <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">

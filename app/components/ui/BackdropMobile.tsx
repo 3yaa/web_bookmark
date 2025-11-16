@@ -19,8 +19,8 @@ export const MobileBackdropImage = ({
         alt="Backdrop"
         width={width}
         height={height}
-        className="object-cover opacity-30"
-        style={{ objectPosition: "center -20px" }}
+        className="object-cover opacity-35"
+        style={{ objectPosition: "center -7px" }}
         priority
       />
 

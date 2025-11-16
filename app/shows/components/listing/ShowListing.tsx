@@ -34,9 +34,12 @@ export default function ShowList() {
   //
   const [isFilterPending, startTransition] = useTransition();
   const filteredShows = useMemo(() => {
-    return statusFilter
-      ? shows.filter((show) => show.status === statusFilter)
-      : shows;
+    if (statusFilter) {
+      return statusFilter
+        ? shows.filter((show) => show.status === statusFilter)
+        : shows;
+    }
+    return shows;
   }, [shows, statusFilter]);
   const sortedShows = useSortShows(filteredShows, sortConfig);
 
@@ -113,15 +116,6 @@ export default function ShowList() {
       document.body.style.overflow = "unset";
     };
   }, [activeModal]);
-
-  useEffect(() => {
-    // Force a reflow on mount to establish sticky positioning
-    if (typeof window !== "undefined") {
-      window.scrollTo(0, 0);
-      // Force browser to calculate sticky positioning immediately
-      void document.body.offsetHeight; // Using void to suppress eslint warning
-    }
-  }, []);
 
   return (
     <div className="min-h-screen">

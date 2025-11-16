@@ -31,18 +31,3 @@ input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield; 
 }
-
-@media (max-width: 1024px) {
-  /* Prevent first scroll jank */
-  body {
-    overscroll-behavior-y: none;
-  }
-  
-  /* Force GPU layer for sticky header from start */
-  .sticky {
-    transform: translate3d(0, 0, 0);
-    -webkit-transform: translate3d(0, 0, 0);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-  }
-}

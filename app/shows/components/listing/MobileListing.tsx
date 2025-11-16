@@ -46,11 +46,15 @@ export default function MobileListing({
     onShowClicked(show);
   };
 
+  // const handleOptionClose = () => {
+  //   if (openSortOption || openStatusOption) {
+  //     setOpenSortOption(false);
+  //     setOpenStatusOption(false);
+  //   }
+  // };
+
   return (
-    <div
-      className="w-full mx-auto font-inter tracking-tight"
-      style={{ overscrollBehaviorY: "none" }}
-    >
+    <div className="w-full mx-auto font-inter tracking-tight">
       {/* HEADING */}
       <div className="sticky top-0 z-10 bg-zinc-900/35 backdrop-blur-xl shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md px-3 will-change-transform">
         {/* STATUS FILTER */}
@@ -245,7 +249,7 @@ export default function MobileListing({
             className={`mx-auto flex bg-zinc-900/35 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm rounded-md border-b border-b-zinc-700/20`}
             onClick={() => handleShowClicked(show)}
           >
-            <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40 flex-shrink-0">
+            <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">
               {show.posterUrl ? (
                 <Image
                   src={show.posterUrl}

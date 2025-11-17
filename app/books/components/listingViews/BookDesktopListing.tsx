@@ -145,7 +145,7 @@ export function BookDesktopListing({
             } 
               ${index === books.length - 1 && "rounded-bl-md"}  
                 hover:cursor-pointer`}
-            onClick={() => onBookClicked}
+            onClick={() => onBookClicked(book)}
           >
             <span className="font-medium text-zinc-300 text-sm">
               {index + 1}

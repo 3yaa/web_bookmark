@@ -11,7 +11,7 @@ import {
   resetBookValues,
 } from "@/app/books/utils/bookMapping";
 //
-import { BookDetails } from "../BookDetails";
+import { BookDetails } from "../BookDetailsHub";
 import { ShowMultBooks } from "./ShowMultBooks";
 import { ManualAddBook } from "./ManualAddBook";
 //

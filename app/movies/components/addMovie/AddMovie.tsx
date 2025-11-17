@@ -11,7 +11,7 @@ import {
   mapWikidataToMovie,
 } from "@/app/movies/utils/movieMapping";
 //
-import { MovieDetails } from "../MovieDetails";
+import { MovieDetails } from "../MovieDetailsHub";
 import { ManualAddMovie } from "./ManualAddMovie";
 //
 import { useMovieSearch } from "@/app/movies/hooks/useMovieSearch";
@@ -150,9 +150,9 @@ export function AddMovie({
     async (
       _movieId: number,
       updates?: Partial<MovieProps>,
-      needYear?: boolean
+      needYearField?: boolean
     ) => {
-      if (needYear) {
+      if (needYearField) {
         setActiveModal(null);
         setNeedYear(true);
         setTimeout(() => {

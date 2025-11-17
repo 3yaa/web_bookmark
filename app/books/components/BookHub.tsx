@@ -14,7 +14,7 @@ import { useSortBooks } from "@/app/books/hooks/useSortBooks";
 import { useBookData } from "@/app/books/hooks/useBookData";
 // components
 import { AddBook } from "./addingBook/AddBook";
-import { BookDetails } from "./BookDetails";
+import { BookDetails } from "./BookDetailsHub";
 import { BookMobileListing } from "./listingViews/BookMobileListing";
 import { BookDesktopListing } from "./listingViews/BookDesktopListing";
 

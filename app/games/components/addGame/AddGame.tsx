@@ -10,7 +10,7 @@ import {
   resetGameValues,
 } from "@/app/games/utils/gameMapping";
 //
-import { GameDetails } from "../GameDetails";
+import { GameDetails } from "../GameDetailsHub";
 import { ShowMultGames } from "./ShowMultGames";
 import { ManualAddGame } from "./ManualAddGame";
 //

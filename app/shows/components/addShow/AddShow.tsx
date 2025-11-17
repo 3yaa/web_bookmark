@@ -6,7 +6,7 @@ import { ShowProps } from "@/types/show";
 //
 import { mapTMDBToShow, mapTMDBTVToShow } from "@/app/shows/utils/showMapping";
 //
-import { ShowDetails } from "../ShowDetails";
+import { ShowDetails } from "../ShowDetailsHub";
 import { ManualAddShow } from "./ManualAddShow";
 //
 import { useShowSearch } from "@/app/shows/hooks/useShowSearch";

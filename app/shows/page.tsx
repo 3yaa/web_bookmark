@@ -1,4 +1,4 @@
-import Shows from "./components/listingViews/ShowListing";
+import Shows from "./components/ShowHub";
 
 export default function Page() {
   return <Shows />;

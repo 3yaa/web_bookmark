@@ -1,8 +1,4 @@
-"use client";
-import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-//
-import { GameProps } from "@/types/game";
 import {
   formatDateShort,
   getStatusBorderGradient,
@@ -13,155 +9,62 @@ import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { Loading } from "@/app/components/ui/Loading";
 import { Trash2, Plus, X, ChevronsUp } from "lucide-react";
-import { BackdropImage } from "../../components/ui/Backdrop";
-interface GameDetailsProps {
+import { BackdropImage } from "@/app/components/ui/Backdrop";
+import { GameProps } from "@/types/game";
+import { GameAction } from "../GameDetailsHub";
+
+interface GameDetailsDesktopProps {
   game: GameProps;
-  isOpen: boolean;
+  localNote: string;
   onClose: () => void;
   isLoading?: { isTrue: boolean; style: string; text: string };
-  onUpdate: (
-    gameId: number,
-    updates?: Partial<GameProps>,
-    takeAction?: boolean
-  ) => void;
-  addGame?: () => void;
-  showDlc?: (igdbId: number, dlcIndex: number) => void;
-  //
+  addingGame: boolean;
+  onAddGame: () => void;
+  onAction: (action: GameAction) => void;
   backdropUrls?: string[];
   backdropIndex?: number;
-  updateBackdropIndex?: (newIndex: number) => void;
 }
 
-export function GameDetails({
-  isOpen,
-  onClose,
+export function GameDetailsDesktop({
   game,
-  onUpdate,
-  addGame,
+  onClose,
+  localNote,
   isLoading,
-  showDlc,
+  addingGame,
+  onAddGame,
+  onAction,
   backdropUrls,
   backdropIndex,
-  updateBackdropIndex,
-}: GameDetailsProps) {
-  const [localNote, setLocalNote] = useState(game.note || "");
-
-  const handleStatusChange = (value: string) => {
-    const newStatus = value as "Playing" | "Completed";
-    const statusLoad: Partial<GameProps> = {
-      status: newStatus,
-    };
-    if (newStatus === "Completed") {
-      statusLoad.dateCompleted = new Date();
-    } else if (game.dateCompleted) {
-      statusLoad.dateCompleted = null;
-    }
-    onUpdate(game.id, statusLoad);
-  };
-
-  const openGameDlcs = (dir: string) => {
-    if (!showDlc) return;
-    let targetIgdbId;
-    let dlcIndex;
-    if (game.dlcs) {
-      if (dir === "next" && game.dlcIndex < game.dlcs.length) {
-        dlcIndex = game.dlcIndex + 1;
-        targetIgdbId = game.dlcs[dlcIndex].id;
-      } else {
-        dlcIndex = game.dlcIndex - 1;
-        targetIgdbId = game.dlcs[dlcIndex].id;
-      }
-    }
-    //
-    if (targetIgdbId && dlcIndex !== undefined) {
-      showDlc(targetIgdbId, dlcIndex);
-    }
-  };
-
-  const saveNote = () => {
-    if (localNote !== game.note) {
-      onUpdate(game.id, { note: localNote });
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); // Prevent new line
-      saveNote();
-      e.currentTarget.blur(); // Optional: remove focus
-    }
-  };
-
-  const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setLocalNote(e.target.value);
-  };
-
-  const handleDelete = () => {
-    onClose();
-    const shouldDelete = true;
-    onUpdate(game.id, undefined, shouldDelete);
-  };
-
-  const handleModalClose = () => {
-    if (addGame) return;
-    onClose();
-  };
-
-  const handleAddGame = useCallback(() => {
-    if (!addGame) return;
-    addGame();
-    onClose();
-  }, [addGame, onClose]);
-
-  const handleNeedYear = () => {
-    const needYear = true;
-    onUpdate(game.id, undefined, needYear);
-  };
-
+}: GameDetailsDesktopProps) {
   const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
-    if (!updateBackdropIndex) return;
     //detects which side of the div was clicked
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const elementWidth = rect.width;
     const isRightSide = clickX > elementWidth / 2;
 
-    //
-    if (backdropIndex !== undefined && backdropUrls !== undefined) {
-      let newCoverIndex = backdropIndex;
-      if (isRightSide) {
-        newCoverIndex = (backdropIndex + 1) % backdropUrls.length;
-      } else {
-        newCoverIndex =
-          backdropIndex === 0 ? backdropUrls.length - 1 : backdropIndex - 1;
-      }
-      updateBackdropIndex(newCoverIndex);
+    onAction({
+      type: "changeCover",
+      payload: isRightSide ? "next" : "prev",
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // prevent new line
+      onAction({ type: "saveNote" });
+      e.currentTarget.blur(); // remove focus
     }
   };
 
-  useEffect(() => {
-    const handleLeave = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      } else if (e.key === "Enter") {
-        const activeElement = document.activeElement;
-        const isInTextarea = activeElement?.tagName === "TEXTAREA";
-        const isInInput = activeElement?.tagName === "INPUT";
-        if (!isInTextarea && !isInInput) {
-          handleAddGame();
-        }
-      }
-    };
-    //
-    window.addEventListener("keydown", handleLeave);
-    return () => window.removeEventListener("keydown", handleLeave);
-  }, [onClose, handleAddGame]);
-
-  if (!isOpen || !game) return null;
-
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
-      <div className="fixed inset-0" onClick={handleModalClose} />
+      <div
+        className="fixed inset-0"
+        onClick={() => {
+          onAction({ type: "closeModal" });
+        }}
+      />
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
@@ -175,12 +78,12 @@ export function GameDetails({
           )}
           <div className={`px-8.5 py-7 border-0 rounded-2xl overflow-hidden`}>
             {/* ACTION BUTTONS */}
-            {addGame ? (
+            {addingGame ? (
               <div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
                 {/* ADD */}
                 <button
                   className="py-1.5 px-5 rounded-lg bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer transition-all group"
-                  onClick={handleAddGame}
+                  onClick={onAddGame}
                   title={"Add Book"}
                 >
                   <Plus className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors duration-0" />
@@ -189,7 +92,9 @@ export function GameDetails({
                 <button
                   className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer
                     transition-all group"
-                  onClick={handleNeedYear}
+                  onClick={() => {
+                    onAction({ type: "needYearField" });
+                  }}
                   title={"See More Options"}
                 >
                   <ChevronsUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
@@ -207,7 +112,9 @@ export function GameDetails({
             ) : (
               <button
                 className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/0 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group z-10"
-                onClick={handleDelete}
+                onClick={() => {
+                  onAction({ type: "deleteGame" });
+                }}
                 title={"Delete Game"}
               >
                 <Trash2 className="w-4 h-4 text-gray-400/5 group-hover:text-red-500 transition-colors duration-200" />
@@ -243,7 +150,7 @@ export function GameDetails({
                 {/* BACKDROP */}
                 {(() => {
                   const backdropUrl =
-                    addGame && backdropIndex !== undefined
+                    addingGame && backdropIndex !== undefined
                       ? backdropUrls?.[backdropIndex]
                       : game.backdropUrl;
 
@@ -257,7 +164,7 @@ export function GameDetails({
                     )
                   );
                 })()}
-                {addGame && backdropUrls && backdropUrls?.length > 1 && (
+                {addingGame && backdropUrls && backdropUrls?.length > 1 && (
                   <div
                     className="absolute top-0 -left-8 -right-8 h-40 hover:cursor-pointer z-5"
                     onClick={handleCoverChange}
@@ -324,7 +231,15 @@ export function GameDetails({
                       </label>
                       <Dropdown
                         value={game.status}
-                        onChange={handleStatusChange}
+                        onChange={(value) => {
+                          onAction({
+                            type: "changeStatus",
+                            payload: value as
+                              | "Playing"
+                              | "Completed"
+                              | "Dropped",
+                          });
+                        }}
                         options={gameStatusOptions}
                         customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={
@@ -342,7 +257,10 @@ export function GameDetails({
                       <Dropdown
                         value={game.score?.toString() || "-"}
                         onChange={(value) => {
-                          onUpdate(game.id, { score: Number(value) });
+                          onAction({
+                            type: "changeScore",
+                            payload: Number(value),
+                          });
                         }}
                         options={scoreOptions}
                         customStyle="text-zinc-200/80 font-semibold"
@@ -363,9 +281,16 @@ export function GameDetails({
                     <div className="bg-zinc-800/50 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-21.5 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200">
                       <AutoTextarea
                         value={localNote}
-                        onChange={handleNoteChange}
+                        onChange={(e) => {
+                          onAction({
+                            type: "changeNote",
+                            payload: e.target.value,
+                          });
+                        }}
                         onKeyDown={handleKeyDown}
-                        onBlur={saveNote}
+                        onBlur={() => {
+                          onAction({ type: "saveNote" });
+                        }}
                         placeholder="Add your thoughts about this game..."
                         className="text-gray-300 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500"
                       />
@@ -378,7 +303,9 @@ export function GameDetails({
                     {game.dlcIndex - 1 >= 0 && game.dlcs !== undefined && (
                       <div
                         className={`text-sm text-zinc-400/80 ${
-                          !addGame ? "hover:underline hover:cursor-pointer" : ""
+                          !addingGame
+                            ? "hover:underline hover:cursor-pointer"
+                            : ""
                         }`}
                       >
                         <label className="text-xs font-medium text-zinc-400 block">
@@ -389,7 +316,9 @@ export function GameDetails({
                         </label>
                         <span
                           onClick={() => {
-                            if (!addGame) openGameDlcs("prev");
+                            if (!addingGame) {
+                              onAction({ type: "dlcNav", payload: "prev" });
+                            }
                           }}
                         >
                           {game.dlcs[game.dlcIndex - 1].name}
@@ -409,7 +338,7 @@ export function GameDetails({
                       game.dlcIndex + 1 < game.dlcs?.length && (
                         <div
                           className={`text-sm text-zinc-400/80 ${
-                            !addGame
+                            !addingGame
                               ? "hover:underline hover:cursor-pointer"
                               : ""
                           }`}
@@ -422,7 +351,9 @@ export function GameDetails({
                           </label>
                           <span
                             onClick={() => {
-                              if (!addGame) openGameDlcs("next");
+                              if (!addingGame) {
+                                onAction({ type: "dlcNav", payload: "next" });
+                              }
                             }}
                           >
                             {game.dlcs[game.dlcIndex + 1].name}

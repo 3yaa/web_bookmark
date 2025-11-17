@@ -1,17 +1,13 @@
-"use client";
-import { useCallback, useEffect, useState } from "react";
-import Image from "next/image";
-//
-import { BookProps } from "@/types/book";
-import { formatDate, getStatusBorderGradient } from "@/utils/formattingUtils";
-import {
-  bookStatusOptions,
-  scoreOptions,
-} from "../../../utils/dropDownDetails";
-//
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
+import { BackdropImage } from "@/app/components/ui/Backdrop";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { Loading } from "@/app/components/ui/Loading";
+import { MovieProps } from "@/types/movie";
+import { movieStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
+import {
+  formatDateShort,
+  getStatusBorderGradient,
+} from "@/utils/formattingUtils";
 import {
   Trash2,
   Plus,
@@ -20,157 +16,51 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { BackdropImageBook } from "@/app/components/ui/BackdropBook";
-interface BookDetailsProps {
-  book: BookProps;
-  isOpen: boolean;
+import Image from "next/image";
+import { MovieAction } from "../MovieDetailsHub";
+
+interface MovieDetailsDesktopProps {
+  movie: MovieProps;
+  localNote: string;
   onClose: () => void;
   isLoading?: { isTrue: boolean; style: string; text: string };
-  onUpdate: (
-    bookId: number,
-    updates?: Partial<BookProps>,
-    takeAction?: boolean
-  ) => void;
-  addBook?: () => void;
-  showSequelPrequel?: (sequelTitle: string) => void;
-  showBookInSeries?: (seriesDir: "left" | "right") => void;
-  //
-  coverUrls?: string[];
-  coverIndex?: number;
-  updateCoverIndex?: (newIndex: number) => void;
+  addingMovie?: boolean;
+  onAddMovie: () => void;
+  showAnotherSeries?: (seriesDir: "left" | "right") => void;
+  onAction: (action: MovieAction) => void;
 }
 
-export function BookDetails({
-  isOpen,
+export function MovieDetailsDesktop({
+  movie,
   onClose,
-  book,
-  onUpdate,
-  addBook,
   isLoading,
-  showBookInSeries, //when wiki gives more then 1 option
-  showSequelPrequel,
-  coverUrls,
-  coverIndex,
-  updateCoverIndex,
-}: BookDetailsProps) {
-  const [localNote, setLocalNote] = useState(book.note || "");
-
-  const handleStatusChange = (value: string) => {
-    const newStatus = value as "Completed" | "Want to Read";
-    const statusLoad: Partial<BookProps> = {
-      status: newStatus,
-    };
-    if (newStatus === "Completed") {
-      statusLoad.dateCompleted = new Date();
-    } else if (book.dateCompleted) {
-      statusLoad.dateCompleted = null;
-    }
-    onUpdate(book.id, statusLoad);
-  };
-
-  const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
-    if (!updateCoverIndex) return;
-    //detects which side of the div was clicked
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const elementWidth = rect.width;
-    const isRightSide = clickX > elementWidth / 2;
-
-    //
-    if (coverIndex !== undefined && coverUrls !== undefined) {
-      let newCoverIndex = coverIndex;
-      if (isRightSide) {
-        newCoverIndex = (coverIndex + 1) % coverUrls.length;
-      } else {
-        newCoverIndex =
-          coverIndex === 0 ? coverUrls.length - 1 : coverIndex - 1;
-      }
-      updateCoverIndex(newCoverIndex);
-    }
-  };
-
-  const openSeriesBook = (seriesDir: string) => {
-    if (!showSequelPrequel) return;
-    const targetTitle = seriesDir === "sequel" ? book.sequel : book.prequel;
-    if (targetTitle) {
-      showSequelPrequel(targetTitle);
-    }
-  };
-
-  const saveNote = () => {
-    if (localNote !== book.note) {
-      onUpdate(book.id, { note: localNote });
-    }
-  };
-
+  addingMovie,
+  showAnotherSeries,
+  onAddMovie,
+  localNote,
+  onAction,
+}: MovieDetailsDesktopProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); // Prevent new line
-      saveNote();
-      e.currentTarget.blur(); // Optional: remove focus
+      e.preventDefault(); // prevent new line
+      onAction({ type: "saveNote" });
+      e.currentTarget.blur(); // remove focus
     }
   };
-
-  const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setLocalNote(e.target.value);
-  };
-
-  const handleDelete = () => {
-    onClose();
-    const shouldDelete = true;
-    onUpdate(book.id, undefined, shouldDelete);
-  };
-
-  const handleModalClose = () => {
-    if (addBook) return;
-    onClose();
-  };
-
-  const handleAddBook = useCallback(() => {
-    if (!addBook) return;
-    addBook();
-    onClose();
-  }, [addBook, onClose]);
-
-  const handleMoreBook = () => {
-    const showMoreBooks = true;
-    onUpdate(book.id, undefined, showMoreBooks);
-  };
-
-  // need to reset local note -- since changing book (seuqel/prequel) doesn't remount
-  useEffect(() => {
-    setLocalNote(book.note || "");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [book.id]);
-
-  useEffect(() => {
-    const handleLeave = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      } else if (e.key === "Enter") {
-        const activeElement = document.activeElement;
-        const isInTextarea = activeElement?.tagName === "TEXTAREA";
-        const isInInput = activeElement?.tagName === "INPUT";
-        if (!isInTextarea && !isInInput) {
-          handleAddBook();
-        }
-      }
-    };
-    //
-    window.addEventListener("keydown", handleLeave);
-    return () => window.removeEventListener("keydown", handleLeave);
-  }, [onClose, handleAddBook]);
-
-  if (!isOpen || !book) return null;
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
-      <div className="fixed inset-0" onClick={handleModalClose} />
+      <div
+        className="fixed inset-0"
+        onClick={() => {
+          onAction({ type: "closeModal" });
+        }}
+      />
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
-          book.status
-        )} py-2 px-2 lg:min-w-[43.5%] lg:max-w-[43.5%]`}
+          movie.status
+        )} py-2 px-2 lg:min-w-[45%] lg:max-w-[45%]`}
       >
         {/* ACTUAL DETAIL CARD */}
         <div className="bg-gradient-to-br bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 w-full max-h-[calc(100vh-3rem)]">
@@ -179,15 +69,15 @@ export function BookDetails({
           )}
           <div className={`px-8.5 py-7 border-0 rounded-2xl overflow-hidden`}>
             {/* ACTION BUTTONS */}
-            {addBook ? (
+            {addingMovie ? (
               <div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
-                {showBookInSeries && (
+                {showAnotherSeries && (
                   <div className="flex gap-1 bg-zinc-800/50 rounded-lg">
                     {/* LEFT BUTTON */}
                     <button
                       className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
                     hover:cursor-pointer transition-all group"
-                      onClick={() => showBookInSeries("left")}
+                      onClick={() => showAnotherSeries("left")}
                     >
                       <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
                     </button>
@@ -195,7 +85,7 @@ export function BookDetails({
                     <button
                       className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
                     hover:cursor-pointer transition-all group"
-                      onClick={() => showBookInSeries("right")}
+                      onClick={() => showAnotherSeries("right")}
                     >
                       <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
                     </button>
@@ -204,17 +94,19 @@ export function BookDetails({
                 {/* ADD */}
                 <button
                   className="py-1.5 px-5 rounded-lg bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer transition-all group"
-                  onClick={handleAddBook}
+                  onClick={onAddMovie}
                   title={"Add Book"}
                 >
                   <Plus className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors duration-0" />
                 </button>
-                {/* MORE VIEW */}
+                {/* NEED YEAR */}
                 <button
                   className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer
                     transition-all group"
-                  onClick={handleMoreBook}
-                  title={"See More Options"}
+                  onClick={() => {
+                    onAction({ type: "needYearField" });
+                  }}
+                  title={"Search with year"}
                 >
                   <ChevronsUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
                 </button>
@@ -230,128 +122,125 @@ export function BookDetails({
               </div>
             ) : (
               <button
-                className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/50 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group z-10"
-                onClick={handleDelete}
-                title={"Delete Book"}
+                className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/0 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group z-10"
+                onClick={() => {
+                  onAction({ type: "deleteMovie" });
+                }}
+                title={"Delete Movie"}
               >
-                <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors duration-200" />
+                <Trash2 className="w-4 h-4 text-gray-400/5 group-hover:text-red-500 transition-colors duration-200" />
               </button>
             )}
+
             <div className="flex gap-8">
               {/* LEFT SIDE -- PIC */}
-              <div
-                className={`flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg select-none ${
-                  coverUrls ? "hover:cursor-pointer" : ""
-                }`}
-                onClick={
-                  coverUrls && coverUrls?.length > 1
-                    ? handleCoverChange
-                    : undefined
-                }
-                title={
-                  coverUrls && coverIndex !== undefined
-                    ? `${coverIndex + 1}/${coverUrls?.length}`
-                    : ""
-                }
-              >
-                {coverIndex !== undefined &&
-                coverUrls !== undefined &&
-                coverUrls[coverIndex] ? (
-                  <Image
-                    src={coverUrls[coverIndex]}
-                    alt={book.title || "Untitled"}
-                    width={248}
-                    height={372}
-                    className="min-w-62 min-h-93 object-cover"
-                  />
-                ) : book.coverUrl && book.coverUrl.trim() !== "" ? (
-                  <Image
-                    src={book.coverUrl}
-                    alt={book.title || "Untitled"}
-                    width={248}
-                    height={372}
-                    className="min-w-62 min-h-93 object-cover"
-                  />
+              <div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg select-none">
+                {movie.posterUrl !== undefined ? (
+                  <>
+                    <Image
+                      src={movie.posterUrl}
+                      alt={movie.title || "Untitled"}
+                      width={1280}
+                      height={720}
+                      className="min-w-62 min-h-93 object-fill"
+                    />
+                    <div
+                      className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
+                      style={{
+                        background:
+                          "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0) 50%, rgba(24,24,27,0.5) 100%)",
+                      }}
+                    />
+                  </>
                 ) : (
                   <div className="min-w-62 min-h-93 bg-gradient-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
                 )}
-                <div
-                  className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
-                  style={{
-                    background:
-                      "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0) 50%, rgba(24,24,27,0.2) 100%)",
-                  }}
-                />
               </div>
               {/* RIGHT SIDE -- DETAILS */}
               <div className="flex flex-col flex-1 min-h-93 min-w-62 relative">
-                {book.coverUrl && (
-                  <BackdropImageBook
-                    src={book.coverUrl}
+                {/* BACKDROP */}
+                {movie.backdropUrl && (
+                  <BackdropImage
+                    src={movie.backdropUrl}
                     width={1280}
                     height={720}
                   />
                 )}
-                <div className="flex flex-col justify-center flex-1">
+                <div
+                  className={`flex flex-col ${
+                    movie.seriesTitle
+                      ? "justify-center"
+                      : "justify-center mt-12"
+                  } flex-1`}
+                >
                   {/* SERIES TITLE */}
-                  {book.seriesTitle && (
+                  {movie.seriesTitle && (
                     <span className="font-semibold text-zinc-100/80 text-xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-0">
-                      {book.seriesTitle}
+                      {movie.seriesTitle}
                     </span>
                   )}
                   {/* TITLE */}
                   <div className="w-fit mb-1.5 max-w-full">
                     <div className="font-bold text-zinc-100/90 text-3xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-1.5">
-                      {book.title || "Untitled"}
+                      {movie.title || "Untitled"}
                     </div>
                     <div
                       className={`w-full h-0.5 bg-gradient-to-r ${getStatusBorderGradient(
-                        book.status
+                        movie.status
                       )} to-zinc-800 rounded-full`}
                     ></div>
                   </div>
-                  {/* AUTHOR AND DATES */}
+                  {/* DIRECTOR AND DATES */}
                   <div className="flex justify-start items-center gap-2 w-full mb-3">
-                    <span className="font-medium text-zinc-200/80 text-lg overflow-y-auto max-h-6 leading-6">
-                      {book.author || "Unknown Author"}
+                    <span className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 leading-6">
+                      {movie.director || "Unknown Director"}
                     </span>
                     {/* ◎ ◈ ୭ ✿ ✧ */}
-                    <div className="font-medium text-zinc-200/80 text-lg leading-6">
+                    <div className="font-medium text-zinc-200/70 text-md leading-6">
                       •
                     </div>
                     <span
-                      className="font-medium text-zinc-200/80 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
+                      className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
                       title="Date Published"
                     >
-                      {book.datePublished || "Unknown"}
+                      {movie.dateReleased || "Unknown"}
                     </span>
-                    {book.status === "Completed" && (
+                    {movie.status === "Completed" && (
                       <div className="flex items-center gap-2">
-                        <div className="font-medium text-zinc-200/80 text-lg leading-6">
+                        <div className="font-medium text-zinc-200/70 text-md leading-6">
                           •
                         </div>
                         <span
-                          className="font-medium text-zinc-200/80 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
+                          className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
                           title="Date Completed"
                         >
-                          {formatDate(book.dateCompleted)}
+                          {formatDateShort(movie.dateCompleted)}
                         </span>
                       </div>
                     )}
                   </div>
+                  <div></div>
                   {/* STATUS AND SCORE */}
-                  <div className="flex justify-start gap-4 mb-2.5 max-w-[94%]">
+                  <div className=" flex justify-start gap-4 mb-2.5 max-w-[94%]">
                     <div className="flex-[0.77] lg:min-w-[165px]">
                       <label className="text-sm font-medium text-zinc-400 mb-1 block">
                         Status
                       </label>
                       <Dropdown
-                        value={book.status}
-                        onChange={handleStatusChange}
-                        options={bookStatusOptions}
+                        value={movie.status}
+                        onChange={(value) => {
+                          onAction({
+                            type: "changeStatus",
+                            payload: value as
+                              | "Completed"
+                              | "Want to Watch"
+                              | "Dropped",
+                          });
+                        }}
+                        options={movieStatusOptions}
                         customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={
-                          book.status === "Completed"
+                          movie.status === "Completed"
                             ? ["to-emerald-500/10", "text-emerald-500"]
                             : ["to-blue-500/10", "text-blue-500"]
                         }
@@ -363,14 +252,17 @@ export function BookDetails({
                         Score
                       </label>
                       <Dropdown
-                        value={book.score?.toString() || "-"}
+                        value={movie.score?.toString() || "-"}
                         onChange={(value) => {
-                          onUpdate(book.id, { score: Number(value) });
+                          onAction({
+                            type: "changeScore",
+                            payload: Number(value),
+                          });
                         }}
                         options={scoreOptions}
                         customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={
-                          book.status === "Completed"
+                          movie.status === "Completed"
                             ? ["to-emerald-500/10", "text-emerald-500"]
                             : ["to-blue-500/10", "text-blue-500"]
                         }
@@ -386,22 +278,31 @@ export function BookDetails({
                     <div className="bg-zinc-800/50 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-21.5 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200">
                       <AutoTextarea
                         value={localNote}
-                        onChange={handleNoteChange}
+                        onChange={(e) => {
+                          onAction({
+                            type: "changeNote",
+                            payload: e.target.value,
+                          });
+                        }}
                         onKeyDown={handleKeyDown}
-                        onBlur={saveNote}
-                        placeholder="Add your thoughts about this book..."
+                        onBlur={() => {
+                          onAction({ type: "saveNote" });
+                        }}
+                        placeholder="Add your thoughts about this movie..."
                         className="text-gray-300 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500"
                       />
                     </div>
                   </div>
                 </div>
                 {/* PREQUEL AND SEQUEL */}
-                <div className="grid grid-cols-[1fr_3rem_1fr] w-full pr-1.5 select-none">
+                <div className="grid grid-cols-[1fr_3rem_1fr] pr-1.5 select-none w-full">
                   <div className="truncate text-left">
-                    {book.prequel && (
+                    {movie.prequel && (
                       <div
                         className={`text-sm text-zinc-400/80 ${
-                          !addBook ? "hover:underline hover:cursor-pointer" : ""
+                          !addingMovie
+                            ? "hover:underline hover:cursor-pointer"
+                            : ""
                         }`}
                       >
                         <label className="text-xs font-medium text-zinc-400 block">
@@ -412,26 +313,33 @@ export function BookDetails({
                         </label>
                         <span
                           onClick={() => {
-                            if (!addBook) openSeriesBook("prequel");
+                            if (!addingMovie) {
+                              onAction({
+                                type: "seriesNav",
+                                payload: "prequel",
+                              });
+                            }
                           }}
                         >
-                          {book.prequel}
+                          {movie.prequel}
                         </span>
                       </div>
                     )}
                   </div>
                   <div className="flex justify-center items-end">
-                    {book.placeInSeries && (
+                    {movie.placeInSeries && (
                       <label className="text-xs font-medium text-zinc-400/85 block">
-                        {book.placeInSeries}
+                        {movie.placeInSeries}
                       </label>
                     )}
                   </div>
                   <div className="truncate text-right">
-                    {book.sequel && (
+                    {movie.sequel && (
                       <div
                         className={`text-sm text-zinc-400/80 ${
-                          !addBook ? "hover:underline hover:cursor-pointer" : ""
+                          !addingMovie
+                            ? "hover:underline hover:cursor-pointer"
+                            : ""
                         }`}
                       >
                         <label className="text-xs font-medium text-zinc-400 block">
@@ -442,10 +350,15 @@ export function BookDetails({
                         </label>
                         <span
                           onClick={() => {
-                            if (!addBook) openSeriesBook("sequel");
+                            if (!addingMovie) {
+                              onAction({
+                                type: "seriesNav",
+                                payload: "sequel",
+                              });
+                            }
                           }}
                         >
-                          {book.sequel}
+                          {movie.sequel}
                         </span>
                       </div>
                     )}

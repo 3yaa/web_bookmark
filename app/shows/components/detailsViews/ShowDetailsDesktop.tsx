@@ -1,8 +1,4 @@
-"use client";
-import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-//
-import { ShowProps } from "@/types/show";
 import {
   formatDateShort,
   getStatusTextColor,
@@ -24,285 +20,60 @@ import {
   ChevronsRight,
   ChevronsLeft,
 } from "lucide-react";
+import { ShowProps } from "@/types/show";
+import { ShowAction } from "../ShowDetailsHub";
 
-interface ShowDetailsProps {
+interface ShowDetailsDesktopProps {
   show: ShowProps;
-  isOpen: boolean;
+  localNote: string;
   onClose: () => void;
   isLoading?: { isTrue: boolean; style: string; text: string };
-  onUpdate: (
-    showId: number,
-    updates?: Partial<ShowProps>,
-    takeAction?: boolean
-  ) => void;
-  addShow?: () => void;
+  addingShow: boolean;
+  onAddShow: () => void;
+  onAction: (action: ShowAction) => void;
+  editingMode: { season: boolean; episode: boolean };
+  inputValues: { season: number | ""; episode: number | "" };
 }
 
-export function ShowDetails({
-  isOpen,
-  onClose,
+export function ShowDetailsDesktop({
   show,
-  onUpdate,
-  addShow,
+  localNote,
+  onClose,
   isLoading,
-}: ShowDetailsProps) {
-  const [localNote, setLocalNote] = useState(show.note || "");
-  const [editingMode, setEditingMode] = useState({
-    season: false,
-    episode: false,
-  });
-  const [inputValues, setInputValues] = useState<{
-    season: number | "";
-    episode: number | "";
-  }>({
-    season: show.curSeasonIndex + 1,
-    episode: show.curEpisode,
-  });
-
-  const handleStatusChange = (value: string) => {
-    const newStatus = value as "Completed" | "Want to Watch";
-    const updatesViaStatus: Partial<ShowProps> = {
-      status: newStatus,
-    };
-    if (newStatus === "Completed") {
-      updatesViaStatus.dateCompleted = new Date();
-      if (show.seasons) {
-        updatesViaStatus.curEpisode =
-          show.seasons[show.seasons.length - 1].episode_count;
-        updatesViaStatus.curSeasonIndex = show.seasons.length - 1;
-      }
-    } else if (show.dateCompleted) {
-      updatesViaStatus.dateCompleted = null;
-    }
-    onUpdate(show.id, updatesViaStatus);
-  };
-
-  const saveNote = () => {
-    if (localNote !== show.note) {
-      onUpdate(show.id, { note: localNote });
-    }
-  };
-
+  addingShow,
+  onAddShow,
+  onAction,
+  editingMode,
+  inputValues,
+}: ShowDetailsDesktopProps) {
   const handleNoteKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); //prevents new line
-      saveNote();
-      e.currentTarget.blur(); //lose focus
+      e.preventDefault();
+      onAction({ type: "saveNote" });
+      e.currentTarget.blur();
     }
-  };
-
-  const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setLocalNote(e.target.value);
-  };
-
-  const handleDelete = () => {
-    onClose();
-    const shouldDelete = true;
-    onUpdate(show.id, undefined, shouldDelete);
-  };
-
-  const handleModalClose = () => {
-    if (addShow) return;
-    onClose();
-  };
-
-  const handleAddShow = useCallback(() => {
-    if (!addShow) return;
-    addShow();
-    onClose();
-  }, [addShow, onClose]);
-
-  const handleNeedYear = () => {
-    const needYear = true;
-    onUpdate(show.id, undefined, needYear);
-  };
-
-  const handleInputClick = (type: "season" | "episode") => {
-    if (editingMode[type]) {
-      setEditingMode({ season: false, episode: false });
-      return;
-    }
-    //
-    setEditingMode({
-      season: type === "season",
-      episode: type === "episode",
-    });
-    //
-    setInputValues({
-      season: show.curSeasonIndex + 1,
-      episode: show.curEpisode,
-    });
   };
 
   const handleInputKeyDown = (key: string, type: "season" | "episode") => {
     if (key === "Enter") {
-      handleInputSubmit(type);
+      onAction({
+        type: type === "season" ? "submitSeasonInput" : "submitEpisodeInput",
+      });
     } else if (key === "Escape") {
-      setEditingMode({ ...editingMode, [type]: false });
-    }
-  };
-
-  const handleInputSubmit = (type: "season" | "episode") => {
-    if (!show.seasons) return;
-
-    if (type === "season") {
-      // empty input
-      let seasonNum =
-        inputValues.season === ""
-          ? show.curSeasonIndex + 1
-          : inputValues.season;
-      // force clamp top
-      seasonNum =
-        seasonNum > show.seasons.length ? show.seasons.length : seasonNum;
-      //
-      if (seasonNum >= 1 && seasonNum <= show.seasons.length) {
-        setEditingMode({ ...editingMode, season: false });
-        onUpdate(show.id, {
-          curSeasonIndex: seasonNum - 1,
-          curEpisode: 1,
-        });
-      } else {
-        setInputValues({ ...inputValues, season: show.curSeasonIndex + 1 });
-        setEditingMode({ ...editingMode, season: false });
-      }
-    } else if (type === "episode") {
-      const maxEpisodes = show.seasons[show.curSeasonIndex].episode_count;
-      // empty input
-      let episodeNum =
-        inputValues.episode === "" ? show.curEpisode : inputValues.episode;
-      // force clamp top
-      episodeNum = episodeNum > maxEpisodes ? maxEpisodes : episodeNum;
-      //
-      if (episodeNum >= 1 && episodeNum <= maxEpisodes) {
-        setEditingMode({ ...editingMode, episode: false });
-        onUpdate(show.id, { curEpisode: episodeNum });
-      } else {
-        setInputValues({ ...inputValues, episode: show.curEpisode });
-        setEditingMode({ ...editingMode, episode: false });
-      }
-    }
-  };
-
-  const handleSeasonInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Allow empty string so user can clear and retype
-    if (value === "") {
-      setInputValues({
-        ...inputValues,
-        season: "",
-      });
-    } else {
-      const numValue = parseInt(value);
-      setInputValues({
-        ...inputValues,
-        season: isNaN(numValue) ? "" : Math.max(1, numValue),
+      onAction({
+        type: type === "season" ? "clickSeasonInput" : "clickEpisodeInput",
       });
     }
   };
-
-  const handleEpisodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "") {
-      setInputValues({
-        ...inputValues,
-        episode: "",
-      });
-    } else {
-      const numValue = parseInt(value);
-      setInputValues({
-        ...inputValues,
-        episode: isNaN(numValue) ? "" : Math.max(1, numValue),
-      });
-    }
-  };
-
-  const handleSeasonChange = (dir: string) => {
-    if (!show.seasons) return;
-    //
-    let { curSeasonIndex: seasonIndex, curEpisode: curEp } = show;
-    const seasons = show.seasons;
-    //
-    const isFirstSeason = seasonIndex === 0;
-    const isLastSeason = seasonIndex === seasons.length - 1;
-    //
-    if (dir === "left") {
-      if (isFirstSeason) return;
-      //
-      seasonIndex -= 1;
-    } else if (dir === "right") {
-      if (isLastSeason) return;
-      //
-      seasonIndex += 1;
-    }
-    curEp = 1;
-    onUpdate(show.id, { curSeasonIndex: seasonIndex, curEpisode: curEp });
-  };
-
-  const handleEpisodeChange = (dir: string) => {
-    if (!show.seasons) return;
-    //
-    let { curSeasonIndex: seasonIndex, curEpisode: curEp } = show;
-    const seasons = show.seasons;
-    //
-    const isFirstEpisode = seasonIndex === 0 && curEp === 1;
-    const isLastEpisode =
-      seasonIndex === seasons.length - 1 &&
-      curEp === seasons[seasonIndex].episode_count;
-    //
-    if (dir === "left") {
-      if (isFirstEpisode) return;
-      // go back season's last ep
-      if (curEp === 1) {
-        seasonIndex -= 1;
-        curEp = seasons[seasonIndex].episode_count;
-      } else {
-        curEp -= 1;
-      }
-    } else if (dir === "right") {
-      if (isLastEpisode) return;
-      // go to next season's first ep
-      if (curEp === seasons[seasonIndex].episode_count) {
-        seasonIndex += 1;
-        curEp = 1;
-      } else {
-        curEp += 1;
-      }
-    }
-
-    onUpdate(show.id, { curSeasonIndex: seasonIndex, curEpisode: curEp });
-  };
-
-  useEffect(() => {
-    const handleLeave = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      } else if (e.key === "Enter") {
-        const activeElement = document.activeElement;
-        const isInTextarea = activeElement?.tagName === "TEXTAREA";
-        const isInInput = activeElement?.tagName === "INPUT";
-        const isInEditingMode = editingMode.season || editingMode.episode;
-        if (!isInTextarea && !isInInput && !isInEditingMode) {
-          handleAddShow();
-        }
-      }
-    };
-    //
-    window.addEventListener("keydown", handleLeave);
-    return () => window.removeEventListener("keydown", handleLeave);
-  }, [onClose, editingMode, handleAddShow]);
-
-  useEffect(() => {
-    setInputValues({
-      season: show.curSeasonIndex + 1,
-      episode: show.curEpisode,
-    });
-  }, [show.curSeasonIndex, show.curEpisode]);
-
-  if (!isOpen || !show) return null;
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
-      <div className="fixed inset-0" onClick={handleModalClose} />
+      <div
+        className="fixed inset-0"
+        onClick={() => {
+          onAction({ type: "closeModal" });
+        }}
+      />
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
@@ -316,12 +87,12 @@ export function ShowDetails({
           )}
           <div className={`px-8.5 py-7 border-0 rounded-2xl overflow-hidden`}>
             {/* ACTION BUTTONS */}
-            {addShow ? (
+            {addingShow ? (
               <div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
                 {/* ADD */}
                 <button
                   className="py-1.5 px-5 rounded-lg bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer transition-all group"
-                  onClick={handleAddShow}
+                  onClick={onAddShow}
                   title={"Add Book"}
                 >
                   <Plus className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors duration-0" />
@@ -330,7 +101,9 @@ export function ShowDetails({
                 <button
                   className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer
                     transition-all group"
-                  onClick={handleNeedYear}
+                  onClick={() => {
+                    onAction({ type: "needYear" });
+                  }}
                   title={"See More Options"}
                 >
                   <ChevronsUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
@@ -348,7 +121,9 @@ export function ShowDetails({
             ) : (
               <button
                 className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/0 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group z-10"
-                onClick={handleDelete}
+                onClick={() => {
+                  onAction({ type: "deleteShow" });
+                }}
                 title={"Delete Show"}
               >
                 <Trash2 className="w-4 h-4 text-gray-400/5 group-hover:text-red-500 transition-colors duration-200" />
@@ -438,7 +213,16 @@ export function ShowDetails({
                       </label>
                       <Dropdown
                         value={show.status}
-                        onChange={handleStatusChange}
+                        onChange={(value) => {
+                          onAction({
+                            type: "changeStatus",
+                            payload: value as
+                              | "Completed"
+                              | "Want to Watch"
+                              | "Dropped"
+                              | "Watching",
+                          });
+                        }}
                         options={showStatusOptions}
                         customStyle="text-zinc-300/75 font-semibold"
                         dropDuration={0.24}
@@ -451,7 +235,10 @@ export function ShowDetails({
                       <Dropdown
                         value={show.score?.toString() || "-"}
                         onChange={(value) => {
-                          onUpdate(show.id, { score: Number(value) });
+                          onAction({
+                            type: "changeScore",
+                            payload: Number(value),
+                          });
                         }}
                         options={scoreOptions}
                         customStyle="text-zinc-300/75 font-semibold"
@@ -470,7 +257,9 @@ export function ShowDetails({
                         <div className="flex items-center justify-between pl-1">
                           <span
                             className="text-[15px] text-zinc-300/70 font-bold hover:cursor-pointer"
-                            onClick={() => handleInputClick("season")}
+                            onClick={() => {
+                              onAction({ type: "clickSeasonInput" });
+                            }}
                           >
                             <span className="text-[14.5px] text-zinc-400/85 font-medium mr-2">
                               Season:
@@ -483,7 +272,12 @@ export function ShowDetails({
                                     ? ""
                                     : inputValues.season
                                 }
-                                onChange={handleSeasonInputChange}
+                                onChange={(e) => {
+                                  onAction({
+                                    type: "changeSeasonInput",
+                                    payload: e.target.value,
+                                  });
+                                }}
                                 //
                                 onKeyDown={(
                                   e: React.KeyboardEvent<HTMLInputElement>
@@ -495,7 +289,7 @@ export function ShowDetails({
                                 }}
                                 // WHEN LOSES FOCUS
                                 onBlur={() => {
-                                  handleInputSubmit("season");
+                                  onAction({ type: "submitSeasonInput" });
                                 }}
                                 //
                                 className="max-w-8 text-center focus:outline-none focus:ring-0 border-0 "
@@ -529,14 +323,24 @@ export function ShowDetails({
                           <div className="flex gap-1.5">
                             <button
                               className="group flex justify-center items-center w-8 h-8 rounded-lg bg-zinc-800/80 border border-zinc-700/25 hover:bg-zinc-700/35 hover:border-zinc-700/40 active:bg-zinc-700/40 active:scale-95 transition-all duration-150 hover:cursor-pointer disabled:hover:bg-zinc-700/50 disabled:border-zinc-600/25 disabled:opacity-40 disabled:cursor-default"
-                              onClick={() => handleSeasonChange("left")}
+                              onClick={() => {
+                                onAction({
+                                  type: "changeSeason",
+                                  payload: "left",
+                                });
+                              }}
                               disabled={show.curSeasonIndex === 0}
                             >
                               <ChevronsLeft className="w-4 h-4 text-zinc-300/80 group-active:text-zinc-200/80 transition-colors" />
                             </button>
                             <button
                               className="group flex justify-center items-center w-8 h-8 rounded-lg bg-zinc-800/80 border border-zinc-700/25 hover:bg-zinc-700/35 hover:border-zinc-700/40 active:bg-zinc-700/40 active:scale-95 transition-all duration-150 hover:cursor-pointer disabled:hover:bg-zinc-700/50 disabled:border-zinc-600/25 disabled:opacity-40 disabled:cursor-default"
-                              onClick={() => handleSeasonChange("right")}
+                              onClick={() => {
+                                onAction({
+                                  type: "changeSeason",
+                                  payload: "right",
+                                });
+                              }}
                               disabled={
                                 show.seasons &&
                                 show.curSeasonIndex === show.seasons.length - 1
@@ -553,7 +357,9 @@ export function ShowDetails({
                         <div className="flex items-center justify-between">
                           <span
                             className="text-[15px] text-zinc-300/70 font-bold hover:cursor-pointer"
-                            onClick={() => handleInputClick("episode")}
+                            onClick={() => {
+                              onAction({ type: "clickEpisodeInput" });
+                            }}
                           >
                             <span className="text-[14.5px] text-zinc-400/85 font-medium mr-2">
                               Episodes:
@@ -566,7 +372,12 @@ export function ShowDetails({
                                     ? ""
                                     : inputValues.episode
                                 }
-                                onChange={handleEpisodeInputChange}
+                                onChange={(e) => {
+                                  onAction({
+                                    type: "changeEpisodeInput",
+                                    payload: e.target.value,
+                                  });
+                                }}
                                 //
                                 onKeyDown={(
                                   e: React.KeyboardEvent<HTMLInputElement>
@@ -578,7 +389,7 @@ export function ShowDetails({
                                 }}
                                 // WHEN LOSES FOCUS
                                 onBlur={() => {
-                                  handleInputSubmit("episode");
+                                  onAction({ type: "submitEpisodeInput" });
                                 }}
                                 //
                                 className="max-w-8 text-center focus:outline-none focus:ring-0 border-0 "
@@ -619,7 +430,12 @@ export function ShowDetails({
                           <div className="flex gap-1.5">
                             <button
                               className="group flex justify-center items-center w-8 h-8 rounded-lg bg-zinc-800/80 border border-zinc-700/25 hover:bg-zinc-700/35 hover:border-zinc-700/40 active:bg-zinc-700/40 active:scale-95 transition-all duration-150 hover:cursor-pointer disabled:hover:bg-zinc-700/50 disabled:border-zinc-600/25 disabled:opacity-40 disabled:cursor-default"
-                              onClick={() => handleEpisodeChange("left")}
+                              onClick={() => {
+                                onAction({
+                                  type: "changeEpisode",
+                                  payload: "left",
+                                });
+                              }}
                               disabled={
                                 show.curSeasonIndex === 0 &&
                                 show.curEpisode === 1
@@ -629,7 +445,12 @@ export function ShowDetails({
                             </button>
                             <button
                               className="group flex justify-center items-center w-8 h-8 rounded-lg bg-zinc-800/80 border border-zinc-700/25 hover:bg-zinc-700/35 hover:border-zinc-700/40 active:bg-zinc-700/40 active:scale-95 transition-all duration-150 hover:cursor-pointer disabled:hover:bg-zinc-700/50 disabled:border-zinc-600/25 disabled:opacity-40 disabled:cursor-default"
-                              onClick={() => handleEpisodeChange("right")}
+                              onClick={() => {
+                                onAction({
+                                  type: "changeEpisode",
+                                  payload: "right",
+                                });
+                              }}
                               disabled={
                                 show.seasons &&
                                 show.curSeasonIndex ===
@@ -654,9 +475,18 @@ export function ShowDetails({
                     <div className="bg-zinc-800/50 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-21.5 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200">
                       <AutoTextarea
                         value={localNote}
-                        onChange={handleNoteChange}
+                        onChange={(e) => {
+                          onAction({
+                            type: "changeNote",
+                            payload: e.target.value,
+                          });
+                        }}
                         onKeyDown={handleNoteKeyDown}
-                        onBlur={saveNote}
+                        onBlur={() => {
+                          onAction({
+                            type: "saveNote",
+                          });
+                        }}
                         placeholder="Add your thoughts about this show..."
                         className="text-gray-300 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500"
                       />

@@ -14,7 +14,7 @@ import { useSortShows } from "@/app/shows/hooks/useSortShow";
 import { useShowData } from "@/app/shows/hooks/useShowData";
 // components
 import { AddShow } from "./addShow/AddShow";
-import { ShowDetails } from "./ShowDetails";
+import { ShowDetails } from "./ShowDetailsHub";
 import { ShowMobileListing } from "./listingViews/ShowMobileListing";
 import { ShowDesktopListing } from "./listingViews/ShowDesktopListing";
 

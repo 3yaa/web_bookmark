@@ -14,7 +14,7 @@ import { useSortMovies } from "@/app/movies/hooks/useSortMovies";
 import { useMovieData } from "@/app/movies/hooks/useMovieData";
 // components
 import { AddMovie } from "./addMovie/AddMovie";
-import { MovieDetails } from "./MovieDetails";
+import { MovieDetails } from "./MovieDetailsHub";
 import { MovieMobileListing } from "./listingViews/MovieMobileListing";
 import { MovieDesktopListing } from "./listingViews/MovieDesktopListing";
 

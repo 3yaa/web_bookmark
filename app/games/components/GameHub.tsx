@@ -14,7 +14,7 @@ import { useSortGames } from "@/app/games/hooks/useSortGames";
 import { useGameData } from "@/app/games/hooks/useGameData";
 // components
 import { AddGame } from "./addGame/AddGame";
-import { GameDetails } from "./GameDetails";
+import { GameDetails } from "./GameDetailsHub";
 import { GameMobileListing } from "./listing/GameMobileListing";
 import { GameDesktopListing } from "./listing/GameDesktopListing";
 

@@ -2,6 +2,7 @@
 import { MovieProps } from "@/types/movie";
 import { useCallback, useEffect, useState } from "react";
 import { MovieDetailsDesktop } from "./detailViews/MovieDetailsDesktop";
+import { MovieDetailsMobile } from "./detailViews/MovieDetailsMobile";
 
 export type MovieAction =
   | { type: "closeModal" }
@@ -163,7 +164,18 @@ export function MovieDetails({
           onAction={handleAction}
         />
       </div>
-      <div className="block lg:hidden"></div>
+      <div className="bg-orange-500 block lg:hidden">
+        <MovieDetailsMobile
+          movie={movie}
+          onClose={onClose}
+          localNote={localNote}
+          isLoading={isLoading}
+          addingMovie={!!addMovie}
+          onAddMovie={handleAddMovie}
+          showAnotherSeries={showAnotherSeries}
+          onAction={handleAction}
+        />
+      </div>
     </>
   );
 }

@@ -88,14 +88,13 @@ export function MovieDetailsMobile({
       >
         <div
           ref={contentRef}
-          className="bg-black rounded-xs overflow-y-auto min-h-[95vh]"
+          className="bg-black rounded-xs overflow-y-auto min-h-[95dvh]"
         >
           <div className="flex justify-between px-3">
             <X />
             <span>Save</span>
           </div>
           <span className="flex justify-center">{movie.title}</span>
-          
         </div>
       </div>
     </div>

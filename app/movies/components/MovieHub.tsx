@@ -107,7 +107,7 @@ export default function MoviesHub() {
 
   const handleMovieClicked = useCallback((movie: MovieProps) => {
     // Scroll listing down to collapse address bar BEFORE modal opens
-    window.scrollBy({ top: 50, behavior: "smooth" });
+    window.scrollBy({ top: 100, behavior: "smooth" });
 
     // Small delay to let scroll happen first
     setTimeout(() => {

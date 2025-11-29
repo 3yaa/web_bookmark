@@ -1,6 +1,6 @@
 import { MovieProps } from "@/types/movie";
 import { MovieAction } from "../MovieDetailsHub";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { X, Trash2, Plus } from "lucide-react";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
@@ -29,10 +29,6 @@ export function MovieMobileDetails({
   isLoading,
 }: MovieMobileDetailsProps) {
   const [posterLoaded, setPosterLoaded] = useState(false);
-
-  useEffect(() => {
-    window.scrollTo(0, 1);
-  }, []);
 
   return (
     <div className="fixed inset-0 z-30 bg-zinc-950 overflow-y-auto flex flex-col animate-fadeIn">

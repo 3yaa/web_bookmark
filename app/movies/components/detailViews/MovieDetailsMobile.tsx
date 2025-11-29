@@ -2,6 +2,9 @@ import { MovieProps } from "@/types/movie";
 import { MovieAction } from "../MovieDetailsHub";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { movieStatusOptions } from "@/utils/dropDownDetails";
+import { getStatusBg } from "@/utils/formattingUtils";
+import { HorizontalScoreWheel } from "@/app/components/ui/WheelSelector";
 
 interface MovieDetailsMobileProps {
   movie: MovieProps;
@@ -24,13 +27,12 @@ export function MovieDetailsMobile({
   localNote,
   onAction,
 }: MovieDetailsMobileProps) {
+  const CLOSE_THRESHOLD = 200;
   const [translateY, setTranslateY] = useState(window.innerHeight);
   const [isDragging, setIsDragging] = useState(false);
   const [startY, setStartY] = useState(0);
   const sheetRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-
-  const CLOSE_THRESHOLD = 500;
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setStartY(e.touches[0].clientY);
@@ -64,6 +66,13 @@ export function MovieDetailsMobile({
     }, 300);
   }, [onClose]);
 
+  const handleCurStatus = (status: string) => {
+    if (status === movie.status) {
+      return getStatusBg(status);
+    }
+    return;
+  };
+
   useEffect(() => {
     // animate on mount
     setTranslateY(0);
@@ -91,10 +100,37 @@ export function MovieDetailsMobile({
           className="bg-black rounded-xs overflow-y-auto min-h-[95dvh]"
         >
           <div className="flex justify-between px-3">
-            <X />
-            <span>Save</span>
+            <X className="bg-white" />
+            <span className="bg-white">Save</span>
           </div>
           <span className="flex justify-center">{movie.title}</span>
+          {/* STATUS */}
+          <span>Status</span>
+          <div className="flex justify-center items-center gap-5">
+            {movieStatusOptions.map((status) => (
+              <div
+                key={status.value}
+                className={`p-1 px-3.5 rounded-md border border-zinc-800 ${handleCurStatus(
+                  status.label
+                )}`}
+                onClick={() => {
+                  onAction({
+                    type: "changeStatus",
+                    payload: `${status.label}`,
+                  });
+                }}
+              >
+                {status.label}
+              </div>
+            ))}
+          </div>
+          {/* SCORE */}
+          <HorizontalScoreWheel
+            value={movie.score ?? 0}
+            onChange={(newScore) =>
+              onAction({ type: "changeScore", payload: newScore })
+            }
+          />
         </div>
       </div>
     </div>

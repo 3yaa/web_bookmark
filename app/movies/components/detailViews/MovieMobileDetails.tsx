@@ -29,16 +29,18 @@ export function MovieDetailsMobileFull({
   isLoading,
 }: MovieDetailsMobileFullProps) {
   useEffect(() => {
-    // Try multiple methods to hide address bar
-    window.scrollTo(0, 1);
-    setTimeout(() => window.scrollTo(0, 1), 100);
+    // LOCK
+    document.body.style.overflow = "hidden";
+    document.body.style.height = "100vh";
 
     return () => {
-      // Reset on unmount if needed
+      // UNLOCK
+      document.body.style.overflow = "";
+      document.body.style.height = "";
     };
   }, []);
   return (
-    <div className="fixed inset-0 z-30 bg-zinc-950 overflow-y-auto flex flex-col animate-fadeIn">
+    <div className="fixed left-0 top-0 w-full h-[100dvh] overflow-y-auto bg-zinc-950 z-30 flex flex-col animate-fadeIn">
       {isLoading?.isTrue && (
         <div className="text-zinc-400 text-sm mt-5">{isLoading.text}</div>
       )}
@@ -91,14 +93,16 @@ export function MovieDetailsMobileFull({
           <div className="mt-4">
             {/* SERIES TITLE */}
             {movie.seriesTitle ? (
-              <div className="text-zinc-400 text-sm font-medium -mt-0.5">
+              <div className="text-zinc-400 text-sm font-medium -mt-2.5">
                 {movie.seriesTitle}
               </div>
             ) : (
-              <div className="min-h-[10px]"></div>
+              <div className="min-h-[6px]"></div>
             )}
             {/* TITLE */}
-            <h1 className="text-zinc-100 text-2xl font-bold">{movie.title}</h1>
+            <h1 className="text-zinc-100 text-2xl font-bold -mt-0.5">
+              {movie.title}
+            </h1>
             {/* DIR AND DATE */}
             <div className="text-zinc-400 text-sm mt-1 flex items-center gap-2">
               <span>{movie.director || "Unknown"}</span>•

@@ -37,49 +37,53 @@ export function MovieMobileDetails({
       )}
       {/* ACTION BAR */}
       {posterLoaded && (
-        <div className="absolute top-0 left-0 right-0 z-20 px-4 py-3 flex items-center justify-between">
-          <button
-            className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md"
-            onClick={onClose}
-          >
-            <X className="w-5 h-5 text-slate-400" />
-          </button>
-
-          <div className="flex items-center gap-2">
-            {addingMovie ? (
-              <button
-                className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md "
-                onClick={onAddMovie}
-              >
-                <Plus className="w-5 h-5 text-slate-400" />
-              </button>
-            ) : (
-              <button
-                className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md"
-                onClick={() => onAction({ type: "deleteMovie" })}
-              >
-                <Trash2 className="w-5 h-5 text-slate-400" />
-              </button>
-            )}
+        <div className="sticky top-0 z-30">
+          <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
+            <button
+              className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md"
+              onClick={onClose}
+            >
+              <X className="w-5 h-5 text-slate-400" />
+            </button>
+            <div className="flex items-center gap-2">
+              {addingMovie ? (
+                <button
+                  className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md "
+                  onClick={onAddMovie}
+                >
+                  <Plus className="w-5 h-5 text-slate-400" />
+                </button>
+              ) : (
+                <button
+                  className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md"
+                  onClick={() => onAction({ type: "deleteMovie" })}
+                >
+                  <Trash2 className="w-5 h-5 text-slate-400" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
       {/* INFO */}
       <div className="pb-10">
         {/* POSTER */}
-        <div className="w-full rounded-b-lg overflow-hidden border border-zinc-700/30 bg-zinc-900/40">
+        <div className="relative w-full overflow-hidden bg-zinc-900/40">
           {movie.posterUrl ? (
             <Image
               src={movie.posterUrl}
               alt={movie.title || "Poster"}
-              width={600}
+              width={1280}
               height={900}
-              className="object-cover w-full max-h-[66vh]"
+              className="object-cover w-full"
               onLoad={() => setPosterLoaded(true)}
             />
           ) : (
             <div className="h-64 bg-gradient-to-br from-zinc-700 to-zinc-800" />
           )}
+
+          {/* Bottom Fade */}
+          <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
         </div>
 
         <div className="px-4">

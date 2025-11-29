@@ -65,7 +65,7 @@ export function MovieMobileDetails({
         </div>
       )}
       {/* INFO */}
-      <div className="pb-10 overflow-hidden">
+      <div className="pb-10">
         {/* POSTER */}
         <div className="w-full rounded-b-lg overflow-hidden border border-zinc-700/30 bg-zinc-900/40">
           {movie.posterUrl ? (

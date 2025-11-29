@@ -72,7 +72,7 @@ export function MovieDetailsMobileFull({
               alt={movie.title || "Poster"}
               width={600}
               height={900}
-              className="object-cover w-full max-h-[69vh]"
+              className="object-cover w-full max-h-[66vh]"
               onLoad={() => setPosterLoaded(true)}
             />
           ) : (

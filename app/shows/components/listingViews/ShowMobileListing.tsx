@@ -329,7 +329,7 @@ export function ShowMobileListing({
                 />
               </div>
               {/* NOTES */}
-              <p className="text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2rem] w-full break-words">
+              <p className="text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2rem] w-full break-words mt-1.5">
                 <span className="line-clamp-2">{show.note || "No notes"}</span>
               </p>
             </div>

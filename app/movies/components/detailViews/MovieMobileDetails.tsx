@@ -5,8 +5,8 @@ import { X, Trash2, Plus } from "lucide-react";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import Image from "next/image";
-import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
-import { ScoreSelector } from "@/app/components/ui/WheelPicker";
+import { MobilePicker } from "@/app/components/ui/MobilePicker";
+import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
 
 interface MovieMobileDetailsProps {
   movie: MovieProps;
@@ -82,7 +82,7 @@ export function MovieMobileDetails({
             <div className="h-64 bg-gradient-to-br from-zinc-700 to-zinc-800" />
           )}
 
-          {/* Bottom Fade */}
+          {/* BOTTOM FADE */}
           <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
         </div>
 
@@ -94,7 +94,7 @@ export function MovieMobileDetails({
                 {movie.seriesTitle}
               </div>
             ) : (
-              <div className="min-h-[6px]"></div>
+              <div></div>
             )}
             <div className="flex justify-between">
               {/* TITLE */}
@@ -102,11 +102,8 @@ export function MovieMobileDetails({
                 {movie.title}
               </h1>
               {/* SCORE */}
-              {/* <span className="text-zinc-400 font-bold bg-zinc-800/60 p-3 py-1.5 rounded-md shadow-inner shadow-black/40 -mt-1.5 mr-2">
-                {movie.score || "-"}
-              </span> */}
               <div>
-                <ScoreSelector
+                <MobilePicker
                   score={movie.score || 0}
                   onScoreChange={(newScore) =>
                     onAction({
@@ -118,7 +115,7 @@ export function MovieMobileDetails({
               </div>
             </div>
             {/* DIR AND DATE */}
-            <div className="text-zinc-400 text-sm mt-1 flex items-center gap-2">
+            <div className="text-zinc-400 text-sm -mt-1 flex items-center gap-2">
               <span>{movie.director || "Unknown"}</span>•
               <span>{movie.dateReleased || "-"}</span>
               {movie.dateCompleted && (
@@ -129,9 +126,9 @@ export function MovieMobileDetails({
             </div>
           </div>
           {/* STATUS */}
-          <div className="mt-5">
-            <div className="text-zinc-400 text-xs font-medium mb-2">Status</div>
-            <div className="flex justify-center gap-2 pb-1">
+          <div className="mt-3">
+            <label className="text-zinc-400 text-xs font-medium">Status</label>
+            <div className="pt-1 flex justify-center gap-2 pb-1">
               {movieStatusOptions.map((status) => (
                 <button
                   key={status.value}
@@ -154,10 +151,10 @@ export function MovieMobileDetails({
           </div>
 
           {/* NOTE */}
-          <div className="mt-3">
-            <div className="text-zinc-400 text-xs font-medium mb-2">Notes</div>
-            <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition max-h-21.5">
-              <AutoTextarea
+          <div className="mt-2">
+            <label className="text-zinc-400 text-xs font-medium">Notes</label>
+            <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition duration-200 max-h-22 overflow-auto">
+              <MobileAutoTextarea
                 value={localNote}
                 onChange={(e) =>
                   onAction({

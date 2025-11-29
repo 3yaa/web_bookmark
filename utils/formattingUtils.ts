@@ -92,7 +92,7 @@ export const getStatusBg = (status: Partial<MediaStatus>) => {
       return "bg-red-500/40";
     // movie && show
     case "Want to Watch":
-      return "bg-blue-500/60";
+      return "bg-blue-600/60";
     // show
     case "Watching":
       return "bg-indigo-600/50";

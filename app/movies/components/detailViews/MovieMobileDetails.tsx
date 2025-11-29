@@ -30,7 +30,6 @@ export function MovieMobileDetails({
 }: MovieMobileDetailsProps) {
   const [posterLoaded, setPosterLoaded] = useState(false);
 
-
   return (
     <div className="fixed inset-0 z-30 bg-zinc-950 overflow-y-auto flex flex-col animate-fadeIn">
       {isLoading?.isTrue && (

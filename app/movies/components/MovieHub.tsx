@@ -21,17 +21,14 @@ import { MovieDesktopListing } from "./listingViews/MovieDesktopListing";
 export default function MoviesHub() {
   const { movies, addMovie, updateMovie, deleteMovie, isProcessingMovie } =
     useMovieData();
-  // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
-  //delegation
   const [selectedMovie, setSelectedMovie] = useState<MovieProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
     "movieDetails" | "addMovie" | null
   >(null);
 
-  // change ground truth
   const [isFilterPending, startTransition] = useTransition();
   const filteredMovies = useMemo(() => {
     if (statusFilter) {
@@ -46,7 +43,6 @@ export default function MoviesHub() {
   const showSequelPrequel = useCallback(
     (targetTitle: string) => {
       if (targetTitle) {
-        // !NEEDS TO MAKE THIS CALL WITH THE ENTIRE DB
         const targetMovie = movies.find(
           (movie) => movie.title.toLowerCase() === targetTitle.toLowerCase()
         );
@@ -54,7 +50,6 @@ export default function MoviesHub() {
         if (targetMovie) {
           setSelectedMovie(targetMovie);
         } else {
-          // need to call external API
           setTitleToUse(targetTitle);
           setActiveModal("addMovie");
         }
@@ -111,8 +106,14 @@ export default function MoviesHub() {
   }, []);
 
   const handleMovieClicked = useCallback((movie: MovieProps) => {
-    setActiveModal("movieDetails");
-    setSelectedMovie(movie);
+    // Scroll listing down to collapse address bar BEFORE modal opens
+    window.scrollBy({ top: 50, behavior: "smooth" });
+
+    // Small delay to let scroll happen first
+    setTimeout(() => {
+      setActiveModal("movieDetails");
+      setSelectedMovie(movie);
+    }, 100);
   }, []);
 
   useEffect(() => {
@@ -121,7 +122,6 @@ export default function MoviesHub() {
         setActiveModal("addMovie");
       }
     };
-    //
     window.addEventListener("keydown", handleEnter);
     return () => window.removeEventListener("keydown", handleEnter);
   }, [activeModal]);

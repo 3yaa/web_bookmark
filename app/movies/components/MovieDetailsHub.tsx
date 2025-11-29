@@ -148,12 +148,6 @@ export function MovieDetails({
     return () => window.removeEventListener("keydown", handleLeave);
   }, [onClose, handleAddMovie]);
 
-  useEffect(() => {
-    if (isOpen) {
-      window.scrollBy({ top: 150, behavior: "smooth" });
-    }
-  }, [isOpen]);
-
   if (!isOpen || !movie) return null;
 
   return (

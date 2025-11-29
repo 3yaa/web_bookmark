@@ -29,18 +29,13 @@ export function MovieDetailsMobileFull({
   isLoading,
 }: MovieDetailsMobileFullProps) {
   useEffect(() => {
-    // LOCK
     document.body.style.overflow = "hidden";
-    document.body.style.height = "100vh";
-
     return () => {
-      // UNLOCK
-      document.body.style.overflow = "";
-      document.body.style.height = "";
+      document.body.style.overflow = "unset";
     };
   }, []);
   return (
-    <div className="fixed left-0 top-0 w-full h-[100dvh] overflow-y-auto bg-zinc-950 z-30 flex flex-col animate-fadeIn">
+    <div className="fixed inset-0 z-30 bg-zinc-950 overflow-y-auto flex flex-col animate-fadeIn">
       {isLoading?.isTrue && (
         <div className="text-zinc-400 text-sm mt-5">{isLoading.text}</div>
       )}
@@ -71,10 +66,9 @@ export function MovieDetailsMobileFull({
           )}
         </div>
       </div>
-
-      {/* Content */}
+      {/* INFO */}
       <div className="pb-10 overflow-hidden">
-        {/* Poster */}
+        {/* POSTER */}
         <div className="w-full rounded-b-lg overflow-hidden border border-zinc-700/30 bg-zinc-900/40">
           {movie.posterUrl ? (
             <Image
@@ -114,7 +108,7 @@ export function MovieDetailsMobileFull({
               )}
             </div>
           </div>
-          {/* Status Pills */}
+          {/* STATUS */}
           <div className="mt-5">
             <div className="text-zinc-400 text-xs font-medium mb-2">Status</div>
             <div className="flex justify-center gap-2 pb-1">
@@ -139,21 +133,10 @@ export function MovieDetailsMobileFull({
             </div>
           </div>
           {/* Score */}
-          {/* <div className="mt-5">
-            <div className="text-zinc-400 text-xs font-medium mb-2">Score</div>
-            <div className="bg-zinc-900/40 rounded-lg p-3">
-              <HorizontalScoreWheel
-                value={movie.score ?? 0}
-                onChange={(newScore) =>
-                  onAction({
-                    type: "changeScore",
-                    payload: newScore,
-                  })
-                }
-              />
-            </div>
-          </div> */}
-          {/* Notes */}
+          <span className="absolute right-5 bottom-58 text-zinc-400 font-bold bg-zinc-800/60 p-3 py-1.5 rounded-md shadow-inner shadow-black/40 -mt-1.5">
+            {movie.score || "-"}
+          </span>
+          {/* NOTE */}
           <div className="mt-3">
             <div className="text-zinc-400 text-xs font-medium mb-2">Notes</div>
             <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition max-h-21.5">

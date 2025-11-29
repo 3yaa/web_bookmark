@@ -150,7 +150,7 @@ export function MovieDetails({
 
   useEffect(() => {
     if (isOpen) {
-      window.scrollBy({ top: 50, behavior: "smooth" });
+      window.scrollBy({ top: 150, behavior: "smooth" });
     }
   }, [isOpen]);
 

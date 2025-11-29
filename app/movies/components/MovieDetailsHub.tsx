@@ -2,7 +2,7 @@
 import { MovieProps } from "@/types/movie";
 import { useCallback, useEffect, useState } from "react";
 import { MovieDetailsDesktop } from "./detailViews/MovieDesktopDetails";
-import { MovieDetailsMobileFull } from "./detailViews/MovieMobileDetails";
+import { MovieMobileDetails } from "./detailViews/MovieMobileDetails";
 
 export type MovieAction =
   | { type: "closeModal" }
@@ -165,7 +165,7 @@ export function MovieDetails({
         />
       </div>
       <div className="block lg:hidden">
-        <MovieDetailsMobileFull
+        <MovieMobileDetails
           movie={movie}
           onClose={onClose}
           localNote={localNote}

@@ -6,8 +6,9 @@ import { movieStatusOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import Image from "next/image";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
+import { ScoreSelector } from "@/app/components/ui/WheelPicker";
 
-interface MovieDetailsMobileFullProps {
+interface MovieMobileDetailsProps {
   movie: MovieProps;
   localNote: string;
   onClose: () => void;
@@ -18,7 +19,7 @@ interface MovieDetailsMobileFullProps {
   showAnotherSeries?: (dir: "left" | "right") => void;
 }
 
-export function MovieDetailsMobileFull({
+export function MovieMobileDetails({
   movie,
   localNote,
   onClose,
@@ -26,8 +27,13 @@ export function MovieDetailsMobileFull({
   addingMovie,
   onAction,
   isLoading,
-}: MovieDetailsMobileFullProps) {
+}: MovieMobileDetailsProps) {
   const [posterLoaded, setPosterLoaded] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 1);
+  }, []);
+
   return (
     <div className="fixed inset-0 z-30 bg-zinc-950 overflow-y-auto flex flex-col animate-fadeIn">
       {isLoading?.isTrue && (
@@ -96,9 +102,20 @@ export function MovieDetailsMobileFull({
                 {movie.title}
               </h1>
               {/* SCORE */}
-              <span className="text-zinc-400 font-bold bg-zinc-800/60 p-3 py-1.5 rounded-md shadow-inner shadow-black/40 -mt-1.5 mr-2">
+              {/* <span className="text-zinc-400 font-bold bg-zinc-800/60 p-3 py-1.5 rounded-md shadow-inner shadow-black/40 -mt-1.5 mr-2">
                 {movie.score || "-"}
-              </span>
+              </span> */}
+              <div>
+                <ScoreSelector
+                  score={movie.score || 0}
+                  onScoreChange={(newScore) =>
+                    onAction({
+                      type: "changeScore",
+                      payload: newScore,
+                    })
+                  }
+                />
+              </div>
             </div>
             {/* DIR AND DATE */}
             <div className="text-zinc-400 text-sm mt-1 flex items-center gap-2">

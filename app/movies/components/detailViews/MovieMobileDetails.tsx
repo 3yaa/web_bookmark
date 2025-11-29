@@ -1,6 +1,6 @@
 import { MovieProps } from "@/types/movie";
 import { MovieAction } from "../MovieDetailsHub";
-import React from "react";
+import React, { useEffect } from "react";
 import { X, Trash2, Plus } from "lucide-react";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
@@ -28,6 +28,15 @@ export function MovieDetailsMobileFull({
   onAction,
   isLoading,
 }: MovieDetailsMobileFullProps) {
+  useEffect(() => {
+    // Try multiple methods to hide address bar
+    window.scrollTo(0, 1);
+    setTimeout(() => window.scrollTo(0, 1), 100);
+
+    return () => {
+      // Reset on unmount if needed
+    };
+  }, []);
   return (
     <div className="fixed inset-0 z-30 bg-zinc-950 overflow-y-auto flex flex-col animate-fadeIn">
       {isLoading?.isTrue && (

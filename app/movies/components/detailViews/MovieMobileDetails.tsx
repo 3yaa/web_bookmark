@@ -44,24 +44,27 @@ export function MovieDetailsMobileFull({
       )}
       {/* ACTION BAR */}
       <div className="absolute top-0 left-0 right-0 z-20 px-4 py-3 flex items-center justify-between">
-        <button className="backdrop-blur-2xl p-2 rounded-md" onClick={onClose}>
-          <X className="w-5 h-5 text-zinc-300" />
+        <button
+          className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md"
+          onClick={onClose}
+        >
+          <X className="w-5 h-5 text-slate-400" />
         </button>
 
         <div className="flex items-center gap-2">
           {addingMovie ? (
             <button
-              className="backdrop-blur-2xl p-2 rounded-md "
+              className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md "
               onClick={onAddMovie}
             >
-              <Plus className="w-5 h-5 text-zinc-300" />
+              <Plus className="w-5 h-5 text-slate-400" />
             </button>
           ) : (
             <button
-              className="backdrop-blur-2xl p-2 rounded-md"
+              className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md"
               onClick={() => onAction({ type: "deleteMovie" })}
             >
-              <Trash2 className="w-5 h-5 text-zinc-300" />
+              <Trash2 className="w-5 h-5 text-slate-400" />
             </button>
           )}
         </div>
@@ -77,7 +80,7 @@ export function MovieDetailsMobileFull({
               alt={movie.title || "Poster"}
               width={600}
               height={900}
-              className="object-cover w-full "
+              className="object-cover w-full max-h-[65vh]"
             />
           ) : (
             <div className="h-64 bg-gradient-to-br from-zinc-700 to-zinc-800" />
@@ -87,15 +90,15 @@ export function MovieDetailsMobileFull({
         <div className="px-4">
           <div className="mt-4">
             {/* SERIES TITLE */}
-            {movie.seriesTitle && (
-              <div className="text-zinc-400 text-sm font-medium">
+            {movie.seriesTitle ? (
+              <div className="text-zinc-400 text-sm font-medium -mt-0.5">
                 {movie.seriesTitle}
               </div>
+            ) : (
+              <div className="min-h-[10px]"></div>
             )}
             {/* TITLE */}
-            <h1 className="text-zinc-100 text-2xl font-bold -mt-0.5">
-              {movie.title}
-            </h1>
+            <h1 className="text-zinc-100 text-2xl font-bold">{movie.title}</h1>
             {/* DIR AND DATE */}
             <div className="text-zinc-400 text-sm mt-1 flex items-center gap-2">
               <span>{movie.director || "Unknown"}</span>•
@@ -147,9 +150,9 @@ export function MovieDetailsMobileFull({
             </div>
           </div> */}
           {/* Notes */}
-          <div className="mt-5">
+          <div className="mt-3">
             <div className="text-zinc-400 text-xs font-medium mb-2">Notes</div>
-            <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition">
+            <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition max-h-21.5">
               <AutoTextarea
                 value={localNote}
                 onChange={(e) =>

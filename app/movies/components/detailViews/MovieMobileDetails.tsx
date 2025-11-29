@@ -77,7 +77,7 @@ export function MovieDetailsMobileFull({
               alt={movie.title || "Poster"}
               width={600}
               height={900}
-              className="object-cover w-full max-h-[62vh]"
+              className="object-cover w-full "
             />
           ) : (
             <div className="h-64 bg-gradient-to-br from-zinc-700 to-zinc-800" />

@@ -93,10 +93,16 @@ export function MovieDetailsMobileFull({
             ) : (
               <div className="min-h-[6px]"></div>
             )}
-            {/* TITLE */}
-            <h1 className="text-zinc-100 text-2xl font-bold -mt-0.5">
-              {movie.title}
-            </h1>
+            <div className="flex justify-between">
+              {/* TITLE */}
+              <h1 className="text-zinc-100 text-2xl font-bold -mt-0.5">
+                {movie.title}
+              </h1>
+              {/* SCORE */}
+              <span className="text-zinc-400 font-bold bg-zinc-800/60 p-3 py-1.5 rounded-md shadow-inner shadow-black/40 -mt-1.5 mr-2">
+                {movie.score || "-"}
+              </span>
+            </div>
             {/* DIR AND DATE */}
             <div className="text-zinc-400 text-sm mt-1 flex items-center gap-2">
               <span>{movie.director || "Unknown"}</span>•
@@ -132,10 +138,7 @@ export function MovieDetailsMobileFull({
               ))}
             </div>
           </div>
-          {/* Score */}
-          <span className="absolute right-5 bottom-58 text-zinc-400 font-bold bg-zinc-800/60 p-3 py-1.5 rounded-md shadow-inner shadow-black/40 -mt-1.5">
-            {movie.score || "-"}
-          </span>
+
           {/* NOTE */}
           <div className="mt-3">
             <div className="text-zinc-400 text-xs font-medium mb-2">Notes</div>

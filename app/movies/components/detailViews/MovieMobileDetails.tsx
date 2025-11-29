@@ -1,11 +1,10 @@
 import { MovieProps } from "@/types/movie";
 import { MovieAction } from "../MovieDetailsHub";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { X, Trash2, Plus } from "lucide-react";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import Image from "next/image";
-import { HorizontalScoreWheel } from "@/app/components/ui/WheelSelector";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 
 interface MovieDetailsMobileFullProps {
@@ -28,44 +27,41 @@ export function MovieDetailsMobileFull({
   onAction,
   isLoading,
 }: MovieDetailsMobileFullProps) {
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, []);
+  const [posterLoaded, setPosterLoaded] = useState(false);
   return (
     <div className="fixed inset-0 z-30 bg-zinc-950 overflow-y-auto flex flex-col animate-fadeIn">
       {isLoading?.isTrue && (
         <div className="text-zinc-400 text-sm mt-5">{isLoading.text}</div>
       )}
       {/* ACTION BAR */}
-      <div className="absolute top-0 left-0 right-0 z-20 px-4 py-3 flex items-center justify-between">
-        <button
-          className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md"
-          onClick={onClose}
-        >
-          <X className="w-5 h-5 text-slate-400" />
-        </button>
+      {posterLoaded && (
+        <div className="absolute top-0 left-0 right-0 z-20 px-4 py-3 flex items-center justify-between">
+          <button
+            className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md"
+            onClick={onClose}
+          >
+            <X className="w-5 h-5 text-slate-400" />
+          </button>
 
-        <div className="flex items-center gap-2">
-          {addingMovie ? (
-            <button
-              className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md "
-              onClick={onAddMovie}
-            >
-              <Plus className="w-5 h-5 text-slate-400" />
-            </button>
-          ) : (
-            <button
-              className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md"
-              onClick={() => onAction({ type: "deleteMovie" })}
-            >
-              <Trash2 className="w-5 h-5 text-slate-400" />
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {addingMovie ? (
+              <button
+                className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md "
+                onClick={onAddMovie}
+              >
+                <Plus className="w-5 h-5 text-slate-400" />
+              </button>
+            ) : (
+              <button
+                className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md"
+                onClick={() => onAction({ type: "deleteMovie" })}
+              >
+                <Trash2 className="w-5 h-5 text-slate-400" />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
       {/* INFO */}
       <div className="pb-10 overflow-hidden">
         {/* POSTER */}
@@ -77,6 +73,7 @@ export function MovieDetailsMobileFull({
               width={600}
               height={900}
               className="object-cover w-full max-h-[69vh]"
+              onLoad={() => setPosterLoaded(true)}
             />
           ) : (
             <div className="h-64 bg-gradient-to-br from-zinc-700 to-zinc-800" />

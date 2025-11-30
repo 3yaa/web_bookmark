@@ -1,7 +1,7 @@
 import { ShowProps } from "@/types/show";
 import { ShowAction } from "../ShowDetailsHub";
 import React, { useEffect, useState, useRef } from "react";
-import { X, Trash2, Plus, ChevronsUp } from "lucide-react";
+import { Plus, ChevronsUp } from "lucide-react";
 import { showStatusOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import Image from "next/image";
@@ -68,15 +68,6 @@ export function ShowMobileDetails({
     };
   }, []);
 
-  const handleClose = () => {
-    setIsExiting(true);
-    setIsVisible(false);
-    // Wait for animation to complete before actually closing
-    setTimeout(() => {
-      onClose();
-    }, 300);
-  };
-
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isProgressPickerOpen) return;
 
@@ -141,20 +132,19 @@ export function ShowMobileDetails({
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
-    const threshold = 100; // Close if dragged down more than 100px
-    const velocityThreshold = 0.4; // Close if velocity is high enough (lowered for easier closing)
+    const threshold = 120;
+    const velocityThreshold = 0.5;
 
-    // Consider both distance and velocity for a more natural feel
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
-      // Animate out with momentum
       const finalY = Math.max(
         translateY + dragVelocity.current * 200,
         window.innerHeight
       );
       setTranslateY(finalY);
+      setIsExiting(true);
       setTimeout(() => {
-        handleClose();
-      }, 200);
+        onClose();
+      }, 250);
     } else {
       setTranslateY(0);
     }

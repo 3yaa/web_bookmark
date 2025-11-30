@@ -69,14 +69,6 @@ export function MovieMobileDetails({
     };
   }, []);
 
-  const handleClose = () => {
-    setIsExiting(true);
-    setIsVisible(false);
-    setTimeout(() => {
-      onClose();
-    }, 300);
-  };
-
   const handleTouchStart = (e: React.TouchEvent) => {
     const target = e.target as HTMLElement;
     if (
@@ -90,7 +82,7 @@ export function MovieMobileDetails({
     const modal = modalRef.current;
     if (!modal) return;
 
-    if (modal.scrollTop === 0) {
+    if (modal.scrollTop < 3) {
       startY.current = e.touches[0].clientY;
       lastY.current = e.touches[0].clientY;
       lastTime.current = Date.now();
@@ -118,7 +110,7 @@ export function MovieMobileDetails({
     lastY.current = currentY;
     lastTime.current = currentTime;
 
-    if (modal.scrollTop === 0 && deltaY > 0) {
+    if (modal.scrollTop < 3 && deltaY > 0) {
       e.preventDefault();
       const resistance = Math.max(0.3, 1 - deltaY / 800);
       setTranslateY(deltaY * resistance);
@@ -140,9 +132,10 @@ export function MovieMobileDetails({
         window.innerHeight
       );
       setTranslateY(finalY);
+      setIsExiting(true);
       setTimeout(() => {
-        handleClose();
-      }, 200);
+        onClose();
+      }, 250);
     } else {
       setTranslateY(0);
     }
@@ -178,7 +171,7 @@ export function MovieMobileDetails({
       {/* ACTION BAR */}
       {(posterLoaded || addingMovie) && (
         <div className="sticky top-0 z-30">
-          <div className="absolute top-0 right-0 px-4 py-3 flex items-center justify-between">
+          <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               {addingMovie && (
                 <>

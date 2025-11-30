@@ -1,7 +1,14 @@
 import { BookProps } from "@/types/book";
 import { BookAction } from "../BookDetailsHub";
 import React, { useEffect, useState, useRef } from "react";
-import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
+import {
+  X,
+  Trash2,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsUp,
+} from "lucide-react";
 import { bookStatusOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import Image from "next/image";
@@ -107,7 +114,7 @@ export function BookMobileDetails({
     const modal = modalRef.current;
     if (!modal) return;
 
-    if (modal.scrollTop === 0) {
+    if (modal.scrollTop < 3) {
       startY.current = e.touches[0].clientY;
       lastY.current = e.touches[0].clientY;
       lastTime.current = Date.now();
@@ -135,7 +142,7 @@ export function BookMobileDetails({
     lastY.current = currentY;
     lastTime.current = currentTime;
 
-    if (modal.scrollTop === 0 && deltaY > 0) {
+    if (modal.scrollTop < 3 && deltaY > 0) {
       e.preventDefault();
       const resistance = Math.max(0.3, 1 - deltaY / 800);
       setTranslateY(deltaY * resistance);
@@ -157,9 +164,10 @@ export function BookMobileDetails({
         window.innerHeight
       );
       setTranslateY(finalY);
+      setIsExiting(true);
       setTimeout(() => {
-        handleClose();
-      }, 200);
+        onClose();
+      }, 250);
     } else {
       setTranslateY(0);
     }
@@ -196,8 +204,14 @@ export function BookMobileDetails({
       {(posterLoaded || addingBook) && (
         <div className="sticky top-0 z-30">
           <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
+            <button
+              className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+              onClick={handleClose}
+            >
+              <X className="w-5 h-5 text-slate-400" />
+            </button>
             <div className="flex items-center gap-2">
-              {addingBook && (
+              {addingBook ? (
                 <>
                   {/* DIFFERENT SERIES OPTIONS */}
                   {showBookInSeries && (
@@ -234,6 +248,13 @@ export function BookMobileDetails({
                     <Plus className="w-5 h-5 text-slate-400" />
                   </button>
                 </>
+              ) : (
+                <button
+                  className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+                  onClick={() => onAction({ type: "deleteBook" })}
+                >
+                  <Trash2 className="w-5 h-5 text-slate-400" />
+                </button>
               )}
             </div>
           </div>

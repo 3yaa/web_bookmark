@@ -32,6 +32,13 @@ export function MobileProgressPicker({
   const seasonObservers = useRef<IntersectionObserver | null>(null);
   const episodeObservers = useRef<IntersectionObserver | null>(null);
 
+  // Haptic feedback helper
+  const triggerHaptic = () => {
+    if ("vibrate" in navigator) {
+      navigator.vibrate(10); // Light haptic feedback (10ms)
+    }
+  };
+
   // keep local state in sync with incoming props when opener resyncs
   useEffect(() => {
     if (isOpen) {
@@ -93,7 +100,10 @@ export function MobileProgressPicker({
         if (entry.isIntersecting) {
           const el = entry.target as HTMLElement;
           const idx = Number(el.dataset.season);
-          if (!Number.isNaN(idx)) setSelectedSeasonIndex(idx);
+          if (!Number.isNaN(idx) && idx !== selectedSeasonIndex) {
+            triggerHaptic(); // Add haptic feedback
+            setSelectedSeasonIndex(idx);
+          }
         }
       });
     };
@@ -102,7 +112,10 @@ export function MobileProgressPicker({
         if (entry.isIntersecting) {
           const el = entry.target as HTMLElement;
           const ep = Number(el.dataset.episode);
-          if (!Number.isNaN(ep)) setSelectedEpisode(ep);
+          if (!Number.isNaN(ep) && ep !== selectedEpisode) {
+            triggerHaptic(); // Add haptic feedback
+            setSelectedEpisode(ep);
+          }
         }
       });
     };
@@ -134,9 +147,10 @@ export function MobileProgressPicker({
       sObserver.disconnect();
       eObserver.disconnect();
     };
-  }, [isOpen, seasons, maxEpisodes]);
+  }, [isOpen, seasons, maxEpisodes, selectedSeasonIndex, selectedEpisode]);
 
   const handleConfirm = () => {
+    triggerHaptic(); // Haptic feedback on confirmation
     onProgressChange(selectedSeasonIndex, selectedEpisode);
     setIsClosing(true);
     setTimeout(() => {
@@ -291,12 +305,12 @@ export function MobileProgressPicker({
             </div>
 
             {/* Confirm Button */}
-            {/* <button
+            <button
               onClick={handleConfirm}
               className="w-full mt-6 px-6 py-3.5 bg-blue-600 text-white rounded-xl font-semibold active:scale-[0.98] transition"
             >
               Done
-            </button> */}
+            </button>
           </div>
         </div>
       </div>

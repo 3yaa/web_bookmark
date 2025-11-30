@@ -94,7 +94,6 @@ export function MovieMobileDetails({
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return;
-
     const modal = modalRef.current;
     if (!modal) return;
 
@@ -111,7 +110,6 @@ export function MovieMobileDetails({
     lastTime.current = currentTime;
 
     if (modal.scrollTop < 3 && deltaY > 0) {
-      e.preventDefault();
       const resistance = Math.max(0.3, 1 - deltaY / 800);
       setTranslateY(deltaY * resistance);
     } else if (deltaY < 0) {
@@ -123,7 +121,7 @@ export function MovieMobileDetails({
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
-    const threshold = 120;
+    const threshold = 50;
     const velocityThreshold = 0.5;
 
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
@@ -135,7 +133,7 @@ export function MovieMobileDetails({
       setIsExiting(true);
       setTimeout(() => {
         onClose();
-      }, 250);
+      }, 150);
     } else {
       setTranslateY(0);
     }

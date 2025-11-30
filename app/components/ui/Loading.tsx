@@ -11,7 +11,7 @@ export function Loading({
 }: LoadingProps) {
   return (
     <div
-      className={`absolute inset-0 ${customBg} rounded-2xl flex items-center justify-center z-20`}
+      className={`absolute inset-0 lg:rounded-2xl flex items-center justify-center z-20 ${customBg}`}
     >
       <div className="flex flex-col items-center gap-3">
         <div

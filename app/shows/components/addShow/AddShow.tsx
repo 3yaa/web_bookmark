@@ -206,7 +206,7 @@ export function AddShow({
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-10 animate-in fade-in duration-200">
       <div className="fixed inset-0" onClick={onClose} />
-      {!titleFromAbove ? (
+      {!titleFromAbove || needYear ? (
         <div className="bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 shadow-2xl w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
           <h2 className="text-xl font-semibold mb-4 text-zinc-100 flex justify-center items-center gap-2">
             <Tv className="w-5 h-5 text-emerald-400" />

@@ -1,12 +1,20 @@
 import { MovieProps } from "@/types/movie";
 import { MovieAction } from "../MovieDetailsHub";
 import React, { useEffect, useState } from "react";
-import { X, Trash2, Plus } from "lucide-react";
+import {
+  X,
+  Trash2,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsUp,
+} from "lucide-react";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import Image from "next/image";
 import { MobilePicker } from "@/app/components/ui/MobilePicker";
 import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
+import { Loading } from "@/app/components/ui/Loading";
 
 interface MovieMobileDetailsProps {
   movie: MovieProps;
@@ -27,6 +35,7 @@ export function MovieMobileDetails({
   addingMovie,
   onAction,
   isLoading,
+  showAnotherSeries,
 }: MovieMobileDetailsProps) {
   const [posterLoaded, setPosterLoaded] = useState(false);
 
@@ -55,10 +64,10 @@ export function MovieMobileDetails({
   return (
     <div className="fixed inset-0 z-30 bg-zinc-950 overflow-y-auto flex flex-col animate-fadeIn">
       {isLoading?.isTrue && (
-        <div className="text-zinc-400 text-sm mt-5">{isLoading.text}</div>
+        <Loading customStyle={isLoading.style} text={isLoading.text} />
       )}
       {/* ACTION BAR */}
-      {posterLoaded && (
+      {(posterLoaded || addingMovie) && (
         <div className="sticky top-0 z-30">
           <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
             <button
@@ -69,12 +78,44 @@ export function MovieMobileDetails({
             </button>
             <div className="flex items-center gap-2">
               {addingMovie ? (
-                <button
-                  className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md "
-                  onClick={onAddMovie}
-                >
-                  <Plus className="w-5 h-5 text-slate-400" />
-                </button>
+                <>
+                  {/* DIFFERENT SERIES OPTIONS */}
+                  {showAnotherSeries && (
+                    <div className="flex gap-1 bg-zinc-800/60 rounded-lg">
+                      {/* LEFT BUTTON */}
+                      <button
+                        className="bg-zinc-800/50 p-2 rounded-md"
+                        onClick={() => showAnotherSeries("left")}
+                      >
+                        <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+                      </button>
+                      {/* RIGHT BUTTON */}
+                      <button
+                        className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md"
+                        onClick={() => showAnotherSeries("right")}
+                      >
+                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+                      </button>
+                    </div>
+                  )}
+                  {/* NEED YEAR */}
+                  <button
+                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5"
+                    onClick={() => {
+                      onAction({ type: "needYearField" });
+                    }}
+                    title={"Search with year"}
+                  >
+                    <ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
+                  </button>
+                  {/* ADD BUTTON */}
+                  <button
+                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md"
+                    onClick={onAddMovie}
+                  >
+                    <Plus className="w-5 h-5 text-slate-400" />
+                  </button>
+                </>
               ) : (
                 <button
                   className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md"
@@ -171,9 +212,69 @@ export function MovieMobileDetails({
               ))}
             </div>
           </div>
-
+          {/* PREQUEL AND SEQUEL */}
+          {movie.placeInSeries && (
+            <div className="pt-2.5 grid grid-cols-[1fr_2rem_1fr]">
+              {/* PREQUEL */}
+              <div className="min-w-0 text-left">
+                {movie.prequel && (
+                  <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
+                    <span className="flex-shrink-0">←</span>
+                    <span
+                      className={`truncate min-w-0  ${
+                        !addingMovie ? "hover:underline" : ""
+                      }`}
+                      onClick={() => {
+                        if (!addingMovie) {
+                          onAction({
+                            type: "seriesNav",
+                            payload: "prequel",
+                          });
+                        }
+                      }}
+                    >
+                      {movie.prequel}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {/* PLACEMENT */}
+              <div className="flex justify-center items-end flex-shrink-0">
+                {movie.placeInSeries && (
+                  <label className="text-sm font-medium text-zinc-400/85">
+                    {movie.placeInSeries}
+                  </label>
+                )}
+              </div>
+              {/* SEQUEL */}
+              <div
+                className={`min-w-0 text-right flex justify-end ${
+                  !addingMovie ? "hover:underline" : ""
+                }`}
+              >
+                {movie.sequel && (
+                  <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
+                    <span
+                      className="truncate min-w-0"
+                      onClick={() => {
+                        if (!addingMovie) {
+                          onAction({
+                            type: "seriesNav",
+                            payload: "sequel",
+                          });
+                        }
+                      }}
+                    >
+                      {movie.sequel}
+                    </span>
+                    <span className="flex-shrink-0">→</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           {/* NOTE */}
-          <div className="mt-2">
+          <div className="mt-1">
             <label className="text-zinc-400 text-xs font-medium">Notes</label>
             <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition duration-200 max-h-22 overflow-auto">
               <MobileAutoTextarea

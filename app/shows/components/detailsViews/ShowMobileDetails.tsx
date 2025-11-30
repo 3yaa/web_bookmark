@@ -1,7 +1,7 @@
 import { ShowProps } from "@/types/show";
 import { ShowAction } from "../ShowDetailsHub";
 import React, { useEffect, useState, useRef } from "react";
-import { Plus, ChevronsUp } from "lucide-react";
+import { X, Trash2, Plus, ChevronsUp } from "lucide-react";
 import { showStatusOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import Image from "next/image";
@@ -54,7 +54,7 @@ export function ShowMobileDetails({
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = "100%";
 
-    // trigger mount animation
+    // Trigger mount animation
     requestAnimationFrame(() => {
       setIsVisible(true);
     });
@@ -74,7 +74,7 @@ export function ShowMobileDetails({
     // Wait for animation to complete before actually closing
     setTimeout(() => {
       onClose();
-    }, 300); // Match this to your CSS transition duration
+    }, 300);
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -93,8 +93,9 @@ export function ShowMobileDetails({
     const modal = modalRef.current;
     if (!modal) return;
 
-    // Only allow drag from top when scrolled to top
-    if (modal.scrollTop === 0) {
+    // Allow drag from anywhere when scrolled to top
+    if (modal.scrollTop <= 5) {
+      // Small tolerance for scroll position
       startY.current = e.touches[0].clientY;
       lastY.current = e.touches[0].clientY;
       lastTime.current = Date.now();
@@ -124,10 +125,11 @@ export function ShowMobileDetails({
     lastTime.current = currentTime;
 
     // Only allow dragging down when at top of scroll
-    if (modal.scrollTop === 0 && deltaY > 0) {
+    if (modal.scrollTop <= 5 && deltaY > 0) {
+      // Small tolerance
       e.preventDefault();
       // Add rubber band effect - resistance increases as you drag further
-      const resistance = Math.max(0.3, 1 - deltaY / 800);
+      const resistance = Math.max(0.4, 1 - deltaY / 1000); // Slightly less resistance
       setTranslateY(deltaY * resistance);
     } else if (deltaY < 0) {
       // Reset if trying to drag up
@@ -139,8 +141,8 @@ export function ShowMobileDetails({
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
-    const threshold = 120; // Close if dragged down more than 120px
-    const velocityThreshold = 0.5; // Close if velocity is high enough
+    const threshold = 100; // Close if dragged down more than 100px
+    const velocityThreshold = 0.4; // Close if velocity is high enough (lowered for easier closing)
 
     // Consider both distance and velocity for a more natural feel
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
@@ -190,7 +192,7 @@ export function ShowMobileDetails({
       {/* ACTION BAR */}
       {(posterLoaded || addingShow) && (
         <div className="sticky top-0 z-30">
-          <div className="absolute top-0 right-0 px-4 py-3 flex items-center justify-between">
+          <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               {addingShow && (
                 <>

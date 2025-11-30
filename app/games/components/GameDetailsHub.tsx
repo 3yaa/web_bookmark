@@ -1,7 +1,8 @@
 "use client";
 import { GameProps } from "@/types/game";
 import { useCallback, useEffect, useState } from "react";
-import { GameDetailsDesktop } from "./detailViews/GameDetailsDesktop";
+import { GameDetailsDesktop } from "./detailsViews/GameDetailsDesktop";
+import { GameMobileDetails } from "./detailsViews/GameDetailsMobile";
 
 export type GameAction =
   | { type: "closeModal" }
@@ -191,7 +192,17 @@ export function GameDetails({
           backdropIndex={backdropIndex}
         />
       </div>
-      <div className="block lg:hidden"></div>
+      <div className="block lg:hidden">
+        <GameMobileDetails
+          game={game}
+          onClose={onClose}
+          localNote={localNote}
+          isLoading={isLoading}
+          addingGame={!!addGame}
+          onAddGame={handleAddGame}
+          onAction={handleAction}
+        />
+      </div>
     </>
   );
 }

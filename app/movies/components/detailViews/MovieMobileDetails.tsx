@@ -31,12 +31,13 @@ export function MovieMobileDetails({
   const [posterLoaded, setPosterLoaded] = useState(false);
 
   useEffect(() => {
+    // original values
     const originalOverflow = document.body.style.overflow;
     const originalPosition = document.body.style.position;
     const originalTop = document.body.style.top;
     const scrollY = window.scrollY;
 
-    // Lock body in place
+    // lock body in place
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
     document.body.style.top = `-${scrollY}px`;
@@ -172,7 +173,7 @@ export function MovieMobileDetails({
           </div>
 
           {/* NOTE */}
-          <div className="mt-2">
+          <div className="mt-2 mb-10">
             <label className="text-zinc-400 text-xs font-medium">Notes</label>
             <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition duration-200 max-h-22 overflow-auto">
               <MobileAutoTextarea

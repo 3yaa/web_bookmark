@@ -55,8 +55,8 @@ export function MobilePicker({ score, onScoreChange }: MobilePickerProps) {
                   onClick={() => handleSelectScore(Number(option.value))}
                   className={`w-full min-w-50 px-4 py-3 text-left font-medium rounded-lg border transition ${
                     Number(option.value) === score
-                      ? "bg-zinc-950/90 text-zinc-100 border-zinc-900"
-                      : "bg-zinc-900/70 text-zinc-300 border-zinc-900/40 active:bg-zinc-800/60"
+                      ? "bg-zinc-900/85 text-zinc-100 border-zinc-900"
+                      : "bg-zinc-900/60 text-zinc-300 border-zinc-900/40 active:bg-zinc-800/60"
                   }`}
                 >
                   {option.label}

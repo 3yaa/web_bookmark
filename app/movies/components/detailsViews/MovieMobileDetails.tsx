@@ -35,6 +35,13 @@ export function MovieMobileDetails({
   const [isDragging, setIsDragging] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
+
+  const [exitStyle, setExitStyle] = useState<{
+    opacity?: number;
+    scale?: number;
+    translateY?: number;
+  }>({});
+
   const startY = useRef(0);
   const startScrollY = useRef(0);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -42,30 +49,39 @@ export function MovieMobileDetails({
   const lastY = useRef(0);
   const lastTime = useRef(0);
 
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
   useEffect(() => {
-    // original values
     const originalOverflow = document.body.style.overflow;
     const originalPosition = document.body.style.position;
     const originalTop = document.body.style.top;
     const scrollY = window.scrollY;
 
-    // lock body in place
+    // 🔥 iOS-friendly body lock
     document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = "100%";
 
-    // trigger mount animation
-    requestAnimationFrame(() => {
-      setIsVisible(true);
-    });
+    if (!isIOS) {
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+    }
+
+    requestAnimationFrame(() => setIsVisible(true));
 
     return () => {
-      document.body.style.overflow = originalOverflow;
-      document.body.style.position = originalPosition;
-      document.body.style.top = originalTop;
-      document.body.style.width = "";
-      window.scrollTo(0, scrollY);
+      const cleanup = () => {
+        document.body.style.overflow = originalOverflow;
+
+        if (!isIOS) {
+          document.body.style.position = originalPosition;
+          document.body.style.top = originalTop;
+          document.body.style.width = "";
+          window.scrollTo(0, scrollY);
+        }
+      };
+
+      // 🔥 iOS needs delay to prevent address bar flash
+      setTimeout(cleanup, 60);
     };
   }, []);
 
@@ -125,15 +141,16 @@ export function MovieMobileDetails({
     const velocityThreshold = 0.5;
 
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
-      const finalY = Math.max(
-        translateY + dragVelocity.current * 200,
-        window.innerHeight
-      );
-      setTranslateY(finalY);
       setIsExiting(true);
-      onClose();
-      // setTimeout(() => {
-      // }, 0);
+
+      // 🔥 iOS-safe exit
+      if (isIOS) {
+        setExitStyle({ opacity: 0, scale: 0.97 });
+      } else {
+        setExitStyle({ translateY: window.innerHeight });
+      }
+
+      setTimeout(() => onClose(), 180);
     } else {
       setTranslateY(0);
     }
@@ -147,13 +164,15 @@ export function MovieMobileDetails({
       ref={modalRef}
       className={`fixed inset-0 z-30 bg-zinc-950 flex flex-col overflow-y-auto`}
       style={{
-        transform: `translateY(${translateY}px)`,
-        opacity: isVisible ? 1 : 0,
+        transform: isExiting
+          ? isIOS
+            ? `scale(${exitStyle.scale ?? 1})`
+            : `translateY(${exitStyle.translateY ?? 0}px)`
+          : `translateY(${translateY}px)`,
+        opacity: isExiting ? exitStyle.opacity ?? 1 : isVisible ? 1 : 0,
         transition: isDragging
           ? "none"
-          : isExiting
-          ? "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-          : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+          : "transform 0.28s cubic-bezier(0.3,0,0.2,1), opacity 0.25s ease",
       }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -166,43 +185,39 @@ export function MovieMobileDetails({
           isMobile={true}
         />
       )}
-      {/* ACTION BAR */}
+
       {(posterLoaded || addingMovie) && (
         <div className="sticky top-0 z-30">
           <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               {addingMovie && (
                 <>
-                  {/* DIFFERENT SERIES OPTIONS */}
                   {showAnotherSeries && (
                     <div className="flex gap-1 bg-zinc-800/60 rounded-lg p-0.5">
                       <button
-                        className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
+                        className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform"
                         onClick={() => showAnotherSeries("left")}
                       >
-                        <ChevronLeft className="w-5 h-5 text-gray-400 transition-colors" />
+                        <ChevronLeft className="w-5 h-5 text-gray-400" />
                       </button>
                       <button
-                        className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+                        className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform"
                         onClick={() => showAnotherSeries("right")}
                       >
-                        <ChevronRight className="w-5 h-5 text-gray-400 transition-colors" />
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
                       </button>
                     </div>
                   )}
-                  {/* NEED YEAR */}
+
                   <button
-                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
-                    onClick={() => {
-                      onAction({ type: "needYearField" });
-                    }}
-                    title={"Search with year"}
+                    className="bg-zinc-800/50 p-2 rounded-md px-2.5 active:scale-95 transition-transform"
+                    onClick={() => onAction({ type: "needYearField" })}
                   >
-                    <ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
+                    <ChevronsUp className="w-5 h-5 text-slate-400" />
                   </button>
-                  {/* ADD BUTTON */}
+
                   <button
-                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+                    className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform"
                     onClick={onAddMovie}
                   >
                     <Plus className="w-5 h-5 text-slate-400" />
@@ -213,9 +228,9 @@ export function MovieMobileDetails({
           </div>
         </div>
       )}
+
       {/* INFO */}
       <div className="pb-10">
-        {/* POSTER */}
         <div
           className={`relative w-full overflow-hidden bg-zinc-900/40 transition-all duration-300 ${
             isDragging && "rounded-lg"
@@ -234,39 +249,32 @@ export function MovieMobileDetails({
             <div className="h-64 bg-gradient-to-br from-zinc-700 to-zinc-800" />
           )}
 
-          {/* BOTTOM FADE */}
           <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
         </div>
 
         <div className="px-4">
           <div className="mt-4">
-            {/* SERIES TITLE */}
-            {movie.seriesTitle ? (
+            {movie.seriesTitle && (
               <div className="text-zinc-400 text-sm font-medium -mt-2.5">
                 {movie.seriesTitle}
               </div>
-            ) : (
-              <div></div>
             )}
+
             <div className="flex justify-between">
-              {/* TITLE */}
               <h1 className="text-zinc-100 text-2xl font-bold -mt-0.5">
                 {movie.title}
               </h1>
-              {/* SCORE */}
+
               <div data-no-drag>
                 <MobilePicker
                   score={movie.score || 0}
                   onScoreChange={(newScore) =>
-                    onAction({
-                      type: "changeScore",
-                      payload: newScore,
-                    })
+                    onAction({ type: "changeScore", payload: newScore })
                   }
                 />
               </div>
             </div>
-            {/* DIR AND DATE */}
+
             <div className="text-zinc-400 text-sm -mt-1 flex items-center gap-2">
               <span>{movie.director || "Unknown"}</span>•
               <span>{movie.dateReleased || "-"}</span>
@@ -277,20 +285,19 @@ export function MovieMobileDetails({
               )}
             </div>
           </div>
+
           {/* STATUS */}
           <div className="mt-3" data-no-drag>
             <label className="text-zinc-400 text-xs font-medium">Status</label>
+
             <div className="pt-1 flex justify-center gap-2 pb-1">
               {movieStatusOptions.map((status) => (
                 <button
                   key={status.value}
                   onClick={() =>
-                    onAction({
-                      type: "changeStatus",
-                      payload: `${status.label}`,
-                    })
+                    onAction({ type: "changeStatus", payload: status.label })
                   }
-                  className={`flex-1 px-4 py-1.5 text-sm rounded-md border border-zinc-700/30 font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 ${
+                  className={`flex-1 px-4 py-1.5 text-sm rounded-md border border-zinc-700/30 font-semibold transition-all active:scale-95 ${
                     status.label === movie.status
                       ? `${getStatusBg(status.label)} text-zinc-100`
                       : "text-zinc-300 bg-zinc-900/40 hover:bg-zinc-800/60"
@@ -301,56 +308,46 @@ export function MovieMobileDetails({
               ))}
             </div>
           </div>
-          {/* PREQUEL AND SEQUEL */}
+
+          {/* SERIES NAV */}
           {movie.placeInSeries && (
             <div className="pt-2.5 grid grid-cols-[1fr_2rem_1fr]" data-no-drag>
-              {/* PREQUEL */}
               <div className="min-w-0 text-left">
                 {movie.prequel && (
                   <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
                     <span className="flex-shrink-0">←</span>
                     <span
-                      className={`truncate min-w-0 transition-all duration-200 ${
+                      className={`truncate min-w-0 ${
                         !addingMovie ? "hover:underline active:scale-95" : ""
                       }`}
-                      onClick={() => {
-                        if (!addingMovie) {
-                          onAction({
-                            type: "seriesNav",
-                            payload: "prequel",
-                          });
-                        }
-                      }}
+                      onClick={() =>
+                        !addingMovie &&
+                        onAction({ type: "seriesNav", payload: "prequel" })
+                      }
                     >
                       {movie.prequel}
                     </span>
                   </div>
                 )}
               </div>
-              {/* PLACEMENT */}
-              <div className="flex justify-center items-end flex-shrink-0">
-                {movie.placeInSeries && (
-                  <label className="text-sm font-medium text-zinc-400/85">
-                    {movie.placeInSeries}
-                  </label>
-                )}
+
+              <div className="flex justify-center items-end">
+                <label className="text-sm font-medium text-zinc-400/85">
+                  {movie.placeInSeries}
+                </label>
               </div>
-              {/* SEQUEL */}
+
               <div className="min-w-0 text-right flex justify-end">
                 {movie.sequel && (
                   <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
                     <span
-                      className={`truncate min-w-0 transition-all duration-200 ${
+                      className={`truncate min-w-0 ${
                         !addingMovie ? "hover:underline active:scale-95" : ""
                       }`}
-                      onClick={() => {
-                        if (!addingMovie) {
-                          onAction({
-                            type: "seriesNav",
-                            payload: "sequel",
-                          });
-                        }
-                      }}
+                      onClick={() =>
+                        !addingMovie &&
+                        onAction({ type: "seriesNav", payload: "sequel" })
+                      }
                     >
                       {movie.sequel}
                     </span>
@@ -360,17 +357,16 @@ export function MovieMobileDetails({
               </div>
             </div>
           )}
+
           {/* NOTE */}
           <div className="mt-1" data-no-drag>
             <label className="text-zinc-400 text-xs font-medium">Notes</label>
-            <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition-all duration-200 max-h-22 overflow-auto">
+
+            <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 max-h-22 overflow-auto">
               <MobileAutoTextarea
                 value={localNote}
                 onChange={(e) =>
-                  onAction({
-                    type: "changeNote",
-                    payload: e.target.value,
-                  })
+                  onAction({ type: "changeNote", payload: e.target.value })
                 }
                 onBlur={() => onAction({ type: "saveNote" })}
                 placeholder="Add your thoughts about this movie..."

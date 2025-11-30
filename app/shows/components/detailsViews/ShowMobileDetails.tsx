@@ -160,8 +160,8 @@ export function ShowMobileDetails({
           {/* STATUS */}
           <div className="mt-3">
             <label className="text-zinc-400 text-xs font-medium">Status</label>
-            <div className="pt-1 flex justify-center gap-2 pb-1">
-              {showStatusOptions.map((status) => (
+            <div className="pt-1 flex flex-wrap gap-2 pb-1">
+              {showStatusOptions.map((status, index) => (
                 <button
                   key={status.value}
                   onClick={() =>
@@ -170,7 +170,9 @@ export function ShowMobileDetails({
                       payload: `${status.label}`,
                     })
                   }
-                  className={`px-4 py-1.5 text-sm rounded-md border border-zinc-700/30 font-semibold whitespace-nowrap transition ${
+                  className={`${
+                    index === 3 ? "w-full" : "flex-1"
+                  } px-4 py-1.5 text-sm rounded-md border border-zinc-700/30 font-semibold whitespace-nowrap transition ${
                     status.label === show.status
                       ? `${getStatusBg(status.label)} text-zinc-100`
                       : "text-zinc-300 bg-zinc-900/40 hover:bg-zinc-800/60"

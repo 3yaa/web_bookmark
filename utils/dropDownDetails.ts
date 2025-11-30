@@ -52,8 +52,8 @@ export const movieStatusOptions = createStatusOptions([
 export const showStatusOptions = createStatusOptions([
   "Watching",
   "Want to Watch",
-  "Completed",
   "Dropped",
+  "Completed",
 ]);
 
 export const gameStatusOptions = createStatusOptions([

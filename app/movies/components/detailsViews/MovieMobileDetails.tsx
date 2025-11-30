@@ -205,7 +205,7 @@ export function MovieMobileDetails({
                       payload: `${status.label}`,
                     })
                   }
-                  className={`px-4 py-1.5 text-sm rounded-md border border-zinc-700/30 font-semibold whitespace-nowrap transition ${
+                  className={`flex-1 px-4 py-1.5 text-sm rounded-md border border-zinc-700/30 font-semibold whitespace-nowrap transition ${
                     status.label === movie.status
                       ? `${getStatusBg(status.label)} text-zinc-100`
                       : "text-zinc-300 bg-zinc-900/40 hover:bg-zinc-800/60"

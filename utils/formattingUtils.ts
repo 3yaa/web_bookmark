@@ -98,10 +98,10 @@ export const getStatusBg = (status: Partial<MediaStatus>) => {
       return "bg-indigo-600/50";
     // book
     case "Want to Read":
-      return "bg-blue-500/50";
+      return "bg-blue-600/50";
     // game
     case "Playing":
-      return "bg-blue-500/50";
+      return "bg-blue-600/50";
     default:
       return "bg-zinc-600/40";
   }

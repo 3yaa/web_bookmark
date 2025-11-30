@@ -12,7 +12,7 @@ import {
 import { bookStatusOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import Image from "next/image";
-import { MobilePicker } from "@/app/components/ui/MobilePicker";
+import { MobilePicker } from "@/app/components/ui/MobileScorePicker";
 import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
 import { Loading } from "@/app/components/ui/Loading";
 

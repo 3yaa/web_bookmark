@@ -22,7 +22,11 @@ export type ShowAction =
   | { type: "submitSeasonInput" }
   | { type: "submitEpisodeInput" }
   | { type: "changeSeasonInput"; payload: string }
-  | { type: "changeEpisodeInput"; payload: string };
+  | { type: "changeEpisodeInput"; payload: string }
+  | {
+      type: "changeProgress";
+      payload: { seasonIndex: number; episode: number };
+    };
 
 interface ShowDetailsProps {
   show: ShowProps;
@@ -109,7 +113,20 @@ export function ShowDetails({
       case "submitEpisodeInput":
         handleInputSubmit("episode");
         break;
+      case "changeProgress":
+        handleProgressChange(action.payload);
+        break;
     }
+  };
+
+  const handleProgressChange = (payload: {
+    seasonIndex: number;
+    episode: number;
+  }) => {
+    onUpdate(show.id, {
+      curSeasonIndex: payload.seasonIndex,
+      curEpisode: payload.episode,
+    });
   };
 
   const handleStatusChange = (value: string) => {

@@ -5,9 +5,11 @@ import { X, Trash2, Plus, ChevronsUp } from "lucide-react";
 import { showStatusOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import Image from "next/image";
-import { MobilePicker } from "@/app/components/ui/MobilePicker";
+import { MobilePicker } from "@/app/components/ui/MobileScorePicker";
 import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
 import { Loading } from "@/app/components/ui/Loading";
+import { calcCurProgress } from "../../utils/progressCalc";
+import { MobileProgressPicker } from "@/app/components/ui/MobileSeasonEpPicker";
 
 interface ShowMobileDetailsProps {
   show: ShowProps;
@@ -29,6 +31,7 @@ export function ShowMobileDetails({
   isLoading,
 }: ShowMobileDetailsProps) {
   const [posterLoaded, setPosterLoaded] = useState(false);
+  const [isProgressPickerOpen, setIsProgressPickerOpen] = useState(false);
 
   useEffect(() => {
     // original values
@@ -157,8 +160,39 @@ export function ShowMobileDetails({
               )}
             </div>
           </div>
+          {/* PROGRESS BAR */}
+          <div
+            className="mt-2.5 w-full bg-zinc-800/80 rounded-md h-1.5 overflow-hidden"
+            onClick={() => setIsProgressPickerOpen(true)}
+          >
+            <div
+              className={`${getStatusBg(
+                show.status
+              )} h-1.5 transition-all duration-500 ease-out rounded-md`}
+              style={{
+                width: `${
+                  show.seasons?.[show.curSeasonIndex]?.episode_count
+                    ? calcCurProgress(
+                        show.seasons,
+                        show.curSeasonIndex,
+                        show.curEpisode
+                      )
+                    : 0
+                }%`,
+              }}
+            />
+          </div>
+          {/* SEASON / EPISODES */}
+          <div className="mt-1 flex justify-between text-zinc-400 text-sm font-bold mb-0.5">
+            <span onClick={() => setIsProgressPickerOpen(true)}>
+              Season: {show.curSeasonIndex + 1 || "-"}
+            </span>
+            <span onClick={() => setIsProgressPickerOpen(true)}>
+              Episode: {show.curEpisode || "-"}
+            </span>
+          </div>
           {/* STATUS */}
-          <div className="mt-3">
+          <div className="mt-1">
             <label className="text-zinc-400 text-xs font-medium">Status</label>
             <div className="pt-1 flex flex-wrap gap-2 pb-1">
               {showStatusOptions.map((status, index) => (
@@ -202,6 +236,20 @@ export function ShowMobileDetails({
             </div>
           </div>
         </div>
+        <MobileProgressPicker
+          isOpen={isProgressPickerOpen}
+          seasons={show.seasons || []}
+          curSeasonIndex={show.curSeasonIndex}
+          curEpisode={show.curEpisode}
+          onClose={() => setIsProgressPickerOpen(false)}
+          onProgressChange={(seasonIndex, episode) => {
+            onAction({
+              type: "changeProgress",
+              payload: { seasonIndex, episode },
+            });
+            setIsProgressPickerOpen(false);
+          }}
+        />
       </div>
     </div>
   );

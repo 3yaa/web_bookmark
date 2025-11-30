@@ -1,47 +1,41 @@
 import Image from "next/image";
-import { formatDate, getStatusBorderGradient } from "@/utils/formattingUtils";
-import { bookStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
+import {
+  formatDateShort,
+  getStatusBorderGradient,
+} from "@/utils/formattingUtils";
+import { gameStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 //
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { Dropdown } from "@/app/components/ui/Dropdown";
 import { Loading } from "@/app/components/ui/Loading";
-import {
-  Trash2,
-  Plus,
-  X,
-  ChevronsUp,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import { BackdropImageBook } from "@/app/components/ui/BackdropBook";
-import { BookProps } from "@/types/book";
-import { BookAction } from "../BookDetailsHub";
+import { Trash2, Plus, X, ChevronsUp } from "lucide-react";
+import { BackdropImage } from "@/app/components/ui/Backdrop";
+import { GameProps } from "@/types/game";
+import { GameAction } from "../GameDetailsHub";
 
-interface BookDetailsDesktopProps {
-  book: BookProps;
+interface GameDesktopDetailsProps {
+  game: GameProps;
   localNote: string;
   onClose: () => void;
   isLoading?: { isTrue: boolean; style: string; text: string };
-  addingBook: boolean;
-  onAddBook: () => void;
-  onAction: (action: BookAction) => void;
-  showBookInSeries?: (seriesDir: "left" | "right") => void;
-  coverUrls?: string[];
-  coverIndex?: number;
+  addingGame: boolean;
+  onAddGame: () => void;
+  onAction: (action: GameAction) => void;
+  backdropUrls?: string[];
+  backdropIndex?: number;
 }
 
-export function BookDetailsDesktop({
-  book,
+export function GameDesktopDetails({
+  game,
   onClose,
   localNote,
   isLoading,
-  addingBook,
-  onAddBook,
+  addingGame,
+  onAddGame,
   onAction,
-  showBookInSeries,
-  coverUrls,
-  coverIndex,
-}: BookDetailsDesktopProps) {
+  backdropUrls,
+  backdropIndex,
+}: GameDesktopDetailsProps) {
   const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
     //detects which side of the div was clicked
     const rect = e.currentTarget.getBoundingClientRect();
@@ -74,8 +68,8 @@ export function BookDetailsDesktop({
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
-          book.status
-        )} py-2 px-2 lg:min-w-[43.5%] lg:max-w-[43.5%]`}
+          game.status
+        )} py-2 px-2 lg:min-w-[45%] lg:max-w-[45%]`}
       >
         {/* ACTUAL DETAIL CARD */}
         <div className="bg-gradient-to-br bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 w-full max-h-[calc(100vh-3rem)]">
@@ -84,32 +78,12 @@ export function BookDetailsDesktop({
           )}
           <div className={`px-8.5 py-7 border-0 rounded-2xl overflow-hidden`}>
             {/* ACTION BUTTONS */}
-            {addingBook ? (
+            {addingGame ? (
               <div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
-                {showBookInSeries && (
-                  <div className="flex gap-1 bg-zinc-800/50 rounded-lg">
-                    {/* LEFT BUTTON */}
-                    <button
-                      className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
-                    hover:cursor-pointer transition-all group"
-                      onClick={() => showBookInSeries("left")}
-                    >
-                      <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
-                    </button>
-                    {/* RIGHT BUTTON */}
-                    <button
-                      className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
-                    hover:cursor-pointer transition-all group"
-                      onClick={() => showBookInSeries("right")}
-                    >
-                      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
-                    </button>
-                  </div>
-                )}
                 {/* ADD */}
                 <button
                   className="py-1.5 px-5 rounded-lg bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer transition-all group"
-                  onClick={onAddBook}
+                  onClick={onAddGame}
                   title={"Add Book"}
                 >
                   <Plus className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors duration-0" />
@@ -119,7 +93,7 @@ export function BookDetailsDesktop({
                   className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer
                     transition-all group"
                   onClick={() => {
-                    onAction({ type: "moreBooks" });
+                    onAction({ type: "needYearField" });
                   }}
                   title={"See More Options"}
                 >
@@ -137,138 +111,139 @@ export function BookDetailsDesktop({
               </div>
             ) : (
               <button
-                className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/50 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group z-10"
+                className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/0 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group z-10"
                 onClick={() => {
-                  onAction({ type: "deleteBook" });
+                  onAction({ type: "deleteGame" });
                 }}
-                title={"Delete Book"}
+                title={"Delete Game"}
               >
-                <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors duration-200" />
+                <Trash2 className="w-4 h-4 text-gray-400/5 group-hover:text-red-500 transition-colors duration-200" />
               </button>
             )}
+
             <div className="flex gap-8">
               {/* LEFT SIDE -- PIC */}
-              <div
-                className={`flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg select-none ${
-                  coverUrls ? "hover:cursor-pointer" : ""
-                }`}
-                onClick={
-                  coverUrls && coverUrls?.length > 1
-                    ? handleCoverChange
-                    : undefined
-                }
-                title={
-                  coverUrls && coverIndex !== undefined
-                    ? `${coverIndex + 1}/${coverUrls?.length}`
-                    : ""
-                }
-              >
-                {coverIndex !== undefined &&
-                coverUrls !== undefined &&
-                coverUrls[coverIndex] ? (
-                  <Image
-                    src={coverUrls[coverIndex]}
-                    alt={book.title || "Untitled"}
-                    width={248}
-                    height={372}
-                    className="min-w-62 min-h-93 object-cover"
-                  />
-                ) : book.coverUrl && book.coverUrl.trim() !== "" ? (
-                  <Image
-                    src={book.coverUrl}
-                    alt={book.title || "Untitled"}
-                    width={248}
-                    height={372}
-                    className="min-w-62 min-h-93 object-cover"
-                  />
+              <div className="flex items-center justify-center max-w-62 min-h-93 overflow-hidden">
+                {game.posterUrl !== undefined ? (
+                  <>
+                    <Image
+                      src={game.posterUrl}
+                      alt={game.title || "Untitled"}
+                      width={1920}
+                      height={1080}
+                      className="min-w-62 min-h-93 object-cover rounded-lg"
+                    />
+                    <div
+                      className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
+                      style={{
+                        background:
+                          "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0) 50%, rgba(24,24,27,0.5) 100%)",
+                      }}
+                    />
+                  </>
                 ) : (
                   <div className="min-w-62 min-h-93 bg-gradient-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
                 )}
-                <div
-                  className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
-                  style={{
-                    background:
-                      "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0) 50%, rgba(24,24,27,0.2) 100%)",
-                  }}
-                />
               </div>
               {/* RIGHT SIDE -- DETAILS */}
-              <div className="flex flex-col flex-1 min-h-93 min-w-62 relative">
-                {book.coverUrl && (
-                  <BackdropImageBook
-                    src={book.coverUrl}
-                    width={1280}
-                    height={720}
+              <div className="flex flex-col flex-1 min-w-62 min-h-93 relative">
+                {/* BACKDROP */}
+                {(() => {
+                  const backdropUrl =
+                    addingGame && backdropIndex !== undefined
+                      ? backdropUrls?.[backdropIndex]
+                      : game.backdropUrl;
+
+                  return (
+                    backdropUrl && (
+                      <BackdropImage
+                        src={backdropUrl}
+                        width={1920}
+                        height={1080}
+                      />
+                    )
+                  );
+                })()}
+                {addingGame && backdropUrls && backdropUrls?.length > 1 && (
+                  <div
+                    className="absolute top-0 -left-8 -right-8 h-40 hover:cursor-pointer z-5"
+                    onClick={handleCoverChange}
+                    title={`${backdropIndex}/${backdropUrls?.length}`}
                   />
                 )}
-                <div className="flex flex-col justify-center flex-1">
+                <div
+                  className={`flex flex-col ${
+                    game.mainTitle ? "justify-center" : "justify-center mt-12"
+                  } flex-1`}
+                >
                   {/* SERIES TITLE */}
-                  {book.seriesTitle && (
+                  {game.mainTitle && game.dlcIndex != 0 && (
                     <span className="font-semibold text-zinc-100/80 text-xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-0">
-                      {book.seriesTitle}
+                      {game.mainTitle}
                     </span>
                   )}
                   {/* TITLE */}
                   <div className="w-fit mb-1.5 max-w-full">
                     <div className="font-bold text-zinc-100/90 text-3xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-1.5">
-                      {book.title || "Untitled"}
+                      {game.title || "Untitled"}
                     </div>
                     <div
                       className={`w-full h-0.5 bg-gradient-to-r ${getStatusBorderGradient(
-                        book.status
+                        game.status
                       )} to-zinc-800 rounded-full`}
                     ></div>
                   </div>
-                  {/* AUTHOR AND DATES */}
+                  {/* DIRECTOR AND DATES */}
                   <div className="flex justify-start items-center gap-2 w-full mb-3">
-                    <span className="font-medium text-zinc-200/80 text-lg overflow-y-auto max-h-6 leading-6">
-                      {book.author || "Unknown Author"}
+                    <span className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 leading-6">
+                      {game.studio || "Unknown Director"}
                     </span>
                     {/* ◎ ◈ ୭ ✿ ✧ */}
-                    <div className="font-medium text-zinc-200/80 text-lg leading-6">
+                    <div className="font-medium text-zinc-200/70 text-md leading-6">
                       •
                     </div>
                     <span
-                      className="font-medium text-zinc-200/80 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
+                      className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
                       title="Date Published"
                     >
-                      {book.datePublished || "Unknown"}
+                      {game.dateReleased || "Unknown"}
                     </span>
-                    {book.status === "Completed" && (
+                    {game.status === "Completed" && (
                       <div className="flex items-center gap-2">
-                        <div className="font-medium text-zinc-200/80 text-lg leading-6">
+                        <div className="font-medium text-zinc-200/70 text-md leading-6">
                           •
                         </div>
                         <span
-                          className="font-medium text-zinc-200/80 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
+                          className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
                           title="Date Completed"
                         >
-                          {formatDate(book.dateCompleted)}
+                          {formatDateShort(game.dateCompleted)}
                         </span>
                       </div>
                     )}
                   </div>
+                  <div></div>
                   {/* STATUS AND SCORE */}
-                  <div className="flex justify-start gap-4 mb-2.5 max-w-[94%]">
+                  <div className=" flex justify-start gap-4 mb-2.5 max-w-[94%]">
                     <div className="flex-[0.77] lg:min-w-[165px]">
                       <label className="text-sm font-medium text-zinc-400 mb-1 block">
                         Status
                       </label>
                       <Dropdown
-                        value={book.status}
+                        value={game.status}
                         onChange={(value) => {
                           onAction({
                             type: "changeStatus",
                             payload: value as
+                              | "Playing"
                               | "Completed"
-                              | "Want to Read"
                               | "Dropped",
                           });
                         }}
-                        options={bookStatusOptions}
+                        options={gameStatusOptions}
                         customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={
-                          book.status === "Completed"
+                          game.status === "Completed"
                             ? ["to-emerald-500/10", "text-emerald-500"]
                             : ["to-blue-500/10", "text-blue-500"]
                         }
@@ -280,7 +255,7 @@ export function BookDetailsDesktop({
                         Score
                       </label>
                       <Dropdown
-                        value={book.score?.toString() || "-"}
+                        value={game.score?.toString() || "-"}
                         onChange={(value) => {
                           onAction({
                             type: "changeScore",
@@ -290,7 +265,7 @@ export function BookDetailsDesktop({
                         options={scoreOptions}
                         customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={
-                          book.status === "Completed"
+                          game.status === "Completed"
                             ? ["to-emerald-500/10", "text-emerald-500"]
                             : ["to-blue-500/10", "text-blue-500"]
                         }
@@ -316,19 +291,19 @@ export function BookDetailsDesktop({
                         onBlur={() => {
                           onAction({ type: "saveNote" });
                         }}
-                        placeholder="Add your thoughts about this book..."
+                        placeholder="Add your thoughts about this game..."
                         className="text-gray-300 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500"
                       />
                     </div>
                   </div>
                 </div>
                 {/* PREQUEL AND SEQUEL */}
-                <div className="grid grid-cols-[1fr_3rem_1fr] w-full pr-1.5 select-none">
+                <div className="grid grid-cols-[1fr_3rem_1fr] pr-1.5 select-none w-full">
                   <div className="truncate text-left">
-                    {book.prequel && (
+                    {game.dlcIndex - 1 >= 0 && game.dlcs !== undefined && (
                       <div
                         className={`text-sm text-zinc-400/80 ${
-                          !addingBook
+                          !addingGame
                             ? "hover:underline hover:cursor-pointer"
                             : ""
                         }`}
@@ -336,60 +311,55 @@ export function BookDetailsDesktop({
                         <label className="text-xs font-medium text-zinc-400 block">
                           <span className="inline-flex items-center gap-1">
                             <span>←</span>
-                            <span>Prequel</span>
+                            <span>Previous</span>
                           </span>
                         </label>
                         <span
                           onClick={() => {
-                            if (!addingBook) {
-                              onAction({
-                                type: "seriesNav",
-                                payload: "prequel",
-                              });
+                            if (!addingGame) {
+                              onAction({ type: "dlcNav", payload: "prev" });
                             }
                           }}
                         >
-                          {book.prequel}
+                          {game.dlcs[game.dlcIndex - 1].name}
                         </span>
                       </div>
                     )}
                   </div>
                   <div className="flex justify-center items-end">
-                    {book.placeInSeries && (
+                    {game.dlcIndex !== 0 && (
                       <label className="text-xs font-medium text-zinc-400/85 block">
-                        {book.placeInSeries}
+                        {game.dlcIndex}
                       </label>
                     )}
                   </div>
                   <div className="truncate text-right">
-                    {book.sequel && (
-                      <div
-                        className={`text-sm text-zinc-400/80 ${
-                          !addingBook
-                            ? "hover:underline hover:cursor-pointer"
-                            : ""
-                        }`}
-                      >
-                        <label className="text-xs font-medium text-zinc-400 block">
-                          <span className="inline-flex items-center gap-1">
-                            <span>Sequel</span>
-                            <span>→</span>
-                          </span>
-                        </label>
-                        <span
-                          onClick={() => {
-                            if (!addingBook) {
-                              onAction({
-                                type: "seriesNav",
-                                payload: "sequel",
-                              });
-                            }
-                          }}
+                    {game.dlcs !== undefined &&
+                      game.dlcIndex + 1 < game.dlcs?.length && (
+                        <div
+                          className={`text-sm text-zinc-400/80 ${
+                            !addingGame
+                              ? "hover:underline hover:cursor-pointer"
+                              : ""
+                          }`}
                         >
-                          {book.sequel}
-                        </span>
-                      </div>
-                    )}
+                          <label className="text-xs font-medium text-zinc-400 block">
+                            <span className="inline-flex items-center gap-1">
+                              <span>Next</span>
+                              <span>→</span>
+                            </span>
+                          </label>
+                          <span
+                            onClick={() => {
+                              if (!addingGame) {
+                                onAction({ type: "dlcNav", payload: "next" });
+                              }
+                            }}
+                          >
+                            {game.dlcs[game.dlcIndex + 1].name}
+                          </span>
+                        </div>
+                      )}
                   </div>
                 </div>
               </div>

@@ -1,8 +1,8 @@
 "use client";
 import { GameProps } from "@/types/game";
 import { useCallback, useEffect, useState } from "react";
-import { GameDetailsDesktop } from "./detailsViews/GameDetailsDesktop";
-import { GameMobileDetails } from "./detailsViews/GameDetailsMobile";
+import { GameDesktopDetails } from "./detailsViews/GameDesktopDetails";
+import { GameMobileDetails } from "./detailsViews/GameMobileDetails";
 
 export type GameAction =
   | { type: "closeModal" }
@@ -180,7 +180,7 @@ export function GameDetails({
   return (
     <>
       <div className="lg:block hidden">
-        <GameDetailsDesktop
+        <GameDesktopDetails
           game={game}
           onClose={onClose}
           localNote={localNote}

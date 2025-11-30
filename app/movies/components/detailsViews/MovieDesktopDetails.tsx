@@ -19,7 +19,7 @@ import {
 import Image from "next/image";
 import { MovieAction } from "../MovieDetailsHub";
 
-interface MovieDetailsDesktopProps {
+interface MovieDesktopDetailsProps {
   movie: MovieProps;
   localNote: string;
   onClose: () => void;
@@ -30,7 +30,7 @@ interface MovieDetailsDesktopProps {
   onAction: (action: MovieAction) => void;
 }
 
-export function MovieDetailsDesktop({
+export function MovieDesktopDetails({
   movie,
   onClose,
   isLoading,
@@ -39,7 +39,7 @@ export function MovieDetailsDesktop({
   onAddMovie,
   localNote,
   onAction,
-}: MovieDetailsDesktopProps) {
+}: MovieDesktopDetailsProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault(); // prevent new line

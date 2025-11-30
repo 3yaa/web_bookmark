@@ -23,7 +23,7 @@ import {
 import { ShowProps } from "@/types/show";
 import { ShowAction } from "../ShowDetailsHub";
 
-interface ShowDetailsDesktopProps {
+interface ShowDesktopDetailsProps {
   show: ShowProps;
   localNote: string;
   onClose: () => void;
@@ -35,7 +35,7 @@ interface ShowDetailsDesktopProps {
   inputValues: { season: number | ""; episode: number | "" };
 }
 
-export function ShowDetailsDesktop({
+export function ShowDesktopDetails({
   show,
   localNote,
   onClose,
@@ -45,7 +45,7 @@ export function ShowDetailsDesktop({
   onAction,
   editingMode,
   inputValues,
-}: ShowDetailsDesktopProps) {
+}: ShowDesktopDetailsProps) {
   const handleNoteKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();

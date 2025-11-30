@@ -1,7 +1,7 @@
 "use client";
 import { MovieProps } from "@/types/movie";
 import { useCallback, useEffect, useState } from "react";
-import { MovieDetailsDesktop } from "./detailsViews/MovieDesktopDetails";
+import { MovieDesktopDetails } from "./detailsViews/MovieDesktopDetails";
 import { MovieMobileDetails } from "./detailsViews/MovieMobileDetails";
 
 export type MovieAction =
@@ -153,7 +153,7 @@ export function MovieDetails({
   return (
     <>
       <div className="lg:block hidden">
-        <MovieDetailsDesktop
+        <MovieDesktopDetails
           movie={movie}
           onClose={onClose}
           localNote={localNote}

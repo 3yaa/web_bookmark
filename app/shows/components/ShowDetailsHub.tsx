@@ -1,7 +1,7 @@
 "use client";
 import { ShowProps } from "@/types/show";
 import React, { useCallback, useEffect, useState } from "react";
-import { ShowDetailsDesktop } from "./detailsViews/ShowDetailsDesktop";
+import { ShowDesktopDetails } from "./detailsViews/ShowDesktopDetails";
 
 export type ShowAction =
   | { type: "closeModal" }
@@ -333,7 +333,7 @@ export function ShowDetails({
   return (
     <>
       <div className="lg:block hidden">
-        <ShowDetailsDesktop
+        <ShowDesktopDetails
           show={show}
           onClose={onClose}
           localNote={localNote}

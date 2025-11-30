@@ -1,7 +1,8 @@
 "use client";
 import { BookProps } from "@/types/book";
 import { useCallback, useEffect, useState } from "react";
-import { BookDetailsDesktop } from "./detailsViews/BookDetailsDesktop";
+import { BookDesktopDetails } from "./detailsViews/BookDesktopDetails";
+import { BookMobileDetails } from "./detailsViews/BookMobileDetails";
 
 export type BookAction =
   | { type: "closeModal" }
@@ -175,7 +176,7 @@ export function BookDetails({
   return (
     <>
       <div className="lg:block hidden">
-        <BookDetailsDesktop
+        <BookDesktopDetails
           book={book}
           onClose={onClose}
           localNote={localNote}
@@ -188,7 +189,20 @@ export function BookDetails({
           coverIndex={coverIndex}
         />
       </div>
-      <div className="block lg:hidden"></div>
+      <div className="block lg:hidden">
+        <BookMobileDetails
+          book={book}
+          onClose={onClose}
+          localNote={localNote}
+          isLoading={isLoading}
+          addingBook={!!addBook}
+          onAddBook={handleAddBook}
+          onAction={handleAction}
+          showBookInSeries={showBookInSeries}
+          coverUrls={coverUrls}
+          coverIndex={coverIndex}
+        />
+      </div>
     </>
   );
 }

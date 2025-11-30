@@ -166,7 +166,7 @@ export function ShowMobileDetails({
           </div>
           {/* PROGRESS BAR */}
           <div
-            className="mt-2.5 w-full bg-zinc-800/80 rounded-md h-1.5 overflow-hidden"
+            className="mt-4.5 w-full bg-zinc-800/80 rounded-md h-1.5 overflow-hidden"
             onClick={() => setIsProgressPickerOpen(true)}
           >
             <div
@@ -196,7 +196,7 @@ export function ShowMobileDetails({
             </span>
           </div>
           {/* STATUS */}
-          <div className="mt-1">
+          <div className="mt-2.5">
             <label className="text-zinc-400 text-xs font-medium">Status</label>
             <div className="pt-1 flex flex-wrap gap-2 pb-1">
               {showStatusOptions.map((status, index) => (

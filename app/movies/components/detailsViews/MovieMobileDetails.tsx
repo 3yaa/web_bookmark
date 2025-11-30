@@ -64,7 +64,11 @@ export function MovieMobileDetails({
   return (
     <div className="fixed inset-0 z-30 bg-zinc-950 overflow-y-auto flex flex-col animate-fadeIn">
       {isLoading?.isTrue && (
-        <Loading customStyle={isLoading.style} text={isLoading.text} />
+        <Loading
+          customStyle={isLoading.style}
+          text={isLoading.text}
+          isMobile={true}
+        />
       )}
       {/* ACTION BAR */}
       {(posterLoaded || addingMovie) && (

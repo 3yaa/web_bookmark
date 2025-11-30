@@ -2,16 +2,20 @@ interface LoadingProps {
   customStyle: string; //border
   customBg?: string;
   text?: string;
+  isMobile?: boolean;
 }
 
 export function Loading({
   customBg = "bg-[#121212]",
   customStyle,
   text,
+  isMobile = false,
 }: LoadingProps) {
   return (
     <div
-      className={`absolute inset-0 sm:overflow-hidden overflow-auto lg:rounded-2xl flex items-center justify-center z-20 ${customBg}`}
+      className={`${
+        isMobile ? "fixed" : "absolute"
+      } inset-0 lg:rounded-2xl flex items-center justify-center z-20 ${customBg}`}
     >
       <div className="flex flex-col items-center gap-3">
         <div

@@ -131,9 +131,9 @@ export function MovieMobileDetails({
       );
       setTranslateY(finalY);
       setIsExiting(true);
-      setTimeout(() => {
-        onClose();
-      }, 150);
+      onClose();
+      // setTimeout(() => {
+      // }, 0);
     } else {
       setTranslateY(0);
     }

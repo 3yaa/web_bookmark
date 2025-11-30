@@ -1,14 +1,7 @@
 import { BookProps } from "@/types/book";
 import { BookAction } from "../BookDetailsHub";
-import React, { useEffect, useState } from "react";
-import {
-  X,
-  Trash2,
-  Plus,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsUp,
-} from "lucide-react";
+import React, { useEffect, useState, useRef } from "react";
+import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
 import { bookStatusOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import Image from "next/image";
@@ -42,6 +35,16 @@ export function BookMobileDetails({
   coverIndex,
 }: BookMobileDetailsProps) {
   const [posterLoaded, setPosterLoaded] = useState(false);
+  const [translateY, setTranslateY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+  const startY = useRef(0);
+  const startScrollY = useRef(0);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const dragVelocity = useRef(0);
+  const lastY = useRef(0);
+  const lastTime = useRef(0);
 
   const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
     //detects which side of the div was clicked
@@ -69,6 +72,11 @@ export function BookMobileDetails({
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = "100%";
 
+    // trigger mount animation
+    requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+
     return () => {
       document.body.style.overflow = originalOverflow;
       document.body.style.position = originalPosition;
@@ -78,8 +86,105 @@ export function BookMobileDetails({
     };
   }, []);
 
+  const handleClose = () => {
+    setIsExiting(true);
+    setIsVisible(false);
+    setTimeout(() => {
+      onClose();
+    }, 300);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const target = e.target as HTMLElement;
+    if (
+      target.closest("button") ||
+      target.closest("textarea") ||
+      target.closest("[data-no-drag]")
+    ) {
+      return;
+    }
+
+    const modal = modalRef.current;
+    if (!modal) return;
+
+    if (modal.scrollTop === 0) {
+      startY.current = e.touches[0].clientY;
+      lastY.current = e.touches[0].clientY;
+      lastTime.current = Date.now();
+      startScrollY.current = modal.scrollTop;
+      dragVelocity.current = 0;
+      setIsDragging(true);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+
+    const modal = modalRef.current;
+    if (!modal) return;
+
+    const currentY = e.touches[0].clientY;
+    const currentTime = Date.now();
+    const deltaY = currentY - startY.current;
+
+    const timeDelta = currentTime - lastTime.current;
+    if (timeDelta > 0) {
+      dragVelocity.current = (currentY - lastY.current) / timeDelta;
+    }
+
+    lastY.current = currentY;
+    lastTime.current = currentTime;
+
+    if (modal.scrollTop === 0 && deltaY > 0) {
+      e.preventDefault();
+      const resistance = Math.max(0.3, 1 - deltaY / 800);
+      setTranslateY(deltaY * resistance);
+    } else if (deltaY < 0) {
+      setIsDragging(false);
+      setTranslateY(0);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDragging) return;
+
+    const threshold = 120;
+    const velocityThreshold = 0.5;
+
+    if (translateY > threshold || dragVelocity.current > velocityThreshold) {
+      const finalY = Math.max(
+        translateY + dragVelocity.current * 200,
+        window.innerHeight
+      );
+      setTranslateY(finalY);
+      setTimeout(() => {
+        handleClose();
+      }, 200);
+    } else {
+      setTranslateY(0);
+    }
+
+    setIsDragging(false);
+    dragVelocity.current = 0;
+  };
+
   return (
-    <div className="fixed inset-0 z-30 bg-zinc-950 overflow-y-auto flex flex-col animate-fadeIn">
+    <div
+      ref={modalRef}
+      className="fixed inset-0 z-30 bg-zinc-950 overflow-y-auto flex flex-col"
+      style={{
+        transform: `translateY(${translateY}px)`,
+        opacity: isVisible ? 1 : 0,
+        transition: isDragging
+          ? "none"
+          : isExiting
+          ? "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+          : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+      }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {isLoading?.isTrue && (
         <Loading
           customStyle={isLoading.style}
@@ -91,59 +196,44 @@ export function BookMobileDetails({
       {(posterLoaded || addingBook) && (
         <div className="sticky top-0 z-30">
           <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
-            <button
-              className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md"
-              onClick={onClose}
-            >
-              <X className="w-5 h-5 text-slate-400" />
-            </button>
             <div className="flex items-center gap-2">
-              {addingBook ? (
+              {addingBook && (
                 <>
                   {/* DIFFERENT SERIES OPTIONS */}
                   {showBookInSeries && (
-                    <div className="flex gap-1 bg-zinc-800/60 rounded-lg">
-                      {/* LEFT BUTTON */}
+                    <div className="flex gap-1 bg-zinc-800/60 rounded-lg p-0.5">
                       <button
-                        className="bg-zinc-800/50 p-2 rounded-md"
+                        className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
                         onClick={() => showBookInSeries("left")}
                       >
-                        <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+                        <ChevronLeft className="w-5 h-5 text-gray-400 transition-colors" />
                       </button>
-                      {/* RIGHT BUTTON */}
                       <button
-                        className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md"
+                        className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
                         onClick={() => showBookInSeries("right")}
                       >
-                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+                        <ChevronRight className="w-5 h-5 text-gray-400 transition-colors" />
                       </button>
                     </div>
                   )}
-                  {/* NEED YEAR */}
+                  {/* MORE BOOKS */}
                   <button
-                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5"
+                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
                     onClick={() => {
                       onAction({ type: "moreBooks" });
                     }}
-                    title={"Search with year"}
+                    title={"More books"}
                   >
                     <ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
                   </button>
                   {/* ADD BUTTON */}
                   <button
-                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md"
+                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
                     onClick={onAddBook}
                   >
                     <Plus className="w-5 h-5 text-slate-400" />
                   </button>
                 </>
-              ) : (
-                <button
-                  className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md"
-                  onClick={() => onAction({ type: "deleteBook" })}
-                >
-                  <Trash2 className="w-5 h-5 text-slate-400" />
-                </button>
               )}
             </div>
           </div>
@@ -151,11 +241,11 @@ export function BookMobileDetails({
       )}
       {/* INFO */}
       <div className="pb-10">
-        {/* POSTER */}
+        {/* COVER */}
         <div
-          className={`relative w-full overflow-hidden bg-zinc-900/40 ${
-            coverUrls && coverUrls.length > 1 ? "cursor-pointer" : ""
-          }`}
+          className={`relative w-full overflow-hidden bg-zinc-900/40 transition-all duration-300 ${
+            isDragging && "rounded-lg"
+          } ${coverUrls && coverUrls.length > 1 ? "cursor-pointer" : ""}`}
           onClick={
             coverUrls && coverUrls.length > 1 ? handleCoverChange : undefined
           }
@@ -165,7 +255,7 @@ export function BookMobileDetails({
           coverUrls[coverIndex] ? (
             <Image
               src={coverUrls[coverIndex]}
-              alt={book.title || "Poster"}
+              alt={book.title || "Cover"}
               width={1280}
               height={900}
               className="object-cover w-full"
@@ -174,7 +264,7 @@ export function BookMobileDetails({
           ) : book.coverUrl ? (
             <Image
               src={book.coverUrl}
-              alt={book.title || "Poster"}
+              alt={book.title || "Cover"}
               width={1280}
               height={900}
               className="object-cover w-full"
@@ -213,7 +303,7 @@ export function BookMobileDetails({
                 {book.title}
               </h1>
               {/* SCORE */}
-              <div>
+              <div data-no-drag>
                 <MobilePicker
                   score={book.score || 0}
                   onScoreChange={(newScore) =>
@@ -237,7 +327,7 @@ export function BookMobileDetails({
             </div>
           </div>
           {/* STATUS */}
-          <div className="mt-3">
+          <div className="mt-3" data-no-drag>
             <label className="text-zinc-400 text-xs font-medium">Status</label>
             <div className="pt-1 flex justify-center gap-2 pb-1">
               {bookStatusOptions.map((status) => (
@@ -249,7 +339,7 @@ export function BookMobileDetails({
                       payload: `${status.label}`,
                     })
                   }
-                  className={`flex-1 px-4 py-1.5 text-sm rounded-md border border-zinc-700/30 font-semibold whitespace-nowrap transition ${
+                  className={`flex-1 px-4 py-1.5 text-sm rounded-md border border-zinc-700/30 font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 ${
                     status.label === book.status
                       ? `${getStatusBg(status.label)} text-zinc-100`
                       : "text-zinc-300 bg-zinc-900/40 hover:bg-zinc-800/60"
@@ -262,15 +352,15 @@ export function BookMobileDetails({
           </div>
           {/* PREQUEL AND SEQUEL */}
           {book.placeInSeries && (
-            <div className="pt-2.5 grid grid-cols-[1fr_2rem_1fr]">
+            <div className="pt-2.5 grid grid-cols-[1fr_2rem_1fr]" data-no-drag>
               {/* PREQUEL */}
               <div className="min-w-0 text-left">
                 {book.prequel && (
                   <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
                     <span className="flex-shrink-0">←</span>
                     <span
-                      className={`truncate min-w-0  ${
-                        !addingBook ? "hover:underline" : ""
+                      className={`truncate min-w-0 transition-all duration-200 ${
+                        !addingBook ? "hover:underline active:scale-95" : ""
                       }`}
                       onClick={() => {
                         if (!addingBook) {
@@ -295,15 +385,13 @@ export function BookMobileDetails({
                 )}
               </div>
               {/* SEQUEL */}
-              <div
-                className={`min-w-0 text-right flex justify-end ${
-                  !addingBook ? "hover:underline" : ""
-                }`}
-              >
+              <div className="min-w-0 text-right flex justify-end">
                 {book.sequel && (
                   <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
                     <span
-                      className="truncate min-w-0"
+                      className={`truncate min-w-0 transition-all duration-200 ${
+                        !addingBook ? "hover:underline active:scale-95" : ""
+                      }`}
                       onClick={() => {
                         if (!addingBook) {
                           onAction({
@@ -322,9 +410,9 @@ export function BookMobileDetails({
             </div>
           )}
           {/* NOTE */}
-          <div className="mt-1">
+          <div className="mt-1" data-no-drag>
             <label className="text-zinc-400 text-xs font-medium">Notes</label>
-            <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition duration-200 max-h-22 overflow-auto">
+            <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition-all duration-200 max-h-22 overflow-auto">
               <MobileAutoTextarea
                 value={localNote}
                 onChange={(e) =>

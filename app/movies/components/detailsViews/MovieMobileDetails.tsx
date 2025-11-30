@@ -41,6 +41,7 @@ export function MovieMobileDetails({
   const dragVelocity = useRef(0);
   const lastY = useRef(0);
   const lastTime = useRef(0);
+  const originalScrollY = useRef(0);
 
   useEffect(() => {
     // original values
@@ -48,6 +49,7 @@ export function MovieMobileDetails({
     const originalPosition = document.body.style.position;
     const originalTop = document.body.style.top;
     const scrollY = window.scrollY;
+    originalScrollY.current = scrollY; // Store for later use
 
     // lock body in place
     document.body.style.overflow = "hidden";
@@ -65,7 +67,7 @@ export function MovieMobileDetails({
       document.body.style.position = originalPosition;
       document.body.style.top = originalTop;
       document.body.style.width = "";
-      window.scrollTo(0, scrollY);
+      window.scrollTo(0, originalScrollY.current);
     };
   }, []);
 
@@ -133,6 +135,14 @@ export function MovieMobileDetails({
       );
       setTranslateY(finalY);
       setIsExiting(true);
+
+      // Restore body scroll immediately so parent can scroll right away
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      window.scrollTo(0, originalScrollY.current);
+
       setTimeout(() => {
         onClose();
       }, 250);

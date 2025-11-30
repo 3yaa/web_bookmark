@@ -66,7 +66,7 @@ export function MovieMobileDetails({
         </div>
       )}
       {/* INFO */}
-      <div className="flex-1 min-h-[100dvh] mb-10">
+      <div className="flex-1 min-h-[100dvh] mb-50">
         {/* POSTER */}
         <div className="relative w-full overflow-hidden bg-zinc-900/40">
           {movie.posterUrl ? (

@@ -2,6 +2,7 @@
 import { ShowProps } from "@/types/show";
 import React, { useCallback, useEffect, useState } from "react";
 import { ShowDesktopDetails } from "./detailsViews/ShowDesktopDetails";
+import { ShowMobileDetails } from "./detailsViews/ShowMobileDetails";
 
 export type ShowAction =
   | { type: "closeModal" }
@@ -345,7 +346,17 @@ export function ShowDetails({
           inputValues={inputValues}
         />
       </div>
-      <div className="block lg:hidden"></div>
+      <div className="block lg:hidden">
+        <ShowMobileDetails
+          show={show}
+          onClose={onClose}
+          localNote={localNote}
+          isLoading={isLoading}
+          addingShow={!!addShow}
+          onAddShow={handleAddShow}
+          onAction={handleAction}
+        />
+      </div>
     </>
   );
 }

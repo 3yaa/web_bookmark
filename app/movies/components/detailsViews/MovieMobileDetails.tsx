@@ -49,8 +49,6 @@ export function MovieMobileDetails({
   const lastY = useRef(0);
   const lastTime = useRef(0);
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     const originalPosition = document.body.style.position;
@@ -60,11 +58,11 @@ export function MovieMobileDetails({
     // 🔥 iOS-friendly body lock
     document.body.style.overflow = "hidden";
 
-    if (!isIOS) {
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
-    }
+    // if (!isIOS) {
+    //   document.body.style.position = "fixed";
+    //   document.body.style.top = `-${scrollY}px`;
+    //   document.body.style.width = "100%";
+    // }
 
     requestAnimationFrame(() => setIsVisible(true));
 
@@ -72,12 +70,12 @@ export function MovieMobileDetails({
       const cleanup = () => {
         document.body.style.overflow = originalOverflow;
 
-        if (!isIOS) {
-          document.body.style.position = originalPosition;
-          document.body.style.top = originalTop;
-          document.body.style.width = "";
-          window.scrollTo(0, scrollY);
-        }
+        // if (!isIOS) {
+        //   document.body.style.position = originalPosition;
+        //   document.body.style.top = originalTop;
+        //   document.body.style.width = "";
+        //   window.scrollTo(0, scrollY);
+        // }
       };
 
       // 🔥 iOS needs delay to prevent address bar flash
@@ -144,11 +142,7 @@ export function MovieMobileDetails({
       setIsExiting(true);
 
       // 🔥 iOS-safe exit
-      if (isIOS) {
-        setExitStyle({ opacity: 0, scale: 0.97 });
-      } else {
-        setExitStyle({ translateY: window.innerHeight });
-      }
+      setExitStyle({ translateY: window.innerHeight });
 
       setTimeout(() => onClose(), 180);
     } else {
@@ -165,9 +159,7 @@ export function MovieMobileDetails({
       className={`fixed inset-0 z-30 bg-zinc-950 flex flex-col overflow-y-auto`}
       style={{
         transform: isExiting
-          ? isIOS
-            ? `scale(${exitStyle.scale ?? 1})`
-            : `translateY(${exitStyle.translateY ?? 0}px)`
+          ? `scale(${exitStyle.scale ?? 1})`
           : `translateY(${translateY}px)`,
         opacity: isExiting ? exitStyle.opacity ?? 1 : isVisible ? 1 : 0,
         transition: isDragging

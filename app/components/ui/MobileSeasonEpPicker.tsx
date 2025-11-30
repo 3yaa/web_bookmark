@@ -195,7 +195,7 @@ export function MobileProgressPicker({
 
                 <div
                   ref={seasonRef}
-                  className="h-44 overflow-y-auto snap-y snap-mandatory scrollbar-hide relative"
+                  className="h-44 overflow-y-auto overflow-x-hidden snap-y snap-mandatory scrollbar-hide relative"
                   style={{
                     maskImage:
                       "linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%)",
@@ -244,7 +244,7 @@ export function MobileProgressPicker({
 
                 <div
                   ref={episodeRef}
-                  className="h-44 overflow-y-auto snap-y snap-mandatory scrollbar-hide relative"
+                  className="h-44 overflow-y-auto overflow-x-hidden snap-y snap-mandatory scrollbar-hide relative"
                   style={{
                     maskImage:
                       "linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%)",

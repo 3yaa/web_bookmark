@@ -190,7 +190,7 @@ export function GameMobileDetails({
             </div>
           </div>
           {/* PREQUEL AND SEQUEL */}
-          {game.dlcIndex !== 0 && (
+          {game.dlcs !== undefined && (
             <div className="pt-2.5 grid grid-cols-[1fr_2rem_1fr]">
               {/* PREQUEL */}
               <div className="min-w-0 text-left">

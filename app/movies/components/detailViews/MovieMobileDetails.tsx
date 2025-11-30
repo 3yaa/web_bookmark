@@ -31,7 +31,7 @@ export function MovieMobileDetails({
   const [posterLoaded, setPosterLoaded] = useState(false);
 
   return (
-    <div className="absolute inset-0 z-30 bg-zinc-950 flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-30 bg-zinc-950 overflow-y-auto flex flex-col animate-fadeIn">
       {isLoading?.isTrue && (
         <div className="text-zinc-400 text-sm mt-5">{isLoading.text}</div>
       )}
@@ -66,7 +66,7 @@ export function MovieMobileDetails({
         </div>
       )}
       {/* INFO */}
-      <div className="flex-1 overflow-y-auto mb-10">
+      <div className="flex-1 min-h-[100dvh] mb-10">
         {/* POSTER */}
         <div className="relative w-full overflow-hidden bg-zinc-900/40">
           {movie.posterUrl ? (

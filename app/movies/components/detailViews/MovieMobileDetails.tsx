@@ -88,7 +88,7 @@ export function MovieMobileDetails({
         </div>
       )}
       {/* INFO */}
-      <div className="flex-1 min-h-[100dvh] mb-10">
+      <div className="pb-10">
         {/* POSTER */}
         <div className="relative w-full overflow-hidden bg-zinc-900/40">
           {movie.posterUrl ? (
@@ -173,7 +173,7 @@ export function MovieMobileDetails({
           </div>
 
           {/* NOTE */}
-          <div className="mt-2 mb-10">
+          <div className="mt-2">
             <label className="text-zinc-400 text-xs font-medium">Notes</label>
             <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition duration-200 max-h-22 overflow-auto">
               <MobileAutoTextarea

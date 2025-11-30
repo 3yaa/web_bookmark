@@ -27,13 +27,10 @@ export function MobileProgressPicker({
   );
   const [selectedEpisode, setSelectedEpisode] = useState(curEpisode ?? 1);
   const [isClosing, setIsClosing] = useState(false);
-  const [dragStart, setDragStart] = useState<number | null>(null);
-  const [dragOffset, setDragOffset] = useState(0);
   const seasonRef = useRef<HTMLDivElement | null>(null);
   const episodeRef = useRef<HTMLDivElement | null>(null);
   const seasonObservers = useRef<IntersectionObserver | null>(null);
   const episodeObservers = useRef<IntersectionObserver | null>(null);
-  const sheetRef = useRef<HTMLDivElement | null>(null);
 
   // keep local state in sync with incoming props when opener resyncs
   useEffect(() => {
@@ -141,117 +138,20 @@ export function MobileProgressPicker({
 
   const handleConfirm = () => {
     onProgressChange(selectedSeasonIndex, selectedEpisode);
-    const sheetEl = sheetRef.current;
-    if (sheetEl) {
-      sheetEl.style.transition = "transform 0.3s ease-out";
-      sheetEl.style.transform = "translateY(100%)";
-    }
-
+    setIsClosing(true);
     setTimeout(() => {
       setIsClosing(false);
-      setDragOffset(0);
       onClose();
-    }, 300);
+    }, 300); // match animation duration
   };
 
   const handleBackdropClick = () => {
-    const sheetEl = sheetRef.current;
-    if (sheetEl) {
-      sheetEl.style.transition = "transform 0.3s ease-out";
-      sheetEl.style.transform = "translateY(100%)";
-    }
-
+    setIsClosing(true);
     setTimeout(() => {
       setIsClosing(false);
-      setDragOffset(0);
       onClose();
     }, 300);
   };
-
-  const handleDragStart = (clientY: number) => {
-    setDragStart(clientY);
-    // Clear any existing inline transforms when starting a new drag
-    const sheetEl = sheetRef.current;
-    if (sheetEl) {
-      sheetEl.style.transform = "";
-      sheetEl.style.transition = "none";
-    }
-  };
-
-  const handleDragMove = (clientY: number) => {
-    if (dragStart === null) return;
-    const diff = clientY - dragStart;
-    // Only allow dragging down (positive offset)
-    if (diff > 0) {
-      setDragOffset(diff);
-    }
-  };
-
-  const handleDragEnd = () => {
-    if (dragStart === null) return;
-
-    setDragStart(null);
-
-    // If dragged more than 150px, close the modal
-    if (dragOffset > 150) {
-      // Animate from current position to fully closed
-      const sheetEl = sheetRef.current;
-      if (sheetEl) {
-        sheetEl.style.transition = "transform 0.3s ease-out";
-        sheetEl.style.transform = `translateY(100%)`;
-      }
-
-      setTimeout(() => {
-        setIsClosing(false);
-        setDragOffset(0);
-        onClose();
-      }, 300);
-    } else {
-      // Snap back to original position smoothly
-      const sheetEl = sheetRef.current;
-      if (sheetEl) {
-        sheetEl.style.transition = "transform 0.3s ease-out";
-        sheetEl.style.transform = `translateY(0)`;
-      }
-      // Don't reset dragOffset - keep it so the inline style doesn't re-apply
-    }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    handleDragStart(e.touches[0].clientY);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    handleDragMove(e.touches[0].clientY);
-  };
-
-  const handleTouchEnd = () => {
-    handleDragEnd();
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    handleDragStart(e.clientY);
-  };
-
-  const handleMouseMove = (e: MouseEvent) => {
-    handleDragMove(e.clientY);
-  };
-
-  const handleMouseUp = () => {
-    handleDragEnd();
-  };
-
-  // Add mouse event listeners when dragging
-  useEffect(() => {
-    if (dragStart !== null) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-      return () => {
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
-      };
-    }
-  }, [dragStart, dragOffset]);
 
   if (!isOpen || seasons.length === 0) return null;
 
@@ -267,26 +167,13 @@ export function MobileProgressPicker({
 
       {/* Bottom Sheet */}
       <div
-        ref={sheetRef}
         className={`fixed inset-x-0 bottom-0 z-50 ${
-          dragStart === null && dragOffset === 0 && !isClosing
-            ? "animate-slideUp"
-            : ""
+          isClosing ? "animate-slideDown" : "animate-slideUp"
         }`}
-        style={{
-          transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined,
-          transition: "none",
-        }}
       >
         <div className="bg-zinc-900 rounded-t-3xl border-t border-zinc-800 shadow-2xl">
-          {/* Handle - draggable area */}
-          <div
-            className="pt-3 pb-2 flex justify-center cursor-grab active:cursor-grabbing"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onMouseDown={handleMouseDown}
-          >
+          {/* Handle */}
+          <div className="pt-3 pb-2 flex justify-center">
             <div className="w-12 h-1 bg-zinc-700 rounded-full"></div>
           </div>
 

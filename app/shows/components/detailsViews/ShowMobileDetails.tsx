@@ -55,15 +55,6 @@ export function ShowMobileDetails({
     };
   }, []);
 
-  useEffect(() => {
-    if (isProgressPickerOpen) {
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = "auto";
-      };
-    }
-  }, [isProgressPickerOpen]);
-
   return (
     <div className="fixed inset-0 z-30 bg-zinc-950 overflow-y-auto flex flex-col animate-fadeIn">
       {isLoading?.isTrue && (

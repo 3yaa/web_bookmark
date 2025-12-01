@@ -44,17 +44,19 @@ export function ShowMobileDetails({
   const lastTime = useRef(0);
 
   useEffect(() => {
+    // original values
     const originalOverflow = document.body.style.overflow;
     const originalPosition = document.body.style.position;
     const originalTop = document.body.style.top;
     const scrollY = window.scrollY;
 
+    // lock body in place
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = "100%";
 
-    // Trigger mount animation
+    // trigger mount animation
     requestAnimationFrame(() => {
       setIsVisible(true);
     });
@@ -85,8 +87,7 @@ export function ShowMobileDetails({
     if (!modal) return;
 
     // Allow drag from anywhere when scrolled to top
-    if (modal.scrollTop <= 5) {
-      // Small tolerance for scroll position
+    if (modal.scrollTop < 3) {
       startY.current = e.touches[0].clientY;
       lastY.current = e.touches[0].clientY;
       lastTime.current = Date.now();
@@ -116,11 +117,8 @@ export function ShowMobileDetails({
     lastTime.current = currentTime;
 
     // Only allow dragging down when at top of scroll
-    if (modal.scrollTop <= 5 && deltaY > 0) {
-      // Small tolerance
-      e.preventDefault();
-      // Add rubber band effect - resistance increases as you drag further
-      const resistance = Math.max(0.4, 1 - deltaY / 1000); // Slightly less resistance
+    if (modal.scrollTop < 3 && deltaY > 0) {
+      const resistance = Math.max(0.3, 1 - deltaY / 800);
       setTranslateY(deltaY * resistance);
     } else if (deltaY < 0) {
       // Reset if trying to drag up
@@ -132,7 +130,7 @@ export function ShowMobileDetails({
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
-    const threshold = 120;
+    const threshold = 50;
     const velocityThreshold = 0.5;
 
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
@@ -144,7 +142,7 @@ export function ShowMobileDetails({
       setIsExiting(true);
       setTimeout(() => {
         onClose();
-      }, 250);
+      }, 75);
     } else {
       setTranslateY(0);
     }

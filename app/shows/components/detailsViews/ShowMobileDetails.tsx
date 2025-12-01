@@ -74,7 +74,6 @@ export function ShowMobileDetails({
     if (isProgressPickerOpen) return;
 
     const target = e.target as HTMLElement;
-    // Don't start drag if touching interactive elements
     if (
       target.closest("button") ||
       target.closest("textarea") ||
@@ -86,7 +85,6 @@ export function ShowMobileDetails({
     const modal = modalRef.current;
     if (!modal) return;
 
-    // Allow drag from anywhere when scrolled to top
     if (modal.scrollTop < 3) {
       startY.current = e.touches[0].clientY;
       lastY.current = e.touches[0].clientY;
@@ -107,7 +105,6 @@ export function ShowMobileDetails({
     const currentTime = Date.now();
     const deltaY = currentY - startY.current;
 
-    // Calculate velocity for momentum
     const timeDelta = currentTime - lastTime.current;
     if (timeDelta > 0) {
       dragVelocity.current = (currentY - lastY.current) / timeDelta;
@@ -116,12 +113,10 @@ export function ShowMobileDetails({
     lastY.current = currentY;
     lastTime.current = currentTime;
 
-    // Only allow dragging down when at top of scroll
     if (modal.scrollTop < 3 && deltaY > 0) {
       const resistance = Math.max(0.3, 1 - deltaY / 800);
       setTranslateY(deltaY * resistance);
     } else if (deltaY < 0) {
-      // Reset if trying to drag up
       setIsDragging(false);
       setTranslateY(0);
     }

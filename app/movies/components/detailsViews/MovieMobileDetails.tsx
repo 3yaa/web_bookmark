@@ -133,7 +133,7 @@ export function MovieMobileDetails({
       setIsExiting(true);
       setTimeout(() => {
         onClose();
-      }, 75);
+      }, 10);
     } else {
       setTranslateY(0);
     }

@@ -96,7 +96,8 @@ export function ShowMobileDetails({
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || isProgressPickerOpen) return;
+    if (!isDragging) return;
+    //  || isProgressPickerOpen
 
     const modal = modalRef.current;
     if (!modal) return;
@@ -137,7 +138,7 @@ export function ShowMobileDetails({
       setIsExiting(true);
       setTimeout(() => {
         onClose();
-      }, 0);
+      }, 75);
     } else {
       setTranslateY(0);
     }
@@ -150,9 +151,7 @@ export function ShowMobileDetails({
     <>
       <div
         ref={modalRef}
-        className={`fixed inset-0 z-30 bg-zinc-950 flex flex-col ${
-          isProgressPickerOpen ? "overflow-hidden" : "overflow-y-auto"
-        }`}
+        className={`fixed inset-0 z-30 bg-zinc-950 flex flex-col overflow-y-auto`}
         style={{
           transform: `translateY(${translateY}px)`,
           opacity: isVisible ? 1 : 0,

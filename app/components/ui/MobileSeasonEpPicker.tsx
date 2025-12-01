@@ -11,7 +11,8 @@ interface MobileProgressPickerProps {
   curSeasonIndex: number;
   curEpisode: number;
   onClose: () => void;
-  onProgressChange: (seasonIndex: number, episode: number) => void;
+  onEpisodeChange: (episode: number) => void;
+  onSeasonIndexChange: (seasonIndex: number) => void;
 }
 
 export function MobileProgressPicker({
@@ -20,347 +21,177 @@ export function MobileProgressPicker({
   curSeasonIndex,
   curEpisode,
   onClose,
-  onProgressChange,
+  onEpisodeChange,
+  onSeasonIndexChange,
 }: MobileProgressPickerProps) {
   const [selectedSeasonIndex, setSelectedSeasonIndex] = useState(
     curSeasonIndex ?? 0
   );
   const [selectedEpisode, setSelectedEpisode] = useState(curEpisode ?? 1);
   const [isClosing, setIsClosing] = useState(false);
-  const seasonRef = useRef<HTMLDivElement | null>(null);
-  const episodeRef = useRef<HTMLDivElement | null>(null);
-  const seasonObservers = useRef<IntersectionObserver | null>(null);
-  const episodeObservers = useRef<IntersectionObserver | null>(null);
+  const seasonScrollRef = useRef<HTMLDivElement>(null);
+  const episodeScrollRef = useRef<HTMLDivElement>(null);
 
-  // keep local state in sync with incoming props when opener resyncs
+  // Reset selection when picker opens
   useEffect(() => {
     if (isOpen) {
       setSelectedSeasonIndex(curSeasonIndex ?? 0);
       setSelectedEpisode(curEpisode ?? 1);
-      // we'll programmatically scroll below after elements mount
+      setIsClosing(false);
     }
   }, [isOpen, curSeasonIndex, curEpisode]);
 
-  const currentSeason = seasons[selectedSeasonIndex];
-  const maxEpisodes = currentSeason?.episode_count || 0;
-
-  // guard episode to valid range whenever season changes
+  // Auto-scroll to selected items when picker opens or selection changes
   useEffect(() => {
-    if (!seasons?.length) return;
-    const newMax = seasons[selectedSeasonIndex]?.episode_count ?? 0;
-    if (newMax <= 0) {
-      setSelectedEpisode(0);
-    } else {
-      setSelectedEpisode((prev) => {
-        if (prev <= 0) return 1;
-        return prev > newMax ? newMax : prev;
-      });
-    }
-  }, [selectedSeasonIndex, seasons]);
-
-  // When modal opens: scroll both wheels to selected items (instant)
-  useEffect(() => {
-    if (!isOpen) return;
-
-    // small timeout to allow DOM to render children
-    const t = setTimeout(() => {
-      const seasonEl = seasonRef.current?.querySelector<HTMLElement>(
+    if (isOpen && seasonScrollRef.current) {
+      const selectedButton = seasonScrollRef.current.querySelector(
         `[data-season="${selectedSeasonIndex}"]`
-      );
-      const episodeEl = episodeRef.current?.querySelector<HTMLElement>(
+      ) as HTMLElement;
+      if (selectedButton) {
+        setTimeout(() => {
+          selectedButton.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 100);
+      }
+    }
+  }, [isOpen, selectedSeasonIndex]);
+
+  useEffect(() => {
+    if (isOpen && episodeScrollRef.current) {
+      const selectedButton = episodeScrollRef.current.querySelector(
         `[data-episode="${selectedEpisode}"]`
-      );
-
-      seasonEl?.scrollIntoView({ behavior: "auto", block: "center" });
-      episodeEl?.scrollIntoView({ behavior: "auto", block: "center" });
-    }, 60);
-
-    return () => clearTimeout(t);
-    // intentionally not watching selectedSeasonIndex here to avoid fighting user scroll
-    // we only do this on open to position the wheels initially.
+      ) as HTMLElement;
+      if (selectedButton) {
+        setTimeout(() => {
+          selectedButton.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 100);
+      }
+    }
   }, [isOpen, selectedEpisode, selectedSeasonIndex]);
 
-  // IntersectionObserver: watch which season / episode is centered and update state
-  useEffect(() => {
-    if (!isOpen) return;
-
-    seasonObservers.current?.disconnect();
-    episodeObservers.current?.disconnect();
-
-    const highlightTop = 40;
-    const highlightHeight = 48;
-    const containerHeight = 176;
-
-    const topMargin = highlightTop;
-    const bottomMargin = -(containerHeight - (highlightTop + highlightHeight));
-
-    const rootMargin = `${topMargin}px 0px ${bottomMargin}px 0px`;
-
-    const seasonCb: IntersectionObserverCallback = (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const idx = Number((entry.target as HTMLElement).dataset.season);
-          if (!isNaN(idx)) setSelectedSeasonIndex(idx);
-        }
-      });
-    };
-
-    const episodeCb: IntersectionObserverCallback = (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const ep = Number((entry.target as HTMLElement).dataset.episode);
-          if (!isNaN(ep)) setSelectedEpisode(ep);
-        }
-      });
-    };
-
-    const sObserver = new IntersectionObserver(seasonCb, {
-      root: seasonRef.current,
-      rootMargin,
-      threshold: 0.5,
-    });
-
-    const eObserver = new IntersectionObserver(episodeCb, {
-      root: episodeRef.current,
-      rootMargin,
-      threshold: 0.5,
-    });
-
-    seasonObservers.current = sObserver;
-    episodeObservers.current = eObserver;
-
-    seasonRef.current
-      ?.querySelectorAll<HTMLElement>("[data-season]")
-      .forEach((n) => sObserver.observe(n));
-
-    episodeRef.current
-      ?.querySelectorAll<HTMLElement>("[data-episode]")
-      .forEach((n) => eObserver.observe(n));
-
-    return () => {
-      sObserver.disconnect();
-      eObserver.disconnect();
-    };
-  }, [isOpen, seasons, maxEpisodes]);
-
-  const handleConfirm = () => {
-    onProgressChange(selectedSeasonIndex, selectedEpisode);
+  const handleClose = () => {
     setIsClosing(true);
     setTimeout(() => {
       setIsClosing(false);
       onClose();
-    }, 300); // match animation duration
-  };
-
-  const handleBackdropClick = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setIsClosing(false);
-      onClose();
-    }, 300);
+    }, 150);
   };
 
   if (!isOpen || seasons.length === 0) return null;
+
+  const seasonOptions = seasons.map((s, idx) => ({
+    index: idx,
+    label: `Season ${s.season_number}`,
+  }));
+
+  const episodeOptions = Array.from(
+    { length: seasons[selectedSeasonIndex]?.episode_count || 0 },
+    (_, i) => i + 1
+  );
 
   return (
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-sm ${
-          isClosing ? "animate-fadeOut" : "animate-fadeIn"
+        className={`fixed inset-0 z-50 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${
+          isClosing ? "opacity-0" : "opacity-100"
         }`}
-        onClick={handleBackdropClick}
+        onClick={handleClose}
       />
 
       {/* Bottom Sheet */}
       <div
-        className={`fixed inset-x-0 bottom-0 z-50 ${
-          isClosing ? "animate-slideDown" : "animate-slideUp"
+        className={`fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-out ${
+          isClosing ? "translate-y-full" : "translate-y-0"
         }`}
       >
-        <div className="bg-zinc-900 rounded-t-3xl border-t border-zinc-800 shadow-2xl">
+        <div className="bg-zinc-900 rounded-t-3xl border-t border-zinc-800/50 shadow-2xl">
           {/* Handle */}
-          <div className="pt-3 pb-2 flex justify-center">
-            <div className="w-12 h-1 bg-zinc-700 rounded-full"></div>
+          <div className="pt-3 pb-4 flex justify-center">
+            <div className="w-12 h-1 bg-zinc-700/80 rounded-full"></div>
           </div>
 
           {/* Content */}
-          <div className="px-6 pb-8">
-            <h3 className="text-lg font-semibold text-zinc-100 mb-6 text-center">
+          <div className="px-5 pb-6">
+            <h3 className="text-base font-semibold text-zinc-100 mb-5 text-center">
               Update Progress
             </h3>
 
-            <div className="flex gap-4 h-52">
-              {/* Season Wheel */}
-              <div className="flex-1 relative">
-                <div className="text-xs text-zinc-400 font-medium mb-2 text-center">
+            {/* Scrollable Pickers */}
+            <div className="flex gap-3 h-56 mb-5">
+              {/* Season Picker */}
+              <div className="flex flex-col flex-1">
+                <span className="text-zinc-500 text-xs font-medium mb-2.5 text-center">
                   Season
-                </div>
-
-                {/* Selection highlight */}
-                <div className="absolute left-0 right-0 top-10 h-12 bg-zinc-800/50 rounded-lg pointer-events-none z-10"></div>
-
+                </span>
                 <div
-                  ref={seasonRef}
-                  className="h-44 overflow-y-auto overflow-x-hidden snap-y snap-mandatory scrollbar-hide relative"
-                  style={{
-                    maskImage:
-                      "linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%)",
-                    WebkitMaskImage:
-                      "linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%)",
-                  }}
+                  ref={seasonScrollRef}
+                  className="overflow-y-auto no-scrollbar flex-1 space-y-1.5 relative mask-gradient"
                 >
-                  <div style={{ paddingTop: "96px", paddingBottom: "96px" }}>
-                    {seasons.map((season, index) => (
-                      <div
-                        key={season.season_number + "-" + index}
-                        data-season={index}
-                        onClick={() => {
-                          // clicking will scroll it into center and also set state
-                          const el =
-                            seasonRef.current?.querySelector<HTMLElement>(
-                              `[data-season="${index}"]`
-                            );
-                          el?.scrollIntoView({
-                            behavior: "smooth",
-                            block: "center",
-                          });
-                          // setSelectedSeasonIndex(index);
-                        }}
-                        className={`h-12 flex items-center justify-center text-2xl font-bold snap-center cursor-pointer transition-all duration-200 ${
-                          selectedSeasonIndex === index
-                            ? "text-zinc-100 scale-110"
-                            : "text-zinc-600 scale-90"
-                        }`}
-                      >
-                        {season.season_number}
-                      </div>
-                    ))}
-                  </div>
+                  {seasonOptions.map((s) => (
+                    <button
+                      key={s.index}
+                      data-season={s.index}
+                      onClick={() => {
+                        setSelectedSeasonIndex(s.index);
+                        setSelectedEpisode(1);
+                        onSeasonIndexChange(s.index);
+                        setTimeout(() => {
+                          handleClose();
+                        }, 10);
+                      }}
+                      className={`w-full py-2.5 rounded-lg text-sm font-medium transition-all duration-150 active:scale-[0.98] ${
+                        s.index === selectedSeasonIndex
+                          ? "bg-zinc-700 text-zinc-50"
+                          : "bg-zinc-800/40 text-zinc-400 active:bg-zinc-800/60"
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Episode Wheel */}
-              <div className="flex-1 relative">
-                <div className="text-xs text-zinc-400 font-medium mb-2 text-center">
+              {/* Episode Picker */}
+              <div className="flex flex-col flex-1">
+                <span className="text-zinc-500 text-xs font-medium mb-2.5 text-center">
                   Episode
-                </div>
-
-                {/* Selection highlight */}
-                <div className="absolute left-0 right-0 top-10 h-12 bg-zinc-800/50 rounded-lg pointer-events-none z-10"></div>
-
+                </span>
                 <div
-                  ref={episodeRef}
-                  className="h-44 overflow-y-auto overflow-x-hidden snap-y snap-mandatory scrollbar-hide relative"
-                  style={{
-                    maskImage:
-                      "linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%)",
-                    WebkitMaskImage:
-                      "linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%)",
-                  }}
+                  ref={episodeScrollRef}
+                  className="overflow-y-auto no-scrollbar flex-1 space-y-1.5 relative mask-gradient"
                 >
-                  <div style={{ paddingTop: "96px", paddingBottom: "96px" }}>
-                    {maxEpisodes > 0 ? (
-                      Array.from({ length: maxEpisodes }, (_, i) => i + 1).map(
-                        (ep) => (
-                          <div
-                            key={ep}
-                            data-episode={ep}
-                            onClick={() => {
-                              const el =
-                                episodeRef.current?.querySelector<HTMLElement>(
-                                  `[data-episode="${ep}"]`
-                                );
-                              el?.scrollIntoView({
-                                behavior: "smooth",
-                                block: "center",
-                              });
-                              // setSelectedEpisode(ep);
-                            }}
-                            className={`h-12 flex items-center justify-center text-2xl font-bold snap-center cursor-pointer transition-all duration-200 ${
-                              selectedEpisode === ep
-                                ? "text-zinc-100 scale-110"
-                                : "text-zinc-600 scale-90"
-                            }`}
-                          >
-                            {ep}
-                          </div>
-                        )
-                      )
-                    ) : (
-                      <div className="h-12 flex items-center justify-center text-zinc-500">
-                        No episodes
-                      </div>
-                    )}
-                  </div>
+                  {episodeOptions.map((episode) => (
+                    <button
+                      key={episode}
+                      data-episode={episode}
+                      onClick={() => {
+                        setSelectedEpisode(episode);
+                        onEpisodeChange(episode);
+                        setTimeout(() => {
+                          handleClose();
+                        }, 10);
+                      }}
+                      className={`w-full py-2.5 rounded-lg text-sm font-medium transition-all duration-150 active:scale-[0.98] ${
+                        episode === selectedEpisode
+                          ? "bg-zinc-700 text-zinc-50"
+                          : "bg-zinc-800/40 text-zinc-400 active:bg-zinc-800/60"
+                      }`}
+                    >
+                      Episode {episode}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
-
-            {/* Confirm Button */}
-            {/* <button
-              onClick={handleConfirm}
-              className="w-full mt-6 px-6 py-3.5 bg-blue-600 text-white rounded-xl font-semibold active:scale-[0.98] transition"
-            >
-              Done
-            </button> */}
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        @keyframes slideUp {
-          from {
-            transform: translateY(100%);
-          }
-          to {
-            transform: translateY(0);
-          }
-        }
-        @keyframes slideDown {
-          from {
-            transform: translateY(0);
-          }
-          to {
-            transform: translateY(100%);
-          }
-        }
-        .animate-slideUp {
-          animation: slideUp 0.3s ease-out;
-        }
-        .animate-slideDown {
-          animation: slideDown 0.3s ease-out;
-        }
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        @keyframes fadeOut {
-          from {
-            opacity: 1;
-          }
-          to {
-            opacity: 0;
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease-out;
-        }
-        .animate-fadeOut {
-          animation: fadeOut 0.3s ease-out;
-        }
-      `}</style>
     </>
   );
 }

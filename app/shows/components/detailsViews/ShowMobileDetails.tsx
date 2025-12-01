@@ -340,12 +340,17 @@ export function ShowMobileDetails({
         curSeasonIndex={show.curSeasonIndex}
         curEpisode={show.curEpisode}
         onClose={() => setIsProgressPickerOpen(false)}
-        onProgressChange={(seasonIndex, episode) => {
+        onSeasonIndexChange={(seasonIndex) => {
           onAction({
-            type: "changeProgress",
-            payload: { seasonIndex, episode },
+            type: "changeSeasonNum",
+            payload: seasonIndex,
           });
-          setIsProgressPickerOpen(false);
+        }}
+        onEpisodeChange={(episode) => {
+          onAction({
+            type: "changeEpisodeNum",
+            payload: episode,
+          });
         }}
       />
     </>

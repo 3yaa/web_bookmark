@@ -2,14 +2,14 @@ import { ShowProps } from "@/types/show";
 import { ShowAction } from "../ShowDetailsHub";
 import React, { useEffect, useState, useRef } from "react";
 import { Plus, ChevronsUp } from "lucide-react";
-import { showStatusOptions } from "@/utils/dropDownDetails";
+import { scoreOptions, showStatusOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import Image from "next/image";
-import { MobilePicker } from "@/app/components/ui/MobileScorePicker";
 import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
 import { Loading } from "@/app/components/ui/Loading";
 import { calcCurProgress } from "../../utils/progressCalc";
 import { MobileProgressPicker } from "@/app/components/ui/MobileSeasonEpPicker";
+import { MobileScorePicker } from "@/app/components/ui/MobileScorePicker1";
 
 interface ShowMobileDetailsProps {
   show: ShowProps;
@@ -30,6 +30,8 @@ export function ShowMobileDetails({
   onAction,
   isLoading,
 }: ShowMobileDetailsProps) {
+  const [isScorePickerOpen, setIsScorePickerOpen] = useState(false);
+  const [score, setScore] = useState(0);
   const [posterLoaded, setPosterLoaded] = useState(false);
   const [isProgressPickerOpen, setIsProgressPickerOpen] = useState(false);
   const [translateY, setTranslateY] = useState(0);
@@ -71,7 +73,7 @@ export function ShowMobileDetails({
   }, []);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (isProgressPickerOpen) return;
+    if (isProgressPickerOpen || isScorePickerOpen) return;
 
     const target = e.target as HTMLElement;
     if (
@@ -96,7 +98,7 @@ export function ShowMobileDetails({
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || isProgressPickerOpen) return;
+    if (!isDragging || isProgressPickerOpen || isScorePickerOpen) return;
 
     const modal = modalRef.current;
     if (!modal) return;
@@ -151,7 +153,9 @@ export function ShowMobileDetails({
       <div
         ref={modalRef}
         className={`fixed inset-0 z-30 bg-zinc-950 flex flex-col ${
-          isProgressPickerOpen ? "overflow-hidden" : "overflow-y-auto"
+          isProgressPickerOpen || isScorePickerOpen
+            ? "overflow-hidden"
+            : "overflow-y-auto"
         }`}
         style={{
           transform: `translateY(${translateY}px)`,
@@ -233,15 +237,12 @@ export function ShowMobileDetails({
                   {show.title}
                 </h1>
                 <div data-no-drag>
-                  <MobilePicker
-                    score={show.score || 0}
-                    onScoreChange={(newScore) =>
-                      onAction({
-                        type: "changeScore",
-                        payload: newScore,
-                      })
-                    }
-                  />
+                  <button
+                    onClick={() => setIsScorePickerOpen(true)}
+                    className="text-zinc-400 font-bold bg-zinc-800/60 px-3 py-1.5 rounded-md shadow-inner shadow-black/40 cursor-pointer hover:bg-zinc-700/60 transition flex items-center gap-2"
+                  >
+                    {score || "-"}
+                  </button>
                 </div>
               </div>
               <div className="text-zinc-400 text-sm -mt-1 flex items-center gap-2">
@@ -334,6 +335,13 @@ export function ShowMobileDetails({
           </div>
         </div>
       </div>
+      <MobileScorePicker
+        isOpen={isScorePickerOpen}
+        score={score}
+        scoreOptions={scoreOptions}
+        onClose={() => setIsScorePickerOpen(false)}
+        onScoreChange={(newScore) => setScore(newScore)}
+      />
       <MobileProgressPicker
         isOpen={isProgressPickerOpen}
         seasons={show.seasons || []}

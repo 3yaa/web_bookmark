@@ -5,7 +5,7 @@ import { Dropdown } from "@/app/components/ui/Dropdown";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
 import { scoreOptions, showStatusOptions } from "@/utils/dropDownDetails";
-
+// NOT USED IN MOBILE
 interface ManualAddShowProps {
   isOpen: boolean;
   onClose: () => void;

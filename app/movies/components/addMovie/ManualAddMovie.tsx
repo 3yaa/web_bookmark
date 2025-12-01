@@ -5,7 +5,7 @@ import { Dropdown } from "@/app/components/ui/Dropdown";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
 import { scoreOptions, movieStatusOptions } from "@/utils/dropDownDetails";
-
+// NOT USED IN MOBILE
 interface ManualAddMovieProps {
   isOpen: boolean;
   onClose: () => void;

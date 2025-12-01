@@ -181,27 +181,27 @@ export function ShowMobileDetails({
         {(posterLoaded || addingShow) && (
           <div className="sticky top-0 z-30">
             <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {addingShow && (
-                  <>
-                    <button
-                      className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
-                      onClick={() => {
-                        onAction({ type: "needYear" });
-                      }}
-                      title={"Search with year"}
-                    >
-                      <ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
-                    </button>
-                    <button
-                      className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
-                      onClick={onAddShow}
-                    >
-                      <Plus className="w-5 h-5 text-slate-400" />
-                    </button>
-                  </>
-                )}
-              </div>
+              {addingShow && (
+                <>
+                  {/* ADD */}
+                  <button
+                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+                    onClick={onAddShow}
+                  >
+                    <Plus className="w-5 h-5 text-slate-400" />
+                  </button>
+                  {/* YEAR */}
+                  <button
+                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
+                    onClick={() => {
+                      onAction({ type: "needYear" });
+                    }}
+                    title={"Search with year"}
+                  >
+                    <ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}

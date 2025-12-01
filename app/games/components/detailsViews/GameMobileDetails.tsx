@@ -1,7 +1,7 @@
 import { GameProps } from "@/types/game";
 import { GameAction } from "../GameDetailsHub";
 import React, { useEffect, useState, useRef } from "react";
-import { X, Trash2, Plus, ChevronsUp } from "lucide-react";
+import { Plus, ChevronsUp } from "lucide-react";
 import { gameStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import Image from "next/image";
@@ -68,14 +68,6 @@ export function GameMobileDetails({
       window.scrollTo(0, scrollY);
     };
   }, []);
-
-  const handleClose = () => {
-    setIsExiting(true);
-    setIsVisible(false);
-    setTimeout(() => {
-      onClose();
-    }, 300);
-  };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isScorePickerOpen) return;
@@ -184,42 +176,27 @@ export function GameMobileDetails({
         {(posterLoaded || addingGame) && (
           <div className="sticky top-0 z-30">
             <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
-              <button
-                className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
-                onClick={handleClose}
-              >
-                <X className="w-5 h-5 text-slate-400" />
-              </button>
-              <div className="flex items-center gap-2">
-                {addingGame ? (
-                  <>
-                    {/* NEED YEAR */}
-                    <button
-                      className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
-                      onClick={() => {
-                        onAction({ type: "needYearField" });
-                      }}
-                      title={"Search with year"}
-                    >
-                      <ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
-                    </button>
-                    {/* ADD BUTTON */}
-                    <button
-                      className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
-                      onClick={onAddGame}
-                    >
-                      <Plus className="w-5 h-5 text-slate-400" />
-                    </button>
-                  </>
-                ) : (
+              {addingGame && (
+                <>
+                  {/* ADD BUTTON */}
                   <button
-                    className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
-                    onClick={() => onAction({ type: "deleteGame" })}
+                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+                    onClick={onAddGame}
                   >
-                    <Trash2 className="w-5 h-5 text-slate-400" />
+                    <Plus className="w-5 h-5 text-slate-400" />
                   </button>
-                )}
-              </div>
+                  {/* NEED YEAR */}
+                  <button
+                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
+                    onClick={() => {
+                      onAction({ type: "needYearField" });
+                    }}
+                    title={"Search with year"}
+                  >
+                    <ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}

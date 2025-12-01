@@ -1,14 +1,7 @@
 import { BookProps } from "@/types/book";
 import { BookAction } from "../BookDetailsHub";
 import React, { useEffect, useState, useRef } from "react";
-import {
-  X,
-  Trash2,
-  Plus,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsUp,
-} from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
 import { bookStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import Image from "next/image";
@@ -94,14 +87,6 @@ export function BookMobileDetails({
       window.scrollTo(0, scrollY);
     };
   }, []);
-
-  const handleClose = () => {
-    setIsExiting(true);
-    setIsVisible(false);
-    setTimeout(() => {
-      onClose();
-    }, 300);
-  };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isScorePickerOpen) return;
@@ -210,15 +195,16 @@ export function BookMobileDetails({
         {(posterLoaded || addingBook) && (
           <div className="sticky top-0 z-30">
             <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
-              <button
-                className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
-                onClick={handleClose}
-              >
-                <X className="w-5 h-5 text-slate-400" />
-              </button>
-              <div className="flex items-center gap-2">
-                {addingBook ? (
-                  <>
+              {addingBook && (
+                <>
+                  {/* ADD BUTTON */}
+                  <button
+                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+                    onClick={onAddBook}
+                  >
+                    <Plus className="w-5 h-5 text-slate-400" />
+                  </button>
+                  <div className="flex items-center gap-2">
                     {/* DIFFERENT SERIES OPTIONS */}
                     {showBookInSeries && (
                       <div className="flex gap-1 bg-zinc-800/60 rounded-lg p-0.5">
@@ -246,23 +232,9 @@ export function BookMobileDetails({
                     >
                       <ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
                     </button>
-                    {/* ADD BUTTON */}
-                    <button
-                      className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
-                      onClick={onAddBook}
-                    >
-                      <Plus className="w-5 h-5 text-slate-400" />
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    className="bg-zinc-800/20 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
-                    onClick={() => onAction({ type: "deleteBook" })}
-                  >
-                    <Trash2 className="w-5 h-5 text-slate-400" />
-                  </button>
-                )}
-              </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}

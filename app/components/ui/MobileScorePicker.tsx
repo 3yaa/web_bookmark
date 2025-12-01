@@ -71,7 +71,7 @@ export function MobileScorePicker({
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-50 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
           isClosing ? "opacity-0" : "opacity-100"
         }`}
         onClick={handleClose}
@@ -83,7 +83,7 @@ export function MobileScorePicker({
           isClosing ? "translate-y-full" : "translate-y-0"
         }`}
       >
-        <div className="bg-zinc-900 rounded-t-3xl border-t border-zinc-800/50 shadow-2xl">
+        <div className="bg-zinc-950 rounded-t-3xl border-t border-zinc-900/50 shadow-2xl">
           {/* Handle */}
           <div className="pt-3 pb-4 flex justify-center">
             <div className="w-12 h-1 bg-zinc-700/80 rounded-full"></div>

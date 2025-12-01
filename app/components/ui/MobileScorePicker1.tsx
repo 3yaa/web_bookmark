@@ -90,7 +90,7 @@ export function MobileScorePicker({
           </div>
 
           {/* Content */}
-          <div className="px-5 pb-6">
+          <div className="px-5 pb-1">
             <h3 className="text-base font-semibold text-zinc-100 mb-5 text-center">
               Update Score
             </h3>

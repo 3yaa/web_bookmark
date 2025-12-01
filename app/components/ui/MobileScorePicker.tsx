@@ -1,71 +1,125 @@
-import React, { useState, useRef, useEffect } from "react";
-import { scoreOptions } from "@/utils/dropDownDetails";
+import React, { useEffect, useRef, useState } from "react";
 
-interface MobilePickerProps {
+interface ScoreOption {
+  value: string;
+  label: string;
+}
+
+interface MobileScorePickerProps {
+  isOpen: boolean;
   score: number;
+  scoreOptions: ScoreOption[];
+  onClose: () => void;
   onScoreChange: (score: number) => void;
 }
 
-export function MobilePicker({ score, onScoreChange }: MobilePickerProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const modalRef = useRef<HTMLDivElement>(null);
+export function MobileScorePicker({
+  isOpen,
+  score,
+  scoreOptions,
+  onClose,
+  onScoreChange,
+}: MobileScorePickerProps) {
+  const [selectedScore, setSelectedScore] = useState(score);
+  const [isClosing, setIsClosing] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const handleSelectScore = (newScore: number) => {
-    onScoreChange(newScore);
-    setIsOpen(false);
+  // Reset selection when picker opens
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedScore(score);
+      setIsClosing(false);
+    }
+  }, [isOpen, score]);
+
+  // Auto-scroll to selected score when picker opens
+  useEffect(() => {
+    if (isOpen && scrollRef.current) {
+      const selectedButton = scrollRef.current.querySelector(
+        `[data-score="${selectedScore}"]`
+      ) as HTMLElement;
+      if (selectedButton) {
+        setTimeout(() => {
+          selectedButton.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 100);
+      }
+    }
+  }, [isOpen, selectedScore]);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 150);
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-    //
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    //
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen]);
+  const handleScoreSelect = (newScore: number) => {
+    setSelectedScore(newScore);
+    onScoreChange(newScore);
+    setTimeout(() => {
+      handleClose();
+    }, 10);
+  };
+
+  if (!isOpen) return null;
 
   return (
     <>
-      {/* OPTION */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="text-zinc-400 font-bold bg-zinc-800/60 px-3 py-1.5 rounded-md shadow-inner shadow-black/40 cursor-pointer hover:bg-zinc-700/60 transition flex items-center gap-2"
+      {/* Backdrop */}
+      <div
+        className={`fixed inset-0 z-50 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${
+          isClosing ? "opacity-0" : "opacity-100"
+        }`}
+        onClick={handleClose}
+      />
+
+      {/* Bottom Sheet */}
+      <div
+        className={`fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-out ${
+          isClosing ? "translate-y-full" : "translate-y-0"
+        }`}
       >
-        {score || "-"}
-      </button>
-      {/* FULL SCREEN MODAL */}
-      {isOpen && (
-        <div className="fixed inset-0 z-50 bg-zinc-950/50 backdrop-blur-2xl overflow-y-auto flex flex-col items-center justify-center animate-fadeIn p-4">
-          {/* OPTIONS GRID */}
-          <div ref={modalRef} className="w-full max-w-sm">
-            <div className="grid grid-cols-1 gap-2">
-              {scoreOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => handleSelectScore(Number(option.value))}
-                  className={`w-full min-w-50 px-4 py-3 text-left font-medium rounded-lg border transition ${
-                    Number(option.value) === score
-                      ? "bg-zinc-900/80 text-zinc-100 border-zinc-900"
-                      : "bg-zinc-800/60 text-zinc-300 border-zinc-800/40 active:bg-zinc-800/60"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
+        <div className="bg-zinc-900 rounded-t-3xl border-t border-zinc-800/50 shadow-2xl">
+          {/* Handle */}
+          <div className="pt-3 pb-4 flex justify-center">
+            <div className="w-12 h-1 bg-zinc-700/80 rounded-full"></div>
+          </div>
+
+          {/* Content */}
+          <div className="px-5 pb-1">
+            <h3 className="text-base font-semibold text-zinc-100 mb-5 text-center">
+              Update Score
+            </h3>
+
+            {/* Scrollable Picker */}
+            <div className="h-80 mb-5">
+              <div
+                ref={scrollRef}
+                className="overflow-y-auto no-scrollbar h-full space-y-1.5 relative mask-gradient"
+              >
+                {scoreOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    data-score={Number(option.value)}
+                    onClick={() => handleScoreSelect(Number(option.value))}
+                    className={`w-full py-3 rounded-lg font-medium transition-all duration-150 active:scale-[0.98] ${
+                      Number(option.value) === selectedScore
+                        ? "bg-zinc-700 text-zinc-50"
+                        : "bg-zinc-800/40 text-zinc-400 active:bg-zinc-800/60"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 }

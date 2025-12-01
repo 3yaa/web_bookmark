@@ -9,7 +9,7 @@ import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
 import { Loading } from "@/app/components/ui/Loading";
 import { calcCurProgress } from "../../utils/progressCalc";
 import { MobileProgressPicker } from "@/app/components/ui/MobileSeasonEpPicker";
-import { MobileScorePicker } from "@/app/components/ui/MobileScorePicker1";
+import { MobileScorePicker } from "@/app/components/ui/MobileScorePicker";
 
 interface ShowMobileDetailsProps {
   show: ShowProps;
@@ -236,6 +236,7 @@ export function ShowMobileDetails({
                 <h1 className="text-zinc-100 text-2xl font-bold -mt-0.5">
                   {show.title}
                 </h1>
+                {/* SCORE */}
                 <div data-no-drag>
                   <button
                     onClick={() => setIsScorePickerOpen(true)}

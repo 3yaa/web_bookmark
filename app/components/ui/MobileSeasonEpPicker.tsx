@@ -118,7 +118,7 @@ export function MobileProgressPicker({
 
           {/* Content */}
           <div className="px-5 pb-1">
-            <h3 className="text-base font-semibold text-zinc-100 mb-5 text-center">
+            <h3 className="text-base font-semibold text-zinc-100 mb-2 text-center">
               Update Progress
             </h3>
 
@@ -126,7 +126,7 @@ export function MobileProgressPicker({
             <div className="flex gap-3 h-56 mb-5">
               {/* Season Picker */}
               <div className="flex flex-col flex-1">
-                <span className="text-zinc-500 text-xs font-medium mb-2.5 text-center">
+                <span className="text-zinc-500 text-sm font-medium mb-2.5 text-center">
                   Season
                 </span>
                 <div
@@ -159,7 +159,7 @@ export function MobileProgressPicker({
 
               {/* Episode Picker */}
               <div className="flex flex-col flex-1">
-                <span className="text-zinc-500 text-xs font-medium mb-2.5 text-center">
+                <span className="text-zinc-500 text-sm font-medium mb-2.5 text-center">
                   Episode
                 </span>
                 <div

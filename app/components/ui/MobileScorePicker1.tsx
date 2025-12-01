@@ -106,7 +106,7 @@ export function MobileScorePicker({
                     key={option.value}
                     data-score={Number(option.value)}
                     onClick={() => handleScoreSelect(Number(option.value))}
-                    className={`w-full py-3 rounded-lg text-sm font-medium transition-all duration-150 active:scale-[0.98] ${
+                    className={`w-full py-3 rounded-lg font-medium transition-all duration-150 active:scale-[0.98] ${
                       Number(option.value) === selectedScore
                         ? "bg-zinc-700 text-zinc-50"
                         : "bg-zinc-800/40 text-zinc-400 active:bg-zinc-800/60"

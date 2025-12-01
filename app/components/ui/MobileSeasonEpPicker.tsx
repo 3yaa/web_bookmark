@@ -83,26 +83,33 @@ export function MobileProgressPicker({
   // IntersectionObserver: watch which season / episode is centered and update state
   useEffect(() => {
     if (!isOpen) return;
-    // cleanup any existing observers
+
     seasonObservers.current?.disconnect();
     episodeObservers.current?.disconnect();
 
-    const rootMargin = "-60% 0px -60% 0px"; // narrow center slab
+    const highlightTop = 40;
+    const highlightHeight = 48;
+    const containerHeight = 176;
+
+    const topMargin = highlightTop;
+    const bottomMargin = -(containerHeight - (highlightTop + highlightHeight));
+
+    const rootMargin = `${topMargin}px 0px ${bottomMargin}px 0px`;
+
     const seasonCb: IntersectionObserverCallback = (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          const el = entry.target as HTMLElement;
-          const idx = Number(el.dataset.season);
-          if (!Number.isNaN(idx)) setSelectedSeasonIndex(idx);
+          const idx = Number((entry.target as HTMLElement).dataset.season);
+          if (!isNaN(idx)) setSelectedSeasonIndex(idx);
         }
       });
     };
+
     const episodeCb: IntersectionObserverCallback = (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          const el = entry.target as HTMLElement;
-          const ep = Number(el.dataset.episode);
-          if (!Number.isNaN(ep)) setSelectedEpisode(ep);
+          const ep = Number((entry.target as HTMLElement).dataset.episode);
+          if (!isNaN(ep)) setSelectedEpisode(ep);
         }
       });
     };
@@ -112,6 +119,7 @@ export function MobileProgressPicker({
       rootMargin,
       threshold: 0.5,
     });
+
     const eObserver = new IntersectionObserver(episodeCb, {
       root: episodeRef.current,
       rootMargin,
@@ -121,14 +129,13 @@ export function MobileProgressPicker({
     seasonObservers.current = sObserver;
     episodeObservers.current = eObserver;
 
-    // observe season items
-    const seasonNodes =
-      seasonRef.current?.querySelectorAll<HTMLElement>("[data-season]");
-    seasonNodes?.forEach((n) => sObserver.observe(n));
-    // observe episode items
-    const episodeNodes =
-      episodeRef.current?.querySelectorAll<HTMLElement>("[data-episode]");
-    episodeNodes?.forEach((n) => eObserver.observe(n));
+    seasonRef.current
+      ?.querySelectorAll<HTMLElement>("[data-season]")
+      .forEach((n) => sObserver.observe(n));
+
+    episodeRef.current
+      ?.querySelectorAll<HTMLElement>("[data-episode]")
+      .forEach((n) => eObserver.observe(n));
 
     return () => {
       sObserver.disconnect();

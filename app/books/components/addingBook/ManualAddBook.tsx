@@ -12,7 +12,7 @@ interface ManualAddBookProps {
   book: Partial<BookProps>;
   onUpdate: (updates: Partial<BookProps>) => void;
 }
-// NOT USED IN BOOK
+// NOT USED IN MOBILE
 export function ManualAddBook({
   isOpen,
   onClose,

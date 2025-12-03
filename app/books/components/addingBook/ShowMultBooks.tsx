@@ -25,7 +25,7 @@ export function ShowMultBooks({
   console.log(books.forEach((book) => console.log(book.cover_urls?.[0])));
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 overflow-x-hidden">
       {/* Modal content */}
       <div className="relative bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] flex flex-col shadow-xl">
         {isLoading && (
@@ -38,7 +38,7 @@ export function ShowMultBooks({
         <div className="absolute right-3 top-3 flex items-center gap-2">
           {/* ADD */}
           <button
-            className="py-1.5 px-5 rounded-lg bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer transition-all group"
+            className="hidden lg:block py-1.5 px-5 rounded-lg bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer transition-all group"
             onClick={() => {
               onClose("manualAdd");
             }}
@@ -82,7 +82,7 @@ export function ShowMultBooks({
                 onClick={() => onClickedBook(book)}
               >
                 {/* COVER */}
-                <div className="w-12.5 h-18">
+                <div className="w-12.5 h-18 flex-shrink-0">
                   {book.cover_urls && book.cover_urls[0] ? (
                     <Image
                       src={book.cover_urls[0]}
@@ -101,8 +101,8 @@ export function ShowMultBooks({
                   )}
                 </div>
                 {/* DETAILS */}
-                <div className="flex flex-col">
-                  <span className="text-lg font-medium text-zinc-100 truncate max-w-132">
+                <div className="flex flex-col flex-1 min-w-0">
+                  <span className="text-lg font-medium text-zinc-100 truncate">
                     {book.title || "Untitled"}
                   </span>
                   {book.author_name && book.author_name.length > 0 ? (

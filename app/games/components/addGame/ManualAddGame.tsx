@@ -12,7 +12,7 @@ interface ManualAddGameProps {
   game: Partial<GameProps>;
   onUpdate: (updates: Partial<GameProps>) => void;
 }
-
+// NOT USED IN MOBILE
 export function ManualAddGame({
   isOpen,
   onClose,

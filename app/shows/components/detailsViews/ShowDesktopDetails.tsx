@@ -242,6 +242,14 @@ export function ShowDesktopDetails({
                         }}
                         options={scoreOptions}
                         customStyle="text-zinc-300/75 font-semibold"
+                        dropStyle={(() => {
+                          const option = showStatusOptions.find(
+                            (opt) => opt.value === show.status
+                          );
+                          return option
+                            ? [option.textStyle, option.bgStyle]
+                            : [];
+                        })()}
                         dropDuration={0.4}
                       />
                     </div>

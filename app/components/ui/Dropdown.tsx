@@ -25,6 +25,7 @@ export function Dropdown({
   onChange,
   customStyle = "text-zinc-200 font-semibold",
   disabled = false,
+  dropStyle,
   dropDuration = 0.3,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -126,28 +127,30 @@ export function Dropdown({
               width: buttonRef.current?.offsetWidth, // keeps same width as button
             }}
           >
-            {options.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => handleSelect(option.value)}
-                className={`w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-zinc-200 focus:outline-none border-b border-zinc-800/90 last:border-none transition-all duration-200 ease-out cursor-pointer
-                ${
-                  option.value === value
-                    ? `rounded-md bg-gradient-to-r from-transparent ${option.bgStyle}`
-                    : "hover:bg-zinc-800/70 hover:text-white"
-                }`}
-              >
-                <span
-                  className={`${
-                    option.value === value ? `${option.textStyle}` : ""
-                  }
-                  `}
+            {options.map((option) => {
+              const textStyle = dropStyle?.[0] || option.textStyle;
+              const bgStyle = dropStyle?.[1] || option.bgStyle;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => handleSelect(option.value)}
+                  className={`w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-zinc-200 focus:outline-none border-b border-zinc-800/90 last:border-none transition-all duration-200 ease-out cursor-pointer
+                  ${
+                    option.value === value
+                      ? `rounded-md bg-gradient-to-r from-transparent ${bgStyle}`
+                      : "hover:bg-zinc-800/70 hover:text-white"
+                  }`}
                 >
-                  {option.label}
-                </span>
-              </button>
-            ))}
+                  <span
+                    className={`${option.value === value ? `${textStyle}` : ""}
+                    `}
+                  >
+                    {option.label}
+                  </span>
+                </button>
+              );
+            })}
           </motion.div>
         </Portal>
       )}

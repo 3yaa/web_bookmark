@@ -261,11 +261,14 @@ export function MovieDesktopDetails({
                         }}
                         options={scoreOptions}
                         customStyle="text-zinc-200/80 font-semibold"
-                        dropStyle={
-                          movie.status === "Completed"
-                            ? ["to-emerald-500/10", "text-emerald-500"]
-                            : ["to-blue-500/10", "text-blue-500"]
-                        }
+                        dropStyle={(() => {
+                          const option = movieStatusOptions.find(
+                            (opt) => opt.value === movie.status
+                          );
+                          return option
+                            ? [option.textStyle, option.bgStyle]
+                            : [];
+                        })()}
                         dropDuration={0.4}
                       />
                     </div>

@@ -289,11 +289,14 @@ export function BookDesktopDetails({
                         }}
                         options={scoreOptions}
                         customStyle="text-zinc-200/80 font-semibold"
-                        dropStyle={
-                          book.status === "Completed"
-                            ? ["to-emerald-500/10", "text-emerald-500"]
-                            : ["to-blue-500/10", "text-blue-500"]
-                        }
+                        dropStyle={(() => {
+                          const option = bookStatusOptions.find(
+                            (opt) => opt.value === book.status
+                          );
+                          return option
+                            ? [option.textStyle, option.bgStyle]
+                            : [];
+                        })()}
                         dropDuration={0.4}
                       />
                     </div>

@@ -264,11 +264,14 @@ export function GameDesktopDetails({
                         }}
                         options={scoreOptions}
                         customStyle="text-zinc-200/80 font-semibold"
-                        dropStyle={
-                          game.status === "Completed"
-                            ? ["to-emerald-500/10", "text-emerald-500"]
-                            : ["to-blue-500/10", "text-blue-500"]
-                        }
+                        dropStyle={(() => {
+                          const option = gameStatusOptions.find(
+                            (opt) => opt.value === game.status
+                          );
+                          return option
+                            ? [option.textStyle, option.bgStyle]
+                            : [];
+                        })()}
                         dropDuration={0.4}
                       />
                     </div>

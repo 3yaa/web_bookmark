@@ -252,8 +252,8 @@ export function ShowMobileListing({
                 <Image
                   src={show.posterUrl}
                   alt={show.title || "Untitled"}
-                  width={100}
-                  height={75}
+                  width={300}
+                  height={450}
                   priority
                   className="object-fill w-full h-full rounded-md border border-zinc-700/40"
                 />

@@ -31,7 +31,6 @@ export function ShowMobileDetails({
   isLoading,
 }: ShowMobileDetailsProps) {
   const [isScorePickerOpen, setIsScorePickerOpen] = useState(false);
-  const [score, setScore] = useState(0);
   const [posterLoaded, setPosterLoaded] = useState(false);
   const [isProgressPickerOpen, setIsProgressPickerOpen] = useState(false);
   const [translateY, setTranslateY] = useState(0);
@@ -242,7 +241,7 @@ export function ShowMobileDetails({
                     onClick={() => setIsScorePickerOpen(true)}
                     className="text-zinc-400 font-bold bg-zinc-800/60 px-3 py-1.5 rounded-md shadow-inner shadow-black/40 cursor-pointer hover:bg-zinc-700/60 transition flex items-center gap-2"
                   >
-                    {score || "-"}
+                    {show.score || "-"}
                   </button>
                 </div>
               </div>
@@ -338,10 +337,12 @@ export function ShowMobileDetails({
       </div>
       <MobileScorePicker
         isOpen={isScorePickerOpen}
-        score={score}
+        score={show.score ?? 0}
         scoreOptions={scoreOptions}
         onClose={() => setIsScorePickerOpen(false)}
-        onScoreChange={(newScore) => setScore(newScore)}
+        onScoreChange={(nScore) =>
+          onAction({ type: "changeScore", payload: nScore })
+        }
       />
       <MobileProgressPicker
         isOpen={isProgressPickerOpen}

@@ -91,12 +91,12 @@ export function MobileScorePicker({
 
           {/* Content */}
           <div className="px-5 pb-1">
-            <h3 className="text-base font-semibold text-zinc-100 mb-5 text-center">
+            <h3 className="text-base font-semibold text-zinc-100 mb-3 text-center">
               Update Score
             </h3>
 
             {/* Scrollable Picker */}
-            <div className="h-80 mb-5">
+            <div className="h-56 mb-5">
               <div
                 ref={scrollRef}
                 className="overflow-y-auto no-scrollbar h-full space-y-1.5 relative mask-gradient"

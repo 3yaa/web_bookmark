@@ -32,7 +32,7 @@ export const getStatusBorderColor = (status: MediaStatus) => {
       return "border-blue-500/50";
     // show
     case "Watching":
-      return "border-indigo-600/50";
+      return "border-violet-600/50";
     // book
     case "Want to Read":
       return "border-blue-500/50";
@@ -56,7 +56,7 @@ export const getStatusBorderGradient = (status: Partial<MediaStatus>) => {
       return "from-blue-500/50";
     // show
     case "Watching":
-      return "from-indigo-600/50";
+      return "from-violet-600/50";
     // book
     case "Want to Read":
       return "from-blue-500/50";
@@ -74,7 +74,7 @@ export const getStatusTextColor = (status: MediaStatus) => {
     case "Completed":
       return "text-emerald-500/80";
     case "Watching":
-      return "text-indigo-500/80";
+      return "text-violet-500/80";
     case "Want to Watch":
       return "text-blue-500/85";
     case "Dropped":
@@ -95,7 +95,7 @@ export const getStatusBg = (status: Partial<MediaStatus>) => {
       return "bg-blue-600/60";
     // show
     case "Watching":
-      return "bg-indigo-600/50";
+      return "bg-violet-600/50";
     // book
     case "Want to Read":
       return "bg-blue-600/50";

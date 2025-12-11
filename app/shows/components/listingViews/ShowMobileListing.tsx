@@ -321,7 +321,8 @@ export function ShowMobileListing({
                         ? calcCurProgress(
                             show.seasons,
                             show.curSeasonIndex,
-                            show.curEpisode
+                            show.curEpisode,
+                            show.status
                           )
                         : 0
                     }%`,

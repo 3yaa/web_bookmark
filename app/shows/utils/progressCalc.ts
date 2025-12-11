@@ -3,8 +3,13 @@ import { TMDBSeasonProps } from "@/types/show";
 export const calcCurProgress = (
   seasons: TMDBSeasonProps[],
   curSeasonIndex: number,
-  curEp: number
+  curEp: number,
+  status?: string
 ) => {
+  if (curSeasonIndex === 0 && curEp === 1 && status === "Want to Watch") {
+    return 100;
+  }
+
   if (curSeasonIndex === 0 && curEp === 1) return 1;
 
   let completedEps = 0;

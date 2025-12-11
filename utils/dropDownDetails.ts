@@ -10,8 +10,8 @@ const statusConfig = {
     bgStyle: "to-blue-500/10",
   },
   Watching: {
-    textStyle: "text-indigo-500",
-    bgStyle: "to-indigo-600/10",
+    textStyle: "text-cyan-500/80",
+    bgStyle: "to-cyan-600/10",
   },
   Playing: {
     textStyle: "text-blue-500/80",

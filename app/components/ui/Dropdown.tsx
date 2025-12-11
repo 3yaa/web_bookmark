@@ -120,13 +120,9 @@ export function Dropdown({
             }}
             className="z-50 rounded-lg rounded-t-md border border-zinc-700/40 bg-zinc-900/70 backdrop-blur-md shadow-lg overflow-hidden min-w-max"
             style={{
-              position: "absolute",
-              top:
-                (buttonRef.current?.getBoundingClientRect().bottom ?? 0) +
-                window.scrollY,
-              left:
-                (buttonRef.current?.getBoundingClientRect().left ?? 0) +
-                window.scrollX,
+              position: "fixed",
+              top: buttonRef.current?.getBoundingClientRect().bottom ?? 0,
+              left: buttonRef.current?.getBoundingClientRect().left ?? 0,
               width: buttonRef.current?.offsetWidth, // keeps same width as button
             }}
           >

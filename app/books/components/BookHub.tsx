@@ -106,8 +106,11 @@ export default function BookList() {
 
   const handleModalClose = useCallback(() => {
     setActiveModal(null);
-    setTitleToUse("");
-    setSelectedBook(null);
+    // wait a frame before clearing state
+    requestAnimationFrame(() => {
+      setTitleToUse("");
+      setSelectedBook(null);
+    });
   }, []);
 
   const handleBookClicked = useCallback((book: BookProps) => {

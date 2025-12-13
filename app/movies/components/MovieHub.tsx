@@ -106,8 +106,11 @@ export default function MoviesHub() {
 
   const handleModalClose = useCallback(() => {
     setActiveModal(null);
-    setTitleToUse("");
-    setSelectedMovie(null);
+    // wait a frame before clearing state
+    requestAnimationFrame(() => {
+      setTitleToUse("");
+      setSelectedMovie(null);
+    });
   }, []);
 
   const handleMovieClicked = useCallback((movie: MovieProps) => {

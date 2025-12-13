@@ -118,8 +118,11 @@ export default function GameList() {
 
   const handleModalClose = useCallback(() => {
     setActiveModal(null);
-    setTitleToAdd(null);
-    setSelectedGame(null);
+    // wait a frame before clearing state
+    requestAnimationFrame(() => {
+      setTitleToAdd(null);
+      setSelectedGame(null);
+    });
   }, []);
 
   const handleGameClicked = useCallback((game: GameProps) => {

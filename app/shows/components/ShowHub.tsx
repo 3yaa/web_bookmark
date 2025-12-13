@@ -5,6 +5,7 @@ import {
   useState,
   useTransition,
   useMemo,
+  useDeferredValue
 } from "react";
 import { Plus } from "lucide-react";
 import { MediaStatus } from "@/types/media";
@@ -32,14 +33,14 @@ export default function ShowList() {
   >(null);
   // change ground truth
   const [isFilterPending, startTransition] = useTransition();
+  const deferredStatusFilter = useDeferredValue(statusFilter);
+  
   const filteredShows = useMemo(() => {
-    if (statusFilter) {
-      return statusFilter
-        ? shows.filter((show) => show.status === statusFilter)
-        : shows;
+    if (deferredStatusFilter) {
+      return shows.filter((show) => show.status === deferredStatusFilter);
     }
     return shows;
-  }, [shows, statusFilter]);
+  }, [shows, deferredStatusFilter]);
   const sortedShows = useSortShows(filteredShows, sortConfig);
 
   const handleShowUpdates = useCallback(

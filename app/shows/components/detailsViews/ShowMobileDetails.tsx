@@ -63,11 +63,13 @@ export function ShowMobileDetails({
     });
 
     return () => {
-      document.body.style.overflow = originalOverflow;
-      document.body.style.position = originalPosition;
-      document.body.style.top = originalTop;
-      document.body.style.width = "";
-      window.scrollTo(0, scrollY);
+      requestAnimationFrame(() => {
+        document.body.style.overflow = originalOverflow;
+        document.body.style.position = originalPosition;
+        document.body.style.top = originalTop;
+        document.body.style.width = "";
+        window.scrollTo(0, scrollY);
+      });
     };
   }, []);
 
@@ -103,12 +105,15 @@ export function ShowMobileDetails({
     if (!modal) return;
 
     const currentY = e.touches[0].clientY;
-    const currentTime = Date.now();
     const deltaY = currentY - startY.current;
 
+    const currentTime = Date.now();
     const timeDelta = currentTime - lastTime.current;
-    if (timeDelta > 0) {
+    if (timeDelta > 16) {
+      // Only update every ~16ms (60fps)
       dragVelocity.current = (currentY - lastY.current) / timeDelta;
+      lastY.current = currentY;
+      lastTime.current = currentTime;
     }
 
     lastY.current = currentY;
@@ -130,15 +135,12 @@ export function ShowMobileDetails({
     const velocityThreshold = 0.5;
 
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
-      const finalY = Math.max(
-        translateY + dragVelocity.current * 200,
-        window.innerHeight
-      );
-      setTranslateY(finalY);
       setIsExiting(true);
-      setTimeout(() => {
+      setTranslateY(window.innerHeight);
+      // Close immediately without waiting
+      requestAnimationFrame(() => {
         onClose();
-      }, 10);
+      });
     } else {
       setTranslateY(0);
     }

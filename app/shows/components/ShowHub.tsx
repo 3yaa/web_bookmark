@@ -1,11 +1,5 @@
 "use client";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useTransition,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { MediaStatus } from "@/types/media";
 import { ShowProps, SortConfig } from "@/types/show";
@@ -30,18 +24,8 @@ export default function ShowList() {
   const [activeModal, setActiveModal] = useState<
     "showDetails" | "addShow" | null
   >(null);
-
-  // change ground truth
-  const [isFilterPending, startTransition] = useTransition();
-  const filteredShows = useMemo(() => {
-    if (statusFilter) {
-      return statusFilter
-        ? shows.filter((show) => show.status === statusFilter)
-        : shows;
-    }
-    return shows;
-  }, [shows, statusFilter]);
-  const sortedShows = useSortShows(filteredShows, sortConfig);
+  //
+  const sortedShows = useSortShows(shows, statusFilter, sortConfig);
 
   const handleShowUpdates = useCallback(
     async (
@@ -74,13 +58,11 @@ export default function ShowList() {
   };
 
   const handleStatusFilterConfig = (status: MediaStatus) => {
-    startTransition(() => {
-      if (statusFilter === status) {
-        setStatusFilter(null);
-      } else {
-        setStatusFilter(status);
-      }
-    });
+    if (statusFilter === status) {
+      setStatusFilter(null);
+    } else {
+      setStatusFilter(status);
+    }
   };
 
   const handleModalClose = useCallback(() => {
@@ -96,11 +78,20 @@ export default function ShowList() {
 
   useEffect(() => {
     const handleEnter = (e: KeyboardEvent) => {
-      if (e.key === "Enter") {
+      const isDesktop = window.matchMedia("(min-width: 900px)").matches;
+      if (!isDesktop) return;
+      // if no modal is open and not typing in an input/textarea
+      if (
+        e.key === "Enter" &&
+        !activeModal &&
+        !(
+          e.target instanceof HTMLInputElement ||
+          e.target instanceof HTMLTextAreaElement
+        )
+      ) {
         setActiveModal("addShow");
       }
     };
-    //
     window.addEventListener("keydown", handleEnter);
     return () => window.removeEventListener("keydown", handleEnter);
   }, [activeModal]);
@@ -122,7 +113,7 @@ export default function ShowList() {
       <div className="lg:block hidden">
         <ShowDesktopListing
           shows={sortedShows}
-          isProcessingShow={isProcessingShow || isFilterPending}
+          isProcessingShow={isProcessingShow}
           sortConfig={sortConfig}
           onSortConfig={handleSortConfig}
           onShowClicked={handleShowClicked}
@@ -131,7 +122,7 @@ export default function ShowList() {
       <div className="block lg:hidden">
         <ShowMobileListing
           shows={sortedShows}
-          isProcessingShow={isProcessingShow || isFilterPending}
+          isProcessingShow={isProcessingShow}
           sortConfig={sortConfig}
           curStatusFilter={statusFilter}
           onShowClicked={handleShowClicked}

@@ -88,6 +88,16 @@ export function NavMenu() {
 
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
+      const isDesktop = window.matchMedia("(min-width: 900px)").matches;
+      if (!isDesktop) return;
+      // don't trigger when typing/textarea
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+      //
       switch (event.key) {
         case "Escape":
           if (isNavOpen) {

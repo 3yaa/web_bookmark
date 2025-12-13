@@ -1,5 +1,11 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  useTransition,
+  useMemo,
+} from "react";
 import { Plus } from "lucide-react";
 import { MediaStatus } from "@/types/media";
 import { ShowProps, SortConfig } from "@/types/show";
@@ -24,8 +30,17 @@ export default function ShowList() {
   const [activeModal, setActiveModal] = useState<
     "showDetails" | "addShow" | null
   >(null);
-  //
-  const sortedShows = useSortShows(shows, statusFilter, sortConfig);
+  // change ground truth
+  const [isFilterPending, startTransition] = useTransition();
+  const filteredShows = useMemo(() => {
+    if (statusFilter) {
+      return statusFilter
+        ? shows.filter((show) => show.status === statusFilter)
+        : shows;
+    }
+    return shows;
+  }, [shows, statusFilter]);
+  const sortedShows = useSortShows(filteredShows, sortConfig);
 
   const handleShowUpdates = useCallback(
     async (
@@ -58,11 +73,13 @@ export default function ShowList() {
   };
 
   const handleStatusFilterConfig = (status: MediaStatus) => {
-    if (statusFilter === status) {
-      setStatusFilter(null);
-    } else {
-      setStatusFilter(status);
-    }
+    startTransition(() => {
+      if (statusFilter === status) {
+        setStatusFilter(null);
+      } else {
+        setStatusFilter(status);
+      }
+    });
   };
 
   const handleModalClose = useCallback(() => {
@@ -113,7 +130,7 @@ export default function ShowList() {
       <div className="lg:block hidden">
         <ShowDesktopListing
           shows={sortedShows}
-          isProcessingShow={isProcessingShow}
+          isProcessingShow={isProcessingShow || isFilterPending}
           sortConfig={sortConfig}
           onSortConfig={handleSortConfig}
           onShowClicked={handleShowClicked}
@@ -122,7 +139,7 @@ export default function ShowList() {
       <div className="block lg:hidden">
         <ShowMobileListing
           shows={sortedShows}
-          isProcessingShow={isProcessingShow}
+          isProcessingShow={isProcessingShow || isFilterPending}
           sortConfig={sortConfig}
           curStatusFilter={statusFilter}
           onShowClicked={handleShowClicked}

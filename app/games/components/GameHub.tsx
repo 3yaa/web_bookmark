@@ -129,7 +129,17 @@ export default function GameList() {
 
   useEffect(() => {
     const handleEnter = (e: KeyboardEvent) => {
-      if (e.key === "Enter") {
+      const isDesktop = window.matchMedia("(min-width: 900px)").matches;
+      if (!isDesktop) return;
+      // if no modal is open and not typing in an input/textarea
+      if (
+        e.key === "Enter" &&
+        !activeModal &&
+        !(
+          e.target instanceof HTMLInputElement ||
+          e.target instanceof HTMLTextAreaElement
+        )
+      ) {
         setActiveModal("addGame");
       }
     };

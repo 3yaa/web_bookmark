@@ -159,9 +159,7 @@ export function GameDetails({
 
   useEffect(() => {
     const handleLeave = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      } else if (e.key === "Enter") {
+      if (e.key === "Enter") {
         const activeElement = document.activeElement;
         const isInTextarea = activeElement?.tagName === "TEXTAREA";
         const isInInput = activeElement?.tagName === "INPUT";

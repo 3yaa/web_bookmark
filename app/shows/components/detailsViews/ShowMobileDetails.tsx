@@ -138,7 +138,7 @@ export function ShowMobileDetails({
       setIsExiting(true);
       setTimeout(() => {
         onClose();
-      }, 300);
+      }, 100);
     } else {
       setTranslateY(0);
     }
@@ -162,7 +162,7 @@ export function ShowMobileDetails({
           transition: isDragging
             ? "none"
             : isExiting
-            ? "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+            ? "transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.1s cubic-bezier(0.4, 0, 0.2, 1)"
             : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
         onTouchStart={handleTouchStart}

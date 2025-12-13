@@ -26,6 +26,127 @@ interface GameMobileListingProps {
   onStatusFilter: (status: MediaStatus) => void;
 }
 
+const GameItem = React.memo(({ 
+  game, 
+  isNavOpen, 
+  onClick 
+}: { 
+  game: GameProps; 
+  isNavOpen: boolean; 
+  onClick: (game: GameProps) => void;
+}) => (
+  <div
+    key={game.id}
+    className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
+      isNavOpen ? "pointer-events-none" : ""
+    }`}
+    onClick={() => onClick(game)}
+  >
+    <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">
+      {game.posterUrl ? (
+        <Image
+          src={game.posterUrl}
+          alt={game.title || "Untitled"}
+          width={300}
+          height={450}
+          priority
+          className="object-fill w-full h-full rounded-md border border-zinc-700/40"
+        />
+      ) : (
+        <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
+      )}
+    </div>
+    <div className="px-3 pt-3 flex flex-col w-full min-w-0">
+      {/* BACKDROP */}
+      {game.backdropUrl && (
+        <BackdropImageMobile
+          src={game.backdropUrl}
+          width={1280}
+          height={720}
+        />
+      )}
+      {/* TITLE/SCORE */}
+      <div className="flex justify-between items-start">
+        <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">
+          {game.title || "-"}
+        </span>
+        <span className="text-zinc-400 text-sm font-semibold bg-zinc-800/60 px-2.5 py-1 rounded-md shadow-inner shadow-black/40 -mt-1.5">
+          {game.score || "-"}
+        </span>
+      </div>
+
+      {/* STUDIO/RELEASE DATE */}
+      <div className="text-zinc-500 text-xs font-medium flex space-x-1 pt-1">
+        <span className="truncate max-w-35">{game.studio || "-"},</span>
+        <span>{game.dateReleased || "-"}</span>
+      </div>
+      {/* COMPLETION DATE */}
+      <div className={`${game.dateCompleted ? "-mt-1.5" : "pt-2.5"}`}>
+        <span className="flex justify-end text-zinc-500 text-[0.65rem] font-medium">
+          {formatDateShort(game.dateCompleted)}
+        </span>
+      </div>
+      {/* STATUS BAR */}
+      <div className="mt-1.5 w-full rounded-md h-1.5 overflow-hidden">
+        <div
+          className={`${getStatusBg(
+            game.status
+          )} h-1.5 transition-all duration-500 ease-out rounded-md`}
+        />
+      </div>
+      {/* PREQUEL/SEQUEL */}
+      <div
+        className={`${
+          game.dlcIndex !== 0
+            ? "grid grid-cols-[1fr_2rem_1fr] mt-1"
+            : "mt-3"
+        }`}
+      >
+        {/* PREQUEL */}
+        <div className="truncate text-left">
+          {game.dlcIndex - 1 >= 0 && game.dlcs !== undefined && (
+            <div
+              className={`flex gap-1 items-center text-[0.60rem] text-zinc-400/80`}
+            >
+              <span>←</span>
+              <span className="truncate">
+                {game.dlcs[game.dlcIndex - 1].name}
+              </span>
+            </div>
+          )}
+        </div>
+        {/* PLACEMENT */}
+        <div className="flex justify-center items-end">
+          {game.dlcIndex !== 0 && (
+            <label className="text-[0.65rem] font-medium text-zinc-400/85">
+              {game.dlcIndex}
+            </label>
+          )}
+        </div>
+        {/* SEQUEL */}
+        <div className="text-right flex justify-end">
+          {game.dlcs !== undefined &&
+            game.dlcIndex + 1 < game.dlcs?.length && (
+              <div
+                className={`flex gap-1 items-center text-[0.60rem] text-zinc-400/80`}
+              >
+                <span className="truncate">
+                  {game.dlcs[game.dlcIndex + 1].name}
+                </span>
+                <span>→</span>
+              </div>
+            )}
+        </div>
+      </div>
+      {/* NOTES */}
+      <p className="text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2rem] w-full break-words">
+        <span className="line-clamp-2">{game.note || "No notes"}</span>
+      </p>
+    </div>
+  </div>
+));
+GameItem.displayName = 'GameItem';
+
 export function GameMobileListing({
   games,
   isProcessingGame,
@@ -239,137 +360,12 @@ export function GameMobileListing({
       {/* LISTING */}
       {!isProcessingGame &&
         games.map((game) => (
-          <div
-            key={game.id}
-            className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
-              isNavOpen ? "pointer-events-none" : ""
-            }`}
-            onClick={() => handleGameClicked(game)}
-          >
-            <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">
-              {game.posterUrl ? (
-                <Image
-                  src={game.posterUrl}
-                  alt={game.title || "Untitled"}
-                  width={300}
-                  height={450}
-                  priority
-                  className="object-fill w-full h-full rounded-md border border-zinc-700/40"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
-              )}
-            </div>
-            <div className="px-3 pt-3 flex flex-col w-full min-w-0">
-              {/* BACKDROP */}
-              {game.backdropUrl && (
-                <BackdropImageMobile
-                  src={game.backdropUrl}
-                  width={1280}
-                  height={720}
-                />
-              )}
-              {/* TITLE/SCORE */}
-              <div className="flex justify-between items-start">
-                <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">
-                  {game.title || "-"}
-                </span>
-                <span className="text-zinc-400 text-sm font-semibold bg-zinc-800/60 px-2.5 py-1 rounded-md shadow-inner shadow-black/40 -mt-1.5">
-                  {game.score || "-"}
-                </span>
-              </div>
-
-              {/* STUDIO/RELEASE DATE */}
-              <div className="text-zinc-500 text-xs font-medium flex space-x-1 pt-1">
-                <span className="truncate max-w-35">{game.studio || "-"},</span>
-                <span>{game.dateReleased || "-"}</span>
-              </div>
-              {/* COMPLETION DATE */}
-              <div className={`${game.dateCompleted ? "-mt-1.5" : "pt-2.5"}`}>
-                <span className="flex justify-end text-zinc-500 text-[0.65rem] font-medium">
-                  {formatDateShort(game.dateCompleted)}
-                </span>
-              </div>
-              {/* STATUS BAR */}
-              <div className="mt-1.5 w-full rounded-md h-1.5 overflow-hidden">
-                <div
-                  className={`${getStatusBg(
-                    game.status
-                  )} h-1.5 transition-all duration-500 ease-out rounded-md`}
-                />
-              </div>
-              {/* PREQUEL/SEQUEL */}
-              <div
-                className={`${
-                  game.dlcIndex !== 0
-                    ? "grid grid-cols-[1fr_2rem_1fr] mt-1"
-                    : "mt-3"
-                }`}
-              >
-                {/* PREQUEL */}
-                <div className="truncate text-left">
-                  {game.dlcIndex - 1 >= 0 && game.dlcs !== undefined && (
-                    <div
-                      className={`flex gap-1 items-center text-[0.60rem] text-zinc-400/80`}
-                      // style={{
-                      //   maxWidth: (game.dlcIndex - 1 >= 0 && game.dlcs !== undefined)
-                      //     ? `${Math.min(
-                      //         Math.min(
-                      //           game.dlcs[game.dlcIndex - 1].name.length,
-                      //           game.dlcs[game.dlcIndex - 1].name.length
-                      //         ) * 0.38,
-                      //         7.38
-                      //       )}rem`
-                      //     : "auto",
-                      // }}
-                    >
-                      <span>←</span>
-                      <span className="truncate">
-                        {game.dlcs[game.dlcIndex - 1].name}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                {/* PLACEMENT */}
-                <div className="flex justify-center items-end">
-                  {game.dlcIndex !== 0 && (
-                    <label className="text-[0.65rem] font-medium text-zinc-400/85">
-                      {game.dlcIndex}
-                    </label>
-                  )}
-                </div>
-                {/* SEQUEL */}
-                <div className="text-right flex justify-end">
-                  {game.dlcs !== undefined &&
-                    game.dlcIndex + 1 < game.dlcs?.length && (
-                      <div
-                        className={`flex gap-1 items-center text-[0.60rem] text-zinc-400/80`}
-                        // style={{
-                        //   maxWidth: game.prequel
-                        //     ? `${Math.min(
-                        //         Math.min(
-                        //           game.prequel.length,
-                        //           game.sequel.length
-                        //         ) * 0.38,
-                        //         7.38
-                        //       )}rem`
-                        //     : "auto",
-                        // }}
-                      >
-                        <span className="truncate">
-                          {game.dlcs[game.dlcIndex + 1].name}
-                        </span>
-                        <span>→</span>
-                      </div>
-                    )}
-                </div>
-              </div>
-              {/* NOTES */}
-              <p className="text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2rem] w-full break-words">
-                <span className="line-clamp-2">{game.note || "No notes"}</span>
-              </p>
-            </div>
-          </div>
+          <GameItem 
+            key={game.id} 
+            game={game} 
+            isNavOpen={isNavOpen} 
+            onClick={handleGameClicked} 
+          />
         ))}
     </div>
   );

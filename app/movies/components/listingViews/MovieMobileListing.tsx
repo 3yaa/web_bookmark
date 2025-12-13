@@ -26,6 +26,146 @@ interface MovieMobileListingProps {
   onStatusFilter: (status: MediaStatus) => void;
 }
 
+const MovieItem = React.memo(({ 
+  movie, 
+  isNavOpen, 
+  onClick 
+}: { 
+  movie: MovieProps; 
+  isNavOpen: boolean; 
+  onClick: (movie: MovieProps) => void;
+}) => (
+  <div
+    key={movie.id}
+    className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
+      isNavOpen ? "pointer-events-none" : ""
+    }`}
+    onClick={() => onClick(movie)}
+  >
+    <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">
+      {movie.posterUrl ? (
+        <Image
+          src={movie.posterUrl}
+          alt={movie.title || "Untitled"}
+          width={300}
+          height={450}
+          priority
+          className="object-fill w-full h-full rounded-md border border-zinc-700/40"
+        />
+      ) : (
+        <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
+      )}
+    </div>
+    <div className="px-3 pt-3 flex flex-col w-full min-w-0">
+      {/* BACKDROP */}
+      {movie.backdropUrl && (
+        <BackdropImageMobile
+          src={movie.backdropUrl}
+          width={1280}
+          height={720}
+        />
+      )}
+      {/* TITLE/SCORE */}
+      <div className="flex justify-between items-start">
+        <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">
+          {movie.title || "-"}
+        </span>
+        <span className="text-zinc-400 text-sm font-semibold bg-zinc-800/60 px-2.5 py-1 rounded-md shadow-inner shadow-black/40 -mt-1.5">
+          {movie.score || "-"}
+        </span>
+      </div>
+
+      {/* STUDIO/RELEASE DATE */}
+      <div className="text-zinc-500 text-xs font-medium flex space-x-1 pt-1">
+        <span className="truncate max-w-35">
+          {movie.director || "-"},
+        </span>
+        <span>{movie.dateReleased || "-"}</span>
+      </div>
+      {/* COMPLETION DATE */}
+      <div className={`${movie.dateCompleted ? "-mt-1.5" : "pt-2.5"}`}>
+        <span className="flex justify-end text-zinc-500 text-[0.65rem] font-medium">
+          {formatDateShort(movie.dateCompleted)}
+        </span>
+      </div>
+      {/* STATUS BAR */}
+      <div className="mt-1.5 w-full rounded-md h-1.5 overflow-hidden">
+        <div
+          className={`${getStatusBg(
+            movie.status
+          )} h-1.5 transition-all duration-500 ease-out rounded-md`}
+        />
+      </div>
+      {/* PREQUEL/SEQUEL */}
+      <div
+        className={`${
+          movie.placeInSeries
+            ? "grid grid-cols-[1fr_2rem_1fr] mt-1"
+            : "mt-3"
+        }`}
+      >
+        {/* PREQUEL */}
+        <div className="truncate text-left">
+          {movie.prequel && (
+            <div
+              className={`flex gap-1 items-center text-[0.60rem] text-zinc-400/80`}
+              style={{
+                maxWidth: movie.sequel
+                  ? `${Math.min(
+                      Math.min(
+                        movie.prequel.length,
+                        movie.sequel.length
+                      ) * 0.38,
+                      7.38
+                    )}rem`
+                  : "auto",
+              }}
+            >
+              <span>←</span>
+              <span className="truncate">{movie.prequel}</span>
+            </div>
+          )}
+        </div>
+        {/* PLACEMENT */}
+        <div className="flex justify-center items-end">
+          {movie.placeInSeries && (
+            <label className="text-[0.65rem] font-medium text-zinc-400/85">
+              {movie.placeInSeries}
+            </label>
+          )}
+        </div>
+        {/* SEQUEL */}
+        <div className="text-right flex justify-end">
+          {movie.sequel && (
+            <div
+              className={`flex gap-1 items-center text-[0.60rem] text-zinc-400/80`}
+              style={{
+                maxWidth: movie.prequel
+                  ? `${Math.min(
+                      Math.min(
+                        movie.prequel.length,
+                        movie.sequel.length
+                      ) * 0.38,
+                      7.38
+                    )}rem`
+                  : "auto",
+              }}
+            >
+              <span className="truncate">{movie.sequel}</span>
+              <span>→</span>
+            </div>
+          )}
+        </div>
+      </div>
+      {/* NOTES */}
+      <p className="text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2rem] w-full break-words">
+        <span className="line-clamp-2">{movie.note || "No notes"}</span>
+      </p>
+    </div>
+  </div>
+));
+MovieItem.displayName = 'MovieItem';
+
 export function MovieMobileListing({
   movies,
   isProcessingMovie,
@@ -239,134 +379,12 @@ export function MovieMobileListing({
       {/* LISTING */}
       {!isProcessingMovie &&
         movies.map((movie) => (
-          <div
-            key={movie.id}
-            className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
-              isNavOpen ? "pointer-events-none" : ""
-            }`}
-            onClick={() => handleMovieClicked(movie)}
-          >
-            <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">
-              {movie.posterUrl ? (
-                <Image
-                  src={movie.posterUrl}
-                  alt={movie.title || "Untitled"}
-                  width={300}
-                  height={450}
-                  priority
-                  className="object-fill w-full h-full rounded-md border border-zinc-700/40"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
-              )}
-            </div>
-            <div className="px-3 pt-3 flex flex-col w-full min-w-0">
-              {/* BACKDROP */}
-              {movie.backdropUrl && (
-                <BackdropImageMobile
-                  src={movie.backdropUrl}
-                  width={1280}
-                  height={720}
-                />
-              )}
-              {/* TITLE/SCORE */}
-              <div className="flex justify-between items-start">
-                <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">
-                  {movie.title || "-"}
-                </span>
-                <span className="text-zinc-400 text-sm font-semibold bg-zinc-800/60 px-2.5 py-1 rounded-md shadow-inner shadow-black/40 -mt-1.5">
-                  {movie.score || "-"}
-                </span>
-              </div>
-
-              {/* STUDIO/RELEASE DATE */}
-              <div className="text-zinc-500 text-xs font-medium flex space-x-1 pt-1">
-                <span className="truncate max-w-35">
-                  {movie.director || "-"},
-                </span>
-                <span>{movie.dateReleased || "-"}</span>
-              </div>
-              {/* COMPLETION DATE */}
-              <div className={`${movie.dateCompleted ? "-mt-1.5" : "pt-2.5"}`}>
-                <span className="flex justify-end text-zinc-500 text-[0.65rem] font-medium">
-                  {formatDateShort(movie.dateCompleted)}
-                </span>
-              </div>
-              {/* STATUS BAR */}
-              <div className="mt-1.5 w-full rounded-md h-1.5 overflow-hidden">
-                <div
-                  className={`${getStatusBg(
-                    movie.status
-                  )} h-1.5 transition-all duration-500 ease-out rounded-md`}
-                />
-              </div>
-              {/* PREQUEL/SEQUEL */}
-              <div
-                className={`${
-                  movie.placeInSeries
-                    ? "grid grid-cols-[1fr_2rem_1fr] mt-1"
-                    : "mt-3"
-                }`}
-              >
-                {/* PREQUEL */}
-                <div className="truncate text-left">
-                  {movie.prequel && (
-                    <div
-                      className={`flex gap-1 items-center text-[0.60rem] text-zinc-400/80`}
-                      style={{
-                        maxWidth: movie.sequel
-                          ? `${Math.min(
-                              Math.min(
-                                movie.prequel.length,
-                                movie.sequel.length
-                              ) * 0.38,
-                              7.38
-                            )}rem`
-                          : "auto",
-                      }}
-                    >
-                      <span>←</span>
-                      <span className="truncate">{movie.prequel}</span>
-                    </div>
-                  )}
-                </div>
-                {/* PLACEMENT */}
-                <div className="flex justify-center items-end">
-                  {movie.placeInSeries && (
-                    <label className="text-[0.65rem] font-medium text-zinc-400/85">
-                      {movie.placeInSeries}
-                    </label>
-                  )}
-                </div>
-                {/* SEQUEL */}
-                <div className="text-right flex justify-end">
-                  {movie.sequel && (
-                    <div
-                      className={`flex gap-1 items-center text-[0.60rem] text-zinc-400/80`}
-                      style={{
-                        maxWidth: movie.prequel
-                          ? `${Math.min(
-                              Math.min(
-                                movie.prequel.length,
-                                movie.sequel.length
-                              ) * 0.38,
-                              7.38
-                            )}rem`
-                          : "auto",
-                      }}
-                    >
-                      <span className="truncate">{movie.sequel}</span>
-                      <span>→</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              {/* NOTES */}
-              <p className="text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2rem] w-full break-words">
-                <span className="line-clamp-2">{movie.note || "No notes"}</span>
-              </p>
-            </div>
-          </div>
+          <MovieItem 
+            key={movie.id} 
+            movie={movie} 
+            isNavOpen={isNavOpen} 
+            onClick={handleMovieClicked} 
+          />
         ))}
     </div>
   );

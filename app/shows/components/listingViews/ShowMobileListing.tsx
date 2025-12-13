@@ -27,6 +27,113 @@ interface ShowMobileListingProps {
   onStatusFilter: (status: MediaStatus) => void;
 }
 
+const ShowItem = React.memo(({ 
+  show, 
+  isNavOpen, 
+  onClick 
+}: { 
+  show: ShowProps; 
+  isNavOpen: boolean; 
+  onClick: (show: ShowProps) => void;
+}) => (
+  <div
+    key={show.id}
+    className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
+      isNavOpen ? "pointer-events-none" : ""
+    }`}
+    onClick={() => onClick(show)}
+  >
+    <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">
+      {show.posterUrl ? (
+        <Image
+          src={show.posterUrl}
+          alt={show.title || "Untitled"}
+          width={300}
+          height={450}
+          priority
+          className="object-fill w-full h-full rounded-md border border-zinc-700/40"
+        />
+      ) : (
+        <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
+      )}
+    </div>
+    <div className="px-3 pt-3 flex flex-col w-full min-w-0">
+      {/* BACKDROP */}
+      {show.backdropUrl && (
+        <BackdropImageMobile
+          src={show.backdropUrl}
+          width={1280}
+          height={720}
+        />
+      )}
+      {/* TITLE/SCORE */}
+      <div className="flex justify-between items-start">
+        <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">
+          {show.title || "-"}
+        </span>
+        <span className="text-zinc-400 text-sm font-semibold bg-zinc-800/60 px-2.5 py-1 rounded-md shadow-inner shadow-black/40 -mt-1.5">
+          {show.score || "-"}
+        </span>
+      </div>
+
+      {/* STUDIO/RELEASE DATE */}
+      <div className="text-zinc-500 text-xs font-medium flex space-x-1 pt-1">
+        <span className="truncate max-w-35">{show.studio || "-"},</span>
+        <span>{show.dateReleased || "-"}</span>
+      </div>
+      <div className="flex justify-between items-center pt-0.5">
+        {/* COMPLETION DATE */}
+        <span className="text-zinc-500 text-[0.65rem] font-medium mt-1">
+          {formatDateShort(show.dateCompleted)}
+        </span>
+
+        {/* SEASON / EPISODES */}
+        <div className="text-zinc-400 text-xs font-medium mb-0.5">
+          <span className="pr-1">
+            S{show.curSeasonIndex + 1 || "-"}
+          </span>
+          <span>Ep {show.curEpisode || "-"}/</span>
+          {show.seasons?.[show.curSeasonIndex]?.episode_count ? (
+            <>
+              <span>
+                {show.seasons[show.curSeasonIndex].episode_count}
+              </span>
+            </>
+          ) : (
+            0
+          )}
+        </div>
+      </div>
+
+      {/* PROGRESS BAR */}
+      <div className="mt-1.5 w-full bg-zinc-800/80 rounded-md h-1.5 overflow-hidden">
+        <div
+          className={`${getStatusBg(
+            show.status
+          )} h-1.5 transition-all duration-500 ease-out rounded-md`}
+          style={{
+            width: `${
+              show.seasons?.[show.curSeasonIndex]?.episode_count
+                ? calcCurProgress(
+                    show.seasons,
+                    show.curSeasonIndex,
+                    show.curEpisode,
+                    show.status
+                  )
+                : 0
+            }%`,
+          }}
+        />
+      </div>
+      {/* NOTES */}
+      <p className="text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2rem] w-full break-words mt-1.5">
+        <span className="line-clamp-2">{show.note || "No notes"}</span>
+      </p>
+    </div>
+  </div>
+));
+ShowItem.displayName = 'ShowItem';
+
 export function ShowMobileListing({
   shows,
   isProcessingShow,
@@ -240,101 +347,12 @@ export function ShowMobileListing({
       {/* LISTING */}
       {!isProcessingShow &&
         shows.map((show) => (
-          <div
-            key={show.id}
-            className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
-              isNavOpen ? "pointer-events-none" : ""
-            }`}
-            onClick={() => handleShowClicked(show)}
-          >
-            <div className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40">
-              {show.posterUrl ? (
-                <Image
-                  src={show.posterUrl}
-                  alt={show.title || "Untitled"}
-                  width={300}
-                  height={450}
-                  priority
-                  className="object-fill w-full h-full rounded-md border border-zinc-700/40"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
-              )}
-            </div>
-            <div className="px-3 pt-3 flex flex-col w-full min-w-0">
-              {/* BACKDROP */}
-              {show.backdropUrl && (
-                <BackdropImageMobile
-                  src={show.backdropUrl}
-                  width={1280}
-                  height={720}
-                />
-              )}
-              {/* TITLE/SCORE */}
-              <div className="flex justify-between items-start">
-                <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">
-                  {show.title || "-"}
-                </span>
-                <span className="text-zinc-400 text-sm font-semibold bg-zinc-800/60 px-2.5 py-1 rounded-md shadow-inner shadow-black/40 -mt-1.5">
-                  {show.score || "-"}
-                </span>
-              </div>
-
-              {/* STUDIO/RELEASE DATE */}
-              <div className="text-zinc-500 text-xs font-medium flex space-x-1 pt-1">
-                <span className="truncate max-w-35">{show.studio || "-"},</span>
-                <span>{show.dateReleased || "-"}</span>
-              </div>
-              <div className="flex justify-between items-center pt-0.5">
-                {/* COMPLETION DATE */}
-                <span className="text-zinc-500 text-[0.65rem] font-medium mt-1">
-                  {formatDateShort(show.dateCompleted)}
-                </span>
-
-                {/* SEASON / EPISODES */}
-                <div className="text-zinc-400 text-xs font-medium mb-0.5">
-                  <span className="pr-1">
-                    S{show.curSeasonIndex + 1 || "-"}
-                  </span>
-                  <span>Ep {show.curEpisode || "-"}/</span>
-                  {show.seasons?.[show.curSeasonIndex]?.episode_count ? (
-                    <>
-                      <span>
-                        {show.seasons[show.curSeasonIndex].episode_count}
-                      </span>
-                    </>
-                  ) : (
-                    0
-                  )}
-                </div>
-              </div>
-
-              {/* PROGRESS BAR */}
-              <div className="mt-1.5 w-full bg-zinc-800/80 rounded-md h-1.5 overflow-hidden">
-                <div
-                  className={`${getStatusBg(
-                    show.status
-                  )} h-1.5 transition-all duration-500 ease-out rounded-md`}
-                  style={{
-                    width: `${
-                      show.seasons?.[show.curSeasonIndex]?.episode_count
-                        ? calcCurProgress(
-                            show.seasons,
-                            show.curSeasonIndex,
-                            show.curEpisode,
-                            show.status
-                          )
-                        : 0
-                    }%`,
-                  }}
-                />
-              </div>
-              {/* NOTES */}
-              <p className="text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2rem] w-full break-words mt-1.5">
-                <span className="line-clamp-2">{show.note || "No notes"}</span>
-              </p>
-            </div>
-          </div>
+          <ShowItem 
+            key={show.id} 
+            show={show} 
+            isNavOpen={isNavOpen} 
+            onClick={handleShowClicked} 
+          />
         ))}
     </div>
   );

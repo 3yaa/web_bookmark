@@ -84,8 +84,11 @@ export default function ShowList() {
 
   const handleModalClose = useCallback(() => {
     setActiveModal(null);
-    setTitleToUse("");
-    setSelectedShow(null);
+    // wait a frame before clearing state
+    requestAnimationFrame(() => {
+      setTitleToUse("");
+      setSelectedShow(null);
+    });
   }, []);
 
   const handleShowClicked = useCallback((show: ShowProps) => {

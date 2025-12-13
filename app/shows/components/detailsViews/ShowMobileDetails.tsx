@@ -138,7 +138,7 @@ export function ShowMobileDetails({
       setIsExiting(true);
       setTimeout(() => {
         onClose();
-      }, 10);
+      }, 75);
     } else {
       setTranslateY(0);
     }

@@ -21,7 +21,7 @@ export const BackdropImageMobile = ({
         height={height}
         className="object-cover opacity-35"
         style={{ objectPosition: "center -7px" }}
-        loading="lazy"
+        priority
       />
 
       {/* HORIZONTAL GRADIENT */}

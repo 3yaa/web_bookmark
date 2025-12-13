@@ -130,11 +130,11 @@ export function ShowMobileDetails({
     const velocityThreshold = 0.5;
 
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
-      // const finalY = Math.max(
-      //   translateY + dragVelocity.current * 200,
-      //   window.innerHeight
-      // );
-      // setTranslateY(finalY);
+      const finalY = Math.max(
+        translateY + dragVelocity.current * 200,
+        window.innerHeight
+      );
+      setTranslateY(finalY);
       setIsExiting(true);
       onClose();
     } else {

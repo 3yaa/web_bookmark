@@ -7,6 +7,15 @@ export function useMovieData() {
   const [movies, setMovies] = useState<MovieProps[]>([]);
   const [movieDataLoading, setMovieDataLoading] = useState(true);
 
+  const sortByStatus = (booksToSort: MovieProps[]) => {
+    const statusOrder = { "Want to Watch": 0, Completed: 1, Dropped: 2 };
+    return booksToSort.sort((a, b) => {
+      const orderA = statusOrder[a.status as keyof typeof statusOrder] ?? 999;
+      const orderB = statusOrder[b.status as keyof typeof statusOrder] ?? 999;
+      return orderA - orderB;
+    });
+  };
+
   // READ
   const getMovies = useCallback(async () => {
     try {
@@ -93,12 +102,19 @@ export function useMovieData() {
           console.warn("Invalid fields attempted:", invalidFields);
           return;
         }
-        // update local immediately
-        setMovies((prevMovies) =>
-          prevMovies.map((movie) =>
+        // check if status update
+        const isStatusUpdate = "status" in updates;
+        // update locally
+        setMovies((prevMovies) => {
+          const updatedMovies = prevMovies.map((movie) =>
             movie.id === movieId ? { ...movie, ...updates } : movie
-          )
-        );
+          );
+          // if status changed re-sort
+          if (isStatusUpdate) {
+            return sortByStatus(updatedMovies);
+          }
+          return updatedMovies;
+        });
         // update db
         const url = `/api/movies/${movieId}`;
         const options = {

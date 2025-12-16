@@ -7,6 +7,16 @@ export function useGameData() {
   const [games, setGames] = useState<GameProps[]>([]);
   const [gameDataLoading, setGameDataLoading] = useState(true);
 
+  // sort books by status (matching DB order)
+  const sortByStatus = (booksToSort: GameProps[]) => {
+    const statusOrder = { Playing: 0, Completed: 1, Dropped: 2 };
+    return booksToSort.sort((a, b) => {
+      const orderA = statusOrder[a.status as keyof typeof statusOrder] ?? 999;
+      const orderB = statusOrder[b.status as keyof typeof statusOrder] ?? 999;
+      return orderA - orderB;
+    });
+  };
+
   // READ
   const getGames = useCallback(async () => {
     try {
@@ -93,12 +103,19 @@ export function useGameData() {
           console.warn("Invalid fields attempted:", invalidFields);
           return;
         }
+        // check if status update
+        const isStatusUpdate = "status" in updates;
         // update locally
-        setGames((prev) =>
-          prev.map((game) =>
+        setGames((prevGames) => {
+          const updatedGames = prevGames.map((game) =>
             game.id === gameId ? { ...game, ...updates } : game
-          )
-        );
+          );
+          // if status changed re-sort
+          if (isStatusUpdate) {
+            return sortByStatus(updatedGames);
+          }
+          return updatedGames;
+        });
         // update db
         const url = `/api/games/${gameId}`;
         const options = {

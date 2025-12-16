@@ -7,6 +7,21 @@ export function useShowData() {
   const [shows, setShows] = useState<ShowProps[]>([]);
   const [showDataLoading, setShowDataLoading] = useState(true);
 
+  // sort books by status (matching DB order)
+  const sortByStatus = (booksToSort: ShowProps[]) => {
+    const statusOrder = {
+      Watching: 0,
+      "Want to Watch": 1,
+      Completed: 2,
+      Dropped: 3,
+    };
+    return booksToSort.sort((a, b) => {
+      const orderA = statusOrder[a.status as keyof typeof statusOrder] ?? 999;
+      const orderB = statusOrder[b.status as keyof typeof statusOrder] ?? 999;
+      return orderA - orderB;
+    });
+  };
+
   // READ
   const getShows = useCallback(async () => {
     try {
@@ -100,12 +115,19 @@ export function useShowData() {
           console.warn("Invalid fields attempted:", invalidFields);
           return;
         }
+        // check if status update
+        const isStatusUpdate = "status" in updates;
         // update locally
-        setShows((prevShows) =>
-          prevShows.map((show) =>
+        setShows((prevShows) => {
+          const updatedShows = prevShows.map((show) =>
             show.id === showId ? { ...show, ...updates } : show
-          )
-        );
+          );
+          // if status changed re-sort
+          if (isStatusUpdate) {
+            return sortByStatus(updatedShows);
+          }
+          return updatedShows;
+        });
         // update db
         const url = `/api/shows/${showId}`;
         const options = {

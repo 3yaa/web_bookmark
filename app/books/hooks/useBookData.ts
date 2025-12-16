@@ -7,33 +7,15 @@ export function useBookData() {
   const [books, setBooks] = useState<BookProps[]>([]);
   const [bookDataLoading, setBookDataLoading] = useState(true);
 
-  // move this to server
-  // const linkBook = useCallback(
-  //   (book: BookProps) => {
-  //     if (book.seriesTitle) {
-  //       books.forEach((bk) => {
-  //         // when book isn't linked
-  //         if (bk.sequel === book.title && !book.prequel) {
-  //           // set book prequel to bk
-  //           book.prequel = bk.title;
-  //         } else if (bk.prequel === book.title && !book.sequel) {
-  //           // set book sequel to bk
-  //           book.sequel = bk.title;
-  //         }
-  //         // when bk isn't linked
-  //         if (book.prequel === bk.title && !bk.sequel) {
-  //           // sets bk sequel to book
-  //           bk.sequel = book.title;
-  //         } else if (book.sequel === bk.title && !bk.prequel) {
-  //           // sets bk prequel to book
-  //           bk.prequel = book.title;
-  //         }
-  //       });
-  //     }
-  //     return book;
-  //   },
-  //   [books]
-  // );
+  // sort books by status (matching DB order)
+  const sortByStatus = (booksToSort: BookProps[]) => {
+    const statusOrder = { "Want to Read": 0, Completed: 1, Dropped: 2 };
+    return booksToSort.sort((a, b) => {
+      const orderA = statusOrder[a.status as keyof typeof statusOrder] ?? 999;
+      const orderB = statusOrder[b.status as keyof typeof statusOrder] ?? 999;
+      return orderA - orderB;
+    });
+  };
 
   // READ
   const getBooks = useCallback(async () => {
@@ -121,12 +103,20 @@ export function useBookData() {
           console.warn("Invalid fields attempted:", invalidFields);
           return;
         }
+        // check if status update
+        const isStatusUpdate = "status" in updates;
         // update local immediately
-        setBooks((prevBooks) =>
-          prevBooks.map((book) =>
+        setBooks((prevBooks) => {
+          const updatedBooks = prevBooks.map((book) =>
             book.id === bookId ? { ...book, ...updates } : book
-          )
-        );
+          );
+          // if status changed re-sort
+          if (isStatusUpdate) {
+            return sortByStatus(updatedBooks);
+          }
+          return updatedBooks;
+        });
+
         // update db
         const url = `/api/books/${bookId}`;
         const options = {
@@ -191,3 +181,31 @@ export function useBookData() {
     isProcessingBook: bookDataLoading,
   };
 }
+
+// move this to server
+// const linkBook = useCallback(
+//   (book: BookProps) => {
+//     if (book.seriesTitle) {
+//       books.forEach((bk) => {
+//         // when book isn't linked
+//         if (bk.sequel === book.title && !book.prequel) {
+//           // set book prequel to bk
+//           book.prequel = bk.title;
+//         } else if (bk.prequel === book.title && !book.sequel) {
+//           // set book sequel to bk
+//           book.sequel = bk.title;
+//         }
+//         // when bk isn't linked
+//         if (book.prequel === bk.title && !bk.sequel) {
+//           // sets bk sequel to book
+//           bk.sequel = book.title;
+//         } else if (book.sequel === bk.title && !bk.prequel) {
+//           // sets bk prequel to book
+//           bk.prequel = book.title;
+//         }
+//       });
+//     }
+//     return book;
+//   },
+//   [books]
+// );

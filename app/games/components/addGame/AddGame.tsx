@@ -176,6 +176,8 @@ export function AddGame({
 
   const handlePickFromMultGames = useCallback((game: IGDBProps) => {
     try {
+      setBackdropUrls(game.screenshot_urls?.map((ss) => ss.ss_url) || []);
+      setBackdropIndex(0);
       setNewGame({ ...mapIGDBDataToGame(game), status: "Playing" });
     } finally {
       setActiveModal("gameDetails");

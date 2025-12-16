@@ -188,174 +188,184 @@ export function MovieMobileListing({
       <div className="fixed right-0 left-0 top-0 z-10 bg-zinc-900/35 backdrop-blur-xl shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md will-change-transform">
         {/* STATUS FILTER */}
         <div
-          className={`py-3 px-5 ${
-            openStatusOption ? "bg-zinc-800/60 rounded-md" : ""
-          }`}
+          className="relative py-3 px-5"
+          onClick={() => {
+            setOpenStatusOption(!openStatusOption);
+            setOpenSortOption(false);
+          }}
         >
-          <Settings2
-            onClick={() => {
-              setOpenStatusOption(!openStatusOption);
-              setOpenSortOption(false);
-            }}
-            className="text-zinc-400 w-5 h-5 transition-colors"
-          />
+          <div
+            className={`
+              relative z-20 transition-all duration-300 ease-out rounded-md
+              ${openStatusOption ? "bg-zinc-800/60 p-2 -m-2" : ""}
+            `}
+          >
+            <Settings2
+              className={`
+                w-5 h-5 transition-all duration-300 ease-out cursor-pointer
+                ${
+                  openStatusOption
+                    ? "text-zinc-200 rotate-90 scale-110"
+                    : "text-zinc-400 rotate-0 scale-100"
+                }
+              `}
+            />
+          </div>
+
           {/* STATUS FILTER OPTIONS */}
-          {openStatusOption && (
-            <div className="fixed z-10 left-0 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-40">
+          <div
+            className={`
+              fixed left-2 mt-2 min-w-44 bg-zinc-900/95 backdrop-blur-xl
+              border border-zinc-700/40 rounded-lg shadow-2xl overflow-hidden
+              origin-top-left z-10
+              transition-all duration-300 ease-out
+              ${
+                openStatusOption
+                  ? "opacity-100 scale-100 translate-y-0"
+                  : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+              }
+            `}
+          >
+            {[
+              { value: "Want to Watch" as MediaStatus },
+              { value: "Completed" as MediaStatus },
+              { value: "Dropped" as MediaStatus },
+            ].map((status, index) => (
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
+                key={status.value}
+                className={`
+                  flex items-center justify-between px-4 py-3 text-zinc-300 text-sm
+                  transition-all duration-200 ease-out cursor-pointer
+                  hover:bg-zinc-800/60 hover:text-zinc-100 active:scale-98
+                  ${index !== 3 ? "border-b border-zinc-800/60" : ""}
+                  ${curStatusFilter === status.value ? "bg-zinc-800/40" : ""}
+                `}
+                style={{
+                  transitionDelay: openStatusOption ? `${index * 30}ms` : "0ms",
+                }}
                 onClick={() => {
-                  onStatusFilter("Want to Watch");
+                  onStatusFilter(status.value);
                   setOpenStatusOption(false);
                 }}
               >
-                <span>Want to Watch</span>
-                {curStatusFilter === "Want to Watch" ? (
-                  <div className="relative w-4 h-4">
-                    <Circle className="w-4 h-4 text-slate-500 absolute" />
-                    <div className="w-2 h-2 bg-slate-500 rounded-full absolute top-1 left-1" />
-                  </div>
-                ) : (
-                  <Circle className="w-4 h-4 text-zinc-600" />
-                )}
+                <span className="font-medium">{status.value}</span>
+                <div
+                  className={`
+                  transition-all duration-200 ease-out
+                  ${
+                    curStatusFilter === status.value
+                      ? "scale-100 opacity-100"
+                      : "scale-75 opacity-40"
+                  }
+                `}
+                >
+                  {curStatusFilter === status.value ? (
+                    <div className="relative w-4 h-4">
+                      <Circle className="w-4 h-4 text-slate-400 absolute" />
+                      <div className="w-2 h-2 bg-slate-400 rounded-full absolute top-1 left-1 animate-pulse" />
+                    </div>
+                  ) : (
+                    <Circle className="w-4 h-4 text-zinc-600" />
+                  )}
+                </div>
               </div>
-              <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
-                onClick={() => {
-                  onStatusFilter("Watching");
-                  setOpenStatusOption(false);
-                }}
-              >
-                <span>Watching</span>
-                {curStatusFilter === "Watching" ? (
-                  <div className="relative w-4 h-4">
-                    <Circle className="w-4 h-4 text-slate-500 absolute" />
-                    <div className="w-2 h-2 bg-slate-500 rounded-full absolute top-1 left-1" />
-                  </div>
-                ) : (
-                  <Circle className="w-4 h-4 text-zinc-600" />
-                )}
-              </div>
-              <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
-                onClick={() => {
-                  onStatusFilter("Completed");
-                  setOpenStatusOption(false);
-                }}
-              >
-                <span>Completed</span>
-                {curStatusFilter === "Completed" ? (
-                  <div className="relative w-4 h-4">
-                    <Circle className="w-4 h-4 text-slate-500 absolute" />
-                    <div className="w-2 h-2 bg-slate-500 rounded-full absolute top-1 left-1" />
-                  </div>
-                ) : (
-                  <Circle className="w-4 h-4 text-zinc-600" />
-                )}
-              </div>
-              <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
-                onClick={() => {
-                  onStatusFilter("Dropped");
-                  setOpenStatusOption(false);
-                }}
-              >
-                <span>Dropped</span>
-                {curStatusFilter === "Dropped" ? (
-                  <div className="relative w-4 h-4">
-                    <Circle className="w-4 h-4 text-slate-500 absolute" />
-                    <div className="w-2 h-2 bg-slate-500 rounded-full absolute top-1 left-1" />
-                  </div>
-                ) : (
-                  <Circle className="w-4 h-4 text-zinc-600" />
-                )}
-              </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
+
         {/* STAT */}
         <div className="flex items-center gap-1 text-slate-400 text-sm font-medium">
           <ChartNoAxesColumn className="w-4 h-4 text-slate-500" />
           <span>{movies.length} Entries</span>
         </div>
+
         {/* SORT */}
         <div
-          className={`py-3 px-5 ${
-            openSortOption ? "bg-zinc-800/60 rounded-md" : ""
-          }`}
+          className="relative py-3 px-5"
+          onClick={() => {
+            setOpenSortOption(!openSortOption);
+            setOpenStatusOption(false);
+          }}
         >
-          <SlidersHorizontal
-            onClick={() => {
-              setOpenSortOption(!openSortOption);
-              setOpenStatusOption(false);
-            }}
-            className="text-zinc-400 w-5 h-5 transition-colors"
-          />
+          <div
+            className={`
+              relative z-20 transition-all duration-300 ease-out rounded-md
+              ${openSortOption ? "bg-zinc-800/60 p-2 -m-2" : ""}
+            `}
+          >
+            <SlidersHorizontal
+              className={`
+                w-5 h-5 transition-all duration-300 ease-out cursor-pointer
+                ${
+                  openSortOption
+                    ? "text-zinc-200 rotate-90 scale-110"
+                    : "text-zinc-400 rotate-0 scale-100"
+                }
+              `}
+            />
+          </div>
           {/* SORT OPTIONS */}
-          {openSortOption && (
-            <div className="fixed z-10 right-0 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-41.25">
+          <div
+            className={`
+              fixed right-2 mt-2 min-w-48 bg-zinc-900/95 backdrop-blur-xl
+              border border-zinc-700/40 rounded-lg shadow-2xl overflow-hidden
+              origin-top-right z-10
+              transition-all duration-300 ease-out
+              ${
+                openSortOption
+                  ? "opacity-100 scale-100 translate-y-0"
+                  : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+              }
+            `}
+          >
+            {[
+              { label: "Title", value: "title" as SortConfig["type"] },
+              { label: "Score", value: "score" as SortConfig["type"] },
+              { label: "Director", value: "director" as SortConfig["type"] },
+              {
+                label: "Date Released",
+                value: "dateReleased" as SortConfig["type"],
+              },
+              {
+                label: "Date Completed",
+                value: "dateCompleted" as SortConfig["type"],
+              },
+            ].map((sort, index) => (
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
-                onClick={() => onSortConfig("title")}
+                key={sort.value}
+                className={`
+                  flex items-center justify-between px-4 py-3 text-zinc-300 text-sm
+                  transition-all duration-200 ease-out cursor-pointer
+                  hover:bg-zinc-800/60 hover:text-zinc-100 active:scale-98
+                  ${index !== 4 ? "border-b border-zinc-800/60" : ""}
+                  ${sortConfig?.type === sort.value ? "bg-zinc-800/40" : ""}
+                `}
+                style={{
+                  transitionDelay: openSortOption ? `${index * 30}ms` : "0ms",
+                }}
+                onClick={() => onSortConfig(sort.value)}
               >
-                <span>Title</span>
-                {sortConfig?.type === "title" &&
-                  (sortConfig?.order === "desc" ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronUp className="w-4 h-4" />
-                  ))}
+                <span className="font-medium">{sort.label}</span>
+                <div
+                  className={`
+                  transition-all duration-200 ease-out
+                  ${
+                    sortConfig?.type === sort.value
+                      ? "scale-100 opacity-100"
+                      : "scale-0 opacity-0"
+                  }
+                `}
+                >
+                  {sortConfig?.type === sort.value &&
+                    (sortConfig?.order === "desc" ? (
+                      <ChevronDown className="w-4 h-4 text-zinc-400" />
+                    ) : (
+                      <ChevronUp className="w-4 h-4 text-zinc-400" />
+                    ))}
+                </div>
               </div>
-              <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
-                onClick={() => onSortConfig("score")}
-              >
-                <span>Score</span>
-                {sortConfig?.type === "score" &&
-                  (sortConfig?.order === "desc" ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronUp className="w-4 h-4" />
-                  ))}
-              </div>
-              <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
-                onClick={() => onSortConfig("director")}
-              >
-                <span>Studio</span>
-                {sortConfig?.type === "director" &&
-                  (sortConfig?.order === "desc" ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronUp className="w-4 h-4" />
-                  ))}
-              </div>
-              <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
-                onClick={() => onSortConfig("dateReleased")}
-              >
-                <span>Date Released</span>
-                {sortConfig?.type === "dateReleased" &&
-                  (sortConfig?.order === "desc" ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronUp className="w-4 h-4" />
-                  ))}
-              </div>
-              <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors rounded-b-md"
-                onClick={() => onSortConfig("dateCompleted")}
-              >
-                <span>Date Completed</span>
-                {sortConfig?.type === "dateCompleted" &&
-                  (sortConfig?.order === "desc" ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronUp className="w-4 h-4" />
-                  ))}
-              </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       </div>
       <div className="h-11" />

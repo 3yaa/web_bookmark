@@ -36,7 +36,7 @@ const createStatusOptions = <T extends keyof typeof statusConfig>(
     ...statusConfig[status],
   }));
 
-// Export status options
+// status options
 export const bookStatusOptions = createStatusOptions([
   "Want to Read",
   "Completed",

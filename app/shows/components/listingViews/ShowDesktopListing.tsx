@@ -157,10 +157,10 @@ export function ShowDesktopListing({
                   width={50}
                   height={75}
                   priority
-                  className="object-fill rounded-[0.25rem] border border-zinc-600/30"
+                  className="object-fill rounded-sm border border-zinc-600/30"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-[0.25rem] border border-zinc-600/30"></div>
+                <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30"></div>
               )}
             </div>
             <div className="flex flex-col min-w-0 flex-1">

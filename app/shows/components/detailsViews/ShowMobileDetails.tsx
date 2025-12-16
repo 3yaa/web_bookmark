@@ -222,10 +222,10 @@ export function ShowMobileDetails({
                 onLoad={() => setPosterLoaded(true)}
               />
             ) : (
-              <div className="h-64 bg-gradient-to-br from-zinc-700 to-zinc-800" />
+              <div className="h-64 bg-linear-to-br from-zinc-700 to-zinc-800" />
             )}
 
-            <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-full h-20 bg-linear-to-t from-zinc-950 to-transparent pointer-events-none" />
           </div>
 
           <div className="px-4">

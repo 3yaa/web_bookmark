@@ -64,7 +64,7 @@ export function BookDesktopDetails({
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
+    <div className="fixed inset-0 bg-linear-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
       <div
         className="fixed inset-0"
         onClick={() => {
@@ -73,12 +73,12 @@ export function BookDesktopDetails({
       />
       {/* BACKGROUND BORDER GRADIENT */}
       <div
-        className={`rounded-2xl bg-gradient-to-b ${getStatusBorderGradient(
+        className={`rounded-2xl bg-linear-to-b ${getStatusBorderGradient(
           book.status
         )} py-2 px-2 lg:min-w-[43.5%] lg:max-w-[43.5%]`}
       >
         {/* ACTUAL DETAIL CARD */}
-        <div className="bg-gradient-to-br bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 w-full max-h-[calc(100vh-3rem)]">
+        <div className="bg-linear-to-br bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 w-full max-h-[calc(100vh-3rem)]">
           {isLoading?.isTrue && (
             <Loading customStyle={isLoading.style} text={isLoading.text} />
           )}
@@ -182,7 +182,7 @@ export function BookDesktopDetails({
                     className="min-w-62 min-h-93 object-cover"
                   />
                 ) : (
-                  <div className="min-w-62 min-h-93 bg-gradient-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
+                  <div className="min-w-62 min-h-93 bg-linear-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
                 )}
                 <div
                   className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
@@ -214,7 +214,7 @@ export function BookDesktopDetails({
                       {book.title || "Untitled"}
                     </div>
                     <div
-                      className={`w-full h-0.5 bg-gradient-to-r ${getStatusBorderGradient(
+                      className={`w-full h-0.5 bg-linear-to-r ${getStatusBorderGradient(
                         book.status
                       )} to-zinc-800 rounded-full`}
                     ></div>
@@ -250,7 +250,7 @@ export function BookDesktopDetails({
                   </div>
                   {/* STATUS AND SCORE */}
                   <div className="flex justify-start gap-4 mb-2.5 max-w-[94%]">
-                    <div className="flex-[0.77] lg:min-w-[165px]">
+                    <div className="flex-[0.77] lg:min-w-41.25">
                       <label className="text-sm font-medium text-zinc-400 mb-1 block">
                         Status
                       </label>
@@ -275,7 +275,7 @@ export function BookDesktopDetails({
                         dropDuration={0.24}
                       />
                     </div>
-                    <div className="flex-[0.865] lg:min-w-[195px]">
+                    <div className="flex-[0.865] lg:min-w-48.75">
                       <label className="ml-1 text-sm font-medium text-zinc-400 mb-1 block">
                         Score
                       </label>

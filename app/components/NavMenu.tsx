@@ -162,7 +162,7 @@ export function NavMenu() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, scale: 0.97 }}
             transition={{ type: "spring", stiffness: 240, damping: 28 }}
-            className="mb-3 w-40 rounded-xl bg-gradient-to-bl from-zinc-transparent via-zinc-800/20 to-zinc-800/60 backdrop-blur-xl 
+            className="mb-3 w-40 rounded-xl bg-linear-to-bl from-zinc-transparent via-zinc-800/20 to-zinc-800/60 backdrop-blur-xl 
                        border border-zinc-800/50 ring-1 ring-zinc-800/50 overflow-hidden"
           >
             <ul className="flex flex-col-reverse">
@@ -188,7 +188,7 @@ export function NavMenu() {
                         disabled={isLoggingOut}
                         className="w-full flex items-center justify-between pl-4.5 pr-5 py-3
                                    text-sm font-medium text-zinc-300 
-                                   hover:text-red-400 hover:bg-gradient-to-r from-red-500/8
+                                   hover:text-red-400 hover:bg-linear-to-r from-red-500/8
                                    transition-all group hover:cursor-pointer
                                    disabled:opacity-50 disabled:cursor-not-allowed"
                       >
@@ -200,7 +200,7 @@ export function NavMenu() {
                         </div>
                         <ChevronRight
                           className="w-4 h-4 opacity-0 group-hover:opacity-100 
-                                                 translate-x-[-4px] group-hover:translate-x-0 
+                                                 -translate-x-1 group-hover:translate-x-0 
                                                  transition-all duration-200"
                         />
                       </button>
@@ -226,7 +226,7 @@ export function NavMenu() {
                         }}
                         className="w-full flex items-center justify-between pl-4.5 pr-5 py-3
                                    text-sm font-medium text-zinc-300 
-                                   hover:text-emerald-500 hover:bg-gradient-to-r from-emerald-500/8
+                                   hover:text-emerald-500 hover:bg-linear-to-r from-emerald-500/8
                                    transition-all group hover:cursor-pointer"
                       >
                         <div className="flex items-center gap-3">
@@ -237,7 +237,7 @@ export function NavMenu() {
                         </div>
                         <ChevronRight
                           className="w-4 h-4 opacity-0 group-hover:opacity-100 
-                                                 translate-x-[-4px] group-hover:translate-x-0 
+                                                 -translate-x-1 group-hover:translate-x-0 
                                                  transition-all duration-200"
                         />
                       </Link>
@@ -256,8 +256,8 @@ export function NavMenu() {
       <button
         //border-0 border-zinc-950/50
         className={`flex items-center justify-center w-10 h-10 lg:w-14 lg:h-14 rounded-full 
-          bg-gradient-to-bl from-zinc-transparent to-zinc-800/60 
-          hover:bg-gradient-to-bl hover:from-zinc-800/60 hover:to-transparent
+          bg-linear-to-bl from-zinc-transparent to-zinc-800/60 
+          hover:bg-linear-to-bl hover:from-zinc-800/60 hover:to-transparent
           backdrop-blur-xl 
           shadow-md hover:scale-105 active:scale-95 
           transition-all duration-200 relative z-10 hover:cursor-pointer focus:outline-none`}

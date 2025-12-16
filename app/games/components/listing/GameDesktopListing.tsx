@@ -157,16 +157,16 @@ export function GameDesktopListing({
                   width={1920}
                   height={1080}
                   priority
-                  className="w-full object rounded-[0.25rem] border border-zinc-600/30"
+                  className="w-full object rounded-sm border border-zinc-600/30"
                 />
               ) : (
-                <div className="w-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-[0.25rem] border border-zinc-600/30"></div>
+                <div className="w-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30"></div>
               )}
             </div>
             <div className="flex flex-col min-w-0 flex-1">
               <span className="font-semibold text-zinc-400 text-[70%] group-hover:text-emerald-400 flex gap-1">
                 {game.mainTitle ? (
-                  <span className="block max-w-[88%] whitespace-nowrap text-ellipsis overflow-hidden flex-shrink">
+                  <span className="block max-w-[88%] whitespace-nowrap text-ellipsis overflow-hidden shrink">
                     {game.mainTitle} ᭡
                   </span>
                 ) : (

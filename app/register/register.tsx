@@ -65,16 +65,16 @@ export function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-zinc-950 flex items-center justify-center px-4 py-8">
       {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-zinc-800/20 via-transparent to-transparent"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,var(--tw-gradient-stops))] from-zinc-800/20 via-transparent to-transparent"></div>
 
       {/* Register Card */}
       <div className="relative w-full max-w-md">
         {/* Outer gradient border */}
-        <div className="rounded-2xl bg-gradient-to-b from-zinc-700/30 via-zinc-800/20 to-zinc-900/30 p-0.5">
+        <div className="rounded-2xl bg-linear-to-b from-zinc-700/30 via-zinc-800/20 to-zinc-900/30 p-0.5">
           {/* Inner card */}
-          <div className="bg-gradient-to-br from-zinc-900/90 via-zinc-900/80 to-zinc-950/90 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-8">
+          <div className="bg-linear-to-br from-zinc-900/90 via-zinc-900/80 to-zinc-950/90 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-8">
             {/* Header */}
             <div className="text-center mb-4">
               <h2 className="text-3xl font-bold text-zinc-100 mb-2">
@@ -193,7 +193,7 @@ export function Register() {
                   !formData.username ||
                   !formData.password
                 }
-                className="mt-5 w-full py-3 px-4 bg-gradient-to-r from-zinc-700 to-zinc-800 
+                className="mt-5 w-full py-3 px-4 bg-linear-to-r from-zinc-700 to-zinc-800 
                   hover:from-emerald-700 hover:to-emerald-800 hover:shadow-lg hover:shadow-emerald-500/20 hover:text-white
                   disabled:from-zinc-800 disabled:to-zinc-900 disabled:opacity-50
                   disabled:border-zinc-800 disabled:shadow-none
@@ -204,8 +204,8 @@ export function Register() {
                   disabled:cursor-not-allowed hover:cursor-pointer
                   group relative overflow-hidden
                   transform hover:scale-[1.02] active:scale-[0.98]
-                  before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent
-                  before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700 before:ease-out"
+                  before:absolute before:inset-0 before:bg-linear-to-r before:from-transparent before:via-white/10 before:to-transparent
+                  before:-translate-x-full hover:before:translate-x-full before:transition-transform before:duration-700 before:ease-out"
               >
                 <span
                   className={`flex items-center justify-center gap-2 relative z-10 ${

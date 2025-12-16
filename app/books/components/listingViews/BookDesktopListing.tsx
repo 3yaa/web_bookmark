@@ -158,17 +158,17 @@ export function BookDesktopListing({
                   width={248}
                   height={372}
                   priority
-                  className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
+                  className="w-full h-full object-fill rounded-sm border border-zinc-600/30"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-[0.25rem] border border-zinc-600/30"></div>
+                <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30"></div>
               )}
             </div>
             <div className="flex flex-col min-w-0 flex-1">
               <span className="font-semibold text-zinc-400 text-[70%] group-hover:text-emerald-400 flex gap-1">
                 {book.seriesTitle ? (
                   <>
-                    <span className="block max-w-[88%] whitespace-nowrap text-ellipsis overflow-hidden flex-shrink">
+                    <span className="block max-w-[88%] whitespace-nowrap text-ellipsis overflow-hidden shrink">
                       {book.seriesTitle}
                     </span>
                     <span>᭡</span>

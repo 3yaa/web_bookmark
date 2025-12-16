@@ -80,17 +80,17 @@ export function ShowMultGames({
                 onClick={() => onClickedGame(game)}
               >
                 {/* COVER */}
-                <div className="w-12.5 h-18 flex-shrink-0">
+                <div className="w-12.5 h-18 shrink-0">
                   {game.cover_url ? (
                     <Image
                       src={game.cover_url!}
                       alt={game.title || "Untitled"}
                       width={50}
                       height={75}
-                      className="w-full h-full object-fill rounded-[0.25rem] border border-zinc-600/30"
+                      className="w-full h-full object-fill rounded-sm border border-zinc-600/30"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-[0.25rem] border border-zinc-600/30"></div>
+                    <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30"></div>
                   )}
                 </div>
                 {/* DETAILS */}

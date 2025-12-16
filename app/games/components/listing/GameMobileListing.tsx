@@ -53,7 +53,7 @@ const GameItem = React.memo(({
           className="object-fill w-full h-full rounded-md border border-zinc-700/40"
         />
       ) : (
-        <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
+        <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
       )}
     </div>
     <div className="px-3 pt-3 flex flex-col w-full min-w-0">
@@ -139,7 +139,7 @@ const GameItem = React.memo(({
         </div>
       </div>
       {/* NOTES */}
-      <p className="text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-[2rem] w-full break-words">
+      <p className="text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-8 w-full wrap-break-word">
         <span className="line-clamp-2">{game.note || "No notes"}</span>
       </p>
     </div>
@@ -188,9 +188,9 @@ export function GameMobileListing({
           />
           {/* STATUS FILTER OPTIONS */}
           {openStatusOption && (
-            <div className="fixed z-10 left-3 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-[160px]">
+            <div className="fixed z-10 left-3 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-40">
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
                 onClick={() => {
                   onStatusFilter("Want to Watch");
                   setOpenStatusOption(false);
@@ -207,7 +207,7 @@ export function GameMobileListing({
                 )}
               </div>
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
                 onClick={() => {
                   onStatusFilter("Watching");
                   setOpenStatusOption(false);
@@ -224,7 +224,7 @@ export function GameMobileListing({
                 )}
               </div>
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
                 onClick={() => {
                   onStatusFilter("Completed");
                   setOpenStatusOption(false);
@@ -241,7 +241,7 @@ export function GameMobileListing({
                 )}
               </div>
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
                 onClick={() => {
                   onStatusFilter("Dropped");
                   setOpenStatusOption(false);
@@ -278,9 +278,9 @@ export function GameMobileListing({
           />
           {/* SORT OPTIONS */}
           {openSortOption && (
-            <div className="fixed z-10 right-3 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-[165px]">
+            <div className="fixed z-10 right-3 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-41.25">
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
                 onClick={() => onSortConfig("title")}
               >
                 <span>Title</span>
@@ -292,7 +292,7 @@ export function GameMobileListing({
                   ))}
               </div>
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
                 onClick={() => onSortConfig("score")}
               >
                 <span>Score</span>
@@ -304,7 +304,7 @@ export function GameMobileListing({
                   ))}
               </div>
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
                 onClick={() => onSortConfig("studio")}
               >
                 <span>Studio</span>
@@ -316,7 +316,7 @@ export function GameMobileListing({
                   ))}
               </div>
               <div
-                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b-1 border-zinc-800"
+                className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
                 onClick={() => onSortConfig("dateReleased")}
               >
                 <span>Date Released</span>

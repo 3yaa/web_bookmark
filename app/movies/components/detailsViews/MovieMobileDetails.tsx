@@ -238,10 +238,10 @@ export function MovieMobileDetails({
                 onLoad={() => setPosterLoaded(true)}
               />
             ) : (
-              <div className="h-64 bg-gradient-to-br from-zinc-700 to-zinc-800" />
+              <div className="h-64 bg-linear-to-br from-zinc-700 to-zinc-800" />
             )}
             {/* BOTTOM FADE */}
-            <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-full h-20 bg-linear-to-t from-zinc-950 to-transparent pointer-events-none" />
           </div>
           <div className="px-4">
             <div className="mt-4">
@@ -315,7 +315,7 @@ export function MovieMobileDetails({
                 <div className="min-w-0 text-left">
                   {movie.prequel && (
                     <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
-                      <span className="flex-shrink-0">←</span>
+                      <span className="shrink-0">←</span>
                       <span
                         className={`truncate min-w-0 transition-all duration-200 ${
                           !addingMovie ? "hover:underline active:scale-95" : ""
@@ -335,7 +335,7 @@ export function MovieMobileDetails({
                   )}
                 </div>
                 {/* PLACEMENT */}
-                <div className="flex justify-center items-end flex-shrink-0">
+                <div className="flex justify-center items-end shrink-0">
                   {movie.placeInSeries && (
                     <label className="text-sm font-medium text-zinc-400/85">
                       {movie.placeInSeries}
@@ -361,7 +361,7 @@ export function MovieMobileDetails({
                       >
                         {movie.sequel}
                       </span>
-                      <span className="flex-shrink-0">→</span>
+                      <span className="shrink-0">→</span>
                     </div>
                   )}
                 </div>

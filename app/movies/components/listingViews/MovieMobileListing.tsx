@@ -185,10 +185,10 @@ export function MovieMobileListing({
   return (
     <div className="w-full mx-auto font-inter tracking-tight">
       {/* HEADING */}
-      <div className="fixed right-0 left-0 top-0 z-10 bg-zinc-900/35 backdrop-blur-xl shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md px-3 will-change-transform">
+      <div className="fixed right-0 left-0 top-0 z-10 bg-zinc-900/35 backdrop-blur-xl shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md will-change-transform">
         {/* STATUS FILTER */}
         <div
-          className={`p-3 ${
+          className={`py-3 px-5 ${
             openStatusOption ? "bg-zinc-800/60 rounded-md" : ""
           }`}
         >
@@ -201,7 +201,7 @@ export function MovieMobileListing({
           />
           {/* STATUS FILTER OPTIONS */}
           {openStatusOption && (
-            <div className="fixed z-10 left-3 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-40">
+            <div className="fixed z-10 left-0 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-40">
               <div
                 className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
                 onClick={() => {
@@ -280,7 +280,9 @@ export function MovieMobileListing({
         </div>
         {/* SORT */}
         <div
-          className={`p-3 ${openSortOption ? "bg-zinc-800/60 rounded-md" : ""}`}
+          className={`py-3 px-5 ${
+            openSortOption ? "bg-zinc-800/60 rounded-md" : ""
+          }`}
         >
           <SlidersHorizontal
             onClick={() => {
@@ -291,7 +293,7 @@ export function MovieMobileListing({
           />
           {/* SORT OPTIONS */}
           {openSortOption && (
-            <div className="fixed z-10 right-3 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-41.25">
+            <div className="fixed z-10 right-0 bg-zinc-900 border border-zinc-700/40 rounded-md shadow-lg mt-2 min-w-41.25">
               <div
                 className="flex items-center justify-between px-3 py-2 text-zinc-300 text-md transition-colors border-b border-zinc-800"
                 onClick={() => onSortConfig("title")}

@@ -159,7 +159,7 @@ export function ShowMobileListing({
   return (
     <div className="w-full mx-auto font-inter tracking-tight">
       {/* HEADING */}
-      <div className="sticky top-0 z-10 bg-zinc-900/35 backdrop-blur-xl shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md px-3 will-change-transform">
+      <div className="fixed left-0 right-0 top-0 z-10 bg-zinc-900/35 backdrop-blur-xl shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md px-3 will-change-transform">
         {/* STATUS FILTER */}
         <div
           className={`p-3 ${
@@ -330,6 +330,7 @@ export function ShowMobileListing({
           )}
         </div>
       </div>
+      <div className="h-11" />
       {/* LOADER */}
       <div className="relative bg-black/20 backdrop-blur-xl">
         {isProcessingShow && (

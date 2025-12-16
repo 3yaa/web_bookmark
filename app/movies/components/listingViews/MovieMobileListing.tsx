@@ -356,13 +356,13 @@ export function MovieMobileListing({
           )}
         </div>
       </div>
+      <div className="h-11" />
       {/* LOADER */}
       <div className="relative bg-black/20 backdrop-blur-xl">
         {isProcessingMovie && (
           <Loading customStyle="mt-72 h-12 w-12 border-zinc-500/40" text="" />
         )}
       </div>
-      <div className="h-11" />
       {/* EMPTY */}
       {!isProcessingMovie && movies.length === 0 && (
         <div className="text-center py-12">

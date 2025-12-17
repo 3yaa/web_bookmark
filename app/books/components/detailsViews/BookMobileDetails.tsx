@@ -214,10 +214,7 @@ export function BookMobileDetails({
   return (
     <>
       <div
-        ref={modalRef}
-        className={`fixed inset-0 z-30 bg-zinc-950 flex flex-col ${
-          isScorePickerOpen ? "overflow-hidden" : "overflow-y-auto"
-        }`}
+        className="fixed inset-0 z-30"
         style={{
           transform: `translate3d(0, ${translateY}px, 0)`,
           opacity: isVisible ? 1 : 0,
@@ -232,6 +229,12 @@ export function BookMobileDetails({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
+        <div
+          ref={modalRef}
+          className={`w-full h-full bg-zinc-950 flex flex-col ${
+            isScorePickerOpen ? "overflow-hidden" : "overflow-y-auto"
+          }`}
+        >
         {isLoading?.isTrue && (
           <Loading
             customStyle={isLoading.style}
@@ -477,6 +480,7 @@ export function BookMobileDetails({
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
       <MobileScorePicker

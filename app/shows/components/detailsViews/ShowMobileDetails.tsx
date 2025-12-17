@@ -90,7 +90,7 @@ export function ShowMobileDetails({
     lastTime.current = currentTime;
 
     if (modal.scrollTop < 3 && deltaY > 0) {
-      const resistance = Math.max(0.2, 1 - deltaY / 1200);
+      const resistance = Math.max(0.3, 1 - deltaY / 800);
       setTranslateY(deltaY * resistance);
     } else if (deltaY < 0) {
       setIsDragging(false);
@@ -124,15 +124,15 @@ export function ShowMobileDetails({
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
-    const threshold = 70;
-    const velocityThreshold = 0.3;
+    const threshold = 50;
+    const velocityThreshold = 0.5;
 
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
       // UNLOCK BODY IMMEDIATELY
       safeUnlock();
 
       const finalY = Math.max(
-        translateY + dragVelocity.current * 150,
+        translateY + dragVelocity.current * 200,
         window.innerHeight
       );
 

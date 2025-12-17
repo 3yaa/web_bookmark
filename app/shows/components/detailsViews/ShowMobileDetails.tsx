@@ -61,7 +61,7 @@ export function ShowMobileDetails({
     const modal = modalRef.current;
     if (!modal) return;
 
-    if (modal.scrollTop < 3) {
+    if (modal.scrollTop <= 5) {
       startY.current = e.touches[0].clientY;
       lastY.current = e.touches[0].clientY;
       lastTime.current = Date.now();
@@ -89,10 +89,11 @@ export function ShowMobileDetails({
     lastY.current = currentY;
     lastTime.current = currentTime;
 
-    if (modal.scrollTop < 3 && deltaY > 0) {
-      const resistance = Math.max(0.3, 1 - deltaY / 800);
+    if (modal.scrollTop <= 5 && deltaY > 0) {
+      e.preventDefault();
+      const resistance = Math.max(0.4, 1 - deltaY / 600);
       setTranslateY(deltaY * resistance);
-    } else if (deltaY < 0) {
+    } else if (deltaY < 0 && modal.scrollTop <= 0) {
       setIsDragging(false);
       setTranslateY(0);
     }
@@ -124,15 +125,15 @@ export function ShowMobileDetails({
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
-    const threshold = 50;
-    const velocityThreshold = 0.5;
+    const threshold = 80;
+    const velocityThreshold = 0.6;
 
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
       // UNLOCK BODY IMMEDIATELY
       safeUnlock();
 
       const finalY = Math.max(
-        translateY + dragVelocity.current * 200,
+        translateY + dragVelocity.current * 250,
         window.innerHeight
       );
 

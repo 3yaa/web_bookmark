@@ -46,6 +46,8 @@ export function BookMobileDetails({
   const dragVelocity = useRef(0);
   const lastY = useRef(0);
   const lastTime = useRef(0);
+  const scrollYRef = useRef(0);
+  const bodyUnlockedRef = useRef(false);
 
   const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
     //detects which side of the div was clicked
@@ -60,36 +62,44 @@ export function BookMobileDetails({
     });
   };
 
-  useEffect(() => {
-    // original values
-    const originalOverflow = document.body.style.overflow;
-    const originalPosition = document.body.style.position;
-    const originalTop = document.body.style.top;
+  const safeUnlock = React.useCallback(() => {
+    if (bodyUnlockedRef.current) return;
+    bodyUnlockedRef.current = true;
+
+    document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.width = "";
+
+    window.scrollTo(0, scrollYRef.current);
+  }, []);
+
+  const lockBodyScroll = () => {
     const scrollY = window.scrollY;
 
-    // lock body in place
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = "100%";
 
-    // trigger mount animation
+    return scrollY;
+  };
+
+  useEffect(() => {
+    scrollYRef.current = lockBodyScroll();
+
     requestAnimationFrame(() => {
       setIsVisible(true);
     });
 
     return () => {
-      document.body.style.overflow = originalOverflow;
-      document.body.style.position = originalPosition;
-      document.body.style.top = originalTop;
-      document.body.style.width = "";
-      window.scrollTo(0, scrollY);
+      safeUnlock(); // fallback only
     };
-  }, []);
+  }, [safeUnlock]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isScorePickerOpen) return;
-    //
+
     const target = e.target as HTMLElement;
     if (
       target.closest("button") ||
@@ -102,7 +112,7 @@ export function BookMobileDetails({
     const modal = modalRef.current;
     if (!modal) return;
 
-    if (modal.scrollTop < 3) {
+    if (modal.scrollTop <= 5) {
       startY.current = e.touches[0].clientY;
       lastY.current = e.touches[0].clientY;
       lastTime.current = Date.now();
@@ -130,10 +140,11 @@ export function BookMobileDetails({
     lastY.current = currentY;
     lastTime.current = currentTime;
 
-    if (modal.scrollTop < 3 && deltaY > 0) {
-      const resistance = Math.max(0.3, 1 - deltaY / 800);
+    if (modal.scrollTop <= 5 && deltaY > 0) {
+      e.preventDefault();
+      const resistance = Math.max(0.4, 1 - deltaY / 600);
       setTranslateY(deltaY * resistance);
-    } else if (deltaY < 0) {
+    } else if (deltaY < 0 && modal.scrollTop <= 0) {
       setIsDragging(false);
       setTranslateY(0);
     }
@@ -142,19 +153,24 @@ export function BookMobileDetails({
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
-    const threshold = 50;
-    const velocityThreshold = 0.5;
+    const threshold = 80;
+    const velocityThreshold = 0.6;
 
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
+      // UNLOCK BODY IMMEDIATELY
+      safeUnlock();
+
       const finalY = Math.max(
-        translateY + dragVelocity.current * 200,
+        translateY + dragVelocity.current * 250,
         window.innerHeight
       );
-      setTranslateY(finalY);
+
       setIsExiting(true);
+      setTranslateY(finalY);
+
       setTimeout(() => {
         onClose();
-      }, 75);
+      }, 50);
     } else {
       setTranslateY(0);
     }

@@ -4,6 +4,8 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { MovieProps, SortConfig } from "@/types/movie";
+import React, { useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface MovieDesktopListingProps {
   movies: MovieProps[];
@@ -13,6 +15,84 @@ interface MovieDesktopListingProps {
   onMovieClicked: (movie: MovieProps) => void;
 }
 
+const MovieItem = React.memo(
+  ({
+    movie,
+    index,
+    totalMovies,
+    onClick,
+  }: {
+    movie: MovieProps;
+    index: number;
+    totalMovies: number;
+    onClick: (movie: MovieProps) => void;
+  }) => (
+    <div
+      key={movie.id}
+      className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
+        movie.status
+      )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
+        index === 0 ? "pt-1.5 rounded-bl-none" : "rounded-l-none"
+      }
+        ${index === totalMovies - 1 && "rounded-bl-md"}  
+           hover:cursor-pointer`}
+      onClick={() => onClick(movie)}
+    >
+      <span className="font-medium text-zinc-300 text-sm">{index + 1}</span>
+      <div className="w-12.5 h-18">
+        {movie.posterUrl !== undefined ? (
+          <Image
+            src={movie.posterUrl}
+            alt={movie.title || "Untitled"}
+            width={1280}
+            height={720}
+            priority
+            className="w-full h-full object-fill rounded-sm border border-zinc-600/30"
+          />
+        ) : (
+          <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30"></div>
+        )}
+      </div>
+      <div className="flex flex-col min-w-0 flex-1">
+        <span className="font-semibold text-zinc-400 text-[70%] group-hover:text-emerald-400 flex gap-1">
+          {movie.seriesTitle ? (
+            <>
+              <span className="block max-w-[88%] whitespace-nowrap text-ellipsis overflow-hidden shrink">
+                {movie.seriesTitle}
+              </span>
+              <span>᭡</span>
+              <span>{movie.placeInSeries}</span>
+            </>
+          ) : (
+            ""
+          )}
+        </span>
+        <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-emerald-400 transition-colors duration-200 truncate max-w-53">
+          {movie.title || "-"}
+        </span>
+      </div>
+      <span className="text-center font-semibold text-zinc-300 text-sm">
+        {movie.score || "-"}
+      </span>
+      <span className="text-center font-medium text-zinc-300 text-sm truncate">
+        {movie.status === "Completed"
+          ? formatDateShort(movie.dateCompleted) || "?"
+          : "-"}
+      </span>
+      <span className="text-center font-semibold text-zinc-300 text-sm truncate">
+        {movie.director || "-"}
+      </span>
+      <span className="text-center font-medium text-zinc-300 text-sm truncate pl-0.5">
+        {movie.dateReleased || "-"}
+      </span>
+      <span className="text-zinc-400 text-sm line-clamp-2 whitespace-normal overflow-hidden pl-0.5 text-center">
+        {movie.note || "No notes"}
+      </span>
+    </div>
+  )
+);
+MovieItem.displayName = "MovieItem";
+
 export function MovieDesktopListing({
   movies,
   isProcessingMovie,
@@ -20,6 +100,15 @@ export function MovieDesktopListing({
   onSortConfig,
   onMovieClicked,
 }: MovieDesktopListingProps) {
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: movies.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 76, // height of each item in pixels
+    overscan: 5, // render 5 extra items above/below viewport
+  });
+
   return (
     <div className="w-full md:w-[70%] lg:w-[60%] mx-auto">
       {/* HEADING */}
@@ -133,73 +222,47 @@ export function MovieDesktopListing({
         </div>
       )}
       {/* LISTING */}
-      {!isProcessingMovie &&
-        movies.map((movie, index) => (
+      {!isProcessingMovie && movies.length > 0 && (
+        <div
+          ref={parentRef}
+          className="w-full overflow-auto"
+          style={{
+            height: "calc(100vh - 100px)", // account for header
+          }}
+        >
           <div
-            key={movie.id}
-            className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
-              movie.status
-            )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
-              index === 0 ? "pt-1.5 rounded-bl-none" : "rounded-l-none"
-            }
-              ${index === movies.length - 1 && "rounded-bl-md"}  
-                 hover:cursor-pointer`}
-            onClick={() => onMovieClicked(movie)}
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
           >
-            <span className="font-medium text-zinc-300 text-sm">
-              {index + 1}
-            </span>
-            <div className="w-12.5 h-18">
-              {movie.posterUrl !== undefined ? (
-                <Image
-                  src={movie.posterUrl}
-                  alt={movie.title || "Untitled"}
-                  width={1280}
-                  height={720}
-                  priority
-                  className="w-full h-full object-fill rounded-sm border border-zinc-600/30"
-                />
-              ) : (
-                <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30"></div>
-              )}
-            </div>
-            <div className="flex flex-col min-w-0 flex-1">
-              <span className="font-semibold text-zinc-400 text-[70%] group-hover:text-emerald-400 flex gap-1">
-                {movie.seriesTitle ? (
-                  <>
-                    <span className="block max-w-[88%] whitespace-nowrap text-ellipsis overflow-hidden shrink">
-                      {movie.seriesTitle}
-                    </span>
-                    <span>᭡</span>
-                    <span>{movie.placeInSeries}</span>
-                  </>
-                ) : (
-                  ""
-                )}
-              </span>
-              <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-emerald-400 transition-colors duration-200 truncate max-w-53">
-                {movie.title || "-"}
-              </span>
-            </div>
-            <span className="text-center font-semibold text-zinc-300 text-sm">
-              {movie.score || "-"}
-            </span>
-            <span className="text-center font-medium text-zinc-300 text-sm truncate">
-              {movie.status === "Completed"
-                ? formatDateShort(movie.dateCompleted) || "?"
-                : "-"}
-            </span>
-            <span className="text-center font-semibold text-zinc-300 text-sm truncate">
-              {movie.director || "-"}
-            </span>
-            <span className="text-center font-medium text-zinc-300 text-sm truncate pl-0.5">
-              {movie.dateReleased || "-"}
-            </span>
-            <span className="text-zinc-400 text-sm line-clamp-2 whitespace-normal overflow-hidden pl-0.5 text-center">
-              {movie.note || "No notes"}
-            </span>
+            {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+              const movie = movies[virtualItem.index];
+              return (
+                <div
+                  key={movie.id}
+                  data-index={virtualItem.index}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <MovieItem
+                    movie={movie}
+                    index={virtualItem.index}
+                    totalMovies={movies.length}
+                    onClick={onMovieClicked}
+                  />
+                </div>
+              );
+            })}
           </div>
-        ))}
+        </div>
+      )}
     </div>
   );
 }

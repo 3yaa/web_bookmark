@@ -46,33 +46,6 @@ export function ShowMobileDetails({
   const scrollYRef = useRef(0);
   const bodyUnlockedRef = useRef(false);
 
-  useEffect(() => {
-    // original values
-    const originalOverflow = document.body.style.overflow;
-    const originalPosition = document.body.style.position;
-    const originalTop = document.body.style.top;
-    const scrollY = window.scrollY;
-
-    // lock body in place
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = "100%";
-
-    // trigger mount animation
-    requestAnimationFrame(() => {
-      setIsVisible(true);
-    });
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-      document.body.style.position = originalPosition;
-      document.body.style.top = originalTop;
-      document.body.style.width = "";
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
-
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isProgressPickerOpen || isScorePickerOpen) return;
 
@@ -128,7 +101,13 @@ export function ShowMobileDetails({
   const safeUnlock = useCallback(() => {
     if (bodyUnlockedRef.current) return;
     bodyUnlockedRef.current = true;
-    unlockBodyScroll(scrollYRef.current);
+
+    document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.width = "";
+
+    window.scrollTo(0, scrollYRef.current);
   }, []);
 
   const lockBodyScroll = () => {
@@ -142,15 +121,6 @@ export function ShowMobileDetails({
     return scrollY;
   };
 
-  const unlockBodyScroll = (scrollY: number) => {
-    document.body.style.overflow = "";
-    document.body.style.position = "";
-    document.body.style.top = "";
-    document.body.style.width = "";
-
-    window.scrollTo(0, scrollY);
-  };
-
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
@@ -158,11 +128,11 @@ export function ShowMobileDetails({
     const velocityThreshold = 0.5;
 
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
-      // 🔓 UNLOCK BODY IMMEDIATELY
-      unlockBodyScroll(scrollYRef.current);
+      // UNLOCK BODY IMMEDIATELY
+      safeUnlock();
 
       const finalY = Math.max(
-        translateY + dragVelocity.current * 200,
+        translateY + dragVelocity.current * 100,
         window.innerHeight
       );
 
@@ -188,8 +158,7 @@ export function ShowMobileDetails({
     });
 
     return () => {
-      // 🧯 Fallback only
-      safeUnlock();
+      safeUnlock(); // fallback only
     };
   }, [safeUnlock]);
 
@@ -208,8 +177,8 @@ export function ShowMobileDetails({
           transition: isDragging
             ? "none"
             : isExiting
-            ? "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-            : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+            ? "transform 0.35s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.2s cubic-bezier(0.4, 0, 1, 1)"
+            : "transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

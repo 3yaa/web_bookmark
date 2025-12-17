@@ -192,8 +192,9 @@ export function MovieMobileDetails({
           isScorePickerOpen ? "overflow-hidden" : "overflow-y-auto"
         }`}
         style={{
-          transform: `translateY(${translateY}px)`,
+          transform: `translate3d(0, ${translateY}px, 0)`,
           opacity: isVisible ? 1 : 0,
+          willChange: isDragging ? "transform" : "auto",
           transition: isDragging
             ? "none"
             : isExiting
@@ -262,9 +263,12 @@ export function MovieMobileDetails({
         <div className="pb-10">
           {/* POSTER */}
           <div
-            className={`relative w-full overflow-hidden bg-zinc-900/40 transition-all duration-300 ${
-              isDragging && "rounded-lg"
+            className={`relative w-full overflow-hidden bg-zinc-900/40 ${
+              isDragging ? "rounded-lg" : ""
             }`}
+            style={{
+              willChange: isDragging ? "transform" : "auto",
+            }}
           >
             {movie.posterUrl ? (
               <Image

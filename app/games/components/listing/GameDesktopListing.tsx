@@ -101,7 +101,7 @@ export function GameDesktopListing({
   const rowVirtualizer = useVirtualizer({
     count: games.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 76, // height of each item in pixels
+    estimateSize: () => 77, // height of each item in pixels
     overscan: 5, // render 5 extra items above/below viewport
   });
 

@@ -178,7 +178,7 @@ export function MovieMobileListing({
   const rowVirtualizer = useVirtualizer({
     count: movies.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 134.562, // height of each item in pixels
+    estimateSize: () => 135.562, // height of each item in pixels
     overscan: 5, // render 5 extra items above/below viewport
   });
 

@@ -144,7 +144,7 @@ export function ShowMobileListing({
     count: shows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 134.562, // height of each item in pixels
-    overscan: 5, // render 5 extra items above/below viewport for smooth scrolling
+    overscan: 5, // render 5 extra items above/below viewport
   });
 
   const handleShowClicked = (show: ShowProps) => {
@@ -360,13 +360,7 @@ export function ShowMobileListing({
       )}
       {/* VIRTUAL SCROLLING LISTING */}
       {!isProcessingShow && shows.length > 0 && (
-        <div
-          ref={parentRef}
-          className="w-full overflow-auto"
-          style={{
-            height: "calc(100vh - 44px)", // acount for fixed header
-          }}
-        >
+        <div ref={parentRef} className="w-full overflow-auto">
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,
@@ -380,7 +374,6 @@ export function ShowMobileListing({
                 <div
                   key={show.id}
                   data-index={virtualItem.index}
-                  // ref={rowVirtualizer.measureElement}
                   style={{
                     position: "absolute",
                     top: 0,

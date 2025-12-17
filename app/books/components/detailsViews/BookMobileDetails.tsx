@@ -322,6 +322,10 @@ export function BookMobileDetails({
                 width={1280}
                 height={900}
                 className="object-cover w-full"
+                style={{
+                  transform: "translateZ(0)",
+                  WebkitTransform: "translateZ(0)",
+                }}
                 onLoad={() => setPosterLoaded(true)}
               />
             ) : book.coverUrl ? (
@@ -331,6 +335,10 @@ export function BookMobileDetails({
                 width={1280}
                 height={900}
                 className="object-cover w-full"
+                style={{
+                  transform: "translateZ(0)",
+                  WebkitTransform: "translateZ(0)",
+                }}
                 onLoad={() => setPosterLoaded(true)}
               />
             ) : (

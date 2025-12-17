@@ -360,7 +360,13 @@ export function ShowMobileListing({
       )}
       {/* VIRTUAL SCROLLING LISTING */}
       {!isProcessingShow && shows.length > 0 && (
-        <div ref={parentRef} className="w-full overflow-auto">
+        <div
+          ref={parentRef}
+          className="w-full overflow-auto"
+          style={{
+            height: "calc(100vh - 44px)", // acount for fixed header
+          }}
+        >
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,

@@ -203,6 +203,11 @@ export function ShowMobileDetails({
           transform: `translate3d(0, ${translateY}px, 0)`,
           opacity: isVisible ? 1 : 0,
           willChange: isDragging ? "transform" : "auto",
+          WebkitTransform: `translate3d(0, ${translateY}px, 0)`,
+          WebkitBackfaceVisibility: "hidden",
+          backfaceVisibility: "hidden",
+          perspective: 1000,
+          WebkitPerspective: 1000,
           transition: isDragging
             ? "none"
             : isExiting
@@ -220,6 +225,11 @@ export function ShowMobileDetails({
               ? "overflow-hidden"
               : "overflow-y-auto"
           }`}
+          style={{
+            WebkitOverflowScrolling: "touch",
+            transform: "translateZ(0)",
+            WebkitTransform: "translateZ(0)",
+          }}
         >
         {isLoading?.isTrue && (
           <Loading

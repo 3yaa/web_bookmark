@@ -202,6 +202,11 @@ export function MovieMobileDetails({
           transform: `translate3d(0, ${translateY}px, 0)`,
           opacity: isVisible ? 1 : 0,
           willChange: isDragging ? "transform" : "auto",
+          WebkitTransform: `translate3d(0, ${translateY}px, 0)`,
+          WebkitBackfaceVisibility: "hidden",
+          backfaceVisibility: "hidden",
+          perspective: 1000,
+          WebkitPerspective: 1000,
           transition: isDragging
             ? "none"
             : isExiting
@@ -217,6 +222,11 @@ export function MovieMobileDetails({
           className={`w-full h-full bg-zinc-950 flex flex-col ${
             isScorePickerOpen ? "overflow-hidden" : "overflow-y-auto"
           }`}
+          style={{
+            WebkitOverflowScrolling: "touch",
+            transform: "translateZ(0)",
+            WebkitTransform: "translateZ(0)",
+          }}
         >
         {isLoading?.isTrue && (
           <Loading

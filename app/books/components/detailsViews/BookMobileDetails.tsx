@@ -48,6 +48,8 @@ export function BookMobileDetails({
   const lastTime = useRef(0);
   const scrollYRef = useRef(0);
   const bodyUnlockedRef = useRef(false);
+  const rafRef = useRef<number | null>(null);
+  const currentTranslateY = useRef(0);
 
   const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
     //detects which side of the div was clicked
@@ -93,6 +95,9 @@ export function BookMobileDetails({
     });
 
     return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+      }
       safeUnlock(); // fallback only
     };
   }, [safeUnlock]);
@@ -143,25 +148,41 @@ export function BookMobileDetails({
     if (modal.scrollTop <= 5 && deltaY > 0) {
       e.preventDefault();
       const resistance = Math.max(0.4, 1 - deltaY / 600);
-      setTranslateY(deltaY * resistance);
+      const newTranslateY = deltaY * resistance;
+      currentTranslateY.current = newTranslateY;
+
+      // Use RAF to batch updates and avoid jitter
+      if (rafRef.current === null) {
+        rafRef.current = requestAnimationFrame(() => {
+          setTranslateY(currentTranslateY.current);
+          rafRef.current = null;
+        });
+      }
     } else if (deltaY < 0 && modal.scrollTop <= 0) {
       setIsDragging(false);
       setTranslateY(0);
+      currentTranslateY.current = 0;
     }
   };
 
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
+    // Cancel any pending RAF
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+
     const threshold = 80;
     const velocityThreshold = 0.6;
 
-    if (translateY > threshold || dragVelocity.current > velocityThreshold) {
+    if (currentTranslateY.current > threshold || dragVelocity.current > velocityThreshold) {
       // UNLOCK BODY IMMEDIATELY
       safeUnlock();
 
       const finalY = Math.max(
-        translateY + dragVelocity.current * 250,
+        currentTranslateY.current + dragVelocity.current * 250,
         window.innerHeight
       );
 
@@ -173,6 +194,7 @@ export function BookMobileDetails({
       }, 50);
     } else {
       setTranslateY(0);
+      currentTranslateY.current = 0;
     }
 
     setIsDragging(false);

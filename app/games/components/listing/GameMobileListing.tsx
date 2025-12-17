@@ -165,7 +165,7 @@ export function GameMobileListing({
   const rowVirtualizer = useVirtualizer({
     count: games.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 134.562, // height of each item in pixels
+    estimateSize: () => 135.562, // height of each item in pixels
     overscan: 5, // render 5 extra items above/below viewport
   });
 

@@ -7,15 +7,15 @@ import {
   ChevronUp,
   Circle,
 } from "lucide-react";
-// utils and ui components
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { ShowProps, SortConfig } from "@/types/show";
 import { calcCurProgress } from "../../utils/progressCalc";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { MediaStatus } from "@/types/media";
 import { BackdropImageMobile } from "@/app/components/ui/BackdropMobile";
 import { useNav } from "@/app/components/NavContext";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface ShowMobileListingProps {
   shows: ShowProps[];
@@ -38,7 +38,6 @@ const ShowItem = React.memo(
     onClick: (show: ShowProps) => void;
   }) => (
     <div
-      key={show.id}
       className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
         isNavOpen ? "pointer-events-none" : ""
       }`}
@@ -51,7 +50,8 @@ const ShowItem = React.memo(
             alt={show.title || "Untitled"}
             width={300}
             height={450}
-            priority
+            priority={false}
+            loading="lazy"
             className="object-fill w-full h-full rounded-md border border-zinc-700/40"
           />
         ) : (
@@ -59,7 +59,6 @@ const ShowItem = React.memo(
         )}
       </div>
       <div className="px-3 pt-3 flex flex-col w-full min-w-0">
-        {/* BACKDROP */}
         {show.backdropUrl && (
           <BackdropImageMobile
             src={show.backdropUrl}
@@ -67,7 +66,6 @@ const ShowItem = React.memo(
             height={720}
           />
         )}
-        {/* TITLE/SCORE */}
         <div className="flex justify-between items-start">
           <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">
             {show.title || "-"}
@@ -77,18 +75,15 @@ const ShowItem = React.memo(
           </span>
         </div>
 
-        {/* STUDIO/RELEASE DATE */}
         <div className="text-zinc-500 text-xs font-medium flex space-x-1 pt-1">
           <span className="truncate max-w-35">{show.studio || "-"},</span>
           <span>{show.dateReleased || "-"}</span>
         </div>
         <div className="flex justify-between items-center pt-0.5">
-          {/* COMPLETION DATE */}
           <span className="text-zinc-500 text-[0.65rem] font-medium mt-1">
             {formatDateShort(show.dateCompleted)}
           </span>
 
-          {/* SEASON / EPISODES */}
           <div className="text-zinc-400 text-xs font-medium mb-0.5">
             <span className="pr-1">S{show.curSeasonIndex + 1 || "-"}</span>
             <span>Ep {show.curEpisode || "-"}/</span>
@@ -102,7 +97,6 @@ const ShowItem = React.memo(
           </div>
         </div>
 
-        {/* PROGRESS BAR */}
         <div className="mt-1.5 w-full bg-zinc-800/80 rounded-md h-1.5 overflow-hidden">
           <div
             className={`${getStatusBg(
@@ -122,7 +116,6 @@ const ShowItem = React.memo(
             }}
           />
         </div>
-        {/* NOTES */}
         <p className="text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-8 w-full wrap-break-word mt-1.5">
           <span className="line-clamp-2">{show.note || "No notes"}</span>
         </p>
@@ -144,6 +137,15 @@ export function ShowMobileListing({
   const { isNavOpen } = useNav();
   const [openSortOption, setOpenSortOption] = useState(false);
   const [openStatusOption, setOpenStatusOption] = useState(false);
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  // virtual scrolling setup
+  const rowVirtualizer = useVirtualizer({
+    count: shows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 134.562, // height of each item in pixels
+    overscan: 5, // render 5 extra items above/below viewport for smooth scrolling
+  });
 
   const handleShowClicked = (show: ShowProps) => {
     if (openSortOption || openStatusOption) {
@@ -356,16 +358,48 @@ export function ShowMobileListing({
           </p>
         </div>
       )}
-      {/* LISTING */}
-      {!isProcessingShow &&
-        shows.map((show) => (
-          <ShowItem
-            key={show.id}
-            show={show}
-            isNavOpen={isNavOpen}
-            onClick={handleShowClicked}
-          />
-        ))}
+      {/* VIRTUAL SCROLLING LISTING */}
+      {!isProcessingShow && shows.length > 0 && (
+        <div
+          ref={parentRef}
+          className="w-full overflow-auto"
+          style={{
+            height: "calc(100vh - 44px)", // acount for fixed header
+          }}
+        >
+          <div
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+              const show = shows[virtualItem.index];
+              return (
+                <div
+                  key={show.id}
+                  data-index={virtualItem.index}
+                  ref={rowVirtualizer.measureElement}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <ShowItem
+                    show={show}
+                    isNavOpen={isNavOpen}
+                    onClick={handleShowClicked}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

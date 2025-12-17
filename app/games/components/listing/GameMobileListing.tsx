@@ -181,10 +181,10 @@ export function GameMobileListing({
   return (
     <div className="w-full mx-auto font-inter tracking-tight">
       {/* HEADING */}
-      <div className="fixed left-0 right-0 top-0 z-10 bg-zinc-900/35 backdrop-blur-xl shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md px-3 will-change-transform">
+      <div className="fixed left-0 right-0 top-0 z-10 bg-zinc-900/35 backdrop-blur-xl shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md px-3 will-change-transform pointer-events-none">
         {/* STATUS FILTER */}
         <div
-          className="relative py-3 px-5"
+          className="relative py-3 px-5 pointer-events-auto"
           onClick={() => {
             setOpenStatusOption(!openStatusOption);
             setOpenSortOption(false);
@@ -270,14 +270,14 @@ export function GameMobileListing({
         </div>
 
         {/* STAT */}
-        <div className="flex items-center gap-1 text-slate-400 text-sm font-medium">
+        <div className="flex items-center gap-1 text-slate-400 text-sm font-medium pointer-events-none">
           <ChartNoAxesColumn className="w-4 h-4 text-slate-500" />
           <span>{games.length} Entries</span>
         </div>
 
         {/* SORT */}
         <div
-          className="relative py-3 px-5"
+          className="relative py-3 px-5 pointer-events-auto"
           onClick={() => {
             setOpenSortOption(!openSortOption);
             setOpenStatusOption(false);

@@ -1,6 +1,6 @@
 import { GameProps } from "@/types/game";
 import { GameAction } from "../GameDetailsHub";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Plus, ChevronsUp } from "lucide-react";
 import { gameStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
@@ -40,37 +40,12 @@ export function GameMobileDetails({
   const dragVelocity = useRef(0);
   const lastY = useRef(0);
   const lastTime = useRef(0);
-
-  useEffect(() => {
-    // original values
-    const originalOverflow = document.body.style.overflow;
-    const originalPosition = document.body.style.position;
-    const originalTop = document.body.style.top;
-    const scrollY = window.scrollY;
-
-    // lock body in place
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = "100%";
-
-    // trigger mount animation
-    requestAnimationFrame(() => {
-      setIsVisible(true);
-    });
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-      document.body.style.position = originalPosition;
-      document.body.style.top = originalTop;
-      document.body.style.width = "";
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
+  const scrollYRef = useRef(0);
+  const bodyUnlockedRef = useRef(false);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isScorePickerOpen) return;
-    //
+
     const target = e.target as HTMLElement;
     if (
       target.closest("button") ||
@@ -120,6 +95,29 @@ export function GameMobileDetails({
     }
   };
 
+  const safeUnlock = useCallback(() => {
+    if (bodyUnlockedRef.current) return;
+    bodyUnlockedRef.current = true;
+
+    document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.width = "";
+
+    window.scrollTo(0, scrollYRef.current);
+  }, []);
+
+  const lockBodyScroll = () => {
+    const scrollY = window.scrollY;
+
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+
+    return scrollY;
+  };
+
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
@@ -127,15 +125,20 @@ export function GameMobileDetails({
     const velocityThreshold = 0.5;
 
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
+      // UNLOCK BODY IMMEDIATELY
+      safeUnlock();
+
       const finalY = Math.max(
         translateY + dragVelocity.current * 200,
         window.innerHeight
       );
-      setTranslateY(finalY);
+
       setIsExiting(true);
+      setTranslateY(finalY);
+
       setTimeout(() => {
         onClose();
-      }, 75);
+      }, 50);
     } else {
       setTranslateY(0);
     }
@@ -143,6 +146,18 @@ export function GameMobileDetails({
     setIsDragging(false);
     dragVelocity.current = 0;
   };
+
+  useEffect(() => {
+    scrollYRef.current = lockBodyScroll();
+
+    requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+
+    return () => {
+      safeUnlock(); // fallback only
+    };
+  }, [safeUnlock]);
 
   return (
     <>

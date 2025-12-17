@@ -11,10 +11,11 @@ import {
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { GameProps, SortConfig } from "@/types/game";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { MediaStatus } from "@/types/media";
 import { BackdropImageMobile } from "@/app/components/ui/BackdropMobile";
 import { useNav } from "@/app/components/NavContext";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface GameMobileListingProps {
   games: GameProps[];
@@ -159,6 +160,14 @@ export function GameMobileListing({
   const { isNavOpen } = useNav();
   const [openSortOption, setOpenSortOption] = useState(false);
   const [openStatusOption, setOpenStatusOption] = useState(false);
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: games.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 134.562, // height of each item in pixels
+    overscan: 5, // render 5 extra items above/below viewport
+  });
 
   const handleGameClicked = (game: GameProps) => {
     if (openSortOption || openStatusOption) {
@@ -371,15 +380,46 @@ export function GameMobileListing({
         </div>
       )}
       {/* LISTING */}
-      {!isProcessingGame &&
-        games.map((game) => (
-          <GameItem
-            key={game.id}
-            game={game}
-            isNavOpen={isNavOpen}
-            onClick={handleGameClicked}
-          />
-        ))}
+      {!isProcessingGame && games.length > 0 && (
+        <div
+          ref={parentRef}
+          className="w-full overflow-auto"
+          style={{
+            height: "calc(100vh- 44px)", // account for header
+          }}
+        >
+          <div
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+              const game = games[virtualItem.index];
+              return (
+                <div
+                  key={game.id}
+                  data-index={virtualItem.index}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <GameItem
+                    game={game}
+                    isNavOpen={isNavOpen}
+                    onClick={handleGameClicked}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -11,10 +11,11 @@ import {
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { MovieProps, SortConfig } from "@/types/movie";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { MediaStatus } from "@/types/media";
 import { BackdropImageMobile } from "@/app/components/ui/BackdropMobile";
 import { useNav } from "@/app/components/NavContext";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface MovieMobileListingProps {
   movies: MovieProps[];
@@ -172,6 +173,14 @@ export function MovieMobileListing({
   const { isNavOpen } = useNav();
   const [openSortOption, setOpenSortOption] = useState(false);
   const [openStatusOption, setOpenStatusOption] = useState(false);
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: movies.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 134.562, // height of each item in pixels
+    overscan: 5, // render 5 extra items above/below viewport
+  });
 
   const handleMovieClicked = (movie: MovieProps) => {
     if (openSortOption || openStatusOption) {
@@ -384,15 +393,46 @@ export function MovieMobileListing({
         </div>
       )}
       {/* LISTING */}
-      {!isProcessingMovie &&
-        movies.map((movie) => (
-          <MovieItem
-            key={movie.id}
-            movie={movie}
-            isNavOpen={isNavOpen}
-            onClick={handleMovieClicked}
-          />
-        ))}
+      {!isProcessingMovie && movies.length > 0 && (
+        <div
+          ref={parentRef}
+          className="w-full overflow-auto"
+          style={{
+            height: "calc(100vh- 44px)", // account for header
+          }}
+        >
+          <div
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+              const movie = movies[virtualItem.index];
+              return (
+                <div
+                  key={movie.id}
+                  data-index={virtualItem.index}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <MovieItem
+                    movie={movie}
+                    isNavOpen={isNavOpen}
+                    onClick={handleMovieClicked}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

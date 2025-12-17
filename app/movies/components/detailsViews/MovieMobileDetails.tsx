@@ -1,6 +1,6 @@
 import { MovieProps } from "@/types/movie";
 import { MovieAction } from "../MovieDetailsHub";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
 import { movieStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
@@ -36,43 +36,41 @@ export function MovieMobileDetails({
   const [isDragging, setIsDragging] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
-  const startY = useRef(0);
-  const startScrollY = useRef(0);
+
   const modalRef = useRef<HTMLDivElement>(null);
-  const dragVelocity = useRef(0);
+  const startY = useRef(0);
+  const scrollYRef = useRef(0);
+  const bodyUnlockedRef = useRef(false);
+
+  // Velocity tracking with smoothing
+  const velocityHistory = useRef<number[]>([]);
   const lastY = useRef(0);
   const lastTime = useRef(0);
+  const rafId = useRef<number>(0);
 
-  useEffect(() => {
-    // original values
-    const originalOverflow = document.body.style.overflow;
-    const originalPosition = document.body.style.position;
-    const originalTop = document.body.style.top;
-    const scrollY = window.scrollY;
+  // Rubber band resistance - exponential decay feels more natural
+  const applyResistance = (deltaY: number): number => {
+    const maxDrag = window.innerHeight * 0.5;
+    // Exponential decay: starts 1:1, then progressively harder
+    return maxDrag * (1 - Math.exp(-deltaY / maxDrag));
+  };
 
-    // lock body in place
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = "100%";
+  // Smooth velocity calculation using weighted average
+  const getSmoothedVelocity = (): number => {
+    const history = velocityHistory.current;
+    if (history.length === 0) return 0;
 
-    // trigger mount animation
-    requestAnimationFrame(() => {
-      setIsVisible(true);
-    });
+    // Weight recent samples more heavily
+    const weights = history.map((_, i) => Math.pow(2, i));
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
+    const weightedSum = history.reduce((sum, v, i) => sum + v * weights[i], 0);
 
-    return () => {
-      document.body.style.overflow = originalOverflow;
-      document.body.style.position = originalPosition;
-      document.body.style.top = originalTop;
-      document.body.style.width = "";
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
+    return weightedSum / totalWeight;
+  };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isScorePickerOpen) return;
-    //
+
     const target = e.target as HTMLElement;
     if (
       target.closest("button") ||
@@ -85,12 +83,12 @@ export function MovieMobileDetails({
     const modal = modalRef.current;
     if (!modal) return;
 
-    if (modal.scrollTop < 3) {
+    // Allow drag when at top of scroll
+    if (modal.scrollTop <= 1) {
       startY.current = e.touches[0].clientY;
       lastY.current = e.touches[0].clientY;
-      lastTime.current = Date.now();
-      startScrollY.current = modal.scrollTop;
-      dragVelocity.current = 0;
+      lastTime.current = performance.now();
+      velocityHistory.current = [];
       setIsDragging(true);
     }
   };
@@ -102,21 +100,31 @@ export function MovieMobileDetails({
     if (!modal) return;
 
     const currentY = e.touches[0].clientY;
-    const currentTime = Date.now();
-    const deltaY = currentY - startY.current;
+    const currentTime = performance.now();
+    const rawDelta = currentY - startY.current;
 
+    // Track velocity with timestamps
     const timeDelta = currentTime - lastTime.current;
     if (timeDelta > 0) {
-      dragVelocity.current = (currentY - lastY.current) / timeDelta;
+      const instantVelocity = (currentY - lastY.current) / timeDelta;
+      velocityHistory.current.push(instantVelocity);
+      // Keep only last 5 samples for smoothing
+      if (velocityHistory.current.length > 5) {
+        velocityHistory.current.shift();
+      }
     }
 
     lastY.current = currentY;
     lastTime.current = currentTime;
 
-    if (modal.scrollTop < 3 && deltaY > 0) {
-      const resistance = Math.max(0.3, 1 - deltaY / 800);
-      setTranslateY(deltaY * resistance);
-    } else if (deltaY < 0) {
+    if (rawDelta > 0) {
+      // Dragging down - apply rubber band
+      cancelAnimationFrame(rafId.current);
+      rafId.current = requestAnimationFrame(() => {
+        setTranslateY(applyResistance(rawDelta));
+      });
+    } else if (modal.scrollTop <= 1 && rawDelta < -10) {
+      // Trying to scroll up from top - release drag
       setIsDragging(false);
       setTranslateY(0);
     }
@@ -124,48 +132,108 @@ export function MovieMobileDetails({
 
   const handleTouchEnd = () => {
     if (!isDragging) return;
+    cancelAnimationFrame(rafId.current);
 
-    const threshold = 50;
-    const velocityThreshold = 0.5;
+    const velocity = getSmoothedVelocity();
+    const screenHeight = window.innerHeight;
 
-    if (translateY > threshold || dragVelocity.current > velocityThreshold) {
-      const finalY = Math.max(
-        translateY + dragVelocity.current * 200,
-        window.innerHeight
-      );
-      setTranslateY(finalY);
+    // Dismiss thresholds - either position OR velocity
+    const positionThreshold = screenHeight * 0.2; // 20% of screen
+    const velocityThreshold = 0.4; // px/ms
+
+    const shouldDismiss =
+      translateY > positionThreshold ||
+      (translateY > 50 && velocity > velocityThreshold);
+
+    if (shouldDismiss) {
+      safeUnlock();
       setIsExiting(true);
-      setTimeout(() => {
-        onClose();
-      }, 75);
+
+      // Calculate exit position based on velocity for natural feel
+      const exitY = Math.max(screenHeight, translateY + velocity * 300);
+      setTranslateY(exitY);
+
+      setTimeout(onClose, 280);
     } else {
+      // Snap back with spring animation
       setTranslateY(0);
     }
 
     setIsDragging(false);
-    dragVelocity.current = 0;
+    velocityHistory.current = [];
   };
+
+  const safeUnlock = useCallback(() => {
+    if (bodyUnlockedRef.current) return;
+    bodyUnlockedRef.current = true;
+
+    document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.width = "";
+
+    window.scrollTo(0, scrollYRef.current);
+  }, []);
+
+  const lockBodyScroll = () => {
+    const scrollY = window.scrollY;
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+    return scrollY;
+  };
+
+  useEffect(() => {
+    scrollYRef.current = lockBodyScroll();
+    requestAnimationFrame(() => setIsVisible(true));
+    return () => safeUnlock();
+  }, [safeUnlock]);
+
+  // Dynamic styles based on drag state
+  const dragProgress = Math.min(translateY / (window.innerHeight * 0.3), 1);
+  const scale = isDragging ? 1 - dragProgress * 0.04 : 1;
+  const borderRadius = isDragging ? Math.min(dragProgress * 24, 24) : 0;
+  const backdropOpacity = 1 - dragProgress * 0.3;
 
   return (
     <>
+      {/* Backdrop that fades during drag */}
+      <div
+        className="fixed inset-0 z-20 bg-black transition-opacity duration-300"
+        style={{
+          opacity: isVisible ? backdropOpacity : 0,
+          pointerEvents: "none",
+        }}
+      />
+
       <div
         ref={modalRef}
         className={`fixed inset-0 z-30 bg-zinc-950 flex flex-col ${
           isScorePickerOpen ? "overflow-hidden" : "overflow-y-auto"
         }`}
         style={{
-          transform: `translateY(${translateY}px)`,
+          transform: `translateY(${translateY}px) scale(${scale})`,
+          borderRadius: `${borderRadius}px`,
           opacity: isVisible ? 1 : 0,
           transition: isDragging
             ? "none"
             : isExiting
-            ? "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-            : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+            ? "transform 0.28s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.28s ease-out, border-radius 0.28s ease-out"
+            : "transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease-out, border-radius 0.3s ease-out",
+          willChange: isDragging ? "transform" : "auto",
+          transformOrigin: "top center",
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
+        {/* Drag indicator pill */}
+        <div
+          className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-1 bg-zinc-600 rounded-full z-40 transition-opacity duration-200"
+          style={{ opacity: isDragging ? 0.8 : 0.4 }}
+        />
+
         {isLoading?.isTrue && (
           <Loading
             customStyle={isLoading.style}
@@ -173,13 +241,13 @@ export function MovieMobileDetails({
             isMobile={true}
           />
         )}
+
         {/* ACTION BAR */}
         {(posterLoaded || addingMovie) && (
           <div className="sticky top-0 z-30">
             <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
               {addingMovie && (
                 <>
-                  {/* ADD BUTTON */}
                   <button
                     className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
                     onClick={onAddMovie}
@@ -187,7 +255,6 @@ export function MovieMobileDetails({
                     <Plus className="w-5 h-5 text-slate-400" />
                   </button>
                   <div className="flex items-center gap-2">
-                    {/* DIFFERENT SERIES OPTIONS */}
                     {showAnotherSeries && (
                       <div className="flex gap-1 bg-zinc-800/60 rounded-lg p-0.5">
                         <button
@@ -204,13 +271,10 @@ export function MovieMobileDetails({
                         </button>
                       </div>
                     )}
-                    {/* NEED YEAR */}
                     <button
                       className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
-                      onClick={() => {
-                        onAction({ type: "needYearField" });
-                      }}
-                      title={"Search with year"}
+                      onClick={() => onAction({ type: "needYearField" })}
+                      title="Search with year"
                     >
                       <ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
                     </button>
@@ -220,13 +284,12 @@ export function MovieMobileDetails({
             </div>
           </div>
         )}
+
         {/* INFO */}
         <div className="pb-10">
           {/* POSTER */}
           <div
-            className={`relative w-full overflow-hidden bg-zinc-900/40 transition-all duration-300 ${
-              isDragging && "rounded-lg"
-            }`}
+            className={`relative w-full overflow-hidden bg-zinc-900/40 transition-all duration-300`}
           >
             {movie.posterUrl ? (
               <Image
@@ -240,12 +303,11 @@ export function MovieMobileDetails({
             ) : (
               <div className="h-64 bg-linear-to-br from-zinc-700 to-zinc-800" />
             )}
-            {/* BOTTOM FADE */}
             <div className="absolute bottom-0 left-0 w-full h-20 bg-linear-to-t from-zinc-950 to-transparent pointer-events-none" />
           </div>
+
           <div className="px-4">
             <div className="mt-4">
-              {/* SERIES TITLE */}
               {movie.seriesTitle ? (
                 <div className="text-zinc-400 text-sm font-medium -mt-2.5">
                   {movie.seriesTitle}
@@ -254,11 +316,9 @@ export function MovieMobileDetails({
                 <div></div>
               )}
               <div className="flex justify-between">
-                {/* TITLE */}
                 <h1 className="text-zinc-100 text-2xl font-bold -mt-0.5">
                   {movie.title}
                 </h1>
-                {/* SCORE */}
                 <div data-no-drag>
                   <button
                     onClick={() => setIsScorePickerOpen(true)}
@@ -268,7 +328,6 @@ export function MovieMobileDetails({
                   </button>
                 </div>
               </div>
-              {/* DIR AND DATE */}
               <div className="text-zinc-400 text-sm -mt-1 flex items-center gap-2">
                 <span>{movie.director || "Unknown"}</span>•
                 <span>{movie.dateReleased || "-"}</span>
@@ -279,6 +338,7 @@ export function MovieMobileDetails({
                 )}
               </div>
             </div>
+
             {/* STATUS */}
             <div className="mt-3" data-no-drag>
               <label className="text-zinc-400 text-xs font-medium">
@@ -305,13 +365,13 @@ export function MovieMobileDetails({
                 ))}
               </div>
             </div>
+
             {/* PREQUEL AND SEQUEL */}
             {movie.placeInSeries && (
               <div
                 className="pt-2.5 grid grid-cols-[1fr_2rem_1fr]"
                 data-no-drag
               >
-                {/* PREQUEL */}
                 <div className="min-w-0 text-left">
                   {movie.prequel && (
                     <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
@@ -322,10 +382,7 @@ export function MovieMobileDetails({
                         }`}
                         onClick={() => {
                           if (!addingMovie) {
-                            onAction({
-                              type: "seriesNav",
-                              payload: "prequel",
-                            });
+                            onAction({ type: "seriesNav", payload: "prequel" });
                           }
                         }}
                       >
@@ -334,7 +391,6 @@ export function MovieMobileDetails({
                     </div>
                   )}
                 </div>
-                {/* PLACEMENT */}
                 <div className="flex justify-center items-end shrink-0">
                   {movie.placeInSeries && (
                     <label className="text-sm font-medium text-zinc-400/85">
@@ -342,7 +398,6 @@ export function MovieMobileDetails({
                     </label>
                   )}
                 </div>
-                {/* SEQUEL */}
                 <div className="min-w-0 text-right flex justify-end">
                   {movie.sequel && (
                     <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
@@ -352,10 +407,7 @@ export function MovieMobileDetails({
                         }`}
                         onClick={() => {
                           if (!addingMovie) {
-                            onAction({
-                              type: "seriesNav",
-                              payload: "sequel",
-                            });
+                            onAction({ type: "seriesNav", payload: "sequel" });
                           }
                         }}
                       >
@@ -367,6 +419,7 @@ export function MovieMobileDetails({
                 </div>
               </div>
             )}
+
             {/* NOTE */}
             <div className="mt-1" data-no-drag>
               <label className="text-zinc-400 text-xs font-medium">Notes</label>
@@ -374,10 +427,7 @@ export function MovieMobileDetails({
                 <MobileAutoTextarea
                   value={localNote}
                   onChange={(e) =>
-                    onAction({
-                      type: "changeNote",
-                      payload: e.target.value,
-                    })
+                    onAction({ type: "changeNote", payload: e.target.value })
                   }
                   onBlur={() => onAction({ type: "saveNote" })}
                   placeholder="Add your thoughts about this movie..."
@@ -388,6 +438,7 @@ export function MovieMobileDetails({
           </div>
         </div>
       </div>
+
       <MobileScorePicker
         isOpen={isScorePickerOpen}
         score={movie.score ?? 0}

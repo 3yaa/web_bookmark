@@ -139,7 +139,6 @@ export function ShowMobileListing({
   const [openStatusOption, setOpenStatusOption] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
 
-  // virtual scrolling setup
   const rowVirtualizer = useVirtualizer({
     count: shows.length,
     getScrollElement: () => parentRef.current,
@@ -358,13 +357,13 @@ export function ShowMobileListing({
           </p>
         </div>
       )}
-      {/* VIRTUAL SCROLLING LISTING */}
+      {/* LISTING */}
       {!isProcessingShow && shows.length > 0 && (
         <div
           ref={parentRef}
           className="w-full overflow-auto"
           style={{
-            height: "calc(100vh - 44px)", // acount for fixed header
+            height: "calc(100vh - 44px)", // acount for header
           }}
         >
           <div

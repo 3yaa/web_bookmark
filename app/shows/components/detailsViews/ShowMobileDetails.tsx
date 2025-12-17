@@ -150,23 +150,30 @@ export function ShowMobileDetails({
       // UNLOCK BODY IMMEDIATELY
       safeUnlock();
 
+      // Calculate final position based on velocity
       const finalY = Math.max(
         currentTranslateY.current + dragVelocity.current * 250,
         window.innerHeight
       );
 
+      // Set exiting state first, then update position in next frame
+      setIsDragging(false);
       setIsExiting(true);
-      setTranslateY(finalY);
+      
+      // Use RAF to ensure the transition is applied
+      requestAnimationFrame(() => {
+        setTranslateY(finalY);
+      });
 
       setTimeout(() => {
         onClose();
-      }, 300);
+      }, 350);
     } else {
       setTranslateY(0);
       currentTranslateY.current = 0;
+      setIsDragging(false);
     }
 
-    setIsDragging(false);
     dragVelocity.current = 0;
   };
 

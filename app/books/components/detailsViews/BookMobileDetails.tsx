@@ -187,13 +187,16 @@ export function BookMobileDetails({
         window.innerHeight
       );
 
-      // Set exiting state first, then update position in next frame
-      setIsDragging(false);
-      setIsExiting(true);
+      // Immediately sync the current position to state before enabling transition
+      setTranslateY(currentTranslateY.current);
       
-      // Use RAF to ensure the transition is applied
+      // Then enable transition and animate to final position
       requestAnimationFrame(() => {
-        setTranslateY(finalY);
+        setIsDragging(false);
+        setIsExiting(true);
+        requestAnimationFrame(() => {
+          setTranslateY(finalY);
+        });
       });
 
       setTimeout(() => {

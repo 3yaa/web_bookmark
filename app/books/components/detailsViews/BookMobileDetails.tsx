@@ -42,7 +42,7 @@ export function BookMobileDetails({
   const [isExiting, setIsExiting] = useState(false);
   const startY = useRef(0);
   const startScrollY = useRef(0);
-  const modalRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dragVelocity = useRef(0);
   const lastY = useRef(0);
   const lastTime = useRef(0);
@@ -114,14 +114,14 @@ export function BookMobileDetails({
       return;
     }
 
-    const modal = modalRef.current;
-    if (!modal) return;
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
 
-    if (modal.scrollTop <= 5) {
+    if (scrollContainer.scrollTop <= 5) {
       startY.current = e.touches[0].clientY;
       lastY.current = e.touches[0].clientY;
       lastTime.current = Date.now();
-      startScrollY.current = modal.scrollTop;
+      startScrollY.current = scrollContainer.scrollTop;
       dragVelocity.current = 0;
       setIsDragging(true);
     }
@@ -130,8 +130,8 @@ export function BookMobileDetails({
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || isScorePickerOpen) return;
 
-    const modal = modalRef.current;
-    if (!modal) return;
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
 
     const currentY = e.touches[0].clientY;
     const currentTime = Date.now();
@@ -145,7 +145,7 @@ export function BookMobileDetails({
     lastY.current = currentY;
     lastTime.current = currentTime;
 
-    if (modal.scrollTop <= 5 && deltaY > 0) {
+    if (scrollContainer.scrollTop <= 5 && deltaY > 0) {
       e.preventDefault();
       const resistance = Math.max(0.4, 1 - deltaY / 600);
       const newTranslateY = deltaY * resistance;
@@ -158,7 +158,7 @@ export function BookMobileDetails({
           rafRef.current = null;
         });
       }
-    } else if (deltaY < 0 && modal.scrollTop <= 0) {
+    } else if (deltaY < 0 && scrollContainer.scrollTop <= 0) {
       setIsDragging(false);
       setTranslateY(0);
       currentTranslateY.current = 0;
@@ -230,7 +230,7 @@ export function BookMobileDetails({
         onTouchEnd={handleTouchEnd}
       >
         <div
-          ref={modalRef}
+          ref={scrollContainerRef}
           className={`w-full h-full bg-zinc-950 flex flex-col ${
             isScorePickerOpen ? "overflow-hidden" : "overflow-y-auto"
           }`}

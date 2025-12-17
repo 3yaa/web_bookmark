@@ -90,7 +90,7 @@ export function ShowMobileDetails({
     lastTime.current = currentTime;
 
     if (modal.scrollTop < 3 && deltaY > 0) {
-      const resistance = Math.max(0.3, 1 - deltaY / 800);
+      const resistance = Math.max(0.2, 1 - deltaY / 1200);
       setTranslateY(deltaY * resistance);
     } else if (deltaY < 0) {
       setIsDragging(false);
@@ -124,15 +124,15 @@ export function ShowMobileDetails({
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
-    const threshold = 50;
-    const velocityThreshold = 0.5;
+    const threshold = 70;
+    const velocityThreshold = 0.3;
 
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
       // UNLOCK BODY IMMEDIATELY
       safeUnlock();
 
       const finalY = Math.max(
-        translateY + dragVelocity.current * 100,
+        translateY + dragVelocity.current * 150,
         window.innerHeight
       );
 
@@ -177,8 +177,8 @@ export function ShowMobileDetails({
           transition: isDragging
             ? "none"
             : isExiting
-            ? "transform 0.35s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.2s cubic-bezier(0.4, 0, 1, 1)"
-            : "transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
+            ? "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+            : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

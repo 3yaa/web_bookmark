@@ -38,14 +38,12 @@ export function MovieMobileDetails({
   const [isExiting, setIsExiting] = useState(false);
   const startY = useRef(0);
   const startScrollY = useRef(0);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const dragVelocity = useRef(0);
   const lastY = useRef(0);
   const lastTime = useRef(0);
   const scrollYRef = useRef(0);
   const bodyUnlockedRef = useRef(false);
-  const rafRef = useRef<number | null>(null);
-  const currentTranslateY = useRef(0);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isScorePickerOpen) return;
@@ -59,14 +57,14 @@ export function MovieMobileDetails({
       return;
     }
 
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
+    const modal = modalRef.current;
+    if (!modal) return;
 
-    if (scrollContainer.scrollTop <= 5) {
+    if (modal.scrollTop < 3) {
       startY.current = e.touches[0].clientY;
       lastY.current = e.touches[0].clientY;
       lastTime.current = Date.now();
-      startScrollY.current = scrollContainer.scrollTop;
+      startScrollY.current = modal.scrollTop;
       dragVelocity.current = 0;
       setIsDragging(true);
     }
@@ -75,8 +73,8 @@ export function MovieMobileDetails({
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || isScorePickerOpen) return;
 
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
+    const modal = modalRef.current;
+    if (!modal) return;
 
     const currentY = e.touches[0].clientY;
     const currentTime = Date.now();
@@ -90,23 +88,12 @@ export function MovieMobileDetails({
     lastY.current = currentY;
     lastTime.current = currentTime;
 
-    if (scrollContainer.scrollTop <= 5 && deltaY > 0) {
-      e.preventDefault();
-      const resistance = Math.max(0.4, 1 - deltaY / 600);
-      const newTranslateY = deltaY * resistance;
-      currentTranslateY.current = newTranslateY;
-
-      // Use RAF to batch updates and avoid jitter
-      if (rafRef.current === null) {
-        rafRef.current = requestAnimationFrame(() => {
-          setTranslateY(currentTranslateY.current);
-          rafRef.current = null;
-        });
-      }
-    } else if (deltaY < 0 && scrollContainer.scrollTop <= 0) {
+    if (modal.scrollTop < 3 && deltaY > 0) {
+      const resistance = Math.max(0.3, 1 - deltaY / 800);
+      setTranslateY(deltaY * resistance);
+    } else if (deltaY < 0) {
       setIsDragging(false);
       setTranslateY(0);
-      currentTranslateY.current = 0;
     }
   };
 
@@ -136,46 +123,29 @@ export function MovieMobileDetails({
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
-    // Cancel any pending RAF
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
+    const threshold = 50;
+    const velocityThreshold = 0.5;
 
-    const threshold = 80;
-    const velocityThreshold = 0.6;
-
-    if (currentTranslateY.current > threshold || dragVelocity.current > velocityThreshold) {
+    if (translateY > threshold || dragVelocity.current > velocityThreshold) {
       // UNLOCK BODY IMMEDIATELY
       safeUnlock();
 
-      // Calculate final position based on velocity
       const finalY = Math.max(
-        currentTranslateY.current + dragVelocity.current * 250,
+        translateY + dragVelocity.current * 200,
         window.innerHeight
       );
 
-      // Immediately sync the current position to state before enabling transition
-      setTranslateY(currentTranslateY.current);
-      
-      // Then enable transition and animate to final position
-      requestAnimationFrame(() => {
-        setIsDragging(false);
-        setIsExiting(true);
-        requestAnimationFrame(() => {
-          setTranslateY(finalY);
-        });
-      });
+      setIsExiting(true);
+      setTranslateY(finalY);
 
       setTimeout(() => {
         onClose();
-      }, 350);
+      }, 50);
     } else {
       setTranslateY(0);
-      currentTranslateY.current = 0;
-      setIsDragging(false);
     }
 
+    setIsDragging(false);
     dragVelocity.current = 0;
   };
 
@@ -187,9 +157,6 @@ export function MovieMobileDetails({
     });
 
     return () => {
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-      }
       safeUnlock(); // fallback only
     };
   }, [safeUnlock]);
@@ -197,37 +164,23 @@ export function MovieMobileDetails({
   return (
     <>
       <div
-        className="fixed inset-0 z-30"
+        ref={modalRef}
+        className={`fixed inset-0 z-30 bg-zinc-950 flex flex-col ${
+          isScorePickerOpen ? "overflow-hidden" : "overflow-y-auto"
+        }`}
         style={{
-          transform: `translate3d(0, ${translateY}px, 0)`,
+          transform: `translateY(${translateY}px)`,
           opacity: isVisible ? 1 : 0,
-          willChange: isDragging ? "transform" : "auto",
-          WebkitTransform: `translate3d(0, ${translateY}px, 0)`,
-          WebkitBackfaceVisibility: "hidden",
-          backfaceVisibility: "hidden",
-          perspective: 1000,
-          WebkitPerspective: 1000,
           transition: isDragging
             ? "none"
             : isExiting
-            ? "transform 0.35s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.25s ease-out"
+            ? "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
             : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div
-          ref={scrollContainerRef}
-          className={`w-full h-full bg-zinc-950 flex flex-col ${
-            isScorePickerOpen ? "overflow-hidden" : "overflow-y-auto"
-          }`}
-          style={{
-            WebkitOverflowScrolling: "touch",
-            transform: "translateZ(0)",
-            WebkitTransform: "translateZ(0)",
-          }}
-        >
         {isLoading?.isTrue && (
           <Loading
             customStyle={isLoading.style}
@@ -286,12 +239,9 @@ export function MovieMobileDetails({
         <div className="pb-10">
           {/* POSTER */}
           <div
-            className={`relative w-full overflow-hidden bg-zinc-900/40 ${
-              isDragging ? "rounded-lg" : ""
+            className={`relative w-full overflow-hidden bg-zinc-900/40 transition-all duration-300 ${
+              isDragging && "rounded-lg"
             }`}
-            style={{
-              willChange: isDragging ? "transform" : "auto",
-            }}
           >
             {movie.posterUrl ? (
               <Image
@@ -300,10 +250,6 @@ export function MovieMobileDetails({
                 width={1280}
                 height={900}
                 className="object-cover w-full"
-                style={{
-                  transform: "translateZ(0)",
-                  WebkitTransform: "translateZ(0)",
-                }}
                 onLoad={() => setPosterLoaded(true)}
               />
             ) : (
@@ -455,7 +401,6 @@ export function MovieMobileDetails({
               </div>
             </div>
           </div>
-        </div>
         </div>
       </div>
       <MobileScorePicker

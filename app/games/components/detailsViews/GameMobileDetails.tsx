@@ -157,7 +157,7 @@ export function GameMobileDetails({
 
       setTimeout(() => {
         onClose();
-      }, 50);
+      }, 300);
     } else {
       setTranslateY(0);
       currentTranslateY.current = 0;
@@ -196,7 +196,7 @@ export function GameMobileDetails({
           transition: isDragging
             ? "none"
             : isExiting
-            ? "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+            ? "transform 0.35s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.25s ease-out"
             : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
         onTouchStart={handleTouchStart}

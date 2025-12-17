@@ -1,6 +1,6 @@
 import { ShowProps } from "@/types/show";
 import { ShowAction } from "../ShowDetailsHub";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Plus, ChevronsUp } from "lucide-react";
 import { scoreOptions, showStatusOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
@@ -43,6 +43,8 @@ export function ShowMobileDetails({
   const dragVelocity = useRef(0);
   const lastY = useRef(0);
   const lastTime = useRef(0);
+  const scrollYRef = useRef(0);
+  const bodyUnlockedRef = useRef(false);
 
   useEffect(() => {
     // original values
@@ -123,6 +125,32 @@ export function ShowMobileDetails({
     }
   };
 
+  const safeUnlock = useCallback(() => {
+    if (bodyUnlockedRef.current) return;
+    bodyUnlockedRef.current = true;
+    unlockBodyScroll(scrollYRef.current);
+  }, []);
+
+  const lockBodyScroll = () => {
+    const scrollY = window.scrollY;
+
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+
+    return scrollY;
+  };
+
+  const unlockBodyScroll = (scrollY: number) => {
+    document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.width = "";
+
+    window.scrollTo(0, scrollY);
+  };
+
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
@@ -130,15 +158,20 @@ export function ShowMobileDetails({
     const velocityThreshold = 0.5;
 
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
+      // 🔓 UNLOCK BODY IMMEDIATELY
+      unlockBodyScroll(scrollYRef.current);
+
       const finalY = Math.max(
         translateY + dragVelocity.current * 200,
         window.innerHeight
       );
-      setTranslateY(finalY);
+
       setIsExiting(true);
+      setTranslateY(finalY);
+
       setTimeout(() => {
         onClose();
-      }, 75);
+      }, 50);
     } else {
       setTranslateY(0);
     }
@@ -146,6 +179,19 @@ export function ShowMobileDetails({
     setIsDragging(false);
     dragVelocity.current = 0;
   };
+
+  useEffect(() => {
+    scrollYRef.current = lockBodyScroll();
+
+    requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+
+    return () => {
+      // 🧯 Fallback only
+      safeUnlock();
+    };
+  }, [safeUnlock]);
 
   return (
     <>

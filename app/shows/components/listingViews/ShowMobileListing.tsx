@@ -380,7 +380,7 @@ export function ShowMobileListing({
                 <div
                   key={show.id}
                   data-index={virtualItem.index}
-                  ref={rowVirtualizer.measureElement}
+                  // ref={rowVirtualizer.measureElement}
                   style={{
                     position: "absolute",
                     top: 0,

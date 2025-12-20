@@ -40,7 +40,7 @@ const MovieItem = React.memo(
     >
       <span className="font-medium text-zinc-300 text-sm">{index + 1}</span>
       <div className="w-12.5 h-18">
-        {movie.posterUrl !== undefined ? (
+        {movie.posterUrl ? (
           <Image
             src={movie.posterUrl}
             alt={movie.title || "Untitled"}

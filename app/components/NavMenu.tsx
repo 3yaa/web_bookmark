@@ -255,7 +255,7 @@ export function NavMenu() {
       {/* MAIN BUTTON */}
       <button
         //border-0 border-zinc-950/50
-        className={`flex items-center justify-center w-10 h-10 lg:w-14 lg:h-14 rounded-full 
+        className={`flex items-center justify-center w-14 h-14 lg:w-14 lg:h-14 rounded-full 
           bg-linear-to-bl from-zinc-transparent to-zinc-800/60 
           hover:bg-linear-to-bl hover:from-zinc-800/60 hover:to-transparent
           backdrop-blur-xl 

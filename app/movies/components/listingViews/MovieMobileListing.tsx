@@ -55,7 +55,10 @@ const MovieItem = React.memo(
             className="object-fill w-full h-full rounded-md border border-zinc-700/40"
           />
         ) : (
-          <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
+          <div
+            className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"
+            style={{ aspectRatio: "2/3" }}
+          ></div>
         )}
       </div>
       <div className="px-3 pt-3 flex flex-col w-full min-w-0">
@@ -398,7 +401,7 @@ export function MovieMobileListing({
           ref={parentRef}
           className="w-full overflow-auto"
           style={{
-            height: "calc(100vh - 44px)", // account for header
+            height: "100dvh", // account for header
           }}
         >
           <div

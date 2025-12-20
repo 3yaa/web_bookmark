@@ -14,7 +14,7 @@ import { BookProps, SortConfig } from "@/types/book";
 import React, { useRef, useState } from "react";
 import { MediaStatus } from "@/types/media";
 import { useNav } from "@/app/components/NavContext";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 
 interface BookMobileListingProps {
   books: BookProps[];
@@ -31,13 +31,15 @@ const BookItem = React.memo(
     book,
     isNavOpen,
     onClick,
+    dataIndex,
   }: {
     book: BookProps;
     isNavOpen: boolean;
     onClick: (book: BookProps) => void;
+    dataIndex?: number;
   }) => (
     <div
-      key={book.id}
+      data-index={dataIndex}
       className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
         isNavOpen ? "pointer-events-none" : ""
       }`}
@@ -54,7 +56,10 @@ const BookItem = React.memo(
             className="object-fill w-full h-full rounded-md border border-zinc-700/40"
           />
         ) : (
-          <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
+          <div
+            className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"
+            style={{ aspectRatio: "2/3" }}
+          ></div>
         )}
       </div>
       <div className="px-3 pt-3 flex flex-col w-full min-w-0">
@@ -166,11 +171,11 @@ export function BookMobileListing({
   const [openStatusOption, setOpenStatusOption] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const rowVirtualizer = useVirtualizer({
+  const rowVirtualizer = useWindowVirtualizer({
     count: books.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 135.562, // height of each item in pixels
-    overscan: 5, // render 5 extra items above/below viewport
+    estimateSize: () => 136,
+    overscan: 5,
+    measureElement: (element) => element?.getBoundingClientRect().height ?? 136,
   });
 
   const handleBookClicked = (book: BookProps) => {
@@ -393,13 +398,7 @@ export function BookMobileListing({
       )}
       {/* LISTING */}
       {!isProcessingBook && books.length > 0 && (
-        <div
-          ref={parentRef}
-          className="w-full overflow-auto"
-          style={{
-            height: "calc(100vh - 44px)", // account for header
-          }}
-        >
+        <div ref={parentRef} className="w-full">
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,
@@ -412,6 +411,7 @@ export function BookMobileListing({
               return (
                 <div
                   key={book.id}
+                  ref={rowVirtualizer.measureElement}
                   data-index={virtualItem.index}
                   style={{
                     position: "absolute",

@@ -40,7 +40,7 @@ const GameItem = React.memo(
     >
       <span className="font-medium text-zinc-300 text-sm">{index + 1}</span>
       <div className="w-12.5 h-18">
-        {game.posterUrl !== undefined ? (
+        {game.posterUrl ? (
           <Image
             src={game.posterUrl}
             alt={game.title || "Untitled"}

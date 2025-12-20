@@ -15,7 +15,7 @@ import React, { useRef, useState } from "react";
 import { MediaStatus } from "@/types/media";
 import { BackdropImageMobile } from "@/app/components/ui/BackdropMobile";
 import { useNav } from "@/app/components/NavContext";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 
 interface GameMobileListingProps {
   games: GameProps[];
@@ -32,13 +32,15 @@ const GameItem = React.memo(
     game,
     isNavOpen,
     onClick,
+    dataIndex,
   }: {
     game: GameProps;
     isNavOpen: boolean;
     onClick: (game: GameProps) => void;
+    dataIndex?: number;
   }) => (
     <div
-      key={game.id}
+      data-index={dataIndex}
       className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
         isNavOpen ? "pointer-events-none" : ""
       }`}
@@ -55,7 +57,10 @@ const GameItem = React.memo(
             className="object-fill w-full h-full rounded-md border border-zinc-700/40"
           />
         ) : (
-          <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"></div>
+          <div
+            className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-md border border-zinc-600/30"
+            style={{ aspectRatio: "2/3" }}
+          ></div>
         )}
       </div>
       <div className="px-3 pt-3 flex flex-col w-full min-w-0">
@@ -162,11 +167,11 @@ export function GameMobileListing({
   const [openStatusOption, setOpenStatusOption] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const rowVirtualizer = useVirtualizer({
+  const rowVirtualizer = useWindowVirtualizer({
     count: games.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 135.562, // height of each item in pixels
-    overscan: 5, // render 5 extra items above/below viewport
+    estimateSize: () => 136,
+    overscan: 5,
+    measureElement: (element) => element?.getBoundingClientRect().height ?? 136,
   });
 
   const handleGameClicked = (game: GameProps) => {
@@ -381,13 +386,7 @@ export function GameMobileListing({
       )}
       {/* LISTING */}
       {!isProcessingGame && games.length > 0 && (
-        <div
-          ref={parentRef}
-          className="w-full overflow-auto"
-          style={{
-            height: "calc(100vh - 44px)", // account for header
-          }}
-        >
+        <div ref={parentRef} className="w-full">
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,
@@ -400,6 +399,7 @@ export function GameMobileListing({
               return (
                 <div
                   key={game.id}
+                  ref={rowVirtualizer.measureElement}
                   data-index={virtualItem.index}
                   style={{
                     position: "absolute",

@@ -15,7 +15,7 @@ import React, { useRef, useState } from "react";
 import { MediaStatus } from "@/types/media";
 import { BackdropImageMobile } from "@/app/components/ui/BackdropMobile";
 import { useNav } from "@/app/components/NavContext";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 
 interface MovieMobileListingProps {
   movies: MovieProps[];
@@ -178,10 +178,10 @@ export function MovieMobileListing({
   const [openStatusOption, setOpenStatusOption] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const rowVirtualizer = useVirtualizer({
+  const rowVirtualizer = useWindowVirtualizer({
     count: movies.length,
-    getScrollElement: () => null,
     estimateSize: () => 136,
+    overscan: 5,
   });
 
   const handleMovieClicked = (movie: MovieProps) => {

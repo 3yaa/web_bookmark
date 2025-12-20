@@ -151,7 +151,7 @@ export function NavMenu() {
   return (
     <div
       ref={menuRef}
-      className="flex fixed bottom-3 left-3 lg:bottom-8 lg:left-8 z-10 flex-col items-start"
+      className="flex fixed bottom-0 left-3 lg:bottom-8 lg:left-8 z-10 flex-col items-start"
       onClick={() => setIsNavOpen(!isNavOpen)}
     >
       {/* Dropdown */}

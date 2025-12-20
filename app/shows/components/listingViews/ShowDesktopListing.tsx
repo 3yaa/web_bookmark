@@ -40,7 +40,7 @@ const ShowItem = React.memo(
     >
       <span className="font-medium text-zinc-300 text-sm">{index + 1}</span>
       <div className="w-12.5 h-18">
-        {show.posterUrl !== undefined ? (
+        {show.posterUrl ? (
           <Image
             src={show.posterUrl}
             alt={show.title || "Untitled"}

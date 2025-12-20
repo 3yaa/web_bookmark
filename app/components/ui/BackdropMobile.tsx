@@ -11,7 +11,7 @@ export const BackdropImageMobile = ({
   width,
   height,
 }: BackdropImagePropsMobile) => (
-  <div className="absolute top-0 left-50 -z-10 overflow-hidden select-none">
+  <div className="absolute top-0 left-50 -z-10 overflow-hidden select-none md:h-30">
     <div className="relative w-full h-full">
       {/* IMAGE */}
       <Image

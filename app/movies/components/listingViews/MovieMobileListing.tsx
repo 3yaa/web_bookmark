@@ -180,9 +180,8 @@ export function MovieMobileListing({
 
   const rowVirtualizer = useVirtualizer({
     count: movies.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 135.562, // height of each item in pixels
-    overscan: 5, // render 5 extra items above/below viewport
+    getScrollElement: () => null,
+    estimateSize: () => 136,
   });
 
   const handleMovieClicked = (movie: MovieProps) => {
@@ -397,13 +396,7 @@ export function MovieMobileListing({
       )}
       {/* LISTING */}
       {!isProcessingMovie && movies.length > 0 && (
-        <div
-          ref={parentRef}
-          className="w-full overflow-auto"
-          style={{
-            height: "100dvh", // account for header
-          }}
-        >
+        <div ref={parentRef} className="w-full">
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,

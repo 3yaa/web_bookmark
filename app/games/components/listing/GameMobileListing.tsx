@@ -32,15 +32,12 @@ const GameItem = React.memo(
     game,
     isNavOpen,
     onClick,
-    dataIndex,
   }: {
     game: GameProps;
     isNavOpen: boolean;
     onClick: (game: GameProps) => void;
-    dataIndex?: number;
   }) => (
     <div
-      data-index={dataIndex}
       className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
         isNavOpen ? "pointer-events-none" : ""
       }`}

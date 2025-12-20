@@ -5,7 +5,7 @@ import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { GameProps, SortConfig } from "@/types/game";
 import React, { useRef } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 
 interface GameDesktopListingProps {
   games: GameProps[];
@@ -28,7 +28,6 @@ const GameItem = React.memo(
     onClick: (game: GameProps) => void;
   }) => (
     <div
-      key={game.id}
       className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
         game.status
       )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
@@ -98,11 +97,11 @@ export function GameDesktopListing({
 }: GameDesktopListingProps) {
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const rowVirtualizer = useVirtualizer({
+  const rowVirtualizer = useWindowVirtualizer({
     count: games.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 77, // height of each item in pixels
-    overscan: 5, // render 5 extra items above/below viewport
+    estimateSize: () => 77,
+    overscan: 5,
+    measureElement: (element) => element?.getBoundingClientRect().height ?? 77,
   });
 
   return (
@@ -219,13 +218,7 @@ export function GameDesktopListing({
       )}
       {/* LISTING */}
       {!isProcessingGame && games.length > 0 && (
-        <div
-          ref={parentRef}
-          className="w-full overflow-auto"
-          style={{
-            height: "calc(100vh - 33.75px)", // account for header
-          }}
-        >
+        <div ref={parentRef} className="w-full">
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,
@@ -238,6 +231,7 @@ export function GameDesktopListing({
               return (
                 <div
                   key={game.id}
+                  ref={rowVirtualizer.measureElement}
                   data-index={virtualItem.index}
                   style={{
                     position: "absolute",

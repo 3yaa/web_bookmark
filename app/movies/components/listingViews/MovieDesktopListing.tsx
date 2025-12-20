@@ -5,7 +5,7 @@ import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { MovieProps, SortConfig } from "@/types/movie";
 import React, { useRef } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 
 interface MovieDesktopListingProps {
   movies: MovieProps[];
@@ -102,11 +102,11 @@ export function MovieDesktopListing({
 }: MovieDesktopListingProps) {
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const rowVirtualizer = useVirtualizer({
+  const rowVirtualizer = useWindowVirtualizer({
     count: movies.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 77, // height of each item in pixels
-    overscan: 5, // render 5 extra items above/below viewport
+    estimateSize: () => 77,
+    overscan: 5,
+    measureElement: (element) => element?.getBoundingClientRect().height ?? 77,
   });
 
   return (
@@ -223,13 +223,7 @@ export function MovieDesktopListing({
       )}
       {/* LISTING */}
       {!isProcessingMovie && movies.length > 0 && (
-        <div
-          ref={parentRef}
-          className="w-full overflow-auto"
-          style={{
-            height: "calc(100vh - 33.75px)", // account for header
-          }}
-        >
+        <div ref={parentRef} className="w-full">
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,
@@ -242,6 +236,7 @@ export function MovieDesktopListing({
               return (
                 <div
                   key={movie.id}
+                  ref={rowVirtualizer.measureElement}
                   data-index={virtualItem.index}
                   style={{
                     position: "absolute",

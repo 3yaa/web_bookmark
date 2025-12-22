@@ -9,7 +9,7 @@ import {
 import { Loading } from "@/app/components/ui/Loading";
 import { ShowProps, SortConfig } from "@/types/show";
 import React, { useRef } from "react";
-import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { calcCurProgress } from "../../utils/progressCalc";
 
 interface ShowDesktopListingProps {
@@ -34,7 +34,7 @@ const ShowItem = React.memo(
   }) => (
     <div
       key={show.id}
-      className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
+      className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_1fr_6rem_6rem_11rem_5rem_0.85fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
         show.status
       )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
         index === 0 ? "rounded-bl-none" : "rounded-l-none"
@@ -59,7 +59,7 @@ const ShowItem = React.memo(
         )}
       </div>
       <div className="flex flex-col min-w-0 flex-1 relative">
-        <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-emerald-400 transition-colors duration-200 truncate max-w-53">
+        <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-zinc-300 transition-colors duration-200 truncate max-w-53">
           {show.title || "-"}
         </span>
         <div className="absolute right-0 -bottom-8 text-zinc-400 text-[11px] font-medium mb-0.5 tracking-tight">
@@ -86,21 +86,21 @@ const ShowItem = React.memo(
           />
         </div>
       </div>
-      <span className="text-center font-semibold text-zinc-300 text-sm">
+      <span className="flex items-center justify-center font-bold text-zinc-300 text-sm bg-linear-to-br from-zinc-800/80 to-zinc-900/90 mx-7.5 py-2 pb-1 rounded-lg shadow-lg shadow-black/20 border border-zinc-800/40">
         {show.score || "-"}
       </span>
-      <span className="text-center font-medium text-zinc-300 text-sm truncate">
+      <span className="text-center font-medium text-zinc-400 text-sm truncate">
         {show.status === "Completed"
           ? formatDateShort(show.dateCompleted) || "?"
           : "-"}
       </span>
-      <span className="text-center font-semibold text-zinc-300 text-sm truncate">
+      <span className="text-center font-medium text-zinc-400 text-sm truncate">
         {show.studio || "-"}
       </span>
-      <span className="text-center font-medium text-zinc-300 text-sm truncate pl-0.5">
+      <span className="text-center font-medium text-zinc-400 text-sm truncate pl-0.5">
         {show.dateReleased || "-"}
       </span>
-      <span className="text-zinc-400 text-sm line-clamp-2 whitespace-normal overflow-hidden pl-0.5 text-center">
+      <span className="text-zinc-300/95 text-sm line-clamp-2 whitespace-normal overflow-hidden pl-0.5 text-center font-semibold group-hover:underline">
         {show.note || "No notes"}
       </span>
     </div>
@@ -117,17 +117,20 @@ export function ShowDesktopListing({
 }: ShowDesktopListingProps) {
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const rowVirtualizer = useWindowVirtualizer({
+  const rowVirtualizer = useVirtualizer({
     count: shows.length,
+    getScrollElement: () => parentRef.current,
     estimateSize: () => 88,
     overscan: 5,
-    measureElement: (element) => element?.getBoundingClientRect().height ?? 88,
   });
 
   return (
-    <div className="w-full md:w-[70%] lg:w-[60%] mx-auto">
+    <div className="w-full md:w-[70%] lg:w-[60%] mx-auto flex flex-col h-screen">
       {/* HEADING */}
-      <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
+      <div
+        className="sticky top-0 z-10 grid 
+      md:grid-cols-[2rem_6rem_1fr_6rem_6rem_11rem_5rem_0.85fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none"
+      >
         <span className="font-semibold text-zinc-300 text-sm">#</span>
         <span className="font-semibold text-zinc-300 text-sm">Cover</span>
         {/* TITLE */}
@@ -238,7 +241,11 @@ export function ShowDesktopListing({
       )}
       {/* LISTING */}
       {!isProcessingShow && shows.length > 0 && (
-        <div ref={parentRef} className="w-full">
+        <div
+          ref={parentRef}
+          className="w-full overflow-auto flex-1"
+          style={{ height: "calc(100vh)" }}
+        >
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,
@@ -251,8 +258,8 @@ export function ShowDesktopListing({
               return (
                 <div
                   key={show.id}
-                  ref={rowVirtualizer.measureElement}
                   data-index={virtualItem.index}
+                  ref={rowVirtualizer.measureElement}
                   style={{
                     position: "absolute",
                     top: 0,

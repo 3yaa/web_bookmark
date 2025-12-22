@@ -82,7 +82,7 @@ export function ShowMultBooks({
                 onClick={() => onClickedBook(book)}
               >
                 {/* COVER */}
-                <div className="w-12.5 h-18 shrink-0">
+                <div className="w-14 h-21 shrink-0">
                   {book.cover_urls && book.cover_urls[0] ? (
                     <Image
                       src={book.cover_urls[0]}
@@ -94,7 +94,7 @@ export function ShowMultBooks({
                           console.log(book.cover_urls[0]);
                         }
                       }}
-                      className="w-full h-full object-fill rounded-sm border border-zinc-600/30"
+                      className="w-full h-full w-full h-full object-fill rounded-sm"
                     />
                   ) : (
                     <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30"></div>

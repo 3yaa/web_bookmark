@@ -31,22 +31,22 @@ const BookItem = React.memo(
       className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
         book.status
       )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
-        index === 0 ? "pt-1.5 rounded-bl-none" : "rounded-l-none"
+        index === 0 ? "rounded-bl-none" : "rounded-l-none"
       } 
         ${index === totalBooks - 1 && "rounded-bl-md"}  
           hover:cursor-pointer`}
       onClick={() => onClick(book)}
     >
       <span className="font-medium text-zinc-300 text-sm">{index + 1}</span>
-      <div className="w-12.5 h-18">
+      <div className="w-14 h-21">
         {book.coverUrl ? (
           <Image
             src={book.coverUrl}
             alt={book.title || "Untitled"}
-            width={248}
-            height={372}
+            width={1280}
+            height={720}
             priority
-            className="w-full h-full object-fill rounded-sm border border-zinc-600/30"
+            className="w-full h-full object-fill rounded-sm"
           />
         ) : (
           <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30"></div>

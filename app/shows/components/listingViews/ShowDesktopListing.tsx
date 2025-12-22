@@ -1,11 +1,16 @@
 import Image from "next/image";
 import { ChevronDown, ChevronUp } from "lucide-react";
 // utils and ui components
-import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
+import {
+  formatDateShort,
+  getStatusBg,
+  getStatusBorderColor,
+} from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { ShowProps, SortConfig } from "@/types/show";
 import React, { useRef } from "react";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { calcCurProgress } from "../../utils/progressCalc";
 
 interface ShowDesktopListingProps {
   shows: ShowProps[];
@@ -53,10 +58,33 @@ const ShowItem = React.memo(
           <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30"></div>
         )}
       </div>
-      <div className="flex flex-col min-w-0 flex-1">
+      <div className="flex flex-col min-w-0 flex-1 relative">
         <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-emerald-400 transition-colors duration-200 truncate max-w-53">
           {show.title || "-"}
         </span>
+        <div className="absolute right-0 -bottom-8 text-zinc-400 text-[11px] font-medium mb-0.5 tracking-tight">
+          S{show.curSeasonIndex + 1 || "-"} · E{show.curEpisode || "-"}/
+          {show.seasons?.[show.curSeasonIndex]?.episode_count || 0}
+        </div>
+        <div className="absolute -bottom-2.5 left-0 w-full bg-zinc-800/80 rounded-md h-1 overflow-hidden">
+          <div
+            className={`${getStatusBg(
+              show.status
+            )} h-1 transition-all duration-500 ease-out rounded-md`}
+            style={{
+              width: `${
+                show.seasons?.[show.curSeasonIndex]?.episode_count
+                  ? calcCurProgress(
+                      show.seasons,
+                      show.curSeasonIndex,
+                      show.curEpisode,
+                      show.status
+                    )
+                  : 0
+              }%`,
+            }}
+          />
+        </div>
       </div>
       <span className="text-center font-semibold text-zinc-300 text-sm">
         {show.score || "-"}

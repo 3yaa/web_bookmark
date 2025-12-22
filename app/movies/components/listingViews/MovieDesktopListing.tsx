@@ -104,9 +104,9 @@ export function MovieDesktopListing({
 
   const rowVirtualizer = useWindowVirtualizer({
     count: movies.length,
-    estimateSize: () => 77,
+    estimateSize: () => 88,
     overscan: 5,
-    measureElement: (element) => element?.getBoundingClientRect().height ?? 77,
+    measureElement: (element) => element?.getBoundingClientRect().height ?? 88,
   });
 
   return (

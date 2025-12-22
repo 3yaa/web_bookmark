@@ -209,11 +209,11 @@ export function MovieDesktopListing({
         </span>
       </div>
       {/* LOADER */}
-      <div className="relative bg-black/20 backdrop-blur-lg">
-        {isProcessingMovie && (
-          <Loading customStyle={"mt-72 h-12 w-12 border-gray-400"} text="" />
-        )}
-      </div>
+      {isProcessingMovie && (
+        <div className="relative bg-black/20 backdrop-blur-lg">
+          <Loading customStyle="mt-72 h-12 w-12 border-gray-400" text="" />
+        </div>
+      )}
       {!isProcessingMovie && movies.length === 0 && (
         <div className="text-center py-12">
           <p className="text-zinc-400 italic text-lg">

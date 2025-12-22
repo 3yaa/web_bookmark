@@ -208,11 +208,11 @@ export function BookDesktopListing({
         </span>
       </div>
       {/* LOADER */}
-      <div className="relative bg-black/20 backdrop-blur-lg">
-        {isProcessingBook && (
-          <Loading customStyle={"mt-72 h-12 w-12 border-gray-400"} text="" />
-        )}
-      </div>
+      {isProcessingBook && (
+        <div className="relative bg-black/20 backdrop-blur-lg">
+          <Loading customStyle="mt-72 h-12 w-12 border-gray-400" text="" />
+        </div>
+      )}
       {/* NO BOOKS */}
       {!isProcessingBook && books.length === 0 && (
         <div className="text-center py-12">

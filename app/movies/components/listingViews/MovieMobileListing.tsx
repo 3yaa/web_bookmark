@@ -381,11 +381,11 @@ export function MovieMobileListing({
       </div>
       <div className="h-11" />
       {/* LOADER */}
-      <div className="relative bg-black/20 backdrop-blur-xl">
-        {isProcessingMovie && (
+      {isProcessingMovie && (
+        <div className="relative bg-black/20 backdrop-blur-lg">
           <Loading customStyle="mt-72 h-12 w-12 border-zinc-500/40" text="" />
-        )}
-      </div>
+        </div>
+      )}
       {/* EMPTY */}
       {!isProcessingMovie && movies.length === 0 && (
         <div className="text-center py-12">

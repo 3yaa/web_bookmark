@@ -6,6 +6,7 @@ export const formatDateShort = (value?: string | Date | null): string => {
   if (!value) return "";
   const date = value instanceof Date ? value : new Date(value);
   return date.toLocaleDateString("en-US", {
+    day: "numeric",
     month: "short",
     year: "numeric",
   });

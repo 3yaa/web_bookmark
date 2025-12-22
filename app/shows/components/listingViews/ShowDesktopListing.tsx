@@ -9,7 +9,7 @@ import {
 import { Loading } from "@/app/components/ui/Loading";
 import { ShowProps, SortConfig } from "@/types/show";
 import React, { useRef } from "react";
-import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { calcCurProgress } from "../../utils/progressCalc";
 
 interface ShowDesktopListingProps {
@@ -117,17 +117,17 @@ export function ShowDesktopListing({
 }: ShowDesktopListingProps) {
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const rowVirtualizer = useWindowVirtualizer({
+  const rowVirtualizer = useVirtualizer({
     count: shows.length,
+    getScrollElement: () => parentRef.current,
     estimateSize: () => 88,
     overscan: 5,
-    measureElement: (element) => element?.getBoundingClientRect().height ?? 88,
   });
 
   return (
-    <div className="w-full md:w-[70%] lg:w-[60%] mx-auto">
+    <div className="w-full md:w-[70%] lg:w-[60%] mx-auto h-screen flex flex-col">
       {/* HEADING */}
-      <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
+      <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_0.9fr_6rem_8rem_10rem_8rem_1fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none shrink-0">
         <span className="font-semibold text-zinc-300 text-sm">#</span>
         <span className="font-semibold text-zinc-300 text-sm">Cover</span>
         {/* TITLE */}
@@ -225,12 +225,12 @@ export function ShowDesktopListing({
       </div>
       {/* LOADER */}
       {isProcessingShow && (
-        <div className="relative bg-black/20 backdrop-blur-lg">
+        <div className="relative bg-black/20 backdrop-blur-lg flex-1">
           <Loading customStyle="mt-72 h-12 w-12 border-gray-400" text="" />
         </div>
       )}
       {!isProcessingShow && shows.length === 0 && (
-        <div className="text-center py-12">
+        <div className="text-center py-12 flex-1">
           <p className="text-zinc-400 italic text-lg">
             No shows yet — add one!
           </p>
@@ -238,7 +238,7 @@ export function ShowDesktopListing({
       )}
       {/* LISTING */}
       {!isProcessingShow && shows.length > 0 && (
-        <div ref={parentRef} className="w-full">
+        <div ref={parentRef} className="w-full flex-1 overflow-auto">
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,
@@ -251,13 +251,13 @@ export function ShowDesktopListing({
               return (
                 <div
                   key={show.id}
-                  ref={rowVirtualizer.measureElement}
                   data-index={virtualItem.index}
                   style={{
                     position: "absolute",
                     top: 0,
                     left: 0,
                     width: "100%",
+                    height: `${virtualItem.size}px`,
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >

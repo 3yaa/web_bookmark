@@ -39,7 +39,7 @@ export function ManualAddBook({
       <div
         className={`rounded-2xl bg-linear-to-b ${getStatusBorderGradient(
           book.status ?? "Want to Read"
-        )} py-2 px-2`}
+        )} p-1.5 py-2`}
       >
         {/* ACTUAL DETAIL CARD */}
         <div className="bg-linear-to-br bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 lg:min-w-3xl lg:max-w-3xl w-full max-h-[calc(100vh-3rem)]">
@@ -180,7 +180,7 @@ export function ManualAddBook({
                       minHeight={100}
                       maxHeight={100}
                       placeholder="Add your thoughts about this book..."
-                      className="text-gray-300 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500"
+                      className="text-gray-300/90 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500 font-medium"
                     />
                   </div>
                 </div>

@@ -31,3 +31,12 @@ input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield; 
 }
+
+@keyframes wave {
+  0%, 100% {
+    transform: translateX(-50%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+}

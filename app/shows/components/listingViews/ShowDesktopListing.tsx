@@ -5,6 +5,7 @@ import {
   formatDateShort,
   getStatusBg,
   getStatusBorderColor,
+  getStatusWaveColor,
 } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { ShowProps, SortConfig } from "@/types/show";
@@ -70,7 +71,7 @@ const ShowItem = React.memo(
           <div
             className={`${getStatusBg(
               show.status
-            )} h-1 transition-all duration-500 ease-out rounded-md`}
+            )} h-1 transition-all duration-500 ease-out rounded-md relative overflow-hidden`}
             style={{
               width: `${
                 show.seasons?.[show.curSeasonIndex]?.episode_count
@@ -83,7 +84,16 @@ const ShowItem = React.memo(
                   : 0
               }%`,
             }}
-          />
+          >
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `${getStatusWaveColor(show.status)}`,
+                animation: "wave 3.5s ease-in-out infinite",
+                width: "200%",
+              }}
+            />
+          </div>
         </div>
       </div>
       <span className="flex items-center justify-center font-bold text-zinc-300 text-sm bg-linear-to-br from-zinc-800/80 to-zinc-900/90 mx-7.5 py-2 pb-1 rounded-lg shadow-lg shadow-black/20 border border-zinc-800/40">

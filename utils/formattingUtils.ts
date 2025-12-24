@@ -107,3 +107,29 @@ export const getStatusBg = (status: Partial<MediaStatus>) => {
       return "bg-zinc-600/40";
   }
 };
+
+export const getStatusWaveColor = (status: Partial<MediaStatus>) => {
+  switch (status) {
+    case "Completed":
+      // cyan-700: rgb(14, 116, 144)
+      return "linear-gradient(90deg, transparent 20%, rgba(14, 116, 144, 0.45) 50%, transparent 80%)";
+    case "Dropped":
+      // yellow-400: rgb(250, 204, 21)
+      return "linear-gradient(90deg, transparent 20%, rgba(250, 204, 21, 0.35) 50%, transparent 80%)";
+    case "Want to Watch":
+      // rose-600: rgb(225, 29, 72)
+      return "linear-gradient(90deg, transparent 20%, rgba(225, 29, 72, 0.35) 50%, transparent 80%)";
+    case "Watching":
+      // rose-400: rgb(251, 113, 133), orange-300: rgb(253, 186, 116)
+      return "linear-gradient(90deg, transparent 20%, rgba(225, 29, 72, 0.35) 50%, transparent 80%)";
+    case "Want to Read":
+      // rose-600: rgb(225, 29, 72)
+      return "linear-gradient(90deg, transparent 20%, rgba(225, 29, 72, 0.35) 50%, transparent 80%)";
+    case "Playing":
+      // orange-400: rgb(251, 146, 60), amber-300: rgb(252, 211, 77)
+      return "linear-gradient(90deg, transparent 20%, rgba(225, 29, 72, 0.35) 50%, transparent 80%)";
+    default:
+      // amber-300: rgb(252, 211, 77)
+      return "linear-gradient(90deg, transparent 20%, rgba(252, 211, 77, 0.5) 50%, transparent 80%)";
+  }
+};

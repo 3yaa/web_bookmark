@@ -5,6 +5,7 @@ import {
   formatDateShort,
   getStatusBg,
   getStatusBorderColor,
+  getStatusWaveColor,
 } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { MovieProps, SortConfig } from "@/types/movie";
@@ -78,8 +79,17 @@ const MovieItem = React.memo(
         <div
           className={`absolute -bottom-2.5 left-0 w-full ${getStatusBg(
             movie.status
-          )} h-1 transition-all duration-500 ease-out rounded-md w-full`}
-        />
+          )} h-1 rounded-md overflow-hidden`}
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `${getStatusWaveColor(movie.status)}`,
+              animation: "wave 3.5s ease-in-out infinite",
+              width: "200%",
+            }}
+          />
+        </div>
       </div>
       <span className="flex items-center justify-center font-bold text-zinc-300 text-sm bg-linear-to-br from-zinc-800/80 to-zinc-900/90 mx-7.5 py-2 pb-1 rounded-lg shadow-lg shadow-black/20 border border-zinc-800/40">
         {movie.score || "-"}

@@ -241,7 +241,7 @@ export function ShowDesktopDetails({
                           });
                         }}
                         options={scoreOptions}
-                        customStyle="text-zinc-300/75 font-semibold"
+                        customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={(() => {
                           const option = showStatusOptions.find(
                             (opt) => opt.value === show.status

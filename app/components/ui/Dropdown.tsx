@@ -138,7 +138,7 @@ export function Dropdown({
                   className={`w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-zinc-200 focus:outline-none border-b border-zinc-800/90 last:border-none transition-all duration-200 ease-out cursor-pointer
                   ${
                     option.value === value
-                      ? `rounded-md bg-gradient-to-r from-transparent ${bgStyle}`
+                      ? `rounded-md bg-linear-to-r from-transparent ${bgStyle}`
                       : "hover:bg-zinc-800/70 hover:text-white"
                   }`}
                 >

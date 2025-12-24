@@ -249,7 +249,7 @@ export function BookDesktopDetails({
                     )}
                   </div>
                   {/* STATUS AND SCORE */}
-                  <div className="flex justify-start gap-4 mb-2.5 max-w-[94%]">
+                  <div className=" flex justify-start gap-4 mb-2.5 max-w-[94%]">
                     <div className="flex-[0.77] lg:min-w-41.25">
                       <label className="text-sm font-medium text-zinc-400 mb-1 block">
                         Status
@@ -266,12 +266,7 @@ export function BookDesktopDetails({
                           });
                         }}
                         options={bookStatusOptions}
-                        customStyle="text-zinc-200/80 font-semibold"
-                        dropStyle={
-                          book.status === "Completed"
-                            ? ["to-emerald-500/10", "text-emerald-500"]
-                            : ["to-blue-500/10", "text-blue-500"]
-                        }
+                        customStyle="text-zinc-300/75 font-semibold"
                         dropDuration={0.24}
                       />
                     </div>

@@ -12,6 +12,7 @@ export interface MovieProps {
   status: "Completed" | "Want to Watch" | "Dropped"; //!--REQUIRED
   // from omdb
   imdbId: string; //!--REQUIRED
+  normalizedTitle: string;
   title: string; //!--REQUIRED
   director?: string;
   dateReleased?: number;

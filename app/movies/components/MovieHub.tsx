@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -17,12 +18,15 @@ import { AddMovie } from "./addMovie/AddMovie";
 import { MovieDetails } from "./MovieDetailsHub";
 import { MovieMobileListing } from "./listingViews/MovieMobileListing";
 import { MovieDesktopListing } from "./listingViews/MovieDesktopListing";
+import { debounce } from "@/utils/debounce";
 
 export default function MoviesHub() {
   const { movies, addMovie, updateMovie, deleteMovie, isProcessingMovie } =
     useMovieData();
   // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
   //delegation
   const [selectedMovie, setSelectedMovie] = useState<MovieProps | null>(null);
@@ -30,17 +34,32 @@ export default function MoviesHub() {
   const [activeModal, setActiveModal] = useState<
     "movieDetails" | "addMovie" | null
   >(null);
+  //
+  const debouncedSetQuery = useRef(
+    debounce((value: string) => {
+      setDebouncedQuery(value);
+    }, 300)
+  ).current;
+  //
 
   // change ground truth
   const [isFilterPending, startTransition] = useTransition();
+  //
+  const searchedMovies = useMemo(() => {
+    if (!debouncedQuery) return movies;
+
+    return movies.filter((movie) =>
+      movie.title.toLowerCase().trim().includes(debouncedQuery)
+    );
+  }, [movies, debouncedQuery]);
+  //
   const filteredMovies = useMemo(() => {
-    if (statusFilter) {
-      return statusFilter
-        ? movies.filter((movie) => movie.status === statusFilter)
-        : movies;
-    }
-    return movies;
-  }, [movies, statusFilter]);
+    if (!statusFilter) return searchedMovies;
+
+    return searchedMovies.filter((movie) => movie.status === statusFilter);
+  }, [searchedMovies, statusFilter]);
+
+  //
   const sortedMovies = useSortMovies(filteredMovies, sortConfig);
 
   const showSequelPrequel = useCallback(
@@ -48,7 +67,9 @@ export default function MoviesHub() {
       if (targetTitle) {
         // !NEEDS TO MAKE THIS CALL WITH THE ENTIRE DB
         const targetMovie = movies.find(
-          (movie) => movie.title.toLowerCase() === targetTitle.toLowerCase()
+          (movie) =>
+            movie.title.toLowerCase().trim() ===
+            targetTitle.toLowerCase().trim()
         );
 
         if (targetMovie) {
@@ -118,6 +139,11 @@ export default function MoviesHub() {
     setSelectedMovie(movie);
   }, []);
 
+  const handleSearchQueryChange = (value: string) => {
+    setSearchQuery(value);
+    debouncedSetQuery(value.toLowerCase().trim());
+  };
+
   useEffect(() => {
     const handleEnter = (e: KeyboardEvent) => {
       const isDesktop = window.matchMedia("(min-width: 900px)").matches;
@@ -160,6 +186,8 @@ export default function MoviesHub() {
           sortConfig={sortConfig}
           onSortConfig={handleSortConfig}
           onMovieClicked={handleMovieClicked}
+          onSearchChange={handleSearchQueryChange}
+          searchQuery={searchQuery}
         />
       </div>
       <div className="block lg:hidden">

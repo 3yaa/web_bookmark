@@ -18,7 +18,7 @@ import { ShowDetails } from "./ShowDetailsHub";
 import { ShowMobileListing } from "./listingViews/ShowMobileListing";
 import { ShowDesktopListing } from "./listingViews/ShowDesktopListing";
 
-export default function ShowList() {
+export default function ShowHub() {
   const { shows, addShow, updateShow, deleteShow, isProcessingShow } =
     useShowData();
   // filter/sort config

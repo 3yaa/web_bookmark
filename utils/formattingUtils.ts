@@ -133,3 +133,29 @@ export const getStatusWaveColor = (status: Partial<MediaStatus>) => {
       return "linear-gradient(90deg, transparent 20%, rgba(252, 211, 77, 0.5) 50%, transparent 80%)";
   }
 };
+
+export const getStatusDetailWaveColor = (status: Partial<MediaStatus>) => {
+  switch (status) {
+    case "Completed":
+      // emerald-500: rgb(16, 185, 129)
+      return "linear-gradient(90deg, transparent 20%, rgba(16, 185, 129, 0.5) 50%, transparent 80%)";
+    case "Dropped":
+      // red-500: rgb(239, 68, 68)
+      return "linear-gradient(90deg, transparent 20%, rgba(239, 68, 68, 0.4) 50%, transparent 80%)";
+    case "Want to Watch":
+      // blue-500: rgb(59, 130, 246)
+      return "linear-gradient(90deg, transparent 20%, rgba(59, 130, 246, 0.5) 50%, transparent 80%)";
+    case "Watching":
+      // cyan-600: rgb(8, 145, 178)
+      return "linear-gradient(90deg, transparent 20%, rgba(8, 145, 178, 0.45) 50%, transparent 80%)";
+    case "Want to Read":
+      // blue-500: rgb(59, 130, 246)
+      return "linear-gradient(90deg, transparent 20%, rgba(59, 130, 246, 0.5) 50%, transparent 80%)";
+    case "Playing":
+      // blue-500: rgb(59, 130, 246)
+      return "linear-gradient(90deg, transparent 20%, rgba(59, 130, 246, 0.5) 50%, transparent 80%)";
+    default:
+      // zinc-600: rgb(82, 82, 91)
+      return "linear-gradient(90deg, transparent 20%, rgba(82, 82, 91, 0.4) 50%, transparent 80%)";
+  }
+};

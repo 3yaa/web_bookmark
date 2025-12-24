@@ -2,6 +2,7 @@ import Image from "next/image";
 import {
   formatDateShort,
   getStatusBorderGradient,
+  getStatusDetailWaveColor,
 } from "@/utils/formattingUtils";
 import { gameStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 //
@@ -187,11 +188,22 @@ export function GameDesktopDetails({
                     <div className="font-bold text-zinc-100/90 text-3xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-1.5">
                       {game.title || "Untitled"}
                     </div>
-                    <div
-                      className={`w-full h-0.5 bg-linear-to-r ${getStatusBorderGradient(
-                        game.status
-                      )} to-zinc-800 rounded-full`}
-                    ></div>
+                    {/* STATUS WAVE */}
+                    <div className="w-full bg-zinc-800 rounded-full h-0.75 overflow-hidden">
+                      <div
+                        className={`bg-zinc-900 h-0.75 transition-all duration-500 ease-out rounded-full relative overflow-hidden`}
+                        style={{ width: "100%" }}
+                      >
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            background: getStatusDetailWaveColor(game.status),
+                            animation: "wave 6s ease-in-out infinite",
+                            width: "200%",
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                   {/* DIRECTOR AND DATES */}
                   <div className="flex justify-start items-center gap-2 w-full mb-3">
@@ -276,7 +288,7 @@ export function GameDesktopDetails({
                     <label className="text-sm font-medium text-zinc-400 block">
                       Notes
                     </label>
-                    <div className="bg-zinc-800/50 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-21.5 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200">
+                    <div className="bg-zinc-800/30 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-21.5 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200 shadow-lg shadow-black/20">
                       <AutoTextarea
                         value={localNote}
                         onChange={(e) => {
@@ -296,68 +308,66 @@ export function GameDesktopDetails({
                   </div>
                 </div>
                 {/* PREQUEL AND SEQUEL */}
-                <div className="grid grid-cols-[1fr_3rem_1fr] pr-1.5 select-none w-full">
-                  <div className="truncate text-left">
-                    {game.dlcIndex - 1 >= 0 && game.dlcs !== undefined && (
-                      <div
-                        className={`text-sm text-zinc-400/80 ${
-                          !addingGame
-                            ? "hover:underline hover:cursor-pointer"
-                            : ""
-                        }`}
-                      >
-                        <label className="text-xs font-medium text-zinc-400 block">
-                          <span className="inline-flex items-center gap-1">
-                            <span>←</span>
-                            <span>Previous</span>
-                          </span>
-                        </label>
-                        <span
+                <div className="pt-2.5 border-t border-zinc-800/80">
+                  <div className="grid grid-cols-[1fr_3rem_1fr] gap-3 w-full pr-1.5 select-none">
+                    <div className="truncate text-left">
+                      {game.dlcIndex - 1 >= 0 && game.dlcs !== undefined && (
+                        <div
+                          className={`group flex flex-col ${
+                            !addingGame ? "hover:cursor-pointer" : ""
+                          }`}
                           onClick={() => {
                             if (!addingGame) {
                               onAction({ type: "dlcNav", payload: "prev" });
                             }
                           }}
                         >
-                          {game.dlcs[game.dlcIndex - 1].name}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex justify-center items-end">
-                    {game.dlcIndex !== 0 && (
-                      <label className="text-xs font-medium text-zinc-400/85 block">
-                        {game.dlcIndex}
-                      </label>
-                    )}
-                  </div>
-                  <div className="truncate text-right">
-                    {game.dlcs !== undefined &&
-                      game.dlcIndex + 1 < game.dlcs?.length && (
-                        <div
-                          className={`text-sm text-zinc-400/80 ${
-                            !addingGame
-                              ? "hover:underline hover:cursor-pointer"
-                              : ""
-                          }`}
-                        >
-                          <label className="text-xs font-medium text-zinc-400 block">
+                          <label className="text-xs font-medium text-zinc-500 block pointer-events-none">
                             <span className="inline-flex items-center gap-1">
-                              <span>Next</span>
-                              <span>→</span>
+                              <span>←</span>
+                              <span>Previous</span>
                             </span>
                           </label>
-                          <span
+                          <span className="text-sm text-zinc-300/70 font-medium group-hover:text-zinc-300/85 group-hover:underline transition-colors duration-200">
+                            {game.dlcs[game.dlcIndex - 1].name}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex justify-center items-end pb-0.5">
+                      {game.dlcIndex !== 0 && (
+                        <label className="text-xs font-semibold text-zinc-400/90 block">
+                          {game.dlcIndex}
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="truncate text-right">
+                      {game.dlcs !== undefined &&
+                        game.dlcIndex + 1 < game.dlcs?.length && (
+                          <div
+                            className={`group flex flex-col ${
+                              !addingGame ? "hover:cursor-pointer" : ""
+                            }`}
                             onClick={() => {
                               if (!addingGame) {
                                 onAction({ type: "dlcNav", payload: "next" });
                               }
                             }}
                           >
-                            {game.dlcs[game.dlcIndex + 1].name}
-                          </span>
-                        </div>
-                      )}
+                            <label className="text-xs font-medium text-zinc-500 block pointer-events-none">
+                              <span className="inline-flex items-center gap-1">
+                                <span>Next</span>
+                                <span>→</span>
+                              </span>
+                            </label>
+                            <span className="text-sm text-zinc-300/70 font-medium group-hover:text-zinc-300/85 group-hover:underline transition-colors duration-200">
+                              {game.dlcs[game.dlcIndex + 1].name}
+                            </span>
+                          </div>
+                        )}
+                    </div>
                   </div>
                 </div>
               </div>

@@ -3,6 +3,7 @@ import {
   formatDateShort,
   getStatusTextColor,
   getStatusBorderGradient,
+  getStatusDetailWaveColor,
 } from "@/utils/formattingUtils";
 import { showStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 //
@@ -170,11 +171,22 @@ export function ShowDesktopDetails({
                     <div className="font-bold text-zinc-100/90 text-3xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-1.5">
                       {show.title || "Untitled"}
                     </div>
-                    <div
-                      className={`w-full h-0.5 bg-linear-to-r ${getStatusBorderGradient(
-                        show.status
-                      )} to-zinc-800 rounded-full`}
-                    ></div>
+                    {/* STATUS WAVE */}
+                    <div className="w-full bg-zinc-800 rounded-full h-0.75 overflow-hidden">
+                      <div
+                        className={`bg-zinc-900 h-0.75 transition-all duration-500 ease-out rounded-full relative overflow-hidden`}
+                        style={{ width: "100%" }}
+                      >
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            background: getStatusDetailWaveColor(show.status),
+                            animation: "wave 6s ease-in-out infinite",
+                            width: "200%",
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                   {/* STUDIO AND DATES */}
                   <div className="flex justify-start items-center gap-2 w-full mb-3">
@@ -257,11 +269,11 @@ export function ShowDesktopDetails({
                   {/* SEASON && EP */}
                   <div className="space-y-1 mb-2">
                     <label className="text-sm font-medium text-zinc-400 block">
-                      Currently
+                      Progress
                     </label>
                     <div className="flex gap-3 max-w-[97.6%]">
                       {/* SEASON CONTROLS */}
-                      <div className="flex-[1.05] bg-linear-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/20 select-none">
+                      <div className="flex-[1.05] bg-linear-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/50 select-none shadow-lg shadow-black/20">
                         <div className="flex items-center justify-between pl-1">
                           <span
                             className="text-[15px] text-zinc-300/70 font-bold hover:cursor-pointer"
@@ -361,7 +373,7 @@ export function ShowDesktopDetails({
                       </div>
 
                       {/* EPISODE CONTROLS */}
-                      <div className="flex-[1.05] bg-linear-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/20 select-none">
+                      <div className="flex-[1.05] bg-linear-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/50 select-none shadow-lg shadow-black/20">
                         <div className="flex items-center justify-between">
                           <span
                             className="text-[15px] text-zinc-300/70 font-bold hover:cursor-pointer"
@@ -480,7 +492,7 @@ export function ShowDesktopDetails({
                     <label className="text-sm font-medium text-zinc-400 block">
                       Notes
                     </label>
-                    <div className="bg-zinc-800/50 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-21.5 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200">
+                    <div className="bg-zinc-800/30 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-21.5 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200 shadow-lg shadow-black/20">
                       <AutoTextarea
                         value={localNote}
                         onChange={(e) => {

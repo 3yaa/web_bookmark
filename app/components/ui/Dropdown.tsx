@@ -81,20 +81,20 @@ export function Dropdown({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={`
-          w-full rounded-lg border backdrop-blur-sm
+          w-full rounded-lg border backdrop-blur-md
           flex items-center justify-between gap-3 px-4 py-3
           transition-all duration-300 ease-out
-          hover:border-zinc-600/70 hover:bg-zinc-800/60 hover:shadow-lg hover:shadow-zinc-900/20
-          focus:outline-none focus:ring-0.5 focus:ring-zinc-500/50 focus:border-zinc-700/70
-          active:scale-[0.98]
+          bg-linear-to-b shadow-md
+          hover:scale-[1.02] hover:shadow-xl hover:shadow-black/30
+          focus:outline-none active:scale-[0.98]
             ${
               isOpen
-                ? "border-zinc-600/70 bg-zinc-800/60 shadow-lg shadow-zinc-900/20"
-                : "border-zinc-700/50 bg-zinc-900/40"
+                ? "border-zinc-800/50 from-transparent via-zinc-800/30 to-zinc-800/50 scale-[1.02]"
+                : "border-zinc-800/50 from-transparent via-zinc-800/30 to-zinc-800/50 shadow-black/20"
             }
           ${
             disabled
-              ? "opacity-40 cursor-not-allowed hover:border-zinc-700/50 hover:bg-zinc-900/40 hover:shadow-none active:scale-100"
+              ? "opacity-40 cursor-not-allowed hover:scale-100 hover:shadow-lg hover:shadow-black/20 active:scale-100"
               : "cursor-pointer"
           }
         `}

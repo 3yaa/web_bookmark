@@ -11,7 +11,7 @@ export const BackdropImageBook = ({
   width,
   height,
 }: BackdropImageBookProps) => (
-  <div className="absolute -top-7 left-32 w-[80%] h-[70%] -z-10 overflow-hidden select-none">
+  <div className="absolute -top-7 left-34 w-[80%] h-[70%] -z-10 overflow-hidden select-none">
     <div className="relative h-full">
       <Image
         src={src}

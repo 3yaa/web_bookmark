@@ -85,7 +85,7 @@ const MovieItem = React.memo(
             className="absolute inset-0"
             style={{
               background: `${getStatusWaveColor(movie.status)}`,
-              animation: "wave 3.5s ease-in-out infinite",
+              animation: "wave 4s ease-in-out infinite",
               width: "200%",
             }}
           />

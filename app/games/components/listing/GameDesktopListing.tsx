@@ -80,7 +80,7 @@ const GameItem = React.memo(
             className="absolute inset-0"
             style={{
               background: `${getStatusWaveColor(game.status)}`,
-              animation: "wave 3.5s ease-in-out infinite",
+              animation: "wave 4s ease-in-out infinite",
               width: "200%",
             }}
           />

@@ -89,7 +89,7 @@ const ShowItem = React.memo(
               className="absolute inset-0"
               style={{
                 background: `${getStatusWaveColor(show.status)}`,
-                animation: "wave 3.5s ease-in-out infinite",
+                animation: "wave 4s ease-in-out infinite",
                 width: "200%",
               }}
             />

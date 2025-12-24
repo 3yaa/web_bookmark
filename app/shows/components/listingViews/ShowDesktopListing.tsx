@@ -33,7 +33,6 @@ const ShowItem = React.memo(
     onClick: (show: ShowProps) => void;
   }) => (
     <div
-      key={show.id}
       className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_1fr_6rem_6rem_11rem_5rem_0.85fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
         show.status
       )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
@@ -66,6 +65,7 @@ const ShowItem = React.memo(
           S{show.curSeasonIndex + 1 || "-"} · E{show.curEpisode || "-"}/
           {show.seasons?.[show.curSeasonIndex]?.episode_count || 0}
         </div>
+        {/* SEASON/EP STATUS */}
         <div className="absolute -bottom-2.5 left-0 w-full bg-zinc-800/80 rounded-md h-1 overflow-hidden">
           <div
             className={`${getStatusBg(
@@ -122,15 +122,13 @@ export function ShowDesktopListing({
     getScrollElement: () => parentRef.current,
     estimateSize: () => 88,
     overscan: 5,
+    measureElement: (element) => element?.getBoundingClientRect().height ?? 88,
   });
 
   return (
     <div className="w-full md:w-[70%] lg:w-[60%] mx-auto flex flex-col h-screen">
       {/* HEADING */}
-      <div
-        className="sticky top-0 z-10 grid 
-      md:grid-cols-[2rem_6rem_1fr_6rem_6rem_11rem_5rem_0.85fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none"
-      >
+      <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_1fr_6rem_6rem_11rem_5rem_0.85fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
         <span className="font-semibold text-zinc-300 text-sm">#</span>
         <span className="font-semibold text-zinc-300 text-sm">Cover</span>
         {/* TITLE */}
@@ -241,11 +239,7 @@ export function ShowDesktopListing({
       )}
       {/* LISTING */}
       {!isProcessingShow && shows.length > 0 && (
-        <div
-          ref={parentRef}
-          className="w-full overflow-auto flex-1"
-          style={{ height: "calc(100vh)" }}
-        >
+        <div ref={parentRef} className="w-full overflow-auto flex-1">
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,

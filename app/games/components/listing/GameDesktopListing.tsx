@@ -1,11 +1,15 @@
 import Image from "next/image";
 import { ChevronDown, ChevronUp } from "lucide-react";
 // utils and ui components
-import { formatDateShort, getStatusBorderColor } from "@/utils/formattingUtils";
+import {
+  formatDateShort,
+  getStatusBg,
+  getStatusBorderColor,
+} from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { GameProps, SortConfig } from "@/types/game";
 import React, { useRef } from "react";
-import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface GameDesktopListingProps {
   games: GameProps[];
@@ -52,7 +56,7 @@ const GameItem = React.memo(
           <div className="w-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30"></div>
         )}
       </div>
-      <div className="flex flex-col min-w-0 flex-1">
+      <div className="flex flex-col min-w-0 flex-1 relative">
         <span className="font-semibold text-zinc-400 text-[70%] group-hover:text-zinc-300 flex gap-1">
           {game.mainTitle ? (
             <span className="block max-w-[88%] whitespace-nowrap text-ellipsis overflow-hidden shrink">
@@ -65,6 +69,12 @@ const GameItem = React.memo(
         <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-zinc-300 transition-colors duration-200 truncate max-w-53">
           {game.title || "-"}
         </span>
+        {/* STATUS */}
+        <div
+          className={`absolute -bottom-2.5 left-0 w-full ${getStatusBg(
+            game.status
+          )} h-1 transition-all duration-500 ease-out rounded-md w-full`}
+        />
       </div>
       <span className="flex items-center justify-center font-bold text-zinc-300 text-sm bg-linear-to-br from-zinc-800/80 to-zinc-900/90 mx-7.5 py-2 pb-1 rounded-lg shadow-lg shadow-black/20 border border-zinc-800/40">
         {game.score || "-"}
@@ -97,15 +107,16 @@ export function GameDesktopListing({
 }: GameDesktopListingProps) {
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const rowVirtualizer = useWindowVirtualizer({
+  const rowVirtualizer = useVirtualizer({
     count: games.length,
+    getScrollElement: () => parentRef.current,
     estimateSize: () => 88,
     overscan: 5,
     measureElement: (element) => element?.getBoundingClientRect().height ?? 88,
   });
 
   return (
-    <div className="w-full md:w-[70%] lg:w-[60%] mx-auto">
+    <div className="w-full md:w-[70%] lg:w-[60%] mx-auto flex flex-col h-screen">
       {/* HEADING */}
       <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_1fr_6rem_6rem_11rem_5rem_0.85fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
         <span className="font-semibold text-zinc-300 text-sm">#</span>
@@ -218,7 +229,7 @@ export function GameDesktopListing({
       )}
       {/* LISTING */}
       {!isProcessingGame && games.length > 0 && (
-        <div ref={parentRef} className="w-full">
+        <div ref={parentRef} className="w-full overflow-auto flex-1">
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,
@@ -231,8 +242,8 @@ export function GameDesktopListing({
               return (
                 <div
                   key={game.id}
-                  ref={rowVirtualizer.measureElement}
                   data-index={virtualItem.index}
+                  ref={rowVirtualizer.measureElement}
                   style={{
                     position: "absolute",
                     top: 0,

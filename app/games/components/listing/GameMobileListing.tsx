@@ -15,7 +15,7 @@ import React, { useRef, useState } from "react";
 import { MediaStatus } from "@/types/media";
 import { BackdropImageMobile } from "@/app/components/ui/BackdropMobile";
 import { useNav } from "@/app/components/NavContext";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 
 interface GameMobileListingProps {
   games: GameProps[];
@@ -164,9 +164,8 @@ export function GameMobileListing({
   const [openStatusOption, setOpenStatusOption] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const rowVirtualizer = useVirtualizer({
+  const rowVirtualizer = useWindowVirtualizer({
     count: games.length,
-    getScrollElement: () => parentRef.current,
     estimateSize: () => 136,
     overscan: 5,
     measureElement: (element) => element?.getBoundingClientRect().height ?? 136,
@@ -182,7 +181,7 @@ export function GameMobileListing({
   };
 
   return (
-    <div className="w-full mx-auto tracking-tight flex flex-col h-screen">
+    <div className="w-full mx-auto tracking-tight">
       {/* HEADING */}
       <div className="sticky left-0 right-0 top-0 z-10 bg-zinc-900/35 backdrop-blur-xl shadow-lg border-b border-zinc-700/20 select-none flex justify-between items-center rounded-b-md px-3 will-change-transform">
         {/* STATUS FILTER */}
@@ -383,7 +382,7 @@ export function GameMobileListing({
       )}
       {/* LISTING */}
       {!isProcessingGame && games.length > 0 && (
-        <div ref={parentRef} className="w-full overflow-auto flex-1">
+        <div ref={parentRef} className="w-full">
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,

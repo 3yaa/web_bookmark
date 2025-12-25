@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -17,6 +18,7 @@ import { AddGame } from "./addGame/AddGame";
 import { GameDetails } from "./GameDetailsHub";
 import { GameMobileListing } from "./listing/GameMobileListing";
 import { GameDesktopListing } from "./listing/GameDesktopListing";
+import { debounce } from "@/utils/debounce";
 
 export default function GameList() {
   const { games, addGame, updateGame, deleteGame, isProcessingGame } =
@@ -24,6 +26,8 @@ export default function GameList() {
   // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   // delegation
   const [selectedGame, setSelectedGame] = useState<GameProps | null>(null);
   const [titleToAdd, setTitleToAdd] = useState<{
@@ -34,17 +38,28 @@ export default function GameList() {
   const [activeModal, setActiveModal] = useState<
     "gameDetails" | "addGame" | null
   >(null);
+  // set deboucne
+  const debouncedSetQuery = useRef(
+    debounce((value: string) => {
+      setDebouncedQuery(value);
+    }, 300)
+  ).current;
+  // SEARCH
+  const searchedGames = useMemo(() => {
+    if (!debouncedQuery) return games;
 
-  // change ground truth
+    return games.filter((game) =>
+      game.title.toLowerCase().trim().includes(debouncedQuery)
+    );
+  }, [games, debouncedQuery]);
+  // FILTER
   const [isFilterPending, startTransition] = useTransition();
   const filteredGames = useMemo(() => {
-    if (statusFilter) {
-      return statusFilter
-        ? games.filter((game) => game.status === statusFilter)
-        : games;
-    }
-    return games;
-  }, [games, statusFilter]);
+    if (!statusFilter) return searchedGames;
+    //
+    return searchedGames.filter((game) => game.status === statusFilter);
+  }, [searchedGames, statusFilter]);
+  // SORT
   const sortedGames = useSortGames(filteredGames, sortConfig);
 
   const showDlc = useCallback(
@@ -130,6 +145,11 @@ export default function GameList() {
     setSelectedGame(game);
   }, []);
 
+  const handleSearchQueryChange = (value: string) => {
+    setSearchQuery(value);
+    debouncedSetQuery(value.toLowerCase().trim());
+  };
+
   useEffect(() => {
     const handleEnter = (e: KeyboardEvent) => {
       const isDesktop = window.matchMedia("(min-width: 900px)").matches;
@@ -172,6 +192,8 @@ export default function GameList() {
           sortConfig={sortConfig}
           onSortConfig={handleSortConfig}
           onGameClicked={handleGameClicked}
+          onSearchChange={handleSearchQueryChange}
+          searchQuery={searchQuery}
         />
       </div>
       <div className="block lg:hidden">

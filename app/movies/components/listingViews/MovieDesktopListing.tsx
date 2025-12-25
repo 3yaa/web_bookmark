@@ -9,7 +9,7 @@ import {
 } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { MovieProps, SortConfig } from "@/types/movie";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface MovieDesktopListingProps {
@@ -126,6 +126,7 @@ export function MovieDesktopListing({
 }: MovieDesktopListingProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const searchBarRef = useRef<HTMLInputElement>(null);
 
   const rowVirtualizer = useVirtualizer({
     count: movies.length,
@@ -135,201 +136,231 @@ export function MovieDesktopListing({
     measureElement: (element) => element?.getBoundingClientRect().height ?? 88,
   });
 
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+      //
+      if (e.key === "/") {
+        if (!searchOpen) {
+          setSearchOpen(true);
+          searchBarRef.current?.focus();
+          e.preventDefault();
+        }
+      }
+    };
+    //
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [searchOpen]);
+
   return (
-    <div className="" onClick={() => setSearchOpen(!searchOpen)}>
-      <div className="w-full md:w-[70%] lg:w-[60%] mx-auto flex flex-col h-screen">
-        {/* HEADING */}
-        <div className="fixed top-0 right-5">
-          {searchOpen && (
-            <div className="px-4 pb-3">
-              <div className="relative animate-in fade-in slide-in-from-top-1 duration-200">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  placeholder="Search movies…"
-                  autoFocus
-                  className="
-            w-full
-            bg-zinc-900/70
-            border border-zinc-700/50
-            rounded-lg
-            pl-10 pr-4 py-2
-            text-sm text-zinc-100
-            placeholder-zinc-500
-            focus:outline-none
-            focus:ring-2
-            focus:ring-emerald-600/40
-          "
-                />
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_1fr_6rem_6rem_11rem_5rem_0.85fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
-          {/* SEARCH */}
-          <div className="absolute -top-2 -right-13 flex items-center gap-3 px-4 py-2">
-            <button
-              onClick={() => setSearchOpen((v) => !v)}
-              className={`
-                group flex items-center justify-center
-                h-9 w-9 rounded-lg
-                hover:bg-zinc-800
-                transition-all
-                ${searchOpen ? "ring-2 ring-emerald-600/40" : ""}
-              `}
-            >
-              <Search className="w-4 h-4 text-zinc-400 group-hover:text-zinc-200" />
-            </button>
-          </div>
-          {/*  */}
-          <span className="font-semibold text-zinc-300 text-sm">#</span>
-          <span className="font-semibold text-zinc-300 text-sm">Cover</span>
-          {/* TITLE */}
+    <div className="w-full md:w-[70%] lg:w-[60%] mx-auto flex flex-col h-screen">
+      {/* SEARCH BUTTON/BAR */}
+      <div className="fixed top-1 right-1 z-20">
+        <div className="relative">
+          {/* SEARCH BUTTON */}
           <div
-            className="flex justify-start items-center gap-1 hover:cursor-pointer"
-            onClick={() => onSortConfig("title")}
+            className={`flex items-center gap-2 bg-zinc-900/70 backdrop-blur-sm  border-zinc-700/50 rounded-lg transition-all duration-300 ease-out ${
+              searchOpen
+                ? "w-72 px-3 py-2"
+                : "w-9 h-9 px-0 py-0 cursor-pointer hover:bg-zinc-800/70"
+            }`}
+            onClick={() => {
+              if (!searchOpen) {
+                setSearchOpen(true);
+                searchBarRef.current?.focus();
+              }
+            }}
           >
-            <span className="font-semibold text-zinc-300 text-sm">Title</span>
-            {sortConfig?.type === "title" &&
-              (sortConfig?.order === "desc" ? (
-                <ChevronDown className="w-4 h-4" />
-              ) : (
-                <ChevronUp className="w-4 h-4" />
-              ))}
-          </div>
-          {/* SCORE */}
-          <div
-            className="flex justify-center items-center gap-1 hover:cursor-pointer"
-            onClick={() => onSortConfig("score")}
-          >
-            <span
-              className={`text-center font-semibold text-zinc-300 text-sm ${
-                sortConfig?.type === "score" ? "ml-4" : ""
+            <Search
+              className={`w-4 h-4 text-zinc-400 shrink-0 transition-all duration-300 ${
+                searchOpen ? "ml-0" : "ml-2.5"
               }`}
-            >
-              Score
-            </span>
-            {sortConfig?.type === "score" &&
-              (sortConfig?.order === "desc" ? (
-                <ChevronDown className="w-4 h-4" />
-              ) : (
-                <ChevronUp className="w-4 h-4" />
-              ))}
-          </div>
-          {/* DATE COMPLETED */}
-          <div
-            className="flex justify-center items-center gap-1 hover:cursor-pointer"
-            onClick={() => onSortConfig("dateCompleted")}
-          >
-            <span
-              className={`text-center font-semibold text-zinc-300 text-sm ${
-                sortConfig?.type === "dateCompleted" ? "ml-4" : ""
-              }`}
-            >
-              Completed
-            </span>
-            {sortConfig?.type === "dateCompleted" &&
-              (sortConfig?.order === "desc" ? (
-                <ChevronDown className="w-4 h-4" />
-              ) : (
-                <ChevronUp className="w-4 h-4" />
-              ))}
-          </div>
-          {/* DIRECTOR */}
-          <div
-            className="flex justify-center items-center gap-1 hover:cursor-pointer"
-            onClick={() => onSortConfig("director")}
-          >
-            <span
-              className={`text-center font-semibold text-zinc-300 text-sm ${
-                sortConfig?.type === "director" ? "ml-4" : ""
-              }`}
-            >
-              Director
-            </span>
-            {sortConfig?.type === "director" &&
-              (sortConfig?.order === "desc" ? (
-                <ChevronDown className="w-4 h-4" />
-              ) : (
-                <ChevronUp className="w-4 h-4" />
-              ))}
-          </div>
-          {/* DATE RELEASED */}
-          <div
-            className="flex justify-center items-center gap-1 hover:cursor-pointer"
-            onClick={() => onSortConfig("dateReleased")}
-          >
-            <span
-              className={`text-center font-semibold text-zinc-300 text-sm ${
-                sortConfig?.type === "dateReleased" ? "ml-4" : ""
-              }`}
-            >
-              Released
-            </span>
-            {sortConfig?.type === "dateReleased" &&
-              (sortConfig?.order === "desc" ? (
-                <ChevronDown className="w-4 h-4" />
-              ) : (
-                <ChevronUp className="w-4 h-4" />
-              ))}
-          </div>
-          <span className="text-center font-semibold text-zinc-300 text-sm pl-0.5">
-            Notes
-          </span>
-        </div>
-        {/* LOADER */}
-        {isProcessingMovie && (
-          <div className="relative bg-black/20 backdrop-blur-lg">
-            <Loading customStyle="mt-72 h-12 w-12 border-gray-400" text="" />
-          </div>
-        )}
-        {!isProcessingMovie && movies.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-zinc-400 italic text-lg">
-              No movies yet — add one!
-            </p>
-          </div>
-        )}
-        {/* LISTING */}
-        {!isProcessingMovie && movies.length > 0 && (
-          <div ref={parentRef} className="w-full overflow-auto flex-1">
-            <div
-              style={{
-                height: `${rowVirtualizer.getTotalSize()}px`,
-                width: "100%",
-                position: "relative",
+            />
+            {/* SEARCH BAR */}
+            <input
+              type="text"
+              ref={searchBarRef}
+              value={searchQuery}
+              onFocus={() => setSearchOpen(true)}
+              onChange={(e) => onSearchChange(e.target.value)}
+              onBlur={() => {
+                if (!searchQuery) setSearchOpen(false);
               }}
-            >
-              {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-                const movie = movies[virtualItem.index];
-                return (
-                  <div
-                    key={movie.id}
-                    data-index={virtualItem.index}
-                    ref={rowVirtualizer.measureElement}
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      transform: `translateY(${virtualItem.start}px)`,
-                    }}
-                  >
-                    <MovieItem
-                      movie={movie}
-                      index={virtualItem.index}
-                      totalMovies={movies.length}
-                      onClick={onMovieClicked}
-                    />
-                  </div>
-                );
-              })}
-            </div>
+              placeholder="Search movies…"
+              className={`bg-transparent text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none flex-1 transition-all duration-300 ${
+                searchOpen
+                  ? "w-full opacity-100 pointer-events-auto"
+                  : "w-0 opacity-0 pointer-events-none"
+              }`}
+            />
+            {searchOpen && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSearchChange("");
+                  setSearchOpen(false);
+                }}
+                className="text-zinc-400 hover:text-zinc-200 text-xs transition-colors"
+              >
+                ✕
+              </button>
+            )}
           </div>
-        )}
+        </div>
       </div>
+      {/* HEADERS */}
+      <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_1fr_6rem_6rem_11rem_5rem_0.85fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
+        <span className="font-semibold text-zinc-300 text-sm">#</span>
+        <span className="font-semibold text-zinc-300 text-sm">Cover</span>
+        {/* TITLE */}
+        <div
+          className="flex justify-start items-center gap-1 hover:cursor-pointer"
+          onClick={() => onSortConfig("title")}
+        >
+          <span className="font-semibold text-zinc-300 text-sm">Title</span>
+          {sortConfig?.type === "title" &&
+            (sortConfig?.order === "desc" ? (
+              <ChevronDown className="w-4 h-4" />
+            ) : (
+              <ChevronUp className="w-4 h-4" />
+            ))}
+        </div>
+        {/* SCORE */}
+        <div
+          className="flex justify-center items-center gap-1 hover:cursor-pointer"
+          onClick={() => onSortConfig("score")}
+        >
+          <span
+            className={`text-center font-semibold text-zinc-300 text-sm ${
+              sortConfig?.type === "score" ? "ml-4" : ""
+            }`}
+          >
+            Score
+          </span>
+          {sortConfig?.type === "score" &&
+            (sortConfig?.order === "desc" ? (
+              <ChevronDown className="w-4 h-4" />
+            ) : (
+              <ChevronUp className="w-4 h-4" />
+            ))}
+        </div>
+        {/* DATE COMPLETED */}
+        <div
+          className="flex justify-center items-center gap-1 hover:cursor-pointer"
+          onClick={() => onSortConfig("dateCompleted")}
+        >
+          <span
+            className={`text-center font-semibold text-zinc-300 text-sm ${
+              sortConfig?.type === "dateCompleted" ? "ml-4" : ""
+            }`}
+          >
+            Completed
+          </span>
+          {sortConfig?.type === "dateCompleted" &&
+            (sortConfig?.order === "desc" ? (
+              <ChevronDown className="w-4 h-4" />
+            ) : (
+              <ChevronUp className="w-4 h-4" />
+            ))}
+        </div>
+        {/* DIRECTOR */}
+        <div
+          className="flex justify-center items-center gap-1 hover:cursor-pointer"
+          onClick={() => onSortConfig("director")}
+        >
+          <span
+            className={`text-center font-semibold text-zinc-300 text-sm ${
+              sortConfig?.type === "director" ? "ml-4" : ""
+            }`}
+          >
+            Director
+          </span>
+          {sortConfig?.type === "director" &&
+            (sortConfig?.order === "desc" ? (
+              <ChevronDown className="w-4 h-4" />
+            ) : (
+              <ChevronUp className="w-4 h-4" />
+            ))}
+        </div>
+        {/* DATE RELEASED */}
+        <div
+          className="flex justify-center items-center gap-1 hover:cursor-pointer"
+          onClick={() => onSortConfig("dateReleased")}
+        >
+          <span
+            className={`text-center font-semibold text-zinc-300 text-sm ${
+              sortConfig?.type === "dateReleased" ? "ml-4" : ""
+            }`}
+          >
+            Released
+          </span>
+          {sortConfig?.type === "dateReleased" &&
+            (sortConfig?.order === "desc" ? (
+              <ChevronDown className="w-4 h-4" />
+            ) : (
+              <ChevronUp className="w-4 h-4" />
+            ))}
+        </div>
+        <span className="text-center font-semibold text-zinc-300 text-sm pl-0.5">
+          Notes
+        </span>
+      </div>
+      {/* LOADER */}
+      {isProcessingMovie && (
+        <div className="relative bg-black/20 backdrop-blur-lg">
+          <Loading customStyle="mt-72 h-12 w-12 border-gray-400" text="" />
+        </div>
+      )}
+      {!isProcessingMovie && movies.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-zinc-400 italic text-lg">
+            No movies yet — add one!
+          </p>
+        </div>
+      )}
+      {/* LISTING */}
+      {!isProcessingMovie && movies.length > 0 && (
+        <div ref={parentRef} className="w-full overflow-auto flex-1">
+          <div
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+              const movie = movies[virtualItem.index];
+              return (
+                <div
+                  key={movie.id}
+                  data-index={virtualItem.index}
+                  ref={rowVirtualizer.measureElement}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <MovieItem
+                    movie={movie}
+                    index={virtualItem.index}
+                    totalMovies={movies.length}
+                    onClick={onMovieClicked}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

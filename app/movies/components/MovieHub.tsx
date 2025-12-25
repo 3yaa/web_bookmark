@@ -25,26 +25,22 @@ export default function MoviesHub() {
     useMovieData();
   // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   //delegation
   const [selectedMovie, setSelectedMovie] = useState<MovieProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
     "movieDetails" | "addMovie" | null
   >(null);
-  //
+  // set deboucne
   const debouncedSetQuery = useRef(
     debounce((value: string) => {
       setDebouncedQuery(value);
     }, 300)
   ).current;
-  //
-
-  // change ground truth
-  const [isFilterPending, startTransition] = useTransition();
-  //
+  // SEARCH
   const searchedMovies = useMemo(() => {
     if (!debouncedQuery) return movies;
 
@@ -52,14 +48,14 @@ export default function MoviesHub() {
       movie.title.toLowerCase().trim().includes(debouncedQuery)
     );
   }, [movies, debouncedQuery]);
-  //
+  // FILTER
+  const [isFilterPending, startTransition] = useTransition();
   const filteredMovies = useMemo(() => {
     if (!statusFilter) return searchedMovies;
-
+    //
     return searchedMovies.filter((movie) => movie.status === statusFilter);
   }, [searchedMovies, statusFilter]);
-
-  //
+  // SORT
   const sortedMovies = useSortMovies(filteredMovies, sortConfig);
 
   const showSequelPrequel = useCallback(

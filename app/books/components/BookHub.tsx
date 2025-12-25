@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -17,6 +18,7 @@ import { AddBook } from "./addingBook/AddBook";
 import { BookDetails } from "./BookDetailsHub";
 import { BookMobileListing } from "./listingViews/BookMobileListing";
 import { BookDesktopListing } from "./listingViews/BookDesktopListing";
+import { debounce } from "@/utils/debounce";
 
 export default function BookList() {
   const { books, addBook, updateBook, deleteBook, isProcessingBook } =
@@ -24,23 +26,36 @@ export default function BookList() {
   // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   // delegation
   const [selectedBook, setSelectedBook] = useState<BookProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
     "bookDetails" | "addBook" | null
   >(null);
+  // set deboucne
+  const debouncedSetQuery = useRef(
+    debounce((value: string) => {
+      setDebouncedQuery(value);
+    }, 300)
+  ).current;
+  // SEARCH
+  const searchedBooks = useMemo(() => {
+    if (!debouncedQuery) return books;
 
-  // change ground truth
+    return books.filter((book) =>
+      book.title.toLowerCase().trim().includes(debouncedQuery)
+    );
+  }, [books, debouncedQuery]);
+  // FILTER
   const [isFilterPending, startTransition] = useTransition();
   const filteredBooks = useMemo(() => {
-    if (statusFilter) {
-      return statusFilter
-        ? books.filter((movie) => movie.status === statusFilter)
-        : books;
-    }
-    return books;
-  }, [books, statusFilter]);
+    if (!statusFilter) return searchedBooks;
+    //
+    return searchedBooks.filter((book) => book.status === statusFilter);
+  }, [searchedBooks, statusFilter]);
+  // 
   const sortedBooks = useSortBooks(filteredBooks, sortConfig);
 
   const showSequelPrequel = useCallback(
@@ -118,6 +133,11 @@ export default function BookList() {
     setSelectedBook(book);
   }, []);
 
+  const handleSearchQueryChange = (value: string) => {
+    setSearchQuery(value);
+    debouncedSetQuery(value.toLowerCase().trim());
+  };
+
   useEffect(() => {
     const handleEnter = (e: KeyboardEvent) => {
       const isDesktop = window.matchMedia("(min-width: 900px)").matches;
@@ -160,6 +180,8 @@ export default function BookList() {
           sortConfig={sortConfig}
           onSortConfig={handleSortConfig}
           onBookClicked={handleBookClicked}
+          onSearchChange={handleSearchQueryChange}
+          searchQuery={searchQuery}
         />
       </div>
       <div className="block lg:hidden">

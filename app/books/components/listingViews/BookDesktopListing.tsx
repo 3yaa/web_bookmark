@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Search } from "lucide-react";
 // utils and ui components
 import {
   formatDateShort,
@@ -9,7 +9,7 @@ import {
 } from "@/utils/formattingUtils";
 import { Loading } from "@/app/components/ui/Loading";
 import { BookProps, SortConfig } from "@/types/book";
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface BookDesktopListingProps {
@@ -18,6 +18,8 @@ interface BookDesktopListingProps {
   sortConfig: SortConfig | null;
   onSortConfig: (sortType: SortConfig["type"]) => void;
   onBookClicked: (book: BookProps) => void;
+  onSearchChange: (searchVal: string) => void;
+  searchQuery: string;
 }
 
 const BookItem = React.memo(
@@ -117,8 +119,12 @@ export function BookDesktopListing({
   sortConfig,
   onSortConfig,
   onBookClicked,
+  onSearchChange,
+  searchQuery,
 }: BookDesktopListingProps) {
   const parentRef = useRef<HTMLDivElement>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchBarRef = useRef<HTMLInputElement>(null);
 
   const rowVirtualizer = useVirtualizer({
     count: books.length,
@@ -128,8 +134,84 @@ export function BookDesktopListing({
     measureElement: (element) => element?.getBoundingClientRect().height ?? 88,
   });
 
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+      //
+      if (e.key === "/") {
+        if (!searchOpen) {
+          setSearchOpen(true);
+          searchBarRef.current?.focus();
+          e.preventDefault();
+        }
+      }
+    };
+    //
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [searchOpen]);
+
   return (
     <div className="w-full md:w-[70%] lg:w-[60%] mx-auto flex flex-col h-screen">
+      {/* SEARCH BUTTON/BAR */}
+      <div className="fixed top-1 right-1 z-20">
+        <div className="relative">
+          {/* SEARCH BUTTON */}
+          <div
+            className={`flex items-center gap-2 bg-zinc-900/70 backdrop-blur-sm  border-zinc-700/50 rounded-lg transition-all duration-300 ease-out ${
+              searchOpen
+                ? "w-72 px-3 py-2"
+                : "w-9 h-9 px-0 py-0 cursor-pointer hover:bg-zinc-800/70"
+            }`}
+            onClick={() => {
+              if (!searchOpen) {
+                setSearchOpen(true);
+                searchBarRef.current?.focus();
+              }
+            }}
+          >
+            <Search
+              className={`w-4 h-4 text-zinc-400 shrink-0 transition-all duration-300 ${
+                searchOpen ? "ml-0" : "ml-2.5"
+              }`}
+            />
+            {/* SEARCH BAR */}
+            <input
+              type="text"
+              ref={searchBarRef}
+              value={searchQuery}
+              onFocus={() => setSearchOpen(true)}
+              onChange={(e) => {
+                onSearchChange(e.target.value);
+              }}
+              onBlur={() => !searchQuery && setSearchOpen(false)}
+              placeholder="Search movies…"
+              className={`bg-transparent text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none flex-1 transition-all duration-300 ${
+                searchOpen
+                  ? "w-full opacity-100 pointer-events-auto"
+                  : "w-0 opacity-0 pointer-events-none"
+              }`}
+            />
+            {searchOpen && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSearchChange("");
+                  setSearchOpen(false);
+                }}
+                className="text-zinc-400 hover:text-zinc-200 text-xs transition-colors"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
       {/* HEADING */}
       <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_1fr_6rem_6rem_11rem_5rem_0.85fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
         <span className="font-semibold text-zinc-300 text-sm">#</span>

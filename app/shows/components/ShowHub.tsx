@@ -5,6 +5,7 @@ import {
   useState,
   useTransition,
   useMemo,
+  useRef,
 } from "react";
 import { Plus } from "lucide-react";
 import { MediaStatus } from "@/types/media";
@@ -17,6 +18,7 @@ import { AddShow } from "./addShow/AddShow";
 import { ShowDetails } from "./ShowDetailsHub";
 import { ShowMobileListing } from "./listingViews/ShowMobileListing";
 import { ShowDesktopListing } from "./listingViews/ShowDesktopListing";
+import { debounce } from "@/utils/debounce";
 
 export default function ShowHub() {
   const { shows, addShow, updateShow, deleteShow, isProcessingShow } =
@@ -24,22 +26,36 @@ export default function ShowHub() {
   // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   // delegation
   const [selectedShow, setSelectedShow] = useState<ShowProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
     "showDetails" | "addShow" | null
   >(null);
-  // change ground truth
+  // set deboucne
+  const debouncedSetQuery = useRef(
+    debounce((value: string) => {
+      setDebouncedQuery(value);
+    }, 300)
+  ).current;
+  // SEARCH
+  const searchedShows = useMemo(() => {
+    if (!debouncedQuery) return shows;
+
+    return shows.filter((show) =>
+      show.title.toLowerCase().trim().includes(debouncedQuery)
+    );
+  }, [shows, debouncedQuery]);
+  // FILTER
   const [isFilterPending, startTransition] = useTransition();
   const filteredShows = useMemo(() => {
-    if (statusFilter) {
-      return statusFilter
-        ? shows.filter((show) => show.status === statusFilter)
-        : shows;
-    }
-    return shows;
-  }, [shows, statusFilter]);
+    if (!statusFilter) return searchedShows;
+    //
+    return searchedShows.filter((show) => show.status === statusFilter);
+  }, [searchedShows, statusFilter]);
+  // SORT
   const sortedShows = useSortShows(filteredShows, sortConfig);
 
   const handleShowUpdates = useCallback(
@@ -96,6 +112,11 @@ export default function ShowHub() {
     setSelectedShow(show);
   }, []);
 
+  const handleSearchQueryChange = (value: string) => {
+    setSearchQuery(value);
+    debouncedSetQuery(value.toLowerCase().trim());
+  };
+
   useEffect(() => {
     const handleEnter = (e: KeyboardEvent) => {
       const isDesktop = window.matchMedia("(min-width: 900px)").matches;
@@ -137,6 +158,8 @@ export default function ShowHub() {
           sortConfig={sortConfig}
           onSortConfig={handleSortConfig}
           onShowClicked={handleShowClicked}
+          onSearchChange={handleSearchQueryChange}
+          searchQuery={searchQuery}
         />
       </div>
       <div className="block lg:hidden">

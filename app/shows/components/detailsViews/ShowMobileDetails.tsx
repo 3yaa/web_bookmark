@@ -317,7 +317,7 @@ export function ShowMobileDetails({
                     </button>
                   </div>
                 </div>
-                <div className="text-zinc-400 text-sm -mt-1 flex items-center gap-2">
+                <div className="text-zinc-400 text-sm font-medium flex items-center gap-2">
                   <span>{show.studio || "Unknown"}</span>•
                   <span>{show.dateReleased || "-"}</span>
                   {show.dateCompleted && (
@@ -386,7 +386,7 @@ export function ShowMobileDetails({
                 <label className="text-zinc-400 text-xs font-medium">
                   Notes
                 </label>
-                <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition-all duration-200 max-h-22 overflow-auto shadow-lg shadow-black/50">
+                <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition-all duration-200 max-h-22 overflow-auto shadow-lg shadow-black/">
                   <MobileAutoTextarea
                     value={localNote}
                     onChange={(e) =>

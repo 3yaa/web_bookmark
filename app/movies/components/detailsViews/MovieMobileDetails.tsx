@@ -277,14 +277,14 @@ export function MovieMobileDetails({
                 <div data-no-drag>
                   <button
                     onClick={() => setIsScorePickerOpen(true)}
-                    className="text-zinc-400 font-bold bg-zinc-800/60 px-3 py-1.5 rounded-md shadow-inner shadow-black/40 cursor-pointer hover:bg-zinc-700/60 transition flex items-center gap-2"
+                    className="text-zinc-400 font-bold bg-zinc-800/60 px-3.5 py-1.5 rounded-md shadow-lg shadow-black cursor-pointer hover:bg-zinc-700/60 transition flex items-center gap-2"
                   >
                     {movie.score || "-"}
                   </button>
                 </div>
               </div>
               {/* DIR AND DATE */}
-              <div className="text-zinc-400 text-sm -mt-1 flex items-center gap-2">
+              <div className="text-zinc-400 text-sm font-medium flex items-center gap-2">
                 <span>{movie.director || "Unknown"}</span>•
                 <span>{movie.dateReleased || "-"}</span>
                 {movie.dateCompleted && (
@@ -309,7 +309,7 @@ export function MovieMobileDetails({
                         payload: `${status.label}`,
                       })
                     }
-                    className={`flex-1 px-4 py-1.5 text-sm rounded-md border border-zinc-700/30 font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 ${
+                    className={`flex-1 px-4 py-1.5 text-sm rounded-md border border-zinc-700/30 font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 shadow-lg shadow-black/50 ${
                       status.label === movie.status
                         ? `${getStatusBg(status.label)} text-zinc-100`
                         : "text-zinc-300 bg-zinc-900/40 hover:bg-zinc-800/60"
@@ -322,10 +322,7 @@ export function MovieMobileDetails({
             </div>
             {/* PREQUEL AND SEQUEL */}
             {movie.placeInSeries && (
-              <div
-                className="pt-2.5 grid grid-cols-[1fr_2rem_1fr]"
-                data-no-drag
-              >
+              <div className="pt-5 grid grid-cols-[1fr_2rem_1fr]" data-no-drag>
                 {/* PREQUEL */}
                 <div className="min-w-0 text-left">
                   {movie.prequel && (
@@ -362,7 +359,7 @@ export function MovieMobileDetails({
                   {movie.sequel && (
                     <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
                       <span
-                        className={`truncate min-w-0 transition-all duration-200 ${
+                        className={`truncate min-w-0 transition-all duration-200  ${
                           !addingMovie ? "hover:underline active:scale-95" : ""
                         }`}
                         onClick={() => {
@@ -383,9 +380,9 @@ export function MovieMobileDetails({
               </div>
             )}
             {/* NOTE */}
-            <div className="mt-1" data-no-drag>
+            <div className="mt-3" data-no-drag>
               <label className="text-zinc-400 text-xs font-medium">Notes</label>
-              <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition-all duration-200 max-h-22 overflow-auto">
+              <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition-all duration-200 max-h-22 overflow-auto shadow-lg shadow-black/50">
                 <MobileAutoTextarea
                   value={localNote}
                   onChange={(e) =>

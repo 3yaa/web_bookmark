@@ -219,18 +219,23 @@ export default function GameList() {
       >
         <button
           onClick={() => setActiveModal("addGame")}
-          className="bg-emerald-700 hover:bg-emerald-600 p-4.5 rounded-full shadow-lg shadow-emerald-700/20 hover:shadow-emerald-500/30 transition-all duration-200 text-white font-medium flex items-center gap-2 hover:scale-105 active:scale-95 border border-emerald-600/20"
+          className="flex items-center justify-center w-14 h-14 lg:w-14 lg:h-14 rounded-full 
+          bg-linear-to-br from-zinc-transparent to-zinc-800/60 
+          hover:bg-linear-to-br hover:from-zinc-800/60 hover:to-transparent
+          backdrop-blur-xl shadow-md shadow-zinc-800/60
+          hover:scale-105 active:scale-95 
+          transition-all duration-200 relative z-10 hover:cursor-pointer focus:outline-none"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-5 h-5 text-zinc-300" />
         </button>
-        <AddGame
-          isOpen={activeModal === "addGame"}
-          onClose={handleModalClose}
-          existingGames={games}
-          onAddGame={addGame}
-          titleFromAbove={titleToAdd}
-        />
       </div>
+      <AddGame
+        isOpen={activeModal === "addGame"}
+        onClose={handleModalClose}
+        existingGames={games}
+        onAddGame={addGame}
+        titleFromAbove={titleToAdd}
+      />
       {/* GAME DETAILS */}
       {selectedGame && (
         <GameDetails

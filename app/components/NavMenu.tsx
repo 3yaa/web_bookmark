@@ -50,7 +50,7 @@ export function NavMenu() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const { logout, isLoggingOut } = useLogout();
-  const isButtonsVisible = useScrollVisibility(50);
+  const isButtonsVisible = useScrollVisibility(25);
 
   // Determine which menu items to show based on path and auth status
   const getMenuItems = (): MenuItem[] => {

@@ -36,7 +36,7 @@ export default function MoviesHub() {
     "movieDetails" | "addMovie" | null
   >(null);
   //
-  const isButtonsVisible = useScrollVisibility(50);
+  const isButtonsVisible = useScrollVisibility(30);
 
   // set deboucne
   const debouncedSetQuery = useRef(

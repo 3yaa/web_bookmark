@@ -203,7 +203,7 @@ export default function MoviesHub() {
       </div>
       {/* ADD BUTTON */}
       <div
-        className={`fixed lg:bottom-10 lg:right-12 bottom-0 right-4 z-10
+        className={`fixed lg:bottom-8 lg:right-10 bottom-1 right-1 z-10
         lg:translate-y-0 transition-transform duration-300 ease-in-out
         ${isButtonsVisible ? "translate-y-0" : "translate-y-24"}`}
       >

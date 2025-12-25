@@ -207,9 +207,9 @@ export function AddShow({
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-10 animate-in fade-in duration-200">
       <div className="fixed inset-0" onClick={onClose} />
       {!titleFromAbove || needYear ? (
-        <div className="bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 shadow-2xl w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
-          <h2 className="text-xl font-semibold mb-4 text-zinc-100 flex justify-center items-center gap-2">
-            <Tv className="w-5 h-5 text-emerald-400" />
+        <div className="bg-linear-to-b from-zinc-950/80 to-zinc-900/50 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
+          <h2 className="text-xl font-semibold mb-4 text-zinc-300/90 flex justify-center items-center gap-2">
+            <Tv className="w-5 h-5 text-zinc-300/90" />
             Search for New Show
           </h2>
           <div className="flex gap-3">
@@ -220,7 +220,7 @@ export function AddShow({
               onKeyDown={handleKeyPress}
               onInput={eraseErrMsg}
               disabled={isShowSearching}
-              className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-400 focus:border-zinc-500/50 focus:ring-1 focus:ring-zinc-700/20 outline-none transition-all duration-200"
+              className="w-full bg-zinc-800/50 border border-zinc-800/50 rounded-xl px-4 py-3 text-zinc-300 font-medium placeholder-zinc-400 focus:border-zinc-800 focus:ring-1 focus:ring-zinc-900/50 outline-none transition-all duration-200 shadow-lg shadow-black/20"
             />
             {needYear && (
               <div className="">
@@ -231,18 +231,20 @@ export function AddShow({
                   onKeyDown={handleKeyPress}
                   onInput={eraseErrMsg}
                   disabled={isShowSearching}
-                  className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-400 focus:border-zinc-500/50 focus:ring-1 focus:ring-zinc-700/20 outline-none transition-all duration-200"
+                  className="w-full bg-zinc-800/50 border border-zinc-800/50 rounded-xl px-4 py-3 text-zinc-300 font-medium placeholder-zinc-400 focus:border-zinc-800 focus:ring-1 focus:ring-zinc-900/50 outline-none transition-all duration-200"
                 />
               </div>
             )}
           </div>
           <div className="flex justify-between mx-2">
             {failedReason && !isShowSearching && (
-              <div className="mt-3 text-zinc-400 text-sm">{failedReason}</div>
+              <div className="mt-3 text-zinc-400 text-sm font-medium">
+                {failedReason}
+              </div>
             )}
             {isAddManual && !isShowSearching && (
               <button
-                className="mt-3 text-zinc-400 text-sm hover:cursor-pointer underline"
+                className="mt-3 text-zinc-400 font-medium text-sm hover:cursor-pointer underline transition-colors duration-200 hover:text-zinc-300/80 hover:scale-102"
                 onClick={() => setActiveModal("manualAdd")}
               >
                 Manual Add

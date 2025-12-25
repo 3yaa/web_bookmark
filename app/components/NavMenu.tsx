@@ -262,7 +262,7 @@ export function NavMenu() {
         className={`flex items-center justify-center w-14 h-14 lg:w-14 lg:h-14 rounded-full 
           bg-linear-to-bl from-zinc-transparent to-zinc-800/60 
           hover:bg-linear-to-bl hover:from-zinc-800/60 hover:to-transparent
-          backdrop-blur-xl shadow-md shadow-zinc-800/60
+          backdrop-blur-xl
           hover:scale-105 active:scale-95 
           transition-all duration-200 relative z-10 hover:cursor-pointer focus:outline-none`}
       >

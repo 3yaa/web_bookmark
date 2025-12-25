@@ -15,7 +15,7 @@ export function Loading({
     <div
       className={`${
         isMobile ? "fixed" : "absolute"
-      } inset-0 lg:rounded-2xl flex items-center justify-center z-20 ${customBg}`}
+      } inset-0 lg:rounded-2xl flex items-center justify-center z-20 font-semibold ${customBg}`}
     >
       <div className="flex flex-col items-center gap-3">
         <div

@@ -41,7 +41,7 @@ export default function LandingPage() {
         transition={{ duration: 0.6 }}
         className="relative z-10 mt-24 text-center"
       >
-        <h1 className="text-6xl font-extrabold tracking-tight bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
+        <h1 className="text-6xl font-extrabold tracking-tight bg-linear-to-r from-white to-zinc-400 bg-clip-text text-transparent">
           Mouthful
         </h1>
       </motion.header>
@@ -60,7 +60,7 @@ export default function LandingPage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.1 }}
               whileHover={{ scale: 1.06, rotate: 0.5 }}
-              className="group relative aspect-[2/3] rounded-2xl border border-zinc-800/70 
+              className="group relative aspect-2/3 rounded-2xl border border-zinc-800/70 
                 bg-zinc-900/40 backdrop-blur-xl shadow-[0_0_20px_-8px_rgba(0,0,0,0.7)] 
                 flex flex-col items-center justify-center cursor-pointer 
                 overflow-hidden transition-all duration-300"
@@ -71,7 +71,7 @@ export default function LandingPage() {
               </span>
               {/* Subtle hover wash */}
               <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-white/20 transition-colors duration-300" />
-              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 bg-gradient-to-tr from-white/5 to-transparent transition-opacity duration-300" />
+              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 bg-linear-to-tr from-white/5 to-transparent transition-opacity duration-300" />
             </motion.div>
           </Link>
         ))}

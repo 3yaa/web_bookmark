@@ -79,7 +79,7 @@ const BookItem = React.memo(
         <div
           className={`absolute -bottom-2.5 left-0 w-full ${getStatusBg(
             book.status
-          )} h-1 rounded-md overflow-hidden`}
+          )} h-0.75 rounded-md overflow-hidden`}
         >
           <div
             className="absolute inset-0"

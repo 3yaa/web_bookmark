@@ -253,7 +253,7 @@ export function GameDesktopDetails({
                           });
                         }}
                         options={gameStatusOptions}
-                        customStyle="text-zinc-300/75 font-semibold"
+                        customStyle="text-zinc-200/80 font-semibold"
                         dropDuration={0.24}
                       />
                     </div>

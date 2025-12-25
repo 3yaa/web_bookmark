@@ -381,7 +381,7 @@ export function BookMobileDetails({
                   <div data-no-drag>
                     <button
                       onClick={() => setIsScorePickerOpen(true)}
-                      className="text-zinc-400 font-bold bg-zinc-800/60 px-3.5 py-1.5 rounded-md shadow-lg shadow-black cursor-pointer hover:bg-zinc-700/60 transition flex items-center gap-2"
+                      className="text-zinc-400 font-bold bg-zinc-800/60 px-3.5 py-2 rounded-md shadow-lg shadow-black cursor-pointer hover:bg-zinc-700/60 transition flex items-center gap-2"
                     >
                       {book.score || "-"}
                     </button>

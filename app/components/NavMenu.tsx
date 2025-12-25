@@ -153,7 +153,7 @@ export function NavMenu() {
   return (
     <div
       ref={menuRef}
-      className={`flex fixed bottom-2 left-2 lg:bottom-8 lg:left-8 z-10 flex-col items-start
+      className={`flex fixed bottom-1.5 left-2 lg:bottom-8 lg:left-8 z-10 flex-col items-start
         lg:translate-y-0 transition-transform duration-300 ease-in-out
         ${isButtonsVisible ? "translate-y-0" : "translate-y-24"}`}
       onClick={() => setIsNavOpen(!isNavOpen)}

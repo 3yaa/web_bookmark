@@ -19,6 +19,7 @@ import { BookDetails } from "./BookDetailsHub";
 import { BookMobileListing } from "./listingViews/BookMobileListing";
 import { BookDesktopListing } from "./listingViews/BookDesktopListing";
 import { debounce } from "@/utils/debounce";
+import { useScrollVisibility } from "@/hooks/useScrollVisibility";
 
 export default function BookList() {
   const { books, addBook, updateBook, deleteBook, isProcessingBook } =
@@ -34,6 +35,9 @@ export default function BookList() {
   const [activeModal, setActiveModal] = useState<
     "bookDetails" | "addBook" | null
   >(null);
+  //
+  const isButtonsVisible = useScrollVisibility(30);
+
   // set deboucne
   const debouncedSetQuery = useRef(
     debounce((value: string) => {
@@ -196,7 +200,11 @@ export default function BookList() {
         />
       </div>
       {/* ADD BUTTON */}
-      <div className="fixed lg:bottom-10 lg:right-12 bottom-0 right-4 z-10">
+      <div
+        className={`fixed lg:bottom-10 lg:right-12 bottom-0 right-4 z-10
+        lg:translate-y-0 transition-transform duration-300 ease-in-out
+        ${isButtonsVisible ? "translate-y-0" : "translate-y-24"}`}
+      >
         <button
           onClick={() => setActiveModal("addBook")}
           className="bg-emerald-700 hover:bg-emerald-600 p-4.5 rounded-full shadow-lg shadow-emerald-700/20 hover:shadow-emerald-500/30 transition-all duration-200 text-white font-medium flex items-center gap-2 hover:scale-105 active:scale-95 border border-emerald-600/20"

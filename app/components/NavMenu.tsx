@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useLogout } from "@/hooks/useLogout";
 import { useNav } from "./NavContext";
+import { useScrollVisibility } from "@/hooks/useScrollVisibility";
 
 type NavigationItem = {
   label: string;
@@ -49,6 +50,7 @@ export function NavMenu() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const { logout, isLoggingOut } = useLogout();
+  const isButtonsVisible = useScrollVisibility(50);
 
   // Determine which menu items to show based on path and auth status
   const getMenuItems = (): MenuItem[] => {
@@ -151,7 +153,9 @@ export function NavMenu() {
   return (
     <div
       ref={menuRef}
-      className="flex fixed bottom-0 left-3 lg:bottom-8 lg:left-8 z-10 flex-col items-start"
+      className={`flex fixed bottom-0 left-3 lg:bottom-8 lg:left-8 z-10 flex-col items-start
+        lg:translate-y-0 transition-transform duration-300 ease-in-out
+        ${isButtonsVisible ? "translate-y-0" : "translate-y-24"}`}
       onClick={() => setIsNavOpen(!isNavOpen)}
     >
       {/* Dropdown */}

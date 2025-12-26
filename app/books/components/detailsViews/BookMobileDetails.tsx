@@ -126,13 +126,25 @@ export function BookMobileDetails({
 
   return (
     <>
+      {/* Backdrop - fades out as you drag */}
       <div
-        className="fixed inset-0 z-30 bg-zinc-950"
+        className="fixed inset-0 z-30 bg-black/60"
         style={{
-          transform: `translateY(${dragY}px)`,
+          opacity: isDragging ? Math.max(0, 1 - dragY / 400) : 1,
+          transition: isDragging ? "none" : "opacity 0.3s ease",
+        }}
+        onClick={onClose}
+      />
+
+      {/* Main content - single transform layer */}
+      <div
+        className="fixed inset-0 z-30"
+        style={{
+          transform: `translate3d(0, ${dragY}px, 0)`,
           transition: isDragging
             ? "none"
             : "transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)",
+          willChange: isDragging ? "transform" : "auto",
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -140,7 +152,7 @@ export function BookMobileDetails({
       >
         <div
           ref={scrollRef}
-          className="w-full h-full overflow-y-auto"
+          className="w-full h-full overflow-y-auto bg-zinc-950"
           style={{
             overscrollBehavior: "contain",
             WebkitOverflowScrolling: "touch",

@@ -1,338 +1,348 @@
-// BookMobileDetails.tsx - Clean drag-to-dismiss implementation
+import Image from "next/image";
+import {
+  formatDate,
+  getStatusBorderGradient,
+  getStatusDetailWaveColor,
+} from "@/utils/formattingUtils";
+import { bookStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
+//
+import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
+import { Dropdown } from "@/app/components/ui/Dropdown";
+import { Loading } from "@/app/components/ui/Loading";
+import {
+  Trash2,
+  Plus,
+  X,
+  ChevronsUp,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { BackdropImageBook } from "@/app/components/ui/BackdropBook";
 import { BookProps } from "@/types/book";
 import { BookAction } from "../BookDetailsHub";
-import React, { useEffect, useState, useRef } from "react";
-import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
-import { bookStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
-import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
-import Image from "next/image";
-import { MobileScorePicker } from "@/app/components/ui/MobileScorePicker";
-import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
-import { Loading } from "@/app/components/ui/Loading";
 
-interface BookMobileDetailsProps {
+interface BookDesktopDetailsProps {
   book: BookProps;
   localNote: string;
   onClose: () => void;
   isLoading?: { isTrue: boolean; style: string; text: string };
-  addingBook?: boolean;
+  addingBook: boolean;
   onAddBook: () => void;
   onAction: (action: BookAction) => void;
-  showBookInSeries?: (dir: "left" | "right") => void;
+  showBookInSeries?: (seriesDir: "left" | "right") => void;
   coverUrls?: string[];
   coverIndex?: number;
 }
 
-export function BookMobileDetails({
+export function BookDesktopDetails({
   book,
-  localNote,
   onClose,
-  onAddBook,
-  addingBook,
-  onAction,
+  localNote,
   isLoading,
+  addingBook,
+  onAddBook,
+  onAction,
   showBookInSeries,
   coverUrls,
   coverIndex,
-}: BookMobileDetailsProps) {
-  const [isScorePickerOpen, setIsScorePickerOpen] = useState(false);
-  const [posterLoaded, setPosterLoaded] = useState(false);
-
-  // Drag state - simplified
-  const [dragY, setDragY] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const startY = useRef(0);
-  const currentY = useRef(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
+}: BookDesktopDetailsProps) {
   const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
+    //detects which side of the div was clicked
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    const isRightSide = clickX > rect.width / 2;
+    const elementWidth = rect.width;
+    const isRightSide = clickX > elementWidth / 2;
+
     onAction({
       type: "changeCover",
       payload: isRightSide ? "next" : "prev",
     });
   };
 
-  // Simple drag handlers
-  const handleTouchStart = (e: React.TouchEvent) => {
-    // Don't interfere with these elements
-    const target = e.target as HTMLElement;
-    if (
-      target.closest("button") ||
-      target.closest("textarea") ||
-      target.closest("input") ||
-      isScorePickerOpen
-    )
-      return;
-
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer) return;
-
-    // Only start drag if at top of scroll
-    if (scrollContainer.scrollTop <= 0) {
-      startY.current = e.touches[0].clientY;
-      currentY.current = e.touches[0].clientY;
-      setIsDragging(true);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // prevent new line
+      onAction({ type: "saveNote" });
+      e.currentTarget.blur(); // remove focus
     }
   };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
-
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer) return;
-
-    currentY.current = e.touches[0].clientY;
-    const deltaY = currentY.current - startY.current;
-
-    // Only allow downward drag and only when scrolled to top
-    if (deltaY > 0 && scrollContainer.scrollTop <= 0) {
-      e.preventDefault(); // Prevent scroll
-
-      // Apply resistance curve for natural feel
-      const resistance = 1 - Math.min(deltaY / 600, 0.6);
-      setDragY(deltaY * resistance);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (!isDragging) return;
-
-    const deltaY = currentY.current - startY.current;
-    const velocity = deltaY; // Simple velocity approximation
-
-    // Threshold: 120px or fast swipe
-    if (deltaY > 120 || velocity > 0.8) {
-      // Animate out
-      setDragY(window.innerHeight);
-      setTimeout(onClose, 250);
-    } else {
-      // Spring back
-      setDragY(0);
-    }
-
-    setIsDragging(false);
-  };
-
-  // Lock body scroll on mount
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, []);
 
   return (
-    <>
-      {/* Backdrop - fades out as you drag */}
+    <div className="fixed inset-0 bg-linear-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
       <div
-        className="fixed inset-0 z-30 bg-black/60"
-        style={{
-          opacity: isDragging ? Math.max(0, 1 - dragY / 400) : 1,
-          transition: isDragging ? "none" : "opacity 0.3s ease",
+        className="fixed inset-0"
+        onClick={() => {
+          onAction({ type: "closeModal" });
         }}
-        onClick={onClose}
       />
-
-      {/* Main content - single transform layer */}
+      {/* BACKGROUND BORDER GRADIENT */}
       <div
-        className="fixed inset-0 z-30"
-        style={{
-          transform: `translate3d(0, ${dragY}px, 0)`,
-          transition: isDragging
-            ? "none"
-            : "transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)",
-          willChange: isDragging ? "transform" : "auto",
-        }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        className={`rounded-2xl bg-linear-to-b ${getStatusBorderGradient(
+          book.status
+        )} p-1.5 py-2 lg:min-w-215 lg:max-w-215`}
       >
-        <div
-          ref={scrollRef}
-          className="w-full h-full overflow-y-auto bg-zinc-950"
-          style={{
-            overscrollBehavior: "contain",
-            WebkitOverflowScrolling: "touch",
-          }}
-        >
+        {/* ACTUAL DETAIL CARD */}
+        <div className="bg-linear-to-br bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 w-full max-h-[calc(100vh-3rem)]">
           {isLoading?.isTrue && (
-            <Loading
-              customStyle={isLoading.style}
-              text={isLoading.text}
-              isMobile={true}
-            />
+            <Loading customStyle={isLoading.style} text={isLoading.text} />
           )}
-
-          {/* ACTION BAR */}
-          {(posterLoaded || addingBook) && (
-            <div className="sticky top-0 z-30 bg-zinc-900/60 backdrop-blur-xl">
-              <div className="px-4 py-3 flex items-center justify-between">
-                {addingBook ? (
-                  <>
+          <div className={`px-8.5 py-7 border-0 rounded-2xl overflow-hidden`}>
+            {/* ACTION BUTTONS */}
+            {addingBook ? (
+              <div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
+                {showBookInSeries && (
+                  <div className="flex gap-1 bg-zinc-800/50 rounded-lg">
+                    {/* LEFT BUTTON */}
                     <button
-                      className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
-                      onClick={onAddBook}
+                      className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
+                    hover:cursor-pointer transition-all group"
+                      onClick={() => showBookInSeries("left")}
                     >
-                      <Plus className="w-5 h-5 text-slate-400" />
+                      <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
                     </button>
-                    <div className="flex items-center gap-2">
-                      {showBookInSeries && (
-                        <div className="flex gap-1 bg-zinc-800/60 rounded-lg p-0.5">
-                          <button
-                            className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
-                            onClick={() => showBookInSeries("left")}
-                          >
-                            <ChevronLeft className="w-5 h-5 text-gray-400" />
-                          </button>
-                          <button
-                            className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
-                            onClick={() => showBookInSeries("right")}
-                          >
-                            <ChevronRight className="w-5 h-5 text-gray-400" />
-                          </button>
-                        </div>
-                      )}
-                      <button
-                        className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
-                        onClick={() => onAction({ type: "moreBooks" })}
-                        title="More books"
-                      >
-                        <ChevronsUp className="w-5 h-5 text-slate-400" />
-                      </button>
-                    </div>
-                  </>
+                    {/* RIGHT BUTTON */}
+                    <button
+                      className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
+                    hover:cursor-pointer transition-all group"
+                      onClick={() => showBookInSeries("right")}
+                    >
+                      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+                    </button>
+                  </div>
+                )}
+                {/* ADD */}
+                <button
+                  className="py-1.5 px-5 rounded-lg bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer transition-all group"
+                  onClick={onAddBook}
+                  title={"Add Book"}
+                >
+                  <Plus className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors duration-0" />
+                </button>
+                {/* MORE VIEW */}
+                <button
+                  className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer
+                    transition-all group"
+                  onClick={() => {
+                    onAction({ type: "moreBooks" });
+                  }}
+                  title={"See More Options"}
+                >
+                  <ChevronsUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
+                </button>
+                {/* CLOSE BUTTON */}
+                <button
+                  className="py-1.5 px-2 rounded-lg bg-zinc-800/50 hover:bg-red-600/50 
+                  hover:cursor-pointer transition-all group"
+                  onClick={onClose}
+                  title={"Close"}
+                >
+                  <X className="w-5 h-5 text-gray-400 group-hover:text-red-300 transition-colors" />
+                </button>
+              </div>
+            ) : (
+              <button
+                className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/50 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group z-10"
+                onClick={() => {
+                  onAction({ type: "deleteBook" });
+                }}
+                title={"Delete Book"}
+              >
+                <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors duration-200" />
+              </button>
+            )}
+            <div className="flex gap-8">
+              {/* LEFT SIDE -- PIC */}
+              <div
+                className={`flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg select-none ${
+                  coverUrls ? "hover:cursor-pointer" : ""
+                }`}
+                onClick={
+                  coverUrls && coverUrls?.length > 1
+                    ? handleCoverChange
+                    : undefined
+                }
+                title={
+                  coverUrls && coverIndex !== undefined
+                    ? `${coverIndex + 1}/${coverUrls?.length}`
+                    : ""
+                }
+              >
+                {coverIndex !== undefined &&
+                coverUrls !== undefined &&
+                coverUrls[coverIndex] ? (
+                  <Image
+                    src={coverUrls[coverIndex]}
+                    alt={book.title || "Untitled"}
+                    width={248}
+                    height={372}
+                    className="min-w-62 min-h-93 object-cover"
+                  />
+                ) : book.coverUrl && book.coverUrl.trim() !== "" ? (
+                  <Image
+                    src={book.coverUrl}
+                    alt={book.title || "Untitled"}
+                    width={248}
+                    height={372}
+                    className="min-w-62 min-h-93 object-cover"
+                  />
                 ) : (
-                  <button
-                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
-                    onClick={onClose}
-                  >
-                    <ChevronLeft className="w-5 h-5 text-slate-400" />
-                  </button>
+                  <div className="min-w-62 min-h-93 bg-linear-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
                 )}
+                <div
+                  className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
+                  style={{
+                    background:
+                      "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0) 50%, rgba(24,24,27,0.2) 100%)",
+                  }}
+                />
               </div>
-            </div>
-          )}
-
-          {/* CONTENT */}
-          <div className="pb-10">
-            {/* COVER */}
-            <div
-              className={`relative w-full overflow-hidden bg-zinc-900/40 ${
-                coverUrls && coverUrls.length > 1 ? "cursor-pointer" : ""
-              }`}
-              onClick={
-                coverUrls && coverUrls.length > 1
-                  ? handleCoverChange
-                  : undefined
-              }
-            >
-              {coverIndex !== undefined &&
-              coverUrls !== undefined &&
-              coverUrls[coverIndex] ? (
-                <Image
-                  src={coverUrls[coverIndex]}
-                  alt={book.title || "Cover"}
-                  width={1280}
-                  height={900}
-                  className="object-cover w-full"
-                  onLoad={() => setPosterLoaded(true)}
-                />
-              ) : book.coverUrl ? (
-                <Image
-                  src={book.coverUrl}
-                  alt={book.title || "Cover"}
-                  width={1280}
-                  height={900}
-                  className="object-cover w-full"
-                  onLoad={() => setPosterLoaded(true)}
-                />
-              ) : (
-                <div className="h-64 bg-linear-to-br from-zinc-700 to-zinc-800" />
-              )}
-
-              {/* Cover indicator */}
-              {coverUrls &&
-                coverUrls.length > 1 &&
-                coverIndex !== undefined && (
-                  <div className="absolute top-3 left-3 px-2 py-1 bg-zinc-800/60 backdrop-blur-sm rounded-md">
-                    <span className="text-xs text-zinc-300 font-medium">
-                      {coverIndex + 1}/{coverUrls.length}
+              {/* RIGHT SIDE -- DETAILS */}
+              <div className="flex flex-col flex-1 min-h-93 min-w-62 relative">
+                {book.coverUrl && (
+                  <BackdropImageBook
+                    src={book.coverUrl}
+                    width={1280}
+                    height={720}
+                  />
+                )}
+                <div className="flex flex-col justify-center flex-1">
+                  {/* SERIES TITLE */}
+                  {book.seriesTitle && (
+                    <span className="font-semibold text-zinc-100/80 text-xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-0">
+                      {book.seriesTitle}
                     </span>
-                  </div>
-                )}
-
-              <div className="absolute bottom-0 left-0 w-full h-20 bg-linear-to-t from-zinc-950 to-transparent pointer-events-none" />
-            </div>
-
-            <div className="px-4">
-              <div className="mt-4">
-                {book.seriesTitle && (
-                  <div className="text-zinc-400 text-sm font-semibold -mt-2.5">
-                    {book.seriesTitle}
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <h1 className="text-zinc-100 text-2xl font-bold -mt-0.5">
-                    {book.title}
-                  </h1>
-                  <button
-                    onClick={() => setIsScorePickerOpen(true)}
-                    className="text-zinc-400 font-bold bg-zinc-800/60 px-3.5 py-1.75 rounded-md shadow-lg shadow-black cursor-pointer hover:bg-zinc-700/60 transition flex items-center gap-2"
-                  >
-                    {book.score || "-"}
-                  </button>
-                </div>
-                <div className="text-zinc-400 text-sm font-medium flex items-center gap-2">
-                  <span>{book.author || "Unknown"}</span>•
-                  <span>{book.datePublished || "-"}</span>
-                  {book.dateCompleted && (
-                    <>
-                      •<span>{formatDateShort(book.dateCompleted)}</span>
-                    </>
                   )}
-                </div>
-              </div>
-
-              {/* STATUS */}
-              <div className="mt-3">
-                <label className="text-zinc-400 text-xs font-medium">
-                  Status
-                </label>
-                <div className="pt-1 flex justify-center gap-2 pb-1">
-                  {bookStatusOptions.map((status) => (
-                    <button
-                      key={status.value}
-                      onClick={() =>
-                        onAction({
-                          type: "changeStatus",
-                          payload: `${status.label}`,
-                        })
-                      }
-                      className={`flex-1 px-4 py-1.5 text-sm rounded-md border border-zinc-700/30 font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 shadow-lg shadow-black/50 ${
-                        status.label === book.status
-                          ? `${getStatusBg(status.label)} text-zinc-100`
-                          : "text-zinc-300 bg-zinc-900/40 hover:bg-zinc-800/60"
-                      }`}
+                  {/* TITLE */}
+                  <div className="w-fit mb-1.5 max-w-full">
+                    <div className="font-bold text-zinc-100/90 text-3xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-1.5">
+                      {book.title || "Untitled"}
+                    </div>
+                    {/* STATUS WAVE */}
+                    <div className="w-full bg-zinc-800 rounded-full h-0.75 overflow-hidden">
+                      <div
+                        className={`bg-zinc-900 h-0.75 transition-all duration-500 ease-out rounded-full relative overflow-hidden`}
+                        style={{ width: "100%" }}
+                      >
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            background: getStatusDetailWaveColor(book.status),
+                            animation: "wave 6s ease-in-out infinite",
+                            width: "200%",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  {/* AUTHOR AND DATES */}
+                  <div className="flex justify-start items-center gap-2 w-full mb-3">
+                    <span className="font-medium text-zinc-200/80 text-lg overflow-y-auto max-h-6 leading-6">
+                      {book.author || "Unknown Author"}
+                    </span>
+                    {/* ◎ ◈ ୭ ✿ ✧ */}
+                    <div className="font-medium text-zinc-200/80 text-lg leading-6">
+                      •
+                    </div>
+                    <span
+                      className="font-medium text-zinc-200/80 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
+                      title="Date Published"
                     >
-                      {status.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* SERIES NAV */}
-              {book.placeInSeries && (
-                <div className="pt-5 grid grid-cols-[1fr_2rem_1fr]">
-                  <div className="min-w-0 text-left">
-                    {book.prequel && (
-                      <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
-                        <span className="shrink-0">←</span>
+                      {book.datePublished || "Unknown"}
+                    </span>
+                    {book.status === "Completed" && (
+                      <div className="flex items-center gap-2">
+                        <div className="font-medium text-zinc-200/80 text-lg leading-6">
+                          •
+                        </div>
                         <span
-                          className={`truncate min-w-0 transition-all duration-200 ${
-                            !addingBook ? "hover:underline active:scale-95" : ""
+                          className="font-medium text-zinc-200/80 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
+                          title="Date Completed"
+                        >
+                          {formatDate(book.dateCompleted)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {/* STATUS AND SCORE */}
+                  <div className=" flex justify-start gap-4 mb-2.5 max-w-[94%]">
+                    <div className="flex-[0.77] lg:min-w-41.25">
+                      <label className="text-sm font-medium text-zinc-400 mb-1 block">
+                        Status
+                      </label>
+                      <Dropdown
+                        value={book.status}
+                        onChange={(value) => {
+                          onAction({
+                            type: "changeStatus",
+                            payload: value as
+                              | "Completed"
+                              | "Want to Read"
+                              | "Dropped",
+                          });
+                        }}
+                        options={bookStatusOptions}
+                        customStyle="text-zinc-200/80 font-semibold"
+                        dropDuration={0.24}
+                      />
+                    </div>
+                    <div className="flex-[0.865] lg:min-w-48.75">
+                      <label className="ml-1 text-sm font-medium text-zinc-400 mb-1 block">
+                        Score
+                      </label>
+                      <Dropdown
+                        value={book.score?.toString() || "-"}
+                        onChange={(value) => {
+                          onAction({
+                            type: "changeScore",
+                            payload: Number(value),
+                          });
+                        }}
+                        options={scoreOptions}
+                        customStyle="text-zinc-200/80 font-semibold"
+                        dropStyle={(() => {
+                          const option = bookStatusOptions.find(
+                            (opt) => opt.value === book.status
+                          );
+                          return option
+                            ? [option.textStyle, option.bgStyle]
+                            : [];
+                        })()}
+                        dropDuration={0.4}
+                      />
+                    </div>
+                  </div>
+                  {/* NOTES */}
+                  <div className="space-y-1 mb-2">
+                    <label className="text-sm font-medium text-zinc-400 block">
+                      Notes
+                    </label>
+                    <div className="bg-zinc-800/30 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-21.5 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200 shadow-lg shadow-black/20">
+                      <AutoTextarea
+                        value={localNote}
+                        onChange={(e) => {
+                          onAction({
+                            type: "changeNote",
+                            payload: e.target.value,
+                          });
+                        }}
+                        onKeyDown={handleKeyDown}
+                        onBlur={() => {
+                          onAction({ type: "saveNote" });
+                        }}
+                        placeholder="Add your thoughts about this book..."
+                        className="text-gray-300/90 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500 font-medium"
+                      />
+                    </div>
+                  </div>
+                </div>
+                {/* PREQUEL AND SEQUEL */}
+                <div className="pt-2.5 border-t border-zinc-800/80">
+                  <div className="grid grid-cols-[1fr_3rem_1fr] gap-3 w-full pr-1.5 select-none">
+                    <div className="truncate text-left">
+                      {book.prequel && (
+                        <div
+                          className={`group flex flex-col ${
+                            !addingBook ? "hover:cursor-pointer" : ""
                           }`}
                           onClick={() => {
                             if (!addingBook) {
@@ -343,24 +353,32 @@ export function BookMobileDetails({
                             }
                           }}
                         >
-                          {book.prequel}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex justify-center items-end shrink-0">
-                    {book.placeInSeries && (
-                      <label className="text-sm font-medium text-zinc-400/85">
-                        {book.placeInSeries}
-                      </label>
-                    )}
-                  </div>
-                  <div className="min-w-0 text-right flex justify-end">
-                    {book.sequel && (
-                      <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
-                        <span
-                          className={`truncate min-w-0 transition-all duration-200 ${
-                            !addingBook ? "hover:underline active:scale-95" : ""
+                          <label className="text-xs font-medium text-zinc-500 block pointer-events-none">
+                            <span className="inline-flex items-center gap-1">
+                              <span>←</span>
+                              <span>Prequel</span>
+                            </span>
+                          </label>
+                          <span className="text-sm text-zinc-300/70 font-medium group-hover:text-zinc-300/85 group-hover:underline transition-colors duration-200">
+                            {book.prequel}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex justify-center items-end pb-0.5">
+                      {book.placeInSeries && (
+                        <label className="text-xs font-semibold text-zinc-400/90 block">
+                          {book.placeInSeries}
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="truncate text-right">
+                      {book.sequel && (
+                        <div
+                          className={`group flex flex-col ${
+                            !addingBook ? "hover:cursor-pointer" : ""
                           }`}
                           onClick={() => {
                             if (!addingBook) {
@@ -371,46 +389,25 @@ export function BookMobileDetails({
                             }
                           }}
                         >
-                          {book.sequel}
-                        </span>
-                        <span className="shrink-0">→</span>
-                      </div>
-                    )}
+                          <label className="text-xs font-medium text-zinc-500 block pointer-events-none">
+                            <span className="inline-flex items-center gap-1">
+                              <span>Sequel</span>
+                              <span>→</span>
+                            </span>
+                          </label>
+                          <span className="text-sm text-zinc-300/70 font-medium group-hover:text-zinc-300/85 group-hover:underline transition-colors duration-200">
+                            {book.sequel}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-
-              {/* NOTES */}
-              <div className="mt-3">
-                <label className="text-zinc-400 text-xs font-medium">
-                  Notes
-                </label>
-                <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition-all duration-200 max-h-22 overflow-auto shadow-lg shadow-black/50">
-                  <MobileAutoTextarea
-                    value={localNote}
-                    onChange={(e) =>
-                      onAction({ type: "changeNote", payload: e.target.value })
-                    }
-                    onBlur={() => onAction({ type: "saveNote" })}
-                    placeholder="Add your thoughts about this book..."
-                    className="w-full bg-transparent text-zinc-200 text-sm leading-relaxed resize-none outline-none placeholder-zinc-500"
-                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <MobileScorePicker
-        isOpen={isScorePickerOpen}
-        score={book.score ?? 0}
-        scoreOptions={scoreOptions}
-        onClose={() => setIsScorePickerOpen(false)}
-        onScoreChange={(nScore) =>
-          onAction({ type: "changeScore", payload: nScore })
-        }
-      />
-    </>
+    </div>
   );
 }

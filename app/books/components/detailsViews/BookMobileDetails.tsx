@@ -1,3 +1,4 @@
+// BookMobileDetails.tsx - Clean drag-to-dismiss implementation
 import { BookProps } from "@/types/book";
 import { BookAction } from "../BookDetailsHub";
 import React, { useEffect, useState, useRef } from "react";
@@ -36,216 +37,113 @@ export function BookMobileDetails({
 }: BookMobileDetailsProps) {
   const [isScorePickerOpen, setIsScorePickerOpen] = useState(false);
   const [posterLoaded, setPosterLoaded] = useState(false);
-  const [translateY, setTranslateY] = useState(0);
+
+  // Drag state - simplified
+  const [dragY, setDragY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  const [isExiting, setIsExiting] = useState(false);
   const startY = useRef(0);
-  const startScrollY = useRef(0);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const dragVelocity = useRef(0);
-  const lastY = useRef(0);
-  const lastTime = useRef(0);
-  const scrollYRef = useRef(0);
-  const bodyUnlockedRef = useRef(false);
-  const rafRef = useRef<number | null>(null);
-  const currentTranslateY = useRef(0);
+  const currentY = useRef(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
-    //detects which side of the div was clicked
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    const elementWidth = rect.width;
-    const isRightSide = clickX > elementWidth / 2;
-
+    const isRightSide = clickX > rect.width / 2;
     onAction({
       type: "changeCover",
       payload: isRightSide ? "next" : "prev",
     });
   };
 
-  const safeUnlock = React.useCallback(() => {
-    if (bodyUnlockedRef.current) return;
-    bodyUnlockedRef.current = true;
-
-    document.body.style.overflow = "";
-    document.body.style.position = "";
-    document.body.style.top = "";
-    document.body.style.width = "";
-
-    window.scrollTo(0, scrollYRef.current);
-  }, []);
-
-  const lockBodyScroll = () => {
-    const scrollY = window.scrollY;
-
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = "100%";
-
-    return scrollY;
-  };
-
-  useEffect(() => {
-    scrollYRef.current = lockBodyScroll();
-
-    requestAnimationFrame(() => {
-      setIsVisible(true);
-    });
-
-    return () => {
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-      }
-      safeUnlock(); // fallback only
-    };
-  }, [safeUnlock]);
-
+  // Simple drag handlers
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (isScorePickerOpen) return;
-
+    // Don't interfere with these elements
     const target = e.target as HTMLElement;
     if (
       target.closest("button") ||
       target.closest("textarea") ||
-      target.closest("[data-no-drag]")
-    ) {
+      target.closest("input") ||
+      isScorePickerOpen
+    )
       return;
-    }
 
-    const scrollContainer = scrollContainerRef.current;
+    const scrollContainer = scrollRef.current;
     if (!scrollContainer) return;
 
-    if (scrollContainer.scrollTop <= 5) {
+    // Only start drag if at top of scroll
+    if (scrollContainer.scrollTop <= 0) {
       startY.current = e.touches[0].clientY;
-      lastY.current = e.touches[0].clientY;
-      lastTime.current = Date.now();
-      startScrollY.current = scrollContainer.scrollTop;
-      dragVelocity.current = 0;
+      currentY.current = e.touches[0].clientY;
       setIsDragging(true);
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || isScorePickerOpen) return;
+    if (!isDragging) return;
 
-    const scrollContainer = scrollContainerRef.current;
+    const scrollContainer = scrollRef.current;
     if (!scrollContainer) return;
 
-    const currentY = e.touches[0].clientY;
-    const currentTime = Date.now();
-    const deltaY = currentY - startY.current;
+    currentY.current = e.touches[0].clientY;
+    const deltaY = currentY.current - startY.current;
 
-    const timeDelta = currentTime - lastTime.current;
-    if (timeDelta > 0) {
-      dragVelocity.current = (currentY - lastY.current) / timeDelta;
-    }
+    // Only allow downward drag and only when scrolled to top
+    if (deltaY > 0 && scrollContainer.scrollTop <= 0) {
+      e.preventDefault(); // Prevent scroll
 
-    lastY.current = currentY;
-    lastTime.current = currentTime;
-
-    if (scrollContainer.scrollTop <= 5 && deltaY > 0) {
-      e.preventDefault();
-      const resistance = Math.max(0.4, 1 - deltaY / 600);
-      const newTranslateY = deltaY * resistance;
-      currentTranslateY.current = newTranslateY;
-
-      // Use RAF to batch updates and avoid jitter
-      if (rafRef.current === null) {
-        rafRef.current = requestAnimationFrame(() => {
-          setTranslateY(currentTranslateY.current);
-          rafRef.current = null;
-        });
-      }
-    } else if (deltaY < 0 && scrollContainer.scrollTop <= 0) {
-      setIsDragging(false);
-      setTranslateY(0);
-      currentTranslateY.current = 0;
+      // Apply resistance curve for natural feel
+      const resistance = 1 - Math.min(deltaY / 600, 0.6);
+      setDragY(deltaY * resistance);
     }
   };
 
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
-    // Cancel any pending RAF
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
+    const deltaY = currentY.current - startY.current;
+    const velocity = deltaY; // Simple velocity approximation
 
-    const threshold = 80;
-    const velocityThreshold = 0.6;
-
-    if (
-      currentTranslateY.current > threshold ||
-      dragVelocity.current > velocityThreshold
-    ) {
-      // UNLOCK BODY IMMEDIATELY
-      safeUnlock();
-
-      // Calculate final position based on velocity
-      const finalY = Math.max(
-        currentTranslateY.current + dragVelocity.current * 250,
-        window.innerHeight
-      );
-
-      // Immediately sync the current position to state before enabling transition
-      setTranslateY(currentTranslateY.current);
-
-      // Then enable transition and animate to final position
-      requestAnimationFrame(() => {
-        setIsDragging(false);
-        setIsExiting(true);
-        requestAnimationFrame(() => {
-          setTranslateY(finalY);
-        });
-      });
-
-      setTimeout(() => {
-        onClose();
-      }, 350);
+    // Threshold: 120px or fast swipe
+    if (deltaY > 120 || velocity > 0.8) {
+      // Animate out
+      setDragY(window.innerHeight);
+      setTimeout(onClose, 250);
     } else {
-      setTranslateY(0);
-      currentTranslateY.current = 0;
-      setIsDragging(false);
+      // Spring back
+      setDragY(0);
     }
 
-    dragVelocity.current = 0;
+    setIsDragging(false);
   };
+
+  // Lock body scroll on mount
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
 
   return (
     <>
       <div
-        className="fixed inset-0 z-30"
+        className="fixed inset-0 z-30 bg-zinc-950"
         style={{
-          transform: `translate3d(0, ${translateY}px, 0)`,
-          opacity: isVisible ? 1 : 0,
-          willChange: isDragging ? "transform" : "auto",
-          WebkitTransform: `translate3d(0, ${translateY}px, 0)`,
-          WebkitBackfaceVisibility: "hidden",
-          backfaceVisibility: "hidden",
-          perspective: 1000,
-          WebkitPerspective: 1000,
+          transform: `translateY(${dragY}px)`,
           transition: isDragging
             ? "none"
-            : isExiting
-            ? "transform 0.35s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.25s ease-out"
-            : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+            : "transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)",
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         <div
-          ref={scrollContainerRef}
-          className={`w-full h-full bg-zinc-950 flex flex-col ${
-            isScorePickerOpen ? "overflow-hidden" : "overflow-y-auto"
-          }`}
+          ref={scrollRef}
+          className="w-full h-full overflow-y-auto"
           style={{
+            overscrollBehavior: "contain",
             WebkitOverflowScrolling: "touch",
-            transform: "translateZ(0)",
-            WebkitTransform: "translateZ(0)",
           }}
         >
           {isLoading?.isTrue && (
@@ -255,13 +153,13 @@ export function BookMobileDetails({
               isMobile={true}
             />
           )}
+
           {/* ACTION BAR */}
           {(posterLoaded || addingBook) && (
-            <div className="sticky top-0 z-30">
-              <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
-                {addingBook && (
+            <div className="sticky top-0 z-30 bg-zinc-900/60 backdrop-blur-xl">
+              <div className="px-4 py-3 flex items-center justify-between">
+                {addingBook ? (
                   <>
-                    {/* ADD BUTTON */}
                     <button
                       className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
                       onClick={onAddBook}
@@ -269,49 +167,50 @@ export function BookMobileDetails({
                       <Plus className="w-5 h-5 text-slate-400" />
                     </button>
                     <div className="flex items-center gap-2">
-                      {/* DIFFERENT SERIES OPTIONS */}
                       {showBookInSeries && (
                         <div className="flex gap-1 bg-zinc-800/60 rounded-lg p-0.5">
                           <button
                             className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
                             onClick={() => showBookInSeries("left")}
                           >
-                            <ChevronLeft className="w-5 h-5 text-gray-400 transition-colors" />
+                            <ChevronLeft className="w-5 h-5 text-gray-400" />
                           </button>
                           <button
-                            className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+                            className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
                             onClick={() => showBookInSeries("right")}
                           >
-                            <ChevronRight className="w-5 h-5 text-gray-400 transition-colors" />
+                            <ChevronRight className="w-5 h-5 text-gray-400" />
                           </button>
                         </div>
                       )}
-                      {/* MORE BOOKS */}
                       <button
                         className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
-                        onClick={() => {
-                          onAction({ type: "moreBooks" });
-                        }}
-                        title={"More books"}
+                        onClick={() => onAction({ type: "moreBooks" })}
+                        title="More books"
                       >
-                        <ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
+                        <ChevronsUp className="w-5 h-5 text-slate-400" />
                       </button>
                     </div>
                   </>
+                ) : (
+                  <button
+                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+                    onClick={onClose}
+                  >
+                    <ChevronLeft className="w-5 h-5 text-slate-400" />
+                  </button>
                 )}
               </div>
             </div>
           )}
-          {/* INFO */}
+
+          {/* CONTENT */}
           <div className="pb-10">
             {/* COVER */}
             <div
               className={`relative w-full overflow-hidden bg-zinc-900/40 ${
-                isDragging ? "rounded-lg" : ""
-              } ${coverUrls && coverUrls.length > 1 ? "cursor-pointer" : ""}`}
-              style={{
-                willChange: isDragging ? "transform" : "auto",
-              }}
+                coverUrls && coverUrls.length > 1 ? "cursor-pointer" : ""
+              }`}
               onClick={
                 coverUrls && coverUrls.length > 1
                   ? handleCoverChange
@@ -327,10 +226,6 @@ export function BookMobileDetails({
                   width={1280}
                   height={900}
                   className="object-cover w-full"
-                  style={{
-                    transform: "translateZ(0)",
-                    WebkitTransform: "translateZ(0)",
-                  }}
                   onLoad={() => setPosterLoaded(true)}
                 />
               ) : book.coverUrl ? (
@@ -340,16 +235,13 @@ export function BookMobileDetails({
                   width={1280}
                   height={900}
                   className="object-cover w-full"
-                  style={{
-                    transform: "translateZ(0)",
-                    WebkitTransform: "translateZ(0)",
-                  }}
                   onLoad={() => setPosterLoaded(true)}
                 />
               ) : (
                 <div className="h-64 bg-linear-to-br from-zinc-700 to-zinc-800" />
               )}
-              {/* COVER INDICATOR */}
+
+              {/* Cover indicator */}
               {coverUrls &&
                 coverUrls.length > 1 &&
                 coverIndex !== undefined && (
@@ -359,35 +251,28 @@ export function BookMobileDetails({
                     </span>
                   </div>
                 )}
-              {/* BOTTOM FADE */}
+
               <div className="absolute bottom-0 left-0 w-full h-20 bg-linear-to-t from-zinc-950 to-transparent pointer-events-none" />
             </div>
+
             <div className="px-4">
               <div className="mt-4">
-                {/* SERIES TITLE */}
-                {book.seriesTitle ? (
+                {book.seriesTitle && (
                   <div className="text-zinc-400 text-sm font-semibold -mt-2.5">
                     {book.seriesTitle}
                   </div>
-                ) : (
-                  <div></div>
                 )}
                 <div className="flex justify-between">
-                  {/* TITLE */}
                   <h1 className="text-zinc-100 text-2xl font-bold -mt-0.5">
                     {book.title}
                   </h1>
-                  {/* SCORE */}
-                  <div data-no-drag>
-                    <button
-                      onClick={() => setIsScorePickerOpen(true)}
-                      className="text-zinc-400 font-bold bg-zinc-800/60 px-3.5 py-1.75 rounded-md shadow-lg shadow-black cursor-pointer hover:bg-zinc-700/60 transition flex items-center gap-2"
-                    >
-                      {book.score || "-"}
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setIsScorePickerOpen(true)}
+                    className="text-zinc-400 font-bold bg-zinc-800/60 px-3.5 py-1.75 rounded-md shadow-lg shadow-black cursor-pointer hover:bg-zinc-700/60 transition flex items-center gap-2"
+                  >
+                    {book.score || "-"}
+                  </button>
                 </div>
-                {/* AUTHOR AND DATE */}
                 <div className="text-zinc-400 text-sm font-medium flex items-center gap-2">
                   <span>{book.author || "Unknown"}</span>•
                   <span>{book.datePublished || "-"}</span>
@@ -398,8 +283,9 @@ export function BookMobileDetails({
                   )}
                 </div>
               </div>
+
               {/* STATUS */}
-              <div className="mt-3" data-no-drag>
+              <div className="mt-3">
                 <label className="text-zinc-400 text-xs font-medium">
                   Status
                 </label>
@@ -424,13 +310,10 @@ export function BookMobileDetails({
                   ))}
                 </div>
               </div>
-              {/* PREQUEL AND SEQUEL */}
+
+              {/* SERIES NAV */}
               {book.placeInSeries && (
-                <div
-                  className="pt-5 grid grid-cols-[1fr_2rem_1fr]"
-                  data-no-drag
-                >
-                  {/* PREQUEL */}
+                <div className="pt-5 grid grid-cols-[1fr_2rem_1fr]">
                   <div className="min-w-0 text-left">
                     {book.prequel && (
                       <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
@@ -453,7 +336,6 @@ export function BookMobileDetails({
                       </div>
                     )}
                   </div>
-                  {/* PLACEMENT */}
                   <div className="flex justify-center items-end shrink-0">
                     {book.placeInSeries && (
                       <label className="text-sm font-medium text-zinc-400/85">
@@ -461,7 +343,6 @@ export function BookMobileDetails({
                       </label>
                     )}
                   </div>
-                  {/* SEQUEL */}
                   <div className="min-w-0 text-right flex justify-end">
                     {book.sequel && (
                       <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
@@ -486,8 +367,9 @@ export function BookMobileDetails({
                   </div>
                 </div>
               )}
-              {/* NOTE */}
-              <div className="mt-3" data-no-drag>
+
+              {/* NOTES */}
+              <div className="mt-3">
                 <label className="text-zinc-400 text-xs font-medium">
                   Notes
                 </label>
@@ -495,10 +377,7 @@ export function BookMobileDetails({
                   <MobileAutoTextarea
                     value={localNote}
                     onChange={(e) =>
-                      onAction({
-                        type: "changeNote",
-                        payload: e.target.value,
-                      })
+                      onAction({ type: "changeNote", payload: e.target.value })
                     }
                     onBlur={() => onAction({ type: "saveNote" })}
                     placeholder="Add your thoughts about this book..."
@@ -510,6 +389,7 @@ export function BookMobileDetails({
           </div>
         </div>
       </div>
+
       <MobileScorePicker
         isOpen={isScorePickerOpen}
         score={book.score ?? 0}

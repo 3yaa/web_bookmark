@@ -134,16 +134,10 @@ export default function BookHub() {
     });
   }, []);
 
-  const handleBookClicked = useCallback(
-    (book: BookProps) => {
-      // Store book data in sessionStorage
-      sessionStorage.setItem("currentBook", JSON.stringify(book));
-
-      // Navigate to details page
-      router.push(`/books/${book.id}`);
-    },
-    [router]
-  );
+  const handleBookClicked = useCallback((book: BookProps) => {
+    setActiveModal("bookDetails");
+    setSelectedBook(book);
+  }, []);
 
   useEffect(() => {
     const handleBookUpdate = (e: CustomEvent) => {

@@ -126,35 +126,30 @@ export function BookMobileDetails({
 
   return (
     <>
-      {/* Main content - single unified layer with fixed positioning */}
+      {/* Outer wrapper - handles the drag transform */}
       <div
-        className="fixed inset-0 z-30 bg-zinc-950"
+        className="fixed inset-0 z-30"
         style={{
           transform: `translate3d(0, ${dragY}px, 0)`,
           transition: isDragging
             ? "none"
             : "transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)",
           willChange: isDragging ? "transform" : "auto",
-          // Force single composite layer on mobile
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
-          perspective: 1000,
-          WebkitPerspective: 1000,
         }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
+        {/* Inner scroll container - no transform, just scroll */}
         <div
           ref={scrollRef}
-          className="w-full h-full overflow-y-auto"
+          className="w-full h-full overflow-y-auto bg-zinc-950"
           style={{
             overscrollBehavior: "contain",
             WebkitOverflowScrolling: "touch",
-            // Prevent content from creating its own layer
-            transform: "translateZ(0)",
-            WebkitTransform: "translateZ(0)",
           }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
         >
           {isLoading?.isTrue && (
             <Loading

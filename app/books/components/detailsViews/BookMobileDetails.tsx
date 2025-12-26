@@ -128,15 +128,13 @@ export function BookMobileDetails({
     <>
       {/* Outer wrapper - handles the drag transform */}
       <div
-        className="fixed inset-0 z-30"
+        className="fixed inset-0 z-30 bg-zinc-950"
         style={{
           transform: `translate3d(0, ${dragY}px, 0)`,
           transition: isDragging
             ? "none"
             : "transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)",
           willChange: isDragging ? "transform" : "auto",
-          backfaceVisibility: "hidden",
-          WebkitBackfaceVisibility: "hidden",
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -145,7 +143,7 @@ export function BookMobileDetails({
         {/* Inner scroll container - no transform, just scroll */}
         <div
           ref={scrollRef}
-          className="w-full h-full overflow-y-auto bg-zinc-950"
+          className="w-full h-full overflow-y-auto"
           style={{
             overscrollBehavior: "contain",
             WebkitOverflowScrolling: "touch",

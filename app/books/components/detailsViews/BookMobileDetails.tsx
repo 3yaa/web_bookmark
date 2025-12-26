@@ -36,13 +36,20 @@ export function BookMobileDetails({
 }: BookMobileDetailsProps) {
   const [isScorePickerOpen, setIsScorePickerOpen] = useState(false);
   const [posterLoaded, setPosterLoaded] = useState(false);
-
-  // drag state
-  const [dragY, setDragY] = useState(0);
+  const [translateY, setTranslateY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
   const startY = useRef(0);
-  const currentY = useRef(0);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const startScrollY = useRef(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const dragVelocity = useRef(0);
+  const lastY = useRef(0);
+  const lastTime = useRef(0);
+  const scrollYRef = useRef(0);
+  const bodyUnlockedRef = useRef(false);
+  const rafRef = useRef<number | null>(null);
+  const currentTranslateY = useRef(0);
 
   const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
     //detects which side of the div was clicked
@@ -57,90 +64,181 @@ export function BookMobileDetails({
     });
   };
 
-  // drag handlers
+  const safeUnlock = React.useCallback(() => {
+    if (bodyUnlockedRef.current) return;
+    bodyUnlockedRef.current = true;
+
+    document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.width = "";
+
+    window.scrollTo(0, scrollYRef.current);
+  }, []);
+
+  const lockBodyScroll = () => {
+    const scrollY = window.scrollY;
+
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+
+    return scrollY;
+  };
+
+  useEffect(() => {
+    scrollYRef.current = lockBodyScroll();
+
+    requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      safeUnlock(); // fallback only
+    };
+  }, [safeUnlock]);
+
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (isScorePickerOpen) return;
+
     const target = e.target as HTMLElement;
     if (
       target.closest("button") ||
       target.closest("textarea") ||
-      target.closest("input") ||
-      isScorePickerOpen
-    )
+      target.closest("[data-no-drag]")
+    ) {
       return;
+    }
 
-    const container = containerRef.current;
-    if (!container) return;
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
 
-    // only start drag if at top of scroll
-    if (container.scrollTop <= 0) {
+    if (scrollContainer.scrollTop <= 5) {
       startY.current = e.touches[0].clientY;
-      currentY.current = e.touches[0].clientY;
+      lastY.current = e.touches[0].clientY;
+      lastTime.current = Date.now();
+      startScrollY.current = scrollContainer.scrollTop;
+      dragVelocity.current = 0;
       setIsDragging(true);
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || isScorePickerOpen) return;
 
-    const container = containerRef.current;
-    if (!container) return;
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
 
-    currentY.current = e.touches[0].clientY;
-    const deltaY = currentY.current - startY.current;
+    const currentY = e.touches[0].clientY;
+    const currentTime = Date.now();
+    const deltaY = currentY - startY.current;
 
-    // only allow downward drag and only when scrolled to top
-    if (deltaY > 0 && container.scrollTop <= 0) {
-      e.preventDefault(); // Prevent scroll
+    const timeDelta = currentTime - lastTime.current;
+    if (timeDelta > 0) {
+      dragVelocity.current = (currentY - lastY.current) / timeDelta;
+    }
 
-      // apply resistance curve for natural feel
-      const resistance = 1 - Math.min(deltaY / 600, 0.6);
-      setDragY(deltaY * resistance);
+    lastY.current = currentY;
+    lastTime.current = currentTime;
+
+    if (scrollContainer.scrollTop <= 5 && deltaY > 0) {
+      e.preventDefault();
+      const resistance = Math.max(0.4, 1 - deltaY / 600);
+      const newTranslateY = deltaY * resistance;
+      currentTranslateY.current = newTranslateY;
+
+      // Use RAF to batch updates and avoid jitter
+      if (rafRef.current === null) {
+        rafRef.current = requestAnimationFrame(() => {
+          setTranslateY(currentTranslateY.current);
+          rafRef.current = null;
+        });
+      }
+    } else if (deltaY < 0 && scrollContainer.scrollTop <= 0) {
+      setIsDragging(false);
+      setTranslateY(0);
+      currentTranslateY.current = 0;
     }
   };
 
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
-    const deltaY = currentY.current - startY.current;
-    const velocity = deltaY; // velocity approximation
-
-    // 120px or fast swipe
-    if (deltaY > 120 || velocity > 0.8) {
-      // animate out
-      setDragY(window.innerHeight);
-      setTimeout(onClose, 250);
-    } else {
-      // spring back
-      setDragY(0);
+    // Cancel any pending RAF
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
     }
 
-    setIsDragging(false);
-  };
+    const threshold = 80;
+    const velocityThreshold = 0.6;
 
-  // lock body scroll on mount
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, []);
+    if (
+      currentTranslateY.current > threshold ||
+      dragVelocity.current > velocityThreshold
+    ) {
+      // UNLOCK BODY IMMEDIATELY
+      safeUnlock();
+
+      // Calculate final position based on velocity
+      const finalY = Math.max(
+        currentTranslateY.current + dragVelocity.current * 250,
+        window.innerHeight
+      );
+
+      // Immediately sync the current position to state before enabling transition
+      setTranslateY(currentTranslateY.current);
+
+      // Then enable transition and animate to final position
+      requestAnimationFrame(() => {
+        setIsDragging(false);
+        setIsExiting(true);
+        requestAnimationFrame(() => {
+          setTranslateY(finalY);
+        });
+      });
+
+      setTimeout(() => {
+        onClose();
+      }, 350);
+    } else {
+      setTranslateY(0);
+      currentTranslateY.current = 0;
+      setIsDragging(false);
+    }
+
+    dragVelocity.current = 0;
+  };
 
   return (
     <>
       <div
         className="fixed inset-0 z-30"
         style={{
-          transform: `translate3d(0, ${dragY}px, 0)`,
+          transform: `translate3d(0, ${translateY}px, 0)`,
+          opacity: isVisible ? 1 : 0,
+          willChange: isDragging ? "transform" : "auto",
+          WebkitTransform: `translate3d(0, ${translateY}px, 0)`,
+          WebkitBackfaceVisibility: "hidden",
+          backfaceVisibility: "hidden",
+          perspective: 1000,
+          WebkitPerspective: 1000,
           transition: isDragging
             ? "none"
-            : "transform 0.35s cubic-bezier(0.35, 0.72, 0, 1)",
+            : isExiting
+            ? "transform 0.35s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.25s ease-out"
+            : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         <div
-          ref={containerRef}
+          ref={scrollContainerRef}
           className={`w-full h-full bg-zinc-950 flex flex-col ${
             isScorePickerOpen ? "overflow-hidden" : "overflow-y-auto"
           }`}

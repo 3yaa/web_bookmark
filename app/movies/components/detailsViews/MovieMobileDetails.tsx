@@ -1,6 +1,6 @@
 import { MovieProps } from "@/types/movie";
 import { MovieAction } from "../MovieDetailsHub";
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
 import { movieStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
@@ -42,12 +42,37 @@ export function MovieMobileDetails({
   const dragVelocity = useRef(0);
   const lastY = useRef(0);
   const lastTime = useRef(0);
-  const scrollYRef = useRef(0);
-  const bodyUnlockedRef = useRef(false);
+
+  useEffect(() => {
+    // original values
+    const originalOverflow = document.body.style.overflow;
+    const originalPosition = document.body.style.position;
+    const originalTop = document.body.style.top;
+    const scrollY = window.scrollY;
+
+    // lock body in place
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+
+    // trigger mount animation
+    requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.position = originalPosition;
+      document.body.style.top = originalTop;
+      document.body.style.width = "";
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isScorePickerOpen) return;
-
+    //
     const target = e.target as HTMLElement;
     if (
       target.closest("button") ||
@@ -97,29 +122,6 @@ export function MovieMobileDetails({
     }
   };
 
-  const safeUnlock = useCallback(() => {
-    if (bodyUnlockedRef.current) return;
-    bodyUnlockedRef.current = true;
-
-    document.body.style.overflow = "";
-    document.body.style.position = "";
-    document.body.style.top = "";
-    document.body.style.width = "";
-
-    window.scrollTo(0, scrollYRef.current);
-  }, []);
-
-  const lockBodyScroll = () => {
-    const scrollY = window.scrollY;
-
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = "100%";
-
-    return scrollY;
-  };
-
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
@@ -127,20 +129,15 @@ export function MovieMobileDetails({
     const velocityThreshold = 0.5;
 
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
-      // UNLOCK BODY IMMEDIATELY
-      safeUnlock();
-
       const finalY = Math.max(
         translateY + dragVelocity.current * 200,
         window.innerHeight
       );
-
-      setIsExiting(true);
       setTranslateY(finalY);
-
+      setIsExiting(true);
       setTimeout(() => {
         onClose();
-      }, 50);
+      }, 75);
     } else {
       setTranslateY(0);
     }
@@ -148,18 +145,6 @@ export function MovieMobileDetails({
     setIsDragging(false);
     dragVelocity.current = 0;
   };
-
-  useEffect(() => {
-    scrollYRef.current = lockBodyScroll();
-
-    requestAnimationFrame(() => {
-      setIsVisible(true);
-    });
-
-    return () => {
-      safeUnlock(); // fallback only
-    };
-  }, [safeUnlock]);
 
   return (
     <>

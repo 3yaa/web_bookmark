@@ -44,13 +44,6 @@ export function BookMobileDetails({
   const currentY = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // smoothness improvements
-  const rafRef = useRef<number | null>(null);
-  const currentDragY = useRef(0);
-  const velocityRef = useRef(0);
-  const lastY = useRef(0);
-  const lastTime = useRef(0);
-
   const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
     //detects which side of the div was clicked
     const rect = e.currentTarget.getBoundingClientRect();
@@ -82,9 +75,6 @@ export function BookMobileDetails({
     if (container.scrollTop <= 0) {
       startY.current = e.touches[0].clientY;
       currentY.current = e.touches[0].clientY;
-      lastY.current = e.touches[0].clientY;
-      lastTime.current = Date.now();
-      velocityRef.current = 0;
       setIsDragging(true);
     }
   };
@@ -96,64 +86,35 @@ export function BookMobileDetails({
     if (!container) return;
 
     currentY.current = e.touches[0].clientY;
-    const currentTime = Date.now();
     const deltaY = currentY.current - startY.current;
-
-    // Calculate velocity (pixels per millisecond)
-    const timeDelta = currentTime - lastTime.current;
-    if (timeDelta > 0) {
-      velocityRef.current = (currentY.current - lastY.current) / timeDelta;
-    }
-
-    lastY.current = currentY.current;
-    lastTime.current = currentTime;
 
     // only allow downward drag and only when scrolled to top
     if (deltaY > 0 && container.scrollTop <= 0) {
       e.preventDefault(); // Prevent scroll
 
-      // apply exponential resistance curve for more natural feel
-      const resistance = Math.max(0.4, 1 - Math.pow(deltaY / 600, 1.5));
-      currentDragY.current = deltaY * resistance;
-
-      // Batch updates with RAF - only update once per frame
-      if (rafRef.current === null) {
-        rafRef.current = requestAnimationFrame(() => {
-          setDragY(currentDragY.current);
-          rafRef.current = null;
-        });
-      }
+      // apply resistance curve for natural feel
+      const resistance = 1 - Math.min(deltaY / 600, 0.6);
+      setDragY(deltaY * resistance);
     }
   };
 
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
-    // Cancel any pending RAF
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-
     const deltaY = currentY.current - startY.current;
-    const velocity = velocityRef.current;
+    const velocity = deltaY; // velocity approximation
 
-    // Use velocity for smoother threshold
-    const shouldClose = deltaY > 100 || velocity > 0.8;
-
-    if (shouldClose) {
-      // Calculate final position with momentum
-      const momentum = velocity * 300; // Apply momentum over 300ms
-      const finalY = Math.max(deltaY + momentum, window.innerHeight);
-      setDragY(finalY);
+    // 120px or fast swipe
+    if (deltaY > 120 || velocity > 0.8) {
+      // animate out
+      setDragY(window.innerHeight);
       setTimeout(onClose, 250);
     } else {
+      // spring back
       setDragY(0);
-      currentDragY.current = 0;
     }
 
     setIsDragging(false);
-    velocityRef.current = 0;
   };
 
   // lock body scroll on mount
@@ -161,10 +122,6 @@ export function BookMobileDetails({
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "";
-      // Clean up any pending RAF
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-      }
     };
   }, []);
 
@@ -174,13 +131,9 @@ export function BookMobileDetails({
         className="fixed inset-0 z-30"
         style={{
           transform: `translate3d(0, ${dragY}px, 0)`,
-          willChange: isDragging ? "transform" : "auto",
-          WebkitTransform: `translate3d(0, ${dragY}px, 0)`,
-          WebkitBackfaceVisibility: "hidden",
-          backfaceVisibility: "hidden",
           transition: isDragging
             ? "none"
-            : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+            : "transform 0.35s cubic-bezier(0.35, 0.72, 0, 1)",
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

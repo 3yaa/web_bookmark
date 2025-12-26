@@ -1,4 +1,3 @@
-// BookMobileDetails.tsx - Clean drag-to-dismiss implementation
 import { BookProps } from "@/types/book";
 import { BookAction } from "../BookDetailsHub";
 import React, { useEffect, useState, useRef } from "react";
@@ -38,26 +37,35 @@ export function BookMobileDetails({
   const [isScorePickerOpen, setIsScorePickerOpen] = useState(false);
   const [posterLoaded, setPosterLoaded] = useState(false);
 
-  // Drag state - simplified
+  // drag state
   const [dragY, setDragY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const startY = useRef(0);
   const currentY = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // smoothness improvements
+  const rafRef = useRef<number | null>(null);
+  const currentDragY = useRef(0);
+  const velocityRef = useRef(0);
+  const lastY = useRef(0);
+  const lastTime = useRef(0);
+
   const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
+    //detects which side of the div was clicked
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    const isRightSide = clickX > rect.width / 2;
+    const elementWidth = rect.width;
+    const isRightSide = clickX > elementWidth / 2;
+
     onAction({
       type: "changeCover",
       payload: isRightSide ? "next" : "prev",
     });
   };
 
-  // Simple drag handlers
+  // drag handlers
   const handleTouchStart = (e: React.TouchEvent) => {
-    // Don't interfere with these elements
     const target = e.target as HTMLElement;
     if (
       target.closest("button") ||
@@ -70,10 +78,13 @@ export function BookMobileDetails({
     const container = containerRef.current;
     if (!container) return;
 
-    // Only start drag if at top of scroll
+    // only start drag if at top of scroll
     if (container.scrollTop <= 0) {
       startY.current = e.touches[0].clientY;
       currentY.current = e.touches[0].clientY;
+      lastY.current = e.touches[0].clientY;
+      lastTime.current = Date.now();
+      velocityRef.current = 0;
       setIsDragging(true);
     }
   };
@@ -85,67 +96,105 @@ export function BookMobileDetails({
     if (!container) return;
 
     currentY.current = e.touches[0].clientY;
+    const currentTime = Date.now();
     const deltaY = currentY.current - startY.current;
 
-    // Only allow downward drag and only when scrolled to top
+    // Calculate velocity (pixels per millisecond)
+    const timeDelta = currentTime - lastTime.current;
+    if (timeDelta > 0) {
+      velocityRef.current = (currentY.current - lastY.current) / timeDelta;
+    }
+
+    lastY.current = currentY.current;
+    lastTime.current = currentTime;
+
+    // only allow downward drag and only when scrolled to top
     if (deltaY > 0 && container.scrollTop <= 0) {
       e.preventDefault(); // Prevent scroll
 
-      // Apply resistance curve for natural feel
-      const resistance = 1 - Math.min(deltaY / 600, 0.6);
-      setDragY(deltaY * resistance);
+      // apply exponential resistance curve for more natural feel
+      const resistance = Math.max(0.4, 1 - Math.pow(deltaY / 600, 1.5));
+      currentDragY.current = deltaY * resistance;
+
+      // Batch updates with RAF - only update once per frame
+      if (rafRef.current === null) {
+        rafRef.current = requestAnimationFrame(() => {
+          setDragY(currentDragY.current);
+          rafRef.current = null;
+        });
+      }
     }
   };
 
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
-    const deltaY = currentY.current - startY.current;
-    const velocity = deltaY; // Simple velocity approximation
+    // Cancel any pending RAF
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
 
-    // Threshold: 120px or fast swipe
-    if (deltaY > 120 || velocity > 0.8) {
-      // Animate out
-      setDragY(window.innerHeight);
+    const deltaY = currentY.current - startY.current;
+    const velocity = velocityRef.current;
+
+    // Use velocity for smoother threshold
+    const shouldClose = deltaY > 100 || velocity > 0.8;
+
+    if (shouldClose) {
+      // Calculate final position with momentum
+      const momentum = velocity * 300; // Apply momentum over 300ms
+      const finalY = Math.max(deltaY + momentum, window.innerHeight);
+      setDragY(finalY);
       setTimeout(onClose, 250);
     } else {
-      // Spring back
       setDragY(0);
+      currentDragY.current = 0;
     }
 
     setIsDragging(false);
+    velocityRef.current = 0;
   };
 
-  // Lock body scroll on mount
+  // lock body scroll on mount
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "";
+      // Clean up any pending RAF
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+      }
     };
   }, []);
 
   return (
     <>
-      {/* Backdrop/Overlay that moves with drag */}
       <div
-        className="fixed inset-0 z-30 bg-zinc-950"
+        className="fixed inset-0 z-30"
         style={{
           transform: `translate3d(0, ${dragY}px, 0)`,
+          willChange: isDragging ? "transform" : "auto",
+          WebkitTransform: `translate3d(0, ${dragY}px, 0)`,
+          WebkitBackfaceVisibility: "hidden",
+          backfaceVisibility: "hidden",
           transition: isDragging
             ? "none"
-            : "transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)",
+            : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Scrollable content container */}
         <div
           ref={containerRef}
-          className="w-full h-full overflow-y-auto"
+          className={`w-full h-full bg-zinc-950 flex flex-col ${
+            isScorePickerOpen ? "overflow-hidden" : "overflow-y-auto"
+          }`}
           style={{
-            overscrollBehavior: "contain",
             WebkitOverflowScrolling: "touch",
+            transform: "translateZ(0)",
+            WebkitTransform: "translateZ(0)",
           }}
         >
           {isLoading?.isTrue && (
@@ -155,13 +204,13 @@ export function BookMobileDetails({
               isMobile={true}
             />
           )}
-
           {/* ACTION BAR */}
           {(posterLoaded || addingBook) && (
-            <div className="sticky top-0 z-30 bg-zinc-900/60 backdrop-blur-xl">
-              <div className="px-4 py-3 flex items-center justify-between">
-                {addingBook ? (
+            <div className="sticky top-0 z-30">
+              <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
+                {addingBook && (
                   <>
+                    {/* ADD BUTTON */}
                     <button
                       className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
                       onClick={onAddBook}
@@ -169,50 +218,49 @@ export function BookMobileDetails({
                       <Plus className="w-5 h-5 text-slate-400" />
                     </button>
                     <div className="flex items-center gap-2">
+                      {/* DIFFERENT SERIES OPTIONS */}
                       {showBookInSeries && (
                         <div className="flex gap-1 bg-zinc-800/60 rounded-lg p-0.5">
                           <button
                             className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
                             onClick={() => showBookInSeries("left")}
                           >
-                            <ChevronLeft className="w-5 h-5 text-gray-400" />
+                            <ChevronLeft className="w-5 h-5 text-gray-400 transition-colors" />
                           </button>
                           <button
-                            className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
+                            className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
                             onClick={() => showBookInSeries("right")}
                           >
-                            <ChevronRight className="w-5 h-5 text-gray-400" />
+                            <ChevronRight className="w-5 h-5 text-gray-400 transition-colors" />
                           </button>
                         </div>
                       )}
+                      {/* MORE BOOKS */}
                       <button
                         className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
-                        onClick={() => onAction({ type: "moreBooks" })}
-                        title="More books"
+                        onClick={() => {
+                          onAction({ type: "moreBooks" });
+                        }}
+                        title={"More books"}
                       >
-                        <ChevronsUp className="w-5 h-5 text-slate-400" />
+                        <ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
                       </button>
                     </div>
                   </>
-                ) : (
-                  <button
-                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
-                    onClick={onClose}
-                  >
-                    <ChevronLeft className="w-5 h-5 text-slate-400" />
-                  </button>
                 )}
               </div>
             </div>
           )}
-
-          {/* CONTENT */}
+          {/* INFO */}
           <div className="pb-10">
             {/* COVER */}
             <div
               className={`relative w-full overflow-hidden bg-zinc-900/40 ${
-                coverUrls && coverUrls.length > 1 ? "cursor-pointer" : ""
-              }`}
+                isDragging ? "rounded-lg" : ""
+              } ${coverUrls && coverUrls.length > 1 ? "cursor-pointer" : ""}`}
+              style={{
+                willChange: isDragging ? "transform" : "auto",
+              }}
               onClick={
                 coverUrls && coverUrls.length > 1
                   ? handleCoverChange
@@ -228,6 +276,10 @@ export function BookMobileDetails({
                   width={1280}
                   height={900}
                   className="object-cover w-full"
+                  style={{
+                    transform: "translateZ(0)",
+                    WebkitTransform: "translateZ(0)",
+                  }}
                   onLoad={() => setPosterLoaded(true)}
                 />
               ) : book.coverUrl ? (
@@ -237,13 +289,16 @@ export function BookMobileDetails({
                   width={1280}
                   height={900}
                   className="object-cover w-full"
+                  style={{
+                    transform: "translateZ(0)",
+                    WebkitTransform: "translateZ(0)",
+                  }}
                   onLoad={() => setPosterLoaded(true)}
                 />
               ) : (
                 <div className="h-64 bg-linear-to-br from-zinc-700 to-zinc-800" />
               )}
-
-              {/* Cover indicator */}
+              {/* COVER INDICATOR */}
               {coverUrls &&
                 coverUrls.length > 1 &&
                 coverIndex !== undefined && (
@@ -253,28 +308,35 @@ export function BookMobileDetails({
                     </span>
                   </div>
                 )}
-
+              {/* BOTTOM FADE */}
               <div className="absolute bottom-0 left-0 w-full h-20 bg-linear-to-t from-zinc-950 to-transparent pointer-events-none" />
             </div>
-
             <div className="px-4">
               <div className="mt-4">
-                {book.seriesTitle && (
+                {/* SERIES TITLE */}
+                {book.seriesTitle ? (
                   <div className="text-zinc-400 text-sm font-semibold -mt-2.5">
                     {book.seriesTitle}
                   </div>
+                ) : (
+                  <div></div>
                 )}
                 <div className="flex justify-between">
+                  {/* TITLE */}
                   <h1 className="text-zinc-100 text-2xl font-bold -mt-0.5">
                     {book.title}
                   </h1>
-                  <button
-                    onClick={() => setIsScorePickerOpen(true)}
-                    className="text-zinc-400 font-bold bg-zinc-800/60 px-3.5 py-1.75 rounded-md shadow-lg shadow-black cursor-pointer hover:bg-zinc-700/60 transition flex items-center gap-2"
-                  >
-                    {book.score || "-"}
-                  </button>
+                  {/* SCORE */}
+                  <div data-no-drag>
+                    <button
+                      onClick={() => setIsScorePickerOpen(true)}
+                      className="text-zinc-400 font-bold bg-zinc-800/60 px-3.5 py-1.75 rounded-md shadow-lg shadow-black cursor-pointer hover:bg-zinc-700/60 transition flex items-center gap-2"
+                    >
+                      {book.score || "-"}
+                    </button>
+                  </div>
                 </div>
+                {/* AUTHOR AND DATE */}
                 <div className="text-zinc-400 text-sm font-medium flex items-center gap-2">
                   <span>{book.author || "Unknown"}</span>•
                   <span>{book.datePublished || "-"}</span>
@@ -285,9 +347,8 @@ export function BookMobileDetails({
                   )}
                 </div>
               </div>
-
               {/* STATUS */}
-              <div className="mt-3">
+              <div className="mt-3" data-no-drag>
                 <label className="text-zinc-400 text-xs font-medium">
                   Status
                 </label>
@@ -312,10 +373,13 @@ export function BookMobileDetails({
                   ))}
                 </div>
               </div>
-
-              {/* SERIES NAV */}
+              {/* PREQUEL AND SEQUEL */}
               {book.placeInSeries && (
-                <div className="pt-5 grid grid-cols-[1fr_2rem_1fr]">
+                <div
+                  className="pt-5 grid grid-cols-[1fr_2rem_1fr]"
+                  data-no-drag
+                >
+                  {/* PREQUEL */}
                   <div className="min-w-0 text-left">
                     {book.prequel && (
                       <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
@@ -338,6 +402,7 @@ export function BookMobileDetails({
                       </div>
                     )}
                   </div>
+                  {/* PLACEMENT */}
                   <div className="flex justify-center items-end shrink-0">
                     {book.placeInSeries && (
                       <label className="text-sm font-medium text-zinc-400/85">
@@ -345,6 +410,7 @@ export function BookMobileDetails({
                       </label>
                     )}
                   </div>
+                  {/* SEQUEL */}
                   <div className="min-w-0 text-right flex justify-end">
                     {book.sequel && (
                       <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
@@ -369,9 +435,8 @@ export function BookMobileDetails({
                   </div>
                 </div>
               )}
-
-              {/* NOTES */}
-              <div className="mt-3">
+              {/* NOTE */}
+              <div className="mt-3" data-no-drag>
                 <label className="text-zinc-400 text-xs font-medium">
                   Notes
                 </label>
@@ -379,7 +444,10 @@ export function BookMobileDetails({
                   <MobileAutoTextarea
                     value={localNote}
                     onChange={(e) =>
-                      onAction({ type: "changeNote", payload: e.target.value })
+                      onAction({
+                        type: "changeNote",
+                        payload: e.target.value,
+                      })
                     }
                     onBlur={() => onAction({ type: "saveNote" })}
                     placeholder="Add your thoughts about this book..."
@@ -391,7 +459,6 @@ export function BookMobileDetails({
           </div>
         </div>
       </div>
-
       <MobileScorePicker
         isOpen={isScorePickerOpen}
         score={book.score ?? 0}

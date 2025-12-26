@@ -20,10 +20,8 @@ import { BookMobileListing } from "./listingViews/BookMobileListing";
 import { BookDesktopListing } from "./listingViews/BookDesktopListing";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
-import { useRouter } from "next/navigation";
 
 export default function BookHub() {
-  const router = useRouter();
   const { books, addBook, updateBook, deleteBook, isProcessingBook } =
     useBookData();
   // filter/sort config
@@ -138,42 +136,6 @@ export default function BookHub() {
     setActiveModal("bookDetails");
     setSelectedBook(book);
   }, []);
-
-  useEffect(() => {
-    const handleBookUpdate = (e: CustomEvent) => {
-      const { bookId, updates } = e.detail;
-      updateBook(bookId, updates);
-    };
-
-    const handleBookDelete = (e: CustomEvent) => {
-      const { bookId } = e.detail;
-      deleteBook(bookId);
-    };
-
-    const handleSeriesNav = (e: CustomEvent) => {
-      const { title } = e.detail;
-      showSequelPrequel(title);
-    };
-
-    window.addEventListener("bookUpdate", handleBookUpdate as EventListener);
-    window.addEventListener("bookDelete", handleBookDelete as EventListener);
-    window.addEventListener("bookSeriesNav", handleSeriesNav as EventListener);
-
-    return () => {
-      window.removeEventListener(
-        "bookUpdate",
-        handleBookUpdate as EventListener
-      );
-      window.removeEventListener(
-        "bookDelete",
-        handleBookDelete as EventListener
-      );
-      window.removeEventListener(
-        "bookSeriesNav",
-        handleSeriesNav as EventListener
-      );
-    };
-  }, [updateBook, deleteBook, showSequelPrequel]);
 
   const handleSearchQueryChange = (value: string) => {
     setSearchQuery(value);

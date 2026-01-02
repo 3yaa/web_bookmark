@@ -165,7 +165,7 @@ export function ShowDesktopDetails({
                     height={720}
                   />
                 )}
-                <div className={`flex flex-col justify-center flex-1`}>
+                <div className={`flex flex-col justify-end flex-1`}>
                   {/* TITLE */}
                   <div className="w-fit mb-1.5 max-w-full">
                     <div className="font-bold text-zinc-100/90 text-3xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-1.5">

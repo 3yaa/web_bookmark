@@ -182,7 +182,7 @@ export function GameDesktopListing({
   }, [openStatusOption]);
 
   return (
-    <div className="w-full md:w-[70%] lg:w-[63%] mx-auto flex flex-col h-screen">
+    <div className="w-full md:w-[70%] lg:w-[62%] mx-auto flex flex-col h-screen">
       {/* STATUS FILTER */}
       <div
         className="fixed left-1 p-2 px-2.5 bg-linear-to-br from-zinc-900/80 to-zinc-950 border-zinc-700/50 shadow-lg shadow-black rounded-lg"

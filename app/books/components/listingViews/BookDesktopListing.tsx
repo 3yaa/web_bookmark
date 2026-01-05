@@ -321,7 +321,7 @@ export function BookDesktopListing({
                   onSearchChange("");
                   setSearchOpen(false);
                 }}
-                className="text-zinc-400 hover:text-zinc-200 text-xs transition-colors"
+                className="text-zinc-400 hover:text-zinc-200 text-xs transition-colors hover:cursor-pointer"
               >
                 ✕
               </button>

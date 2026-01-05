@@ -239,7 +239,7 @@ export function ShowMobileDetails({
                 <div data-no-drag>
                   <button
                     onClick={() => setIsScorePickerOpen(true)}
-                    className="relative text-zinc-300/90 font-bold bg-linear-to-br from-zinc-800/90 to-zinc-950 px-3.5 py-1.75 rounded-lg shadow-lg shadow-black flex items-center gap-2 group"
+                    className="relative text-zinc-300/90 font-bold bg-linear-to-br from-zinc-800/90 to-zinc-950 px-3.5 py-1.75 rounded-lg shadow-lg shadow-black"
                   >
                     <span className="relative z-10">{show.score || "-"}</span>
                   </button>

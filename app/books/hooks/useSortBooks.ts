@@ -29,7 +29,7 @@ export const useSortBooks = (
           if (!a.score) return 1;
           if (!b.score) return -1;
 
-          if (sortConfig.order === "desc") {
+          if (sortConfig.order === "asc") {
             return a.score - b.score;
           } else {
             return b.score - a.score;

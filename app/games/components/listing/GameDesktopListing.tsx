@@ -1,5 +1,11 @@
 import Image from "next/image";
-import { ChevronDown, ChevronUp, Search } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Search,
+  Circle,
+  Settings2,
+} from "lucide-react";
 // utils and ui components
 import {
   formatDateShort,
@@ -11,15 +17,18 @@ import { Loading } from "@/app/components/ui/Loading";
 import { GameProps, SortConfig } from "@/types/game";
 import React, { useEffect, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { MediaStatus } from "@/types/media";
 
 interface GameDesktopListingProps {
   games: GameProps[];
+  searchQuery: string;
   isProcessingGame: boolean;
   sortConfig: SortConfig | null;
+  curStatusFilter: MediaStatus | null;
   onSortConfig: (sortType: SortConfig["type"]) => void;
   onGameClicked: (game: GameProps) => void;
   onSearchChange: (searchVal: string) => void;
-  searchQuery: string;
+  onStatusFilter: (status: MediaStatus) => void;
 }
 
 const GameItem = React.memo(
@@ -112,16 +121,20 @@ GameItem.displayName = "GameItem";
 
 export function GameDesktopListing({
   games,
-  isProcessingGame,
   sortConfig,
+  searchQuery,
+  curStatusFilter,
+  isProcessingGame,
   onSortConfig,
   onGameClicked,
   onSearchChange,
-  searchQuery,
+  onStatusFilter,
 }: GameDesktopListingProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const searchBarRef = useRef<HTMLInputElement>(null);
+  const [openStatusOption, setOpenStatusOption] = useState(false);
+  const statusFilterRef = useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
     count: games.length,
@@ -153,14 +166,118 @@ export function GameDesktopListing({
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [searchOpen]);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        openStatusOption &&
+        statusFilterRef.current &&
+        !statusFilterRef.current.contains(e.target as Node)
+      ) {
+        setOpenStatusOption(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openStatusOption]);
+
   return (
     <div className="w-full md:w-[70%] lg:w-[60%] mx-auto flex flex-col h-screen">
+      {/* STATUS FILTER */}
+      <div
+        className="fixed left-1 p-2 px-2.5 bg-linear-to-br from-zinc-900/80 to-zinc-950 border-zinc-700/50 shadow-lg shadow-black rounded-lg"
+        ref={statusFilterRef}
+        onClick={() => {
+          setOpenStatusOption(!openStatusOption);
+        }}
+      >
+        <div
+          className={`
+                    relative z-20 transition-all duration-300 ease-out rounded-md
+                    ${openStatusOption ? "bg-zinc-800/60 p-2 -m-2" : ""}
+                  `}
+        >
+          <Settings2
+            className={`
+                      w-5 h-5 transition-all duration-300 ease-out cursor-pointer
+                      ${
+                        openStatusOption
+                          ? "text-zinc-300 rotate-90 scale-110"
+                          : "text-zinc-400 rotate-0 scale-100"
+                      }
+                    `}
+          />
+        </div>
+        {/* STATUS FILTER OPTIONS */}
+        <div
+          className={`
+                    fixed left-0 mt-2 min-w-44 bg-linear-to-br from-zinc-900/95 to-zinc-950 backdrop-blur-xl
+                    border border-zinc-800/40 rounded-lg shadow-2xl overflow-hidden
+                    origin-top-left z-10
+                    transition-all duration-300 ease-out
+                    ${
+                      openStatusOption
+                        ? "opacity-100 scale-100 translate-y-0"
+                        : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+                    }
+                  `}
+        >
+          {[
+            { value: "Playing" as MediaStatus },
+            { value: "Completed" as MediaStatus },
+            { value: "Dropped" as MediaStatus },
+          ].map((status, index) => (
+            <div
+              key={status.value}
+              className={`
+                        flex items-center justify-between px-4 py-3 text-zinc-300 text-sm
+                        transition-all duration-200 ease-out cursor-pointer
+                        hover:bg-zinc-800/60 hover:text-zinc-100 active:scale-98
+                        ${index !== 3 ? "border-b border-zinc-800/80" : ""}
+                        ${
+                          curStatusFilter === status.value
+                            ? "bg-zinc-800/40"
+                            : ""
+                        }
+                      `}
+              style={{
+                transitionDelay: openStatusOption ? `${index * 30}ms` : "0ms",
+              }}
+              onClick={() => {
+                onStatusFilter(status.value);
+                setOpenStatusOption(false);
+              }}
+            >
+              <span className="font-medium">{status.value}</span>
+              <div
+                className={`
+                        transition-all duration-200 ease-out
+                        ${
+                          curStatusFilter === status.value
+                            ? "scale-100 opacity-100"
+                            : "scale-75 opacity-40"
+                        }
+                      `}
+              >
+                {curStatusFilter === status.value ? (
+                  <div className="relative w-5 h-5">
+                    <Circle className="w-5 h-5 text-blue-400 absolute" />
+                    <div className="w-3 h-3 bg-blue-400/90 rounded-full absolute top-1 left-1 animate-pulse" />
+                  </div>
+                ) : (
+                  <Circle className="w-5 h-5 text-gray-500" />
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
       {/* SEARCH BUTTON/BAR */}
       <div className="fixed top-1 right-1 z-20">
         <div className="relative">
           {/* SEARCH BUTTON */}
           <div
-            className={`flex items-center gap-2 bg-zinc-900/70 backdrop-blur-sm  border-zinc-700/50 rounded-lg transition-all duration-300 ease-out ${
+            className={`flex items-center gap-2 bg-linear-to-bl from-zinc-900/80 to-zinc-950 border-zinc-700/50 shadow-lg shadow-black rounded-lg transition-all duration-300 ease-out ${
               searchOpen
                 ? "w-72 px-3 py-2"
                 : "w-9 h-9 px-0 py-0 cursor-pointer hover:bg-zinc-800/70"

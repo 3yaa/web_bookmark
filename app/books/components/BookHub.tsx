@@ -184,8 +184,10 @@ export default function BookHub() {
           sortConfig={sortConfig}
           onSortConfig={handleSortConfig}
           onBookClicked={handleBookClicked}
-          onSearchChange={handleSearchQueryChange}
+          curStatusFilter={statusFilter}
+          onStatusFilter={handleStatusFilterConfig}
           searchQuery={searchQuery}
+          onSearchChange={handleSearchQueryChange}
         />
       </div>
       <div className="block lg:hidden">

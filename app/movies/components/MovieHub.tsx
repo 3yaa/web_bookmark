@@ -186,8 +186,10 @@ export default function MoviesHub() {
           sortConfig={sortConfig}
           onSortConfig={handleSortConfig}
           onMovieClicked={handleMovieClicked}
-          onSearchChange={handleSearchQueryChange}
+          curStatusFilter={statusFilter}
+          onStatusFilter={handleStatusFilterConfig}
           searchQuery={searchQuery}
+          onSearchChange={handleSearchQueryChange}
         />
       </div>
       <div className="block lg:hidden">

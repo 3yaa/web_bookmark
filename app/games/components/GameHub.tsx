@@ -196,8 +196,10 @@ export default function GameList() {
           sortConfig={sortConfig}
           onSortConfig={handleSortConfig}
           onGameClicked={handleGameClicked}
-          onSearchChange={handleSearchQueryChange}
+          curStatusFilter={statusFilter}
+          onStatusFilter={handleStatusFilterConfig}
           searchQuery={searchQuery}
+          onSearchChange={handleSearchQueryChange}
         />
       </div>
       <div className="block lg:hidden">

@@ -267,11 +267,11 @@ export function BookMobileListing({
                 >
                   {curStatusFilter === status.value ? (
                     <div className="relative w-4 h-4">
-                      <Circle className="w-4 h-4 text-slate-400 absolute" />
+                      <Circle className="w-5 h-5 text-blue-400 absolute" />
                       <div className="w-2 h-2 bg-slate-400 rounded-full absolute top-1 left-1 animate-pulse" />
                     </div>
                   ) : (
-                    <Circle className="w-4 h-4 text-zinc-600" />
+                    <Circle className="w-5 h-5 text-gray-500" />
                   )}
                 </div>
               </div>

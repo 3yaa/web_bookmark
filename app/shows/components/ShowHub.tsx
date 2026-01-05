@@ -162,8 +162,10 @@ export default function ShowHub() {
           sortConfig={sortConfig}
           onSortConfig={handleSortConfig}
           onShowClicked={handleShowClicked}
-          onSearchChange={handleSearchQueryChange}
+          curStatusFilter={statusFilter}
+          onStatusFilter={handleStatusFilterConfig}
           searchQuery={searchQuery}
+          onSearchChange={handleSearchQueryChange}
         />
       </div>
       <div className="block lg:hidden">
@@ -171,9 +173,9 @@ export default function ShowHub() {
           shows={sortedShows}
           isProcessingShow={isProcessingShow || isFilterPending}
           sortConfig={sortConfig}
-          curStatusFilter={statusFilter}
-          onShowClicked={handleShowClicked}
           onSortConfig={handleSortConfig}
+          onShowClicked={handleShowClicked}
+          curStatusFilter={statusFilter}
           onStatusFilter={handleStatusFilterConfig}
         />
       </div>

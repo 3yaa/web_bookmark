@@ -130,9 +130,9 @@ ShowItem.displayName = "ShowItem";
 
 export function ShowMobileListing({
   shows,
-  isProcessingShow,
   sortConfig,
   curStatusFilter,
+  isProcessingShow,
   onSortConfig,
   onShowClicked,
   onStatusFilter,
@@ -211,9 +211,7 @@ export function ShowMobileListing({
               <div
                 key={status.value}
                 className={`
-                  flex items-center justify-between px-4 py-3 text-zinc-300 text-sm
-                  transition-all duration-200 ease-out cursor-pointer
-                  hover:bg-zinc-800/60 hover:text-zinc-100 active:scale-98
+                  flex items-center justify-between px-4 py-3 text-zinc-300 text-sm active:scale-98
                   ${index !== 3 ? "border-b border-zinc-800/60" : ""}
                   ${curStatusFilter === status.value ? "bg-zinc-800/40" : ""}
                 `}
@@ -238,11 +236,11 @@ export function ShowMobileListing({
                 >
                   {curStatusFilter === status.value ? (
                     <div className="relative w-4 h-4">
-                      <Circle className="w-4 h-4 text-slate-400 absolute" />
-                      <div className="w-2 h-2 bg-slate-400 rounded-full absolute top-1 left-1 animate-pulse" />
+                      <Circle className="w-5 h-5 text-blue-400 absolute" />
+                      <div className="w-3 h-3 bg-blue-400/90 rounded-full absolute top-1 left-1 animate-pulse" />
                     </div>
                   ) : (
-                    <Circle className="w-4 h-4 text-zinc-600" />
+                    <Circle className="w-5 h-5 text-gray-500" />
                   )}
                 </div>
               </div>

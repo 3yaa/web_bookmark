@@ -65,7 +65,7 @@ const BookItem = React.memo(
           <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">
             {book.title || "-"}
           </span>
-          <span className="text-zinc-400 text-sm font-semibold bg-zinc-800/60 px-2.5 py-1 rounded-md shadow-inner shadow-black/40 -mt-1.5">
+          <span className="text-zinc-400 text-sm font-bold bg-zinc-900/60 px-2.5 py-1 rounded-md shadow-xl shadow-black/80 -mt-1.5">
             {book.score || "-"}
           </span>
         </div>

@@ -29,7 +29,7 @@ export const BackdropImageMobile = ({
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "linear-gradient(to right, rgba(9,9,9,1) 10%, rgba(9,9,9,0.2) 30%, transparent 50%, rgba(9,9,9,0.2) 100%)",
+            "linear-gradient(to right, rgba(9,9,9,1) 0%, rgba(9,9,9,0) 30%, transparent 50%, rgba(9,9,9,0.2) 100%)",
         }}
       />
 
@@ -38,7 +38,7 @@ export const BackdropImageMobile = ({
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "linear-gradient(to bottom, transparent 10%, rgba(9,9,9,0.8) 50%, rgba(9,9,9,1) 75%, rgba(9,9,9,1) 100%)",
+            "linear-gradient(to bottom, transparent 50%, rgba(9,9,9,0.7) 60%, rgba(9,9,9,1) 75%, rgba(9,9,9,1) 100%)",
         }}
       />
     </div>

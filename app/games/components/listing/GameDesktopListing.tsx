@@ -44,7 +44,7 @@ const GameItem = React.memo(
     onClick: (game: GameProps) => void;
   }) => (
     <div
-      className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_1fr_6rem_7rem_11rem_6rem_0.85fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
+      className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_1fr_6rem_7rem_11rem_6.5rem_0.85fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
         game.status
       )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
         index === 0 ? "rounded-bl-none" : "rounded-l-none"
@@ -105,7 +105,7 @@ const GameItem = React.memo(
           ? formatDateShort(game.dateCompleted) || "?"
           : "-"}
       </span>
-      <span className="text-center font-medium text-zinc-400 text-sm truncate">
+      <span className="text-center font-medium text-zinc-300/95 text-sm truncate">
         {game.studio || "-"}
       </span>
       <span className="text-center font-medium text-zinc-400 text-sm truncate pl-0.5">
@@ -327,7 +327,7 @@ export function GameDesktopListing({
         </div>
       </div>
       {/* HEADING */}
-      <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_1fr_6rem_7rem_11rem_6rem_0.85fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
+      <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_1fr_6rem_7rem_11rem_6.5rem_0.85fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
         <span className="font-semibold text-zinc-300 text-sm">#</span>
         <span className="font-semibold text-zinc-300 text-sm">Cover</span>
         {/* TITLE */}

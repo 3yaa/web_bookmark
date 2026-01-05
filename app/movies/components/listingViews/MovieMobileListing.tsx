@@ -74,7 +74,7 @@ const MovieItem = React.memo(
           <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">
             {movie.title || "-"}
           </span>
-          <span className="text-zinc-400 text-sm font-bold bg-zinc-800/60 px-2.5 py-1 rounded-md shadow-inner shadow-black/40 -mt-1.5">
+          <span className="text-zinc-400 text-sm font-semibold bg-zinc-800/60 px-2.5 py-1 rounded-md shadow-inner shadow-black/40 -mt-1.5">
             {movie.score || "-"}
           </span>
         </div>

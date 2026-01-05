@@ -73,7 +73,7 @@ const ShowItem = React.memo(
           <span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">
             {show.title || "-"}
           </span>
-          <span className="text-zinc-400 text-sm font-bold bg-zinc-900/90 px-2.5 py-1 rounded-md shadow-xl shadow-black ring-1 ring-zinc-500/10 -mt-1.5">
+          <span className="text-zinc-400 text-sm font-bold bg-zinc-900/60 px-2.5 py-1 rounded-md shadow-xl shadow-black/80 -mt-1.5">
             {show.score || "-"}
           </span>
         </div>

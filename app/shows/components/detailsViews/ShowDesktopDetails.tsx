@@ -371,7 +371,6 @@ export function ShowDesktopDetails({
                           </div>
                         </div>
                       </div>
-
                       {/* EPISODE CONTROLS */}
                       <div className="flex-[1.05] bg-linear-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/50 select-none shadow-lg shadow-black/20">
                         <div className="flex items-center justify-between">

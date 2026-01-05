@@ -176,12 +176,12 @@ export function MovieMobileDetails({
         {/* ACTION BAR */}
         {(posterLoaded || addingMovie) && (
           <div className="sticky top-0 z-30">
-            <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
+            <div className="absolute top-0 left-0 right-0 mt-1.5 mx-0.5 flex items-center justify-between">
               {addingMovie && (
                 <>
                   {/* ADD BUTTON */}
                   <button
-                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
                     onClick={onAddMovie}
                   >
                     <Plus className="w-5 h-5 text-slate-400" />
@@ -197,7 +197,7 @@ export function MovieMobileDetails({
                           <ChevronLeft className="w-5 h-5 text-gray-400 transition-colors" />
                         </button>
                         <button
-                          className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+                          className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
                           onClick={() => showAnotherSeries("right")}
                         >
                           <ChevronRight className="w-5 h-5 text-gray-400 transition-colors" />

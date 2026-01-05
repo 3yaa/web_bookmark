@@ -83,7 +83,7 @@ const ShowItem = React.memo(
                       show.curEpisode,
                       show.status
                     )
-                  : 0
+                  : 100
               }%`,
             }}
           >

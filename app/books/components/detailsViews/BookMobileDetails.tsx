@@ -193,16 +193,26 @@ export function BookMobileDetails({
         {/* ACTION BAR */}
         {(posterLoaded || addingBook) && (
           <div className="sticky top-0 z-30">
-            <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between">
+            <div className="absolute top-0 left-0 right-0 mt-1.5 mx-0.5 flex items-center justify-between">
               {addingBook && (
                 <>
                   {/* ADD BUTTON */}
                   <button
-                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+                    className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
                     onClick={onAddBook}
                   >
                     <Plus className="w-5 h-5 text-slate-400" />
                   </button>
+                  {/* COVER INDICATOR */}
+                  {coverUrls &&
+                    coverUrls.length > 1 &&
+                    coverIndex !== undefined && (
+                      <div className="p-1.5 px-2.5 bg-zinc-800/50 backdrop-blur-sm rounded-md">
+                        <span className="text-xs text-slate-400 font-medium">
+                          {coverIndex + 1}/{coverUrls.length}
+                        </span>
+                      </div>
+                    )}
                   <div className="flex items-center gap-2">
                     {/* DIFFERENT SERIES OPTIONS */}
                     {showBookInSeries && (
@@ -214,7 +224,7 @@ export function BookMobileDetails({
                           <ChevronLeft className="w-5 h-5 text-gray-400 transition-colors" />
                         </button>
                         <button
-                          className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+                          className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
                           onClick={() => showBookInSeries("right")}
                         >
                           <ChevronRight className="w-5 h-5 text-gray-400 transition-colors" />
@@ -270,14 +280,6 @@ export function BookMobileDetails({
               />
             ) : (
               <div className="h-64 bg-linear-to-br from-zinc-700 to-zinc-800" />
-            )}
-            {/* COVER INDICATOR */}
-            {coverUrls && coverUrls.length > 1 && coverIndex !== undefined && (
-              <div className="absolute top-3 left-3 px-2 py-1 bg-zinc-800/60 backdrop-blur-sm rounded-md">
-                <span className="text-xs text-zinc-300 font-medium">
-                  {coverIndex + 1}/{coverUrls.length}
-                </span>
-              </div>
             )}
             {/* BOTTOM FADE */}
             <div className="absolute bottom-0 left-0 w-full h-20 bg-linear-to-t from-zinc-950 to-transparent pointer-events-none" />

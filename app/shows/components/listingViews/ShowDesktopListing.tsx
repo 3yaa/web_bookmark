@@ -70,7 +70,7 @@ const ShowItem = React.memo(
         )}
       </div>
       <div className="flex flex-col min-w-0 flex-1 relative">
-        <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-zinc-300 transition-colors duration-200 truncate max-w-53">
+        <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-zinc-300 transition-colors duration-200 truncate max-w-full">
           {show.title || "-"}
         </span>
         <div className="absolute right-0 -bottom-8 text-zinc-400 text-[11px] font-medium mb-0.5 tracking-tight">

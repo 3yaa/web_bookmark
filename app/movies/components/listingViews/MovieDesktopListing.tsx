@@ -83,7 +83,7 @@ const MovieItem = React.memo(
             ""
           )}
         </span>
-        <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-zinc-300 transition-colors duration-200 truncate max-w-53">
+        <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-zinc-300 transition-colors duration-200 truncate max-w-full">
           {movie.title || "-"}
         </span>
         {/* STATUS */}

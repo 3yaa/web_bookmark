@@ -28,7 +28,7 @@ const statusConfig = {
 } as const;
 
 const createStatusOptions = <T extends keyof typeof statusConfig>(
-  statuses: T[]
+  statuses: T[],
 ) =>
   statuses.map((status) => ({
     value: status,
@@ -70,12 +70,12 @@ const getScoreLabel = (score: number): string => {
   if (score >= 9) return "Amazing";
   if (score >= 8) return "Great";
   if (score >= 7) return "Good";
-  if (score >= 6) return "Average";
-  if (score >= 5) return "Below Average";
-  if (score >= 4) return "Yikes";
-  if (score >= 3) return "Bad";
+  if (score >= 6) return "Fine";
+  if (score >= 5) return "Average";
+  if (score >= 4) return "Bad";
+  if (score >= 3) return "Yikes";
   if (score >= 2) return "Awful";
-  if (score >= 1) return "Dog Water";
+  if (score >= 1) return "Disgusting";
   return "Select Option";
 };
 

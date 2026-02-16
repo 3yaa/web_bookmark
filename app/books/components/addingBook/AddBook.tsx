@@ -96,7 +96,11 @@ export function AddBook({
     }
     setAllNewBooks(response); //all
     // console.log(response?.[0].title, ": ", response?.[0].key);
-    setNewBook(mapOpenLibDataToBook(response?.[0])); //main
+    setNewBook({
+      //!!MAYBE WILL WANT TO FIX CAUSES BORDER TO SHOW UP REALLY EARLY
+      ...mapOpenLibDataToBook(response?.[0]),
+      status: "Want to Read",
+    }); //main
     return {
       title: olData.title,
       olKey: olData.key,
@@ -131,7 +135,7 @@ export function AddBook({
       });
       return mappedData;
     },
-    [searchForSeriesInfo]
+    [searchForSeriesInfo],
   );
 
   const handleBookSearch = useCallback(async () => {
@@ -193,14 +197,14 @@ export function AddBook({
       setNewBook({ ...mapOpenLibDataToBook(book), status: "Want to Read" });
       if (key) await handleSeriesSearch(key);
     },
-    [handleSeriesSearch]
+    [handleSeriesSearch],
   );
 
   const handleBookDetailsUpdates = useCallback(
     async (
       _bookId: number,
       updates?: Partial<BookProps>,
-      showMore?: boolean
+      showMore?: boolean,
     ) => {
       if (showMore) {
         setActiveModal("multOptions");
@@ -211,7 +215,7 @@ export function AddBook({
       }
       setNewBook((prev) => ({ ...prev, ...updates }));
     },
-    []
+    [],
   );
 
   const handleBookAdd = async () => {
@@ -252,7 +256,7 @@ export function AddBook({
         return updated;
       });
     },
-    [allSeries, curSeries]
+    [allSeries, curSeries],
   );
 
   const handleBookDetailsClose = () => {

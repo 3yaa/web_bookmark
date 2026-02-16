@@ -71,7 +71,7 @@ const getScoreLabel = (score: number): string => {
   if (score >= 8) return "Very Good";
   if (score >= 7) return "Good";
   if (score >= 6) return "Fine";
-  if (score >= 5) return "Average";
+  if (score >= 5) return "Disappointing";
   if (score >= 4) return "Bad";
   if (score >= 3) return "Yikes";
   if (score >= 2) return "Awful";

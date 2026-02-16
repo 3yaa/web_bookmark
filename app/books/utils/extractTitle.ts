@@ -1,4 +1,4 @@
-export function extractTitle(query: string) {
+ export function extractTitle(query: string) {
   const trimmed = query.trim();
   if (!trimmed) return;
 

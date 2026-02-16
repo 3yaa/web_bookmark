@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { OpenLibraryProps, WikidataProps } from "@/types/book";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
-import { extractTitle } from "../utils/extractTitle";
+// import { extractTitle } from "../utils/extractTitle";
 
 export function useBookSearch() {
   const { authFetch, isAuthLoading } = useAuthFetch();
@@ -21,9 +21,9 @@ export function useBookSearch() {
       setIsSearching(true);
       setError(null);
       //
-      const title = extractTitle(query);
+      // const title = extractTitle(query);
       // make call
-      const url = `/api/books-api/open-library?query=${query}&title=${title}&limit=${limit}`;
+      const url = `/api/books-api/open-library?query=${query}&limit=${limit}`;
       const response = await authFetch(url);
       // if duplicate
       if (response.status === 409) {

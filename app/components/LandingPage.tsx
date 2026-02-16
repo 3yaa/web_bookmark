@@ -6,9 +6,9 @@ import { Book, Film, Tv, Gamepad2 } from "lucide-react";
 import LightRays from "@/app/components/ui/LightRays";
 
 const sections = [
-  { name: "Books", href: "/books", icon: Book },
   { name: "Movies", href: "/movies", icon: Film },
   { name: "Shows", href: "/shows", icon: Tv },
+  { name: "Books", href: "/books", icon: Book },
   { name: "Games", href: "/games", icon: Gamepad2 },
 ];
 

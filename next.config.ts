@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "https://pihole.tailffb772.ts.net/:path*",
+        destination:
+          "https://detect-locations-lightning-diet.trycloudflare.com/:path*",
       },
     ];
   },

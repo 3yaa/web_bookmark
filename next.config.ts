@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       {
         source: "/api/:path*",
         destination:
-          "https://detect-locations-lightning-diet.trycloudflare.com/:path*",
+          "https://moves-reasonably-kids-gone.trycloudflare.com/:path*",
       },
     ];
   },

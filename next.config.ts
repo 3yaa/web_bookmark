@@ -5,8 +5,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination:
-          "https://moves-reasonably-kids-gone.trycloudflare.com/:path*",
+        destination: "https://pihole.tailffb772.ts.net/:path*",
       },
     ];
   },

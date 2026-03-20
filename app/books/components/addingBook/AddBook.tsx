@@ -16,7 +16,7 @@ import { ShowMultBooks } from "./ShowMultBooks";
 import { ManualAddBook } from "./ManualAddBook";
 //
 import { useBookSearch } from "@/app/books/hooks/useBookSearch";
-import { filterCovers } from "@/app/games/utils/filterCovers";
+// import { filterCovers } from "@/app/games/utils/filterCovers";
 
 interface AddBookProps {
   isOpen: boolean;
@@ -90,7 +90,8 @@ export function AddBook({
     //save books
     try {
       setCleaningCover(true);
-      setCoverUrls((await filterCovers(olData.cover_urls)) || []);
+      // setCoverUrls((await filterCovers(olData.cover_urls)) || []);
+      setCoverUrls(olData.cover_urls || []);
     } finally {
       setCleaningCover(false);
     }
@@ -190,7 +191,8 @@ export function AddBook({
       setActiveModal("bookDetails");
       try {
         setCleaningCover(true);
-        setCoverUrls((await filterCovers(book.cover_urls)) || []);
+        // setCoverUrls((await filterCovers(book.cover_urls)) || []);
+        setCoverUrls(book.cover_urls || []);
       } finally {
         setCleaningCover(false);
       }

@@ -46,7 +46,7 @@ const ShowItem = React.memo(
   }) => (
     <div
       className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_1fr_6rem_7rem_11rem_6.5rem_0.85fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
-        show.status
+        show.status,
       )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
         index === 0 ? "rounded-bl-none" : "rounded-l-none"
       } 
@@ -81,7 +81,7 @@ const ShowItem = React.memo(
         <div className="absolute -bottom-2.5 left-0 w-full bg-zinc-800/80 rounded-md h-1 overflow-hidden">
           <div
             className={`${getStatusBg(
-              show.status
+              show.status,
             )} h-1 transition-all duration-500 ease-out rounded-md relative overflow-hidden`}
             style={{
               width: `${
@@ -90,7 +90,7 @@ const ShowItem = React.memo(
                       show.seasons,
                       show.curSeasonIndex,
                       show.curEpisode,
-                      show.status
+                      show.status,
                     )
                   : 100
               }%`,
@@ -125,7 +125,7 @@ const ShowItem = React.memo(
         {show.note || "No notes"}
       </span>
     </div>
-  )
+  ),
 );
 ShowItem.displayName = "ShowItem";
 
@@ -192,7 +192,7 @@ export function ShowDesktopListing({
   }, [openStatusOption]);
 
   return (
-    <div className="w-full md:w-[70%] lg:w-[62%] mx-auto flex flex-col h-screen">
+    <div className="w-full md:w-[70%] lg:w-[65%] mx-auto flex flex-col h-screen">
       {/* STATUS FILTER */}
       <div
         className="fixed left-1 p-2 px-2.5 bg-linear-to-br from-zinc-900/80 to-zinc-950 border-zinc-700/50 shadow-lg shadow-black rounded-lg"

@@ -5,6 +5,10 @@ interface BookCoverChangeProps {
   title: string;
   coverUrls?: string[];
   coverIndex?: number;
+  className?: string;
+  onLoad?: () => void;
+  height?: number;
+  width?: number;
 }
 
 export function BookCoverChange({
@@ -12,6 +16,10 @@ export function BookCoverChange({
   title,
   coverUrls,
   coverIndex,
+  onLoad,
+  className,
+  width,
+  height,
 }: BookCoverChangeProps) {
   return (
     <>
@@ -21,20 +29,22 @@ export function BookCoverChange({
         <Image
           src={coverUrls[coverIndex]}
           alt={title || "Untitled"}
-          width={248}
-          height={372}
-          className="min-w-62 min-h-93 object-cover"
+          width={width}
+          height={height}
+          className={className}
+          onLoad={onLoad}
         />
       ) : coverUrl && coverUrl.trim() !== "" ? (
         <Image
           src={coverUrl}
           alt={title || "Untitled"}
-          width={248}
-          height={372}
-          className="min-w-62 min-h-93 object-cover"
+          width={width}
+          height={height}
+          className={className}
+          onLoad={onLoad}
         />
       ) : (
-        <div className="min-w-62 min-h-93 bg-linear-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
+        <div className="h-64 bg-linear-to-br from-zinc-700 to-zinc-800" />
       )}
     </>
   );

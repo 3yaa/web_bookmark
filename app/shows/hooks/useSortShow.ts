@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { ShowProps, SortConfig } from "@/types/show";
+import { ShowProps, ShowSortConfig } from "@/types/show";
 
 export const useSortShows = (
   shows: ShowProps[],
-  sortConfig: SortConfig | null
+  sortConfig: ShowSortConfig | null,
 ) => {
   return useMemo(() => {
     // if no sort config, return shows as-is (no copying)

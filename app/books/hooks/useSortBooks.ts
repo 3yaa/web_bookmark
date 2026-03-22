@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { BookProps, SortConfig } from "@/types/book";
+import { BookProps, BookSortConfig } from "@/types/book";
 
 export const useSortBooks = (
   books: BookProps[],
-  sortConfig: SortConfig | null
+  sortConfig: BookSortConfig | null,
 ) => {
   return useMemo(() => {
     switch (sortConfig?.type) {

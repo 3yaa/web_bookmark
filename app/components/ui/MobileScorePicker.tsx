@@ -1,14 +1,9 @@
+import { scoreOptions } from "@/utils/dropDownDetails";
 import React, { useEffect, useRef, useState } from "react";
-
-interface ScoreOption {
-  value: string;
-  label: string;
-}
 
 interface MobileScorePickerProps {
   isOpen: boolean;
   score: number;
-  scoreOptions: ScoreOption[];
   onClose: () => void;
   onScoreChange: (score: number) => void;
 }
@@ -16,7 +11,6 @@ interface MobileScorePickerProps {
 export function MobileScorePicker({
   isOpen,
   score,
-  scoreOptions,
   onClose,
   onScoreChange,
 }: MobileScorePickerProps) {
@@ -36,7 +30,7 @@ export function MobileScorePicker({
   useEffect(() => {
     if (isOpen && scrollRef.current) {
       const selectedButton = scrollRef.current.querySelector(
-        `[data-score="${selectedScore}"]`
+        `[data-score="${selectedScore}"]`,
       ) as HTMLElement;
       if (selectedButton) {
         setTimeout(() => {

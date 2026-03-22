@@ -142,7 +142,7 @@ export function MobileListing<T extends BaseMediaProps>({
                 `}
                 >
                   {curStatusFilter === status ? (
-                    <div className="relative w-4 h-4">
+                    <div className="relative w-5 h-5">
                       <Circle className="w-5 h-5 text-blue-400 absolute" />
                       <div className="w-3 h-3 bg-blue-400/90 rounded-full absolute top-1 left-1 animate-pulse" />
                     </div>

@@ -1,9 +1,9 @@
 "use client";
 import { BookProps } from "@/types/book";
 import { useCallback, useEffect, useState } from "react";
-import { BookMobileDetails } from "./detailsUtil/BookMobileDetails";
 import { DesktopDetails } from "@/app/shared/detailView/DesktopDetails";
 import { bookStatusOptions } from "@/utils/dropDownDetails";
+import { MobileDetails } from "@/app/shared/detailView/MobileDetails";
 
 export type BookAction =
   | { type: "closeModal" }
@@ -208,15 +208,34 @@ export function BookDetails({
         />
       </div>
       <div className="block lg:hidden">
-        <BookMobileDetails
-          book={book}
-          onClose={onClose}
+        <MobileDetails
+          item={book}
           localNote={localNote}
+          statusOptions={bookStatusOptions}
+          mediaType="book"
           isLoading={isLoading}
-          addingBook={!!addBook}
-          onAddBook={handleAddBook}
-          onAction={handleAction}
-          showBookInSeries={showBookInSeries}
+          isAdding={!!addBook}
+          onAdd={handleAddBook}
+          onClose={onClose}
+          onSeriesNav={showBookInSeries}
+          onAction={
+            handleAction as (action: {
+              type: string;
+              payload?: unknown;
+            }) => void
+          }
+          differentColumns={[
+            {
+              label: "Author",
+              sortKey: "author",
+              render: (b: BookProps) => b.author,
+            },
+            {
+              label: "Published",
+              sortKey: "datePublished",
+              render: (b: BookProps) => b.datePublished,
+            },
+          ]}
           coverUrls={coverUrls}
           coverIndex={coverIndex}
         />

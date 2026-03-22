@@ -1,9 +1,9 @@
 "use client";
 import { GameProps } from "@/types/game";
 import { useCallback, useEffect, useState } from "react";
-import { GameMobileDetails } from "./detailsViews/GameMobileDetails";
 import { DesktopDetails } from "@/app/shared/detailView/DesktopDetails";
 import { gameStatusOptions } from "@/utils/dropDownDetails";
+import { MobileDetails } from "@/app/shared/detailView/MobileDetails";
 
 export type GameAction =
   | { type: "closeModal" }
@@ -211,14 +211,33 @@ export function GameDetails({
         />
       </div>
       <div className="block lg:hidden">
-        <GameMobileDetails
-          game={game}
-          onClose={onClose}
+        <MobileDetails
+          item={game}
           localNote={localNote}
+          statusOptions={gameStatusOptions}
+          mediaType="game"
           isLoading={isLoading}
-          addingGame={!!addGame}
-          onAddGame={handleAddGame}
-          onAction={handleAction}
+          isAdding={!!addGame}
+          onAdd={handleAddGame}
+          onClose={onClose}
+          onAction={
+            handleAction as (action: {
+              type: string;
+              payload?: unknown;
+            }) => void
+          }
+          differentColumns={[
+            {
+              label: "Studio",
+              sortKey: "studio",
+              render: (g: GameProps) => g.studio,
+            },
+            {
+              label: "Released",
+              sortKey: "dateReleased",
+              render: (g: GameProps) => g.dateReleased,
+            },
+          ]}
         />
       </div>
     </>

@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { MovieProps, SortConfig } from "@/types/movie";
+import { MovieProps, MovieSortConfig } from "@/types/movie";
 
 export const useSortMovies = (
   movies: MovieProps[],
-  sortConfig: SortConfig | null
+  sortConfig: MovieSortConfig | null,
 ) => {
   return useMemo(() => {
     switch (sortConfig?.type) {

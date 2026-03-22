@@ -216,6 +216,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
                     title={item.title}
                     coverUrls={coverUrls}
                     coverIndex={coverIndex}
+                    className={"min-w-62 min-h-93 object-cover"}
+                    height={372}
+                    width={248}
                   />
                 )}
                 {/* gradient overlay */}
@@ -425,7 +428,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
                     </div>
                   </div>
                 </div>
-                {/* PREQUEL AND SEQUEL — outside the flex-1 div, pinned to bottom */}
+                {/* PREQUEL AND SEQUEL */}
                 {mediaType !== "show" && (
                   <SeriesNav
                     item={item}

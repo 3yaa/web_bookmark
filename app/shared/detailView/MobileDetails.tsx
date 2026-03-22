@@ -1,39 +1,50 @@
-import { BookProps } from "@/types/book";
-import { BookAction } from "../BookDetailsHub";
-import React, { useEffect, useState, useRef } from "react";
-import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
-import { bookStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
-import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import Image from "next/image";
+import { Option } from "@/app/components/ui/Dropdown";
+import { BaseMediaProps } from "@/types/media";
+import { ColumnConfig } from "../listView/shared";
+import { useEffect, useRef, useState } from "react";
 import { MobileScorePicker } from "@/app/components/ui/MobileScorePicker";
-import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
+import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
 import { Loading } from "@/app/components/ui/Loading";
+import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
+import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
+import { BookCoverChange } from "@/app/books/components/detailsUtil/BookCoverChange";
+import { MobileProgressPicker } from "@/app/components/ui/MobileSeasonEpPicker";
+import { MobileSeriesNav } from "./MobileSeriesNav";
+import { calcCurProgress } from "@/app/shows/utils/progressCalc";
 
-interface BookMobileDetailsProps {
-  book: BookProps;
+interface MobileDetailsProps<T extends BaseMediaProps> {
+  item: T;
   localNote: string;
   onClose: () => void;
   isLoading?: { isTrue: boolean; style: string; text: string };
-  addingBook?: boolean;
-  onAddBook: () => void;
-  onAction: (action: BookAction) => void;
-  showBookInSeries?: (dir: "left" | "right") => void;
-  coverUrls?: string[];
-  coverIndex?: number;
+  isAdding: boolean;
+  onAdd: () => void;
+  statusOptions: Option[];
+  mediaType: string;
+  onAction: (action: { type: string; payload?: unknown }) => void;
+  differentColumns: [ColumnConfig<T>, ColumnConfig<T>];
+  onSeriesNav?: (dir: "left" | "right") => void; // book + movie
+  coverUrls?: string[]; // book only
+  coverIndex?: number; // book only
 }
 
-export function BookMobileDetails({
-  book,
+export function MobileDetails<T extends BaseMediaProps>({
+  item,
   localNote,
   onClose,
-  onAddBook,
-  addingBook,
-  onAction,
   isLoading,
-  showBookInSeries,
+  isAdding,
+  onAdd,
+  statusOptions,
+  mediaType,
+  onAction,
+  differentColumns,
+  onSeriesNav,
   coverUrls,
   coverIndex,
-}: BookMobileDetailsProps) {
+}: MobileDetailsProps<T>) {
+  const [isProgressPickerOpen, setIsProgressPickerOpen] = useState(false);
   const [isScorePickerOpen, setIsScorePickerOpen] = useState(false);
   const [posterLoaded, setPosterLoaded] = useState(false);
   const [translateY, setTranslateY] = useState(0);
@@ -48,7 +59,6 @@ export function BookMobileDetails({
   const lastTime = useRef(0);
 
   const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
-    //detects which side of the div was clicked
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const elementWidth = rect.width;
@@ -60,35 +70,8 @@ export function BookMobileDetails({
     });
   };
 
-  useEffect(() => {
-    // original values
-    const originalOverflow = document.body.style.overflow;
-    const originalPosition = document.body.style.position;
-    const originalTop = document.body.style.top;
-    const scrollY = window.scrollY;
-
-    // lock body in place
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = "100%";
-
-    // trigger mount animation
-    requestAnimationFrame(() => {
-      setIsVisible(true);
-    });
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-      document.body.style.position = originalPosition;
-      document.body.style.top = originalTop;
-      document.body.style.width = "";
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
-
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (isScorePickerOpen) return;
+    if (isScorePickerOpen || isProgressPickerOpen) return;
     //
     const target = e.target as HTMLElement;
     if (
@@ -113,7 +96,7 @@ export function BookMobileDetails({
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || isScorePickerOpen) return;
+    if (!isDragging || isScorePickerOpen || isProgressPickerOpen) return;
 
     const modal = modalRef.current;
     if (!modal) return;
@@ -163,12 +146,41 @@ export function BookMobileDetails({
     dragVelocity.current = 0;
   };
 
+  useEffect(() => {
+    // original values
+    const originalOverflow = document.body.style.overflow;
+    const originalPosition = document.body.style.position;
+    const originalTop = document.body.style.top;
+    const scrollY = window.scrollY;
+
+    // lock body in place
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+
+    // trigger mount animation
+    requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.position = originalPosition;
+      document.body.style.top = originalTop;
+      document.body.style.width = "";
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
   return (
     <>
       <div
         ref={modalRef}
         className={`fixed inset-0 z-30 bg-zinc-950 flex flex-col ${
-          isScorePickerOpen ? "overflow-hidden" : "overflow-y-auto"
+          isScorePickerOpen || isProgressPickerOpen
+            ? "overflow-hidden"
+            : "overflow-y-auto"
         }`}
         style={{
           transform: `translateY(${translateY}px)`,
@@ -191,20 +203,21 @@ export function BookMobileDetails({
           />
         )}
         {/* ACTION BAR */}
-        {(posterLoaded || addingBook) && (
+        {(posterLoaded || isAdding) && (
           <div className="sticky top-0 z-30">
             <div className="absolute top-0 left-0 right-0 mt-1.5 mx-0.5 flex items-center justify-between">
-              {addingBook && (
+              {isAdding && (
                 <>
                   {/* ADD BUTTON */}
                   <button
                     className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
-                    onClick={onAddBook}
+                    onClick={onAdd}
                   >
                     <Plus className="w-5 h-5 text-slate-400" />
                   </button>
                   {/* COVER INDICATOR */}
-                  {coverUrls &&
+                  {mediaType === "book" &&
+                    coverUrls &&
                     coverUrls.length > 1 &&
                     coverIndex !== undefined && (
                       <div className="p-1.5 px-2.5 bg-zinc-800/50 backdrop-blur-sm rounded-md">
@@ -215,29 +228,38 @@ export function BookMobileDetails({
                     )}
                   <div className="flex items-center gap-2">
                     {/* DIFFERENT SERIES OPTIONS */}
-                    {showBookInSeries && (
+                    {onSeriesNav && (
                       <div className="flex gap-1 bg-zinc-800/60 rounded-lg p-0.5">
                         <button
                           className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
-                          onClick={() => showBookInSeries("left")}
+                          onClick={() => onSeriesNav("left")}
                         >
                           <ChevronLeft className="w-5 h-5 text-gray-400 transition-colors" />
                         </button>
                         <button
                           className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
-                          onClick={() => showBookInSeries("right")}
+                          onClick={() => onSeriesNav("right")}
                         >
                           <ChevronRight className="w-5 h-5 text-gray-400 transition-colors" />
                         </button>
                       </div>
                     )}
-                    {/* MORE BOOKS */}
+                    {/* NEED YEAR */}
                     <button
                       className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
                       onClick={() => {
-                        onAction({ type: "more" });
+                        onAction({
+                          type:
+                            mediaType === "book"
+                              ? "moreBooks"
+                              : "needYearField",
+                        });
                       }}
-                      title={"More books"}
+                      title={
+                        mediaType === "book"
+                          ? "See More Options"
+                          : "Search with year"
+                      }
                     >
                       <ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
                     </button>
@@ -249,7 +271,7 @@ export function BookMobileDetails({
         )}
         {/* INFO */}
         <div className="pb-10">
-          {/* COVER */}
+          {/* PIC */}
           <div
             className={`relative w-full overflow-hidden bg-zinc-900/40 transition-all duration-300 ${
               isDragging && "rounded-lg"
@@ -258,21 +280,21 @@ export function BookMobileDetails({
               coverUrls && coverUrls.length > 1 ? handleCoverChange : undefined
             }
           >
-            {coverIndex !== undefined &&
-            coverUrls !== undefined &&
-            coverUrls[coverIndex] ? (
-              <Image
-                src={coverUrls[coverIndex]}
-                alt={book.title || "Cover"}
-                width={1280}
-                height={900}
-                className="object-cover w-full"
+            {mediaType === "book" ? (
+              <BookCoverChange
+                coverUrl={item.coverUrl}
+                title={item.title}
+                coverUrls={coverUrls}
+                coverIndex={coverIndex}
                 onLoad={() => setPosterLoaded(true)}
+                height={900}
+                width={1280}
+                className="object-cover w-full"
               />
-            ) : book.coverUrl ? (
+            ) : item.posterUrl ? (
               <Image
-                src={book.coverUrl}
-                alt={book.title || "Cover"}
+                src={item.posterUrl}
+                alt={item.title || "Poster"}
                 width={1280}
                 height={900}
                 className="object-cover w-full"
@@ -287,17 +309,26 @@ export function BookMobileDetails({
           <div className="px-4">
             <div className="mt-4">
               {/* SERIES TITLE */}
-              {book.seriesTitle ? (
-                <div className="text-zinc-400 text-sm font-semibold -mt-2.5">
-                  {book.seriesTitle}
-                </div>
-              ) : (
-                <div></div>
-              )}
+              {(() => {
+                const seriesLabel =
+                  mediaType === "game"
+                    ? item.dlcIndex !== 0
+                      ? item.mainTitle
+                      : null
+                    : item.seriesTitle;
+
+                return seriesLabel ? (
+                  <div className="text-zinc-400 text-sm font-semibold -mt-2.5">
+                    {seriesLabel}
+                  </div>
+                ) : (
+                  <div></div>
+                );
+              })()}
               <div className="flex justify-between">
                 {/* TITLE */}
                 <h1 className="text-zinc-100 text-2xl font-bold -mt-0.5">
-                  {book.title}
+                  {item.title}
                 </h1>
                 {/* SCORE */}
                 <div data-no-drag>
@@ -305,28 +336,56 @@ export function BookMobileDetails({
                     onClick={() => setIsScorePickerOpen(true)}
                     className="relative text-zinc-300/90 font-bold bg-linear-to-br from-zinc-800/90 to-zinc-950 px-3.5 py-1.75 rounded-lg shadow-lg shadow-black"
                   >
-                    <span className="relative z-10">{book.score || "-"}</span>
+                    <span className="relative z-10">{item.score || "-"}</span>
                   </button>
                 </div>
               </div>
-              {/* AUTHOR AND DATE */}
+              {/* AUTHOR/STUDIO/DIRECTOR AND DATES */}
               <div className="text-zinc-400 text-sm font-medium flex items-center gap-2">
-                <span>{book.author || "Unknown"}</span>•
-                <span>{book.datePublished || "-"}</span>
-                {book.dateCompleted && (
+                <span>
+                  {differentColumns[0].render(item) ||
+                    "Unknown " + differentColumns[0].label}
+                </span>
+                •<span>{differentColumns[1].render(item) || "Unknown"}</span>
+                {item.dateCompleted && (
                   <>
-                    •<span>{formatDateShort(book.dateCompleted)}</span>
+                    •<span>{formatDateShort(item.dateCompleted)}</span>
                   </>
                 )}
               </div>
             </div>
+            {/* PROGRESS BAR — show only */}
+            {mediaType === "show" && item.seasons && (
+              <div onClick={() => setIsProgressPickerOpen(true)}>
+                <div className="mt-4.5 w-full bg-zinc-800/80 rounded-md h-1.5 overflow-hidden shadow-md shadow-black/50">
+                  <div
+                    className={`${getStatusBg(item.status)} h-1.5 transition-all duration-500 ease-out rounded-md`}
+                    style={{
+                      width: `${
+                        item.seasons?.[item.curSeasonIndex ?? 0]?.episode_count
+                          ? calcCurProgress(
+                              item.seasons,
+                              item.curSeasonIndex ?? 0,
+                              item.curEpisode ?? 1,
+                            )
+                          : 100
+                      }%`,
+                    }}
+                  />
+                </div>
+                <div className="mt-1 flex justify-between text-zinc-400 text-sm font-bold mb-0.5">
+                  <span>Season: {(item.curSeasonIndex ?? 0) + 1 || "-"}</span>
+                  <span>Episode: {item.curEpisode || "-"}</span>
+                </div>
+              </div>
+            )}
             {/* STATUS */}
             <div className="mt-3" data-no-drag>
               <label className="text-zinc-400 text-xs font-medium">
                 Status
               </label>
-              <div className="pt-1 flex justify-center gap-2 pb-1">
-                {bookStatusOptions.map((status) => (
+              <div className="pt-1 flex flex-wrap gap-2 pb-1">
+                {statusOptions.map((status, index) => (
                   <button
                     key={status.value}
                     onClick={() =>
@@ -335,8 +394,10 @@ export function BookMobileDetails({
                         payload: `${status.label}`,
                       })
                     }
-                    className={`flex-1 px-4 py-1.5 text-sm rounded-md border border-zinc-700/30 font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 shadow-lg shadow-black/50 ${
-                      status.label === book.status
+                    className={`${
+                      index === 3 ? "w-full" : "flex-1"
+                    } px-4 py-1.5 text-sm rounded-md border border-zinc-700/30 font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 shadow-lg shadow-black/50 ${
+                      status.label === item.status
                         ? `${getStatusBg(status.label)} text-zinc-100`
                         : "text-zinc-300 bg-zinc-900/40 hover:bg-zinc-800/60"
                     }`}
@@ -347,66 +408,19 @@ export function BookMobileDetails({
               </div>
             </div>
             {/* PREQUEL AND SEQUEL */}
-            {book.placeInSeries && (
-              <div className="pt-5 grid grid-cols-[1fr_2rem_1fr]" data-no-drag>
-                {/* PREQUEL */}
-                <div className="min-w-0 text-left">
-                  {book.prequel && (
-                    <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
-                      <span className="shrink-0">←</span>
-                      <span
-                        className={`truncate min-w-0 transition-all duration-200 ${
-                          !addingBook ? "hover:underline active:scale-95" : ""
-                        }`}
-                        onClick={() => {
-                          if (!addingBook) {
-                            onAction({
-                              type: "seriesNav",
-                              payload: "prequel",
-                            });
-                          }
-                        }}
-                      >
-                        {book.prequel}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                {/* PLACEMENT */}
-                <div className="flex justify-center items-end shrink-0">
-                  {book.placeInSeries && (
-                    <label className="text-sm font-medium text-zinc-400/85">
-                      {book.placeInSeries}
-                    </label>
-                  )}
-                </div>
-                {/* SEQUEL */}
-                <div className="min-w-0 text-right flex justify-end">
-                  {book.sequel && (
-                    <div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
-                      <span
-                        className={`truncate min-w-0 transition-all duration-200 ${
-                          !addingBook ? "hover:underline active:scale-95" : ""
-                        }`}
-                        onClick={() => {
-                          if (!addingBook) {
-                            onAction({
-                              type: "seriesNav",
-                              payload: "sequel",
-                            });
-                          }
-                        }}
-                      >
-                        {book.sequel}
-                      </span>
-                      <span className="shrink-0">→</span>
-                    </div>
-                  )}
-                </div>
-              </div>
+            {mediaType !== "show" && (
+              <MobileSeriesNav
+                item={item}
+                mediaType={mediaType}
+                isAdding={isAdding}
+                onAction={onAction}
+              />
             )}
             {/* NOTE */}
-            <div className="mt-3" data-no-drag>
+            <div
+              className={`${mediaType === "show" ? "mt-1" : "mt-3"}`}
+              data-no-drag
+            >
               <label className="text-zinc-400 text-xs font-medium">Notes</label>
               <div className="bg-zinc-800/40 rounded-lg pl-3 pr-1 pt-3 pb-2 focus-within:ring-1 focus-within:ring-zinc-700 transition-all duration-200 max-h-22 overflow-auto shadow-lg shadow-black/50">
                 <MobileAutoTextarea
@@ -418,7 +432,9 @@ export function BookMobileDetails({
                     })
                   }
                   onBlur={() => onAction({ type: "saveNote" })}
-                  placeholder="Add your thoughts about this book..."
+                  placeholder={
+                    "Add your thoughts about this " + mediaType + "..."
+                  }
                   className="w-full bg-transparent text-zinc-200 text-sm leading-relaxed resize-none outline-none placeholder-zinc-500"
                 />
               </div>
@@ -428,13 +444,27 @@ export function BookMobileDetails({
       </div>
       <MobileScorePicker
         isOpen={isScorePickerOpen}
-        score={book.score ?? 0}
-        scoreOptions={scoreOptions}
+        score={item.score ?? 0}
         onClose={() => setIsScorePickerOpen(false)}
         onScoreChange={(nScore) =>
           onAction({ type: "changeScore", payload: nScore })
         }
       />
+      {mediaType === "show" && (
+        <MobileProgressPicker
+          isOpen={isProgressPickerOpen}
+          seasons={item.seasons || []}
+          curSeasonIndex={item.curSeasonIndex ?? 0}
+          curEpisode={item.curEpisode ?? 1}
+          onClose={() => setIsProgressPickerOpen(false)}
+          onSeasonIndexChange={(seasonIndex) => {
+            onAction({ type: "changeSeasonNum", payload: seasonIndex });
+          }}
+          onEpisodeChange={(episode) => {
+            onAction({ type: "changeEpisodeNum", payload: episode });
+          }}
+        />
+      )}
     </>
   );
 }

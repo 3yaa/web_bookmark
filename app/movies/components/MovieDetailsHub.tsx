@@ -1,9 +1,9 @@
 "use client";
 import { MovieProps } from "@/types/movie";
 import { useCallback, useEffect, useState } from "react";
-import { MovieMobileDetails } from "./detailsViews/MovieMobileDetails";
 import { DesktopDetails } from "@/app/shared/detailView/DesktopDetails";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
+import { MobileDetails } from "@/app/shared/detailView/MobileDetails";
 
 export type MovieAction =
   | { type: "closeModal" }
@@ -183,15 +183,34 @@ export function MovieDetails({
         />
       </div>
       <div className="block lg:hidden">
-        <MovieMobileDetails
-          movie={movie}
-          onClose={onClose}
+        <MobileDetails
+          item={movie}
           localNote={localNote}
+          statusOptions={movieStatusOptions}
+          mediaType="movie"
           isLoading={isLoading}
-          addingMovie={!!addMovie}
-          onAddMovie={handleAddMovie}
-          showAnotherSeries={showAnotherSeries}
-          onAction={handleAction}
+          isAdding={!!addMovie}
+          onAdd={handleAddMovie}
+          onClose={onClose}
+          onSeriesNav={showAnotherSeries}
+          onAction={
+            handleAction as (action: {
+              type: string;
+              payload?: unknown;
+            }) => void
+          }
+          differentColumns={[
+            {
+              label: "Director",
+              sortKey: "director",
+              render: (m: MovieProps) => m.director,
+            },
+            {
+              label: "Released",
+              sortKey: "dateReleased",
+              render: (m: MovieProps) => m.dateReleased,
+            },
+          ]}
         />
       </div>
     </>

@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { GameProps, SortConfig } from "@/types/game";
+import { GameProps, GameSortConfig } from "@/types/game";
 
 export const useSortGames = (
   shows: GameProps[],
-  sortConfig: SortConfig | null
+  sortConfig: GameSortConfig | null,
 ) => {
   return useMemo(() => {
     switch (sortConfig?.type) {

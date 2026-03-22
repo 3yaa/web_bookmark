@@ -8,8 +8,8 @@ interface Season {
 interface MobileProgressPickerProps {
   isOpen: boolean;
   seasons: Season[];
-  curSeasonIndex: number;
-  curEpisode: number;
+  curSeasonIndex?: number;
+  curEpisode?: number;
   onClose: () => void;
   onEpisodeChange: (episode: number) => void;
   onSeasonIndexChange: (seasonIndex: number) => void;
@@ -25,7 +25,7 @@ export function MobileProgressPicker({
   onSeasonIndexChange,
 }: MobileProgressPickerProps) {
   const [selectedSeasonIndex, setSelectedSeasonIndex] = useState(
-    curSeasonIndex ?? 0
+    curSeasonIndex ?? 0,
   );
   const [selectedEpisode, setSelectedEpisode] = useState(curEpisode ?? 1);
   const [isClosing, setIsClosing] = useState(false);
@@ -45,7 +45,7 @@ export function MobileProgressPicker({
   useEffect(() => {
     if (isOpen && seasonScrollRef.current) {
       const selectedButton = seasonScrollRef.current.querySelector(
-        `[data-season="${selectedSeasonIndex}"]`
+        `[data-season="${selectedSeasonIndex}"]`,
       ) as HTMLElement;
       if (selectedButton) {
         setTimeout(() => {
@@ -61,7 +61,7 @@ export function MobileProgressPicker({
   useEffect(() => {
     if (isOpen && episodeScrollRef.current) {
       const selectedButton = episodeScrollRef.current.querySelector(
-        `[data-episode="${selectedEpisode}"]`
+        `[data-episode="${selectedEpisode}"]`,
       ) as HTMLElement;
       if (selectedButton) {
         setTimeout(() => {
@@ -91,7 +91,7 @@ export function MobileProgressPicker({
 
   const episodeOptions = Array.from(
     { length: seasons[selectedSeasonIndex]?.episode_count || 0 },
-    (_, i) => i + 1
+    (_, i) => i + 1,
   );
 
   return (

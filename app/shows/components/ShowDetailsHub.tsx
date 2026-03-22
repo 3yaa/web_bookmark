@@ -1,9 +1,9 @@
 "use client";
 import { ShowProps } from "@/types/show";
 import React, { useCallback, useEffect, useState } from "react";
-import { ShowMobileDetails } from "./detailsUtil/ShowMobileDetails";
 import { DesktopDetails } from "@/app/shared/detailView/DesktopDetails";
 import { showStatusOptions } from "@/utils/dropDownDetails";
+import { MobileDetails } from "@/app/shared/detailView/MobileDetails";
 
 export type ShowAction =
   | { type: "closeModal" }
@@ -377,14 +377,33 @@ export function ShowDetails({
         />
       </div>
       <div className="block lg:hidden">
-        <ShowMobileDetails
-          show={show}
-          onClose={onClose}
+        <MobileDetails
+          item={show}
           localNote={localNote}
+          statusOptions={showStatusOptions}
+          mediaType="show"
           isLoading={isLoading}
-          addingShow={!!addShow}
-          onAddShow={handleAddShow}
-          onAction={handleAction}
+          isAdding={!!addShow}
+          onAdd={handleAddShow}
+          onClose={onClose}
+          onAction={
+            handleAction as (action: {
+              type: string;
+              payload?: unknown;
+            }) => void
+          }
+          differentColumns={[
+            {
+              label: "Studio",
+              sortKey: "studio",
+              render: (s: ShowProps) => s.studio,
+            },
+            {
+              label: "Released",
+              sortKey: "dateReleased",
+              render: (s: ShowProps) => s.dateReleased,
+            },
+          ]}
         />
       </div>
     </>

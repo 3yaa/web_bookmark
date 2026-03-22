@@ -18,9 +18,9 @@ import { AddShow } from "./addShow/AddShow";
 import { ShowDetails } from "./ShowDetailsHub";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
-import { MediaDesktopListing } from "@/app/shared/listView/MediaDesktopListing";
+import { DesktopListing } from "@/app/shared/listView/DesktopListing";
 import { showStatusOptions } from "@/utils/dropDownDetails";
-import { MediaMobileListing } from "@/app/shared/listView/MediaMobileListing";
+import { MobileListing } from "@/app/shared/listView/MobileListing";
 
 export default function ShowHub() {
   const { shows, addShow, updateShow, deleteShow, isProcessingShow } =
@@ -157,7 +157,7 @@ export default function ShowHub() {
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">
-        <MediaDesktopListing
+        <DesktopListing
           mediaItems={sortedShows}
           isProcessing={isProcessingShow}
           sortConfig={sortConfig}
@@ -185,7 +185,7 @@ export default function ShowHub() {
         />
       </div>
       <div className="block lg:hidden">
-        <MediaMobileListing
+        <MobileListing
           mediaItems={sortedShows}
           isProcessing={isProcessingShow || isFilterPending}
           sortConfig={sortConfig}

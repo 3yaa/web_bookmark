@@ -12,9 +12,9 @@ import { useNav } from "../../components/NavContext";
 import { useRef, useState } from "react";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Loading } from "../../components/ui/Loading";
-import { MediaMobileItem } from "./MediaMobileItem";
+import { MobileItem } from "./MobileItem";
 
-interface MediaMobileListingProps<T extends BaseMediaProps> {
+interface MobileListingProps<T extends BaseMediaProps> {
   mediaItems: T[];
   isProcessing: boolean;
   sortConfig: { type: string; order: "asc" | "desc" } | null;
@@ -28,7 +28,7 @@ interface MediaMobileListingProps<T extends BaseMediaProps> {
   onStatusFilter: (status: MediaStatus) => void;
 }
 
-export function MediaMobileListing<T extends BaseMediaProps>({
+export function MobileListing<T extends BaseMediaProps>({
   mediaItems,
   isProcessing,
   sortConfig,
@@ -40,7 +40,7 @@ export function MediaMobileListing<T extends BaseMediaProps>({
   onItemClicked,
   onSortConfig,
   onStatusFilter,
-}: MediaMobileListingProps<T>) {
+}: MobileListingProps<T>) {
   const { isNavOpen } = useNav();
   const parentRef = useRef<HTMLDivElement>(null);
   const [openSortOption, setOpenSortOption] = useState(false);
@@ -275,7 +275,7 @@ export function MediaMobileListing<T extends BaseMediaProps>({
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
-                  <MediaMobileItem
+                  <MobileItem
                     item={item}
                     isNavOpen={isNavOpen}
                     mediaType={mediaType}

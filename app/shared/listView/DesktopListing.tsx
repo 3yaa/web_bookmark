@@ -10,9 +10,9 @@ import { useEffect, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Loading } from "../../components/ui/Loading";
 import { ColumnConfig } from "./shared";
-import { MediaDesktopItem } from "./MediaDesktopItem";
+import { DesktopItem } from "./DesktopItem";
 
-interface MediaDesktopListingProps<T extends BaseMediaProps> {
+interface DesktopListingProps<T extends BaseMediaProps> {
   mediaItems: T[];
   isProcessing: boolean;
   // sort/filter
@@ -33,7 +33,7 @@ interface MediaDesktopListingProps<T extends BaseMediaProps> {
   onStatusFilter: (Status: MediaStatus) => void;
 }
 
-export function MediaDesktopListing<T extends BaseMediaProps>({
+export function DesktopListing<T extends BaseMediaProps>({
   mediaItems,
   isProcessing,
   sortConfig,
@@ -47,7 +47,7 @@ export function MediaDesktopListing<T extends BaseMediaProps>({
   onSortConfig,
   onSearchChange,
   onStatusFilter,
-}: MediaDesktopListingProps<T>) {
+}: DesktopListingProps<T>) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const searchBarRef = useRef<HTMLInputElement>(null);
@@ -370,7 +370,7 @@ export function MediaDesktopListing<T extends BaseMediaProps>({
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
-                  <MediaDesktopItem
+                  <DesktopItem
                     item={item}
                     index={virtualItem.index}
                     total={mediaItems.length}

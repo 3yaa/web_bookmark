@@ -4,11 +4,11 @@ import { BaseMediaProps } from "@/types/media";
 import { ColumnConfig } from "./shared";
 import { BackdropImageMobile } from "../../components/ui/BackdropMobile";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
-import { ShowProgressBarMobile } from "../../shows/components/listing/showProgress";
+import { ShowProgressBarMobile } from "../../shows/components/listingUtil/showProgress";
 import { ShowProps } from "@/types/show";
 import { GameProps } from "@/types/game";
 
-interface MediaMobileItemProps<T extends BaseMediaProps> {
+interface MobileItemProps<T extends BaseMediaProps> {
   item: T;
   isNavOpen: boolean;
   mediaType: string;
@@ -16,7 +16,7 @@ interface MediaMobileItemProps<T extends BaseMediaProps> {
   onClick: (item: T) => void;
 }
 
-export const MediaMobileItem = React.memo(function MediaMobileItem<
+export const MobileItem = React.memo(function MobileItem<
   T extends BaseMediaProps,
 >({
   item,
@@ -24,7 +24,7 @@ export const MediaMobileItem = React.memo(function MediaMobileItem<
   mediaType,
   differentColumns,
   onClick,
-}: MediaMobileItemProps<T>) {
+}: MobileItemProps<T>) {
   const seriesSection =
     mediaType === "game"
       ? (() => {
@@ -180,4 +180,4 @@ export const MediaMobileItem = React.memo(function MediaMobileItem<
       </div>
     </div>
   );
-}) as <T extends BaseMediaProps>(props: MediaMobileItemProps<T>) => ReactNode;
+}) as <T extends BaseMediaProps>(props: MobileItemProps<T>) => ReactNode;

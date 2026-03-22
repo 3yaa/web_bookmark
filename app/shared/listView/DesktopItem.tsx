@@ -9,9 +9,9 @@ import {
   getStatusWaveColor,
 } from "@/utils/formattingUtils";
 import { ShowProps } from "@/types/show";
-import { ShowProgressBarDesktop } from "../../shows/components/listing/showProgress";
+import { ShowProgressBarDesktop } from "../../shows/components/listingUtil/showProgress";
 
-interface MediaDesktopItemProps<T extends BaseMediaProps> {
+interface DesktopItemProps<T extends BaseMediaProps> {
   item: T;
   index: number;
   total: number;
@@ -20,7 +20,7 @@ interface MediaDesktopItemProps<T extends BaseMediaProps> {
   differentColumns: [ColumnConfig<T>, ColumnConfig<T>];
 }
 
-export const MediaDesktopItem = React.memo(function MediaDesktopItem<
+export const DesktopItem = React.memo(function DesktopItem<
   T extends BaseMediaProps,
 >({
   item,
@@ -29,7 +29,7 @@ export const MediaDesktopItem = React.memo(function MediaDesktopItem<
   mediaType,
   onClick,
   differentColumns,
-}: MediaDesktopItemProps<T>) {
+}: DesktopItemProps<T>) {
   return (
     <div
       className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_1fr_6rem_7rem_11rem_6.5rem_0.85fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
@@ -113,4 +113,4 @@ export const MediaDesktopItem = React.memo(function MediaDesktopItem<
       </span>
     </div>
   );
-}) as <T extends BaseMediaProps>(props: MediaDesktopItemProps<T>) => ReactNode;
+}) as <T extends BaseMediaProps>(props: DesktopItemProps<T>) => ReactNode;

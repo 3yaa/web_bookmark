@@ -18,9 +18,9 @@ import { AddBook } from "./addingBook/AddBook";
 import { BookDetails } from "./BookDetailsHub";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
-import { MediaDesktopListing } from "@/app/shared/listView/MediaDesktopListing";
+import { DesktopListing } from "@/app/shared/listView/DesktopListing";
 import { bookStatusOptions } from "@/utils/dropDownDetails";
-import { MediaMobileListing } from "@/app/shared/listView/MediaMobileListing";
+import { MobileListing } from "@/app/shared/listView/MobileListing";
 
 export default function BookHub() {
   const { books, addBook, updateBook, deleteBook, isProcessingBook } =
@@ -179,7 +179,7 @@ export default function BookHub() {
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">
-        <MediaDesktopListing
+        <DesktopListing
           mediaItems={sortedBooks}
           isProcessing={isProcessingBook}
           sortConfig={sortConfig}
@@ -207,7 +207,7 @@ export default function BookHub() {
         />
       </div>
       <div className="block lg:hidden">
-        <MediaMobileListing
+        <MobileListing
           mediaItems={sortedBooks}
           isProcessing={isProcessingBook || isFilterPending}
           sortConfig={sortConfig}

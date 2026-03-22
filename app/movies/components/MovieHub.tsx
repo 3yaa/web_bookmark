@@ -18,9 +18,9 @@ import { AddMovie } from "./addMovie/AddMovie";
 import { MovieDetails } from "./MovieDetailsHub";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
-import { MediaDesktopListing } from "@/app/shared/listView/MediaDesktopListing";
+import { DesktopListing } from "@/app/shared/listView/DesktopListing";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
-import { MediaMobileListing } from "@/app/shared/listView/MediaMobileListing";
+import { MobileListing } from "@/app/shared/listView/MobileListing";
 
 export default function MoviesHub() {
   const { movies, addMovie, updateMovie, deleteMovie, isProcessingMovie } =
@@ -181,7 +181,7 @@ export default function MoviesHub() {
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">
-        <MediaDesktopListing
+        <DesktopListing
           mediaItems={sortedMovies}
           isProcessing={isProcessingMovie}
           sortConfig={sortConfig}
@@ -209,7 +209,7 @@ export default function MoviesHub() {
         />
       </div>
       <div className="block lg:hidden">
-        <MediaMobileListing
+        <MobileListing
           mediaItems={sortedMovies}
           isProcessing={isProcessingMovie || isFilterPending}
           sortConfig={sortConfig}

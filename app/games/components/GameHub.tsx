@@ -18,9 +18,9 @@ import { AddGame } from "./addGame/AddGame";
 import { GameDetails } from "./GameDetailsHub";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
-import { MediaDesktopListing } from "@/app/shared/listView/MediaDesktopListing";
+import { DesktopListing } from "@/app/shared/listView/DesktopListing";
 import { gameStatusOptions } from "@/utils/dropDownDetails";
-import { MediaMobileListing } from "@/app/shared/listView/MediaMobileListing";
+import { MobileListing } from "@/app/shared/listView/MobileListing";
 
 export default function GameList() {
   const { games, addGame, updateGame, deleteGame, isProcessingGame } =
@@ -191,7 +191,7 @@ export default function GameList() {
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">
-        <MediaDesktopListing
+        <DesktopListing
           mediaItems={sortedGames}
           isProcessing={isProcessingGame}
           sortConfig={sortConfig}
@@ -219,7 +219,7 @@ export default function GameList() {
         />
       </div>
       <div className="block lg:hidden">
-        <MediaMobileListing
+        <MobileListing
           mediaItems={sortedGames}
           isProcessing={isProcessingGame || isFilterPending}
           sortConfig={sortConfig}

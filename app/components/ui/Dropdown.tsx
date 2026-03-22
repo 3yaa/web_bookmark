@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { Portal } from "@/utils/portal";
-interface Option {
+
+export interface Option {
   value: string;
   label: string;
   bgStyle?: string;

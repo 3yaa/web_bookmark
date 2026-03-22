@@ -1,29 +1,15 @@
-export type SortConfig = {
-  type: "title" | "score" | "dateCompleted" | "director" | "dateReleased";
-  order: "asc" | "desc";
-};
+import { BaseMediaProps, SortState } from "./media";
 
-export interface MovieProps {
-  id: number; //--REQUIRED -> will do on server side
-  // user set
-  score?: number;
-  dateCompleted?: Date | null;
-  note?: string;
-  status: "Completed" | "Want to Watch" | "Dropped"; //!--REQUIRED
-  // from omdb
-  imdbId: string; //!--REQUIRED
+export type MovieSortConfig = SortState<
+  "title" | "score" | "dateCompleted" | "director" | "dateReleased"
+>;
+
+export interface MovieProps extends BaseMediaProps {
+  status: "Completed" | "Want to Watch" | "Dropped";
+  imdbId: string;
   normalizedTitle: string;
-  title: string; //!--REQUIRED
   director?: string;
   dateReleased?: number;
-  // from tmdb
-  posterUrl?: string;
-  backdropUrl?: string;
-  // from WikidataProps
-  seriesTitle?: string;
-  placeInSeries?: string;
-  prequel?: string;
-  sequel?: string;
 }
 
 export interface OMDbProps {

@@ -1,3 +1,6 @@
+import { IGDBInitProps } from "./game";
+import { TMDBSeasonProps } from "./show";
+
 export type MediaStatus =
   | "Completed"
   | "Want to Read"
@@ -18,9 +21,17 @@ export interface BaseMediaProps {
   posterUrl?: string;
   coverUrl?: string;
   backdropUrl?: string;
-  mainTitle?: string;
+  // series (book/movie)
   seriesTitle?: string;
   placeInSeries?: string;
   prequel?: string;
   sequel?: string;
+  // game only
+  mainTitle?: string;
+  dlcs?: IGDBInitProps[];
+  dlcIndex?: number;
+  // show only
+  seasons?: TMDBSeasonProps[];
+  curSeasonIndex?: number;
+  curEpisode?: number;
 }

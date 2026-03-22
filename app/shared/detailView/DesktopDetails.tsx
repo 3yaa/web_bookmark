@@ -1,9 +1,6 @@
-import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
-import { BackdropImage } from "@/app/components/ui/Backdrop";
-import { Dropdown } from "@/app/components/ui/Dropdown";
+import Image from "next/image";
 import { Loading } from "@/app/components/ui/Loading";
-import { MovieProps } from "@/types/movie";
-import { movieStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
+import { BaseMediaProps } from "@/types/media";
 import {
   formatDateShort,
   getStatusBorderGradient,
@@ -17,36 +14,77 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import Image from "next/image";
-import { MovieAction } from "../MovieDetailsHub";
+import { BackdropImage } from "@/app/components/ui/Backdrop";
+import { ColumnConfig } from "../listView/shared";
+import { Dropdown, Option } from "@/app/components/ui/Dropdown";
+import { scoreOptions } from "@/utils/dropDownDetails";
+import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
+import { BookCoverChange } from "@/app/books/components/detailsUtil/BookCoverChange";
+import { BackdropImageBook } from "@/app/components/ui/BackdropBook";
+import { SeriesNav } from "./SeriesNav";
+import { EditProgress } from "@/app/shows/components/detailsUtil/EditProgress";
 
-interface MovieDesktopDetailsProps {
-  movie: MovieProps;
+interface DesktopDetailsProps<T extends BaseMediaProps> {
+  item: T;
   localNote: string;
-  onClose: () => void;
+  statusOptions: Option[];
+  mediaType: string;
   isLoading?: { isTrue: boolean; style: string; text: string };
-  addingMovie?: boolean;
-  onAddMovie: () => void;
-  showAnotherSeries?: (seriesDir: "left" | "right") => void;
-  onAction: (action: MovieAction) => void;
+  isAdding: boolean;
+  onAdd: () => void;
+  onClose: () => void;
+  onSeriesNav?: (dir: "left" | "right") => void;
+  differentColumns: [ColumnConfig<T>, ColumnConfig<T>];
+  onAction: (action: { type: string; payload?: unknown }) => void;
+  // only for book
+  coverUrls?: string[];
+  coverIndex?: number;
+  // only for game
+  backdropUrls?: string[];
+  backdropIndex?: number;
+  // only for show
+  editingMode?: { season: boolean; episode: boolean };
+  inputValues?: { season: number | ""; episode: number | "" };
 }
 
-export function MovieDesktopDetails({
-  movie,
-  onClose,
-  isLoading,
-  addingMovie,
-  showAnotherSeries,
-  onAddMovie,
+export function DesktopDetails<T extends BaseMediaProps>({
+  item,
   localNote,
+  statusOptions,
+  mediaType,
+  isLoading,
+  isAdding,
+  onAdd,
+  onClose,
+  onSeriesNav,
   onAction,
-}: MovieDesktopDetailsProps) {
+  coverUrls,
+  coverIndex,
+  backdropUrls,
+  backdropIndex,
+  editingMode,
+  inputValues,
+  differentColumns,
+}: DesktopDetailsProps<T>) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault(); // prevent new line
       onAction({ type: "saveNote" });
       e.currentTarget.blur(); // remove focus
     }
+  };
+  // only for game/book
+  const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
+    //detects which side of the div was clicked
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const elementWidth = rect.width;
+    const isRightSide = clickX > elementWidth / 2;
+
+    onAction({
+      type: "changeCover",
+      payload: isRightSide ? "next" : "prev",
+    });
   };
 
   return (
@@ -60,7 +98,7 @@ export function MovieDesktopDetails({
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-linear-to-b ${getStatusBorderGradient(
-          movie.status
+          item.status,
         )} p-1.5 py-2 lg:min-w-215 lg:max-w-215`}
       >
         {/* ACTUAL DETAIL CARD */}
@@ -70,23 +108,24 @@ export function MovieDesktopDetails({
           )}
           <div className={`px-8.5 py-7 border-0 rounded-2xl overflow-hidden`}>
             {/* ACTION BUTTONS */}
-            {addingMovie ? (
+            {isAdding ? (
               <div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
-                {showAnotherSeries && (
+                {/* NAV DIFFERENT SERIES */}
+                {onSeriesNav && (
                   <div className="flex gap-1 bg-zinc-800/50 rounded-lg">
                     {/* LEFT BUTTON */}
                     <button
                       className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
-                    hover:cursor-pointer transition-all group"
-                      onClick={() => showAnotherSeries("left")}
+                      hover:cursor-pointer transition-all group"
+                      onClick={() => onSeriesNav("left")}
                     >
                       <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
                     </button>
                     {/* RIGHT BUTTON */}
                     <button
                       className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
-                    hover:cursor-pointer transition-all group"
-                      onClick={() => showAnotherSeries("right")}
+                      hover:cursor-pointer transition-all group"
+                      onClick={() => onSeriesNav("right")}
                     >
                       <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
                     </button>
@@ -95,26 +134,32 @@ export function MovieDesktopDetails({
                 {/* ADD */}
                 <button
                   className="py-1.5 px-5 rounded-lg bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer transition-all group"
-                  onClick={onAddMovie}
-                  title={"Add Book"}
+                  onClick={onAdd}
+                  title={"Add " + mediaType}
                 >
                   <Plus className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors duration-0" />
                 </button>
-                {/* NEED YEAR */}
+                {/* NEED YEAR | SHOW MORE BOOKS*/}
                 <button
-                  className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer
-                    transition-all group"
+                  className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer transition-all group"
                   onClick={() => {
-                    onAction({ type: "needYearField" });
+                    onAction({
+                      type:
+                        mediaType === "book" ? "moreBooks" : "needYearField",
+                    });
                   }}
-                  title={"Search with year"}
+                  title={
+                    mediaType === "book"
+                      ? "See More Options"
+                      : "Search with year"
+                  }
                 >
                   <ChevronsUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
                 </button>
                 {/* CLOSE BUTTON */}
                 <button
                   className="py-1.5 px-2 rounded-lg bg-zinc-800/50 hover:bg-red-600/50 
-                  hover:cursor-pointer transition-all group"
+                    hover:cursor-pointer transition-all group"
                   onClick={onClose}
                   title={"Close"}
                 >
@@ -125,9 +170,9 @@ export function MovieDesktopDetails({
               <button
                 className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/0 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group z-10"
                 onClick={() => {
-                  onAction({ type: "deleteMovie" });
+                  onAction({ type: "delete" });
                 }}
-                title={"Delete Movie"}
+                title={"Delete " + mediaType}
               >
                 <Trash2 className="w-4 h-4 text-gray-400/5 group-hover:text-red-500 transition-colors duration-200" />
               </button>
@@ -135,55 +180,120 @@ export function MovieDesktopDetails({
 
             <div className="flex gap-8">
               {/* LEFT SIDE -- PIC */}
-              <div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg select-none">
-                {movie.posterUrl !== undefined ? (
-                  <>
-                    <Image
-                      src={movie.posterUrl}
-                      alt={movie.title || "Untitled"}
-                      width={1280}
-                      height={720}
-                      className="min-w-62 min-h-93 object-fill"
-                    />
-                    <div
-                      className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
-                      style={{
-                        background:
-                          "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0) 50%, rgba(24,24,27,0.5) 100%)",
-                      }}
-                    />
-                  </>
+              <div
+                className={`flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg select-none ${
+                  coverUrls ? "hover:cursor-pointer" : ""
+                }`}
+                // FO BOOK ONLY
+                onClick={
+                  mediaType === "book" && coverUrls && coverUrls.length > 1
+                    ? handleCoverChange
+                    : undefined
+                }
+                title={
+                  mediaType === "book" && coverUrls && coverIndex !== undefined
+                    ? `${coverIndex + 1}/${coverUrls?.length}`
+                    : ""
+                }
+              >
+                {mediaType !== "book" ? (
+                  (item.posterUrl ?? item.coverUrl) ? (
+                    <>
+                      <Image
+                        src={(item.posterUrl ?? item.coverUrl)!}
+                        alt={item.title || "Untitled"}
+                        width={1280}
+                        height={720}
+                        className={`min-w-62 min-h-93 ${mediaType === "game" ? "object-cover" : "object-fill"}`}
+                      />
+                    </>
+                  ) : (
+                    <div className="min-w-62 min-h-93 bg-linear-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
+                  )
                 ) : (
-                  <div className="min-w-62 min-h-93 bg-linear-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
+                  <BookCoverChange
+                    coverUrl={item.coverUrl}
+                    title={item.title}
+                    coverUrls={coverUrls}
+                    coverIndex={coverIndex}
+                  />
                 )}
+                {/* gradient overlay */}
+                <div
+                  className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
+                  style={{
+                    background:
+                      "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0) 50%, rgba(24,24,27,0.5) 100%)",
+                  }}
+                />
               </div>
+
               {/* RIGHT SIDE -- DETAILS */}
               <div className="flex flex-col flex-1 min-h-93 min-w-62 relative">
                 {/* BACKDROP */}
-                {movie.backdropUrl && (
-                  <BackdropImage
-                    src={movie.backdropUrl}
-                    width={1280}
-                    height={720}
-                  />
-                )}
+                {mediaType === "book"
+                  ? item.coverUrl && (
+                      <BackdropImageBook
+                        src={item.coverUrl}
+                        width={1280}
+                        height={720}
+                      />
+                    )
+                  : (() => {
+                      const backdropUrl =
+                        mediaType === "game" &&
+                        isAdding &&
+                        backdropIndex !== undefined
+                          ? backdropUrls?.[backdropIndex]
+                          : item.backdropUrl;
+                      return (
+                        backdropUrl && (
+                          <BackdropImage
+                            src={backdropUrl}
+                            width={mediaType === "game" ? 1920 : 1280}
+                            height={mediaType === "game" ? 1080 : 720}
+                          />
+                        )
+                      );
+                    })()}
+                {/* game backdrop cycling overlay */}
+                {mediaType === "game" &&
+                  isAdding &&
+                  backdropUrls &&
+                  backdropUrls.length > 1 && (
+                    <div
+                      className="absolute top-0 -left-8 -right-8 h-40 hover:cursor-pointer z-5"
+                      onClick={handleCoverChange}
+                      title={`${backdropIndex}/${backdropUrls.length}`}
+                    />
+                  )}
+                {/*  */}
                 <div
                   className={`flex flex-col ${
-                    movie.seriesTitle
-                      ? "justify-center"
-                      : "justify-center mt-12"
+                    item.seriesTitle ? "justify-center" : "justify-center mt-12"
                   } flex-1`}
                 >
                   {/* SERIES TITLE */}
-                  {movie.seriesTitle && (
-                    <span className="font-semibold text-zinc-100/80 text-xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-0">
-                      {movie.seriesTitle}
-                    </span>
-                  )}
+                  {(() => {
+                    const seriesLabel =
+                      mediaType === "game"
+                        ? item.dlcIndex !== 0
+                          ? item.mainTitle
+                          : null
+                        : item.seriesTitle;
+
+                    return (
+                      seriesLabel && (
+                        <span className="font-semibold text-zinc-100/80 text-xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-0">
+                          {seriesLabel}
+                        </span>
+                      )
+                    );
+                  })()}
                   {/* TITLE */}
                   <div className="w-fit mb-1.5 max-w-full">
                     <div className="font-bold text-zinc-100/90 text-3xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-1.5">
-                      {movie.title || "Untitled"}
+                      {item.title || "Untitled"}
                     </div>
                     {/* STATUS WAVE */}
                     <div className="w-full bg-zinc-800 rounded-full h-0.75 overflow-hidden">
@@ -194,7 +304,7 @@ export function MovieDesktopDetails({
                         <div
                           className="absolute inset-0"
                           style={{
-                            background: getStatusDetailWaveColor(movie.status),
+                            background: getStatusDetailWaveColor(item.status),
                             animation: "wave 6s ease-in-out infinite",
                             width: "200%",
                           }}
@@ -202,12 +312,12 @@ export function MovieDesktopDetails({
                       </div>
                     </div>
                   </div>
-                  {/* DIRECTOR AND DATES */}
+                  {/* AUTHOR/STUDIO/DIRECTOR AND DATES */}
                   <div className="flex justify-start items-center gap-2 w-full mb-3">
                     <span className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 leading-6">
-                      {movie.director || "Unknown Director"}
+                      {differentColumns[0].render(item) ||
+                        "Unknown " + differentColumns[0].label}
                     </span>
-                    {/* ◎ ◈ ୭ ✿ ✧ */}
                     <div className="font-medium text-zinc-200/70 text-md leading-6">
                       •
                     </div>
@@ -215,9 +325,9 @@ export function MovieDesktopDetails({
                       className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
                       title="Date Published"
                     >
-                      {movie.dateReleased || "Unknown"}
+                      {differentColumns[1].render(item) || "Unknown"}
                     </span>
-                    {movie.status === "Completed" && (
+                    {item.status === "Completed" && (
                       <div className="flex items-center gap-2">
                         <div className="font-medium text-zinc-200/70 text-md leading-6">
                           •
@@ -226,20 +336,20 @@ export function MovieDesktopDetails({
                           className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
                           title="Date Completed"
                         >
-                          {formatDateShort(movie.dateCompleted)}
+                          {formatDateShort(item.dateCompleted)}
                         </span>
                       </div>
                     )}
                   </div>
                   <div></div>
                   {/* STATUS AND SCORE */}
-                  <div className=" flex justify-start gap-4 mb-2.5 max-w-[94%]">
+                  <div className="flex justify-start gap-4 mb-2.5 max-w-[94%]">
                     <div className="flex-[0.77] lg:min-w-41.25">
                       <label className="text-sm font-medium text-zinc-400 mb-1 block">
                         Status
                       </label>
                       <Dropdown
-                        value={movie.status}
+                        value={item.status}
                         onChange={(value) => {
                           onAction({
                             type: "changeStatus",
@@ -249,7 +359,7 @@ export function MovieDesktopDetails({
                               | "Dropped",
                           });
                         }}
-                        options={movieStatusOptions}
+                        options={statusOptions}
                         customStyle="text-zinc-200/80 font-semibold"
                         dropDuration={0.24}
                       />
@@ -259,7 +369,7 @@ export function MovieDesktopDetails({
                         Score
                       </label>
                       <Dropdown
-                        value={movie.score?.toString() || "-"}
+                        value={item.score?.toString() || "-"}
                         onChange={(value) => {
                           onAction({
                             type: "changeScore",
@@ -269,19 +379,30 @@ export function MovieDesktopDetails({
                         options={scoreOptions}
                         customStyle="text-zinc-200/80 font-semibold"
                         dropStyle={(() => {
-                          const option = movieStatusOptions.find(
-                            (opt) => opt.value === movie.status
+                          const option = statusOptions.find(
+                            (opt) => opt.value === item.status,
                           );
                           return option
-                            ? [option.textStyle, option.bgStyle]
+                            ? [option.textStyle, option.bgStyle].filter(
+                                (s): s is string => s !== undefined,
+                              )
                             : [];
                         })()}
                         dropDuration={0.4}
                       />
                     </div>
                   </div>
+                  {/* SHOW PROGRESS (season/episode) */}
+                  {mediaType === "show" && editingMode && inputValues && (
+                    <EditProgress
+                      item={item}
+                      editingMode={editingMode}
+                      inputValues={inputValues}
+                      onAction={onAction}
+                    />
+                  )}
                   {/* NOTES */}
-                  <div className="space-y-1 mb-2">
+                  <div className="space-y-1 mb-2 max-w-[94%]">
                     <label className="text-sm font-medium text-zinc-400 block">
                       Notes
                     </label>
@@ -298,80 +419,21 @@ export function MovieDesktopDetails({
                         onBlur={() => {
                           onAction({ type: "saveNote" });
                         }}
-                        placeholder="Add your thoughts about this movie..."
+                        placeholder="Add your thoughts about this item..."
                         className="text-gray-300/90 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500 font-medium"
                       />
                     </div>
                   </div>
                 </div>
-                {/* PREQUEL AND SEQUEL */}
-                <div className="pt-2.5 border-t border-zinc-800/80">
-                  <div className="grid grid-cols-[1fr_3rem_1fr] gap-3 w-full pr-1.5 select-none">
-                    <div className="truncate text-left">
-                      {movie.prequel && (
-                        <div
-                          className={`group flex flex-col ${
-                            !addingMovie ? "hover:cursor-pointer" : ""
-                          }`}
-                          onClick={() => {
-                            if (!addingMovie) {
-                              onAction({
-                                type: "seriesNav",
-                                payload: "prequel",
-                              });
-                            }
-                          }}
-                        >
-                          <label className="text-xs font-medium text-zinc-500 block pointer-events-none">
-                            <span className="inline-flex items-center gap-1">
-                              <span>←</span>
-                              <span>Prequel</span>
-                            </span>
-                          </label>
-                          <span className="text-sm text-zinc-300/70 font-medium group-hover:text-zinc-300/85 group-hover:underline transition-colors duration-200">
-                            {movie.prequel}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex justify-center items-end pb-0.5">
-                      {movie.placeInSeries && (
-                        <label className="text-xs font-semibold text-zinc-400/90 block">
-                          {movie.placeInSeries}
-                        </label>
-                      )}
-                    </div>
-
-                    <div className="truncate text-right">
-                      {movie.sequel && (
-                        <div
-                          className={`group flex flex-col ${
-                            !addingMovie ? "hover:cursor-pointer" : ""
-                          }`}
-                          onClick={() => {
-                            if (!addingMovie) {
-                              onAction({
-                                type: "seriesNav",
-                                payload: "sequel",
-                              });
-                            }
-                          }}
-                        >
-                          <label className="text-xs font-medium text-zinc-500 block pointer-events-none">
-                            <span className="inline-flex items-center gap-1">
-                              <span>Sequel</span>
-                              <span>→</span>
-                            </span>
-                          </label>
-                          <span className="text-sm text-zinc-300/70 font-medium group-hover:text-zinc-300/85 group-hover:underline transition-colors duration-200">
-                            {movie.sequel}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                {/* PREQUEL AND SEQUEL — outside the flex-1 div, pinned to bottom */}
+                {mediaType !== "show" && (
+                  <SeriesNav
+                    item={item}
+                    mediaType={mediaType}
+                    isAdding={isAdding}
+                    onAction={onAction}
+                  />
+                )}
               </div>
             </div>
           </div>

@@ -1,27 +1,19 @@
-export type SortConfig = {
-  type: "title" | "score" | "dateCompleted" | "studio" | "dateReleased";
-  order: "asc" | "desc";
-};
+import { BaseMediaProps, SortState } from "./media";
 
-export interface ShowProps {
-  id: number; //--REQUIRED -> will do on server side
-  // user set
-  score?: number;
-  dateCompleted?: Date | null;
-  note?: string;
-  status: "Completed" | "Want to Watch" | "Dropped" | "Watching"; //!--REQUIRED
-  // from tmdb
-  tmdbId: string; //!--REQUIRED
-  title: string; //!--REQUIRED
+export type ShowSortConfig = SortState<
+  "title" | "score" | "dateCompleted" | "studio" | "dateReleased"
+>;
+
+export interface ShowProps extends BaseMediaProps {
+  status: "Completed" | "Want to Watch" | "Dropped" | "Watching";
+  tmdbId: string;
   studio?: string;
   dateReleased?: number;
-  posterUrl?: string;
-  backdropUrl?: string;
-  // from tmdb-tv
   seasons?: TMDBSeasonProps[];
   curSeasonIndex: number;
   curEpisode: number;
 }
+
 
 export interface TMDBProps {
   tmdbId: string;

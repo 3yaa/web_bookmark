@@ -9,7 +9,7 @@ import {
 } from "react";
 import { Plus } from "lucide-react";
 import { MediaStatus } from "@/types/media";
-import { BookProps, SortConfig } from "@/types/book";
+import { BookProps, BookSortConfig } from "@/types/book";
 // hooks
 import { useSortBooks } from "@/app/books/hooks/useSortBooks";
 import { useBookData } from "@/app/books/hooks/useBookData";
@@ -27,7 +27,7 @@ export default function BookHub() {
     useBookData();
   // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
-  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  const [sortConfig, setSortConfig] = useState<BookSortConfig | null>(null);
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   // delegation
@@ -102,7 +102,7 @@ export default function BookHub() {
     [deleteBook, selectedBook, updateBook],
   );
 
-  const handleSortConfig = (sortType: SortConfig["type"]) => {
+  const handleSortConfig = (sortType: BookSortConfig["type"]) => {
     setSortConfig((prev) => {
       if (!prev || prev.type !== sortType) {
         return { type: sortType, order: "desc" };
@@ -201,7 +201,9 @@ export default function BookHub() {
           searchQuery={searchQuery}
           emptyListText="No books yet — add one!"
           onItemClicked={handleBookClicked}
-          onSortConfig={(key) => handleSortConfig(key as SortConfig["type"])}
+          onSortConfig={(key) =>
+            handleSortConfig(key as BookSortConfig["type"])
+          }
           onSearchChange={handleSearchQueryChange}
           onStatusFilter={handleStatusFilterConfig}
         />
@@ -228,7 +230,9 @@ export default function BookHub() {
           ]}
           emptyListText="No books yet — add one!"
           onItemClicked={handleBookClicked}
-          onSortConfig={(key) => handleSortConfig(key as SortConfig["type"])}
+          onSortConfig={(key) =>
+            handleSortConfig(key as BookSortConfig["type"])
+          }
           onStatusFilter={handleStatusFilterConfig}
         />
       </div>

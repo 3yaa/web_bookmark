@@ -1,12 +1,13 @@
 "use client";
 import { MovieProps } from "@/types/movie";
 import { useCallback, useEffect, useState } from "react";
-import { MovieDesktopDetails } from "./detailsViews/MovieDesktopDetails";
 import { MovieMobileDetails } from "./detailsViews/MovieMobileDetails";
+import { DesktopDetails } from "@/app/shared/detailView/DesktopDetails";
+import { movieStatusOptions } from "@/utils/dropDownDetails";
 
 export type MovieAction =
   | { type: "closeModal" }
-  | { type: "deleteMovie" }
+  | { type: "delete" }
   | { type: "changeStatus"; payload: "Completed" | "Want to Watch" | "Dropped" }
   | { type: "changeScore"; payload: number }
   | { type: "changeNote"; payload: string }
@@ -22,7 +23,7 @@ interface MovieDetailsProps {
   onUpdate: (
     movieId: number,
     updates?: Partial<MovieProps>,
-    takeAction?: boolean
+    takeAction?: boolean,
   ) => void;
   addMovie?: () => void;
   showSequelPrequel?: (sequelTitle: string) => void;
@@ -47,7 +48,7 @@ export function MovieDetails({
       case "closeModal":
         handleModalClose();
         break;
-      case "deleteMovie":
+      case "delete":
         handleDelete();
         break;
       case "needYearField":
@@ -151,15 +152,34 @@ export function MovieDetails({
   return (
     <>
       <div className="lg:block hidden">
-        <MovieDesktopDetails
-          movie={movie}
-          onClose={onClose}
+        <DesktopDetails
+          item={movie}
           localNote={localNote}
+          statusOptions={movieStatusOptions}
+          mediaType="movie"
           isLoading={isLoading}
-          addingMovie={!!addMovie}
-          onAddMovie={handleAddMovie}
-          showAnotherSeries={showAnotherSeries}
-          onAction={handleAction}
+          isAdding={!!addMovie}
+          onAdd={handleAddMovie}
+          onClose={onClose}
+          onSeriesNav={showAnotherSeries}
+          onAction={
+            handleAction as (action: {
+              type: string;
+              payload?: unknown;
+            }) => void
+          }
+          differentColumns={[
+            {
+              label: "Director",
+              sortKey: "director",
+              render: (m: MovieProps) => m.director,
+            },
+            {
+              label: "Released",
+              sortKey: "dateReleased",
+              render: (m: MovieProps) => m.dateReleased,
+            },
+          ]}
         />
       </div>
       <div className="block lg:hidden">

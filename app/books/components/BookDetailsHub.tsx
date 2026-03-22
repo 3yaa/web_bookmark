@@ -1,19 +1,20 @@
 "use client";
 import { BookProps } from "@/types/book";
 import { useCallback, useEffect, useState } from "react";
-import { BookDesktopDetails } from "./detailsViews/BookDesktopDetails";
-import { BookMobileDetails } from "./detailsViews/BookMobileDetails";
+import { BookMobileDetails } from "./detailsUtil/BookMobileDetails";
+import { DesktopDetails } from "@/app/shared/detailView/DesktopDetails";
+import { bookStatusOptions } from "@/utils/dropDownDetails";
 
 export type BookAction =
   | { type: "closeModal" }
-  | { type: "deleteBook" }
+  | { type: "delete" }
   | { type: "changeStatus"; payload: "Completed" | "Want to Read" | "Dropped" }
   | { type: "changeScore"; payload: number }
   | { type: "changeNote"; payload: string }
   | { type: "saveNote" }
   | { type: "seriesNav"; payload: "sequel" | "prequel" }
   | { type: "changeCover"; payload: "next" | "prev" }
-  | { type: "moreBooks" };
+  | { type: "more" };
 
 interface BookDetailsProps {
   book: BookProps;
@@ -23,7 +24,7 @@ interface BookDetailsProps {
   onUpdate: (
     bookId: number,
     updates?: Partial<BookProps>,
-    takeAction?: boolean
+    takeAction?: boolean,
   ) => void;
   addBook?: () => void;
   showSequelPrequel?: (sequelTitle: string) => void;
@@ -55,7 +56,7 @@ export function BookDetails({
       case "closeModal":
         handleModalClose();
         break;
-      case "deleteBook":
+      case "delete":
         handleDelete();
         break;
       // =========update actions=============
@@ -78,7 +79,7 @@ export function BookDetails({
       case "seriesNav":
         handleSeriesOpen(action.payload);
         break;
-      case "moreBooks":
+      case "more":
         handleMoreBook();
         break;
     }
@@ -174,15 +175,34 @@ export function BookDetails({
   return (
     <>
       <div className="lg:block hidden">
-        <BookDesktopDetails
-          book={book}
-          onClose={onClose}
+        <DesktopDetails
+          item={book}
           localNote={localNote}
+          statusOptions={bookStatusOptions}
+          mediaType="book"
           isLoading={isLoading}
-          addingBook={!!addBook}
-          onAddBook={handleAddBook}
-          onAction={handleAction}
-          showBookInSeries={showBookInSeries}
+          isAdding={!!addBook}
+          onAdd={handleAddBook}
+          onClose={onClose}
+          onSeriesNav={showBookInSeries}
+          onAction={
+            handleAction as (action: {
+              type: string;
+              payload?: unknown;
+            }) => void
+          }
+          differentColumns={[
+            {
+              label: "Author",
+              sortKey: "author",
+              render: (b: BookProps) => b.author,
+            },
+            {
+              label: "Published",
+              sortKey: "datePublished",
+              render: (b: BookProps) => b.datePublished,
+            },
+          ]}
           coverUrls={coverUrls}
           coverIndex={coverIndex}
         />

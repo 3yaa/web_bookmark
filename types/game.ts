@@ -1,26 +1,17 @@
-export type SortConfig = {
-  type: "title" | "score" | "dateCompleted" | "studio" | "dateReleased";
-  order: "asc" | "desc";
-};
+import { BaseMediaProps, SortState } from "./media";
 
-export interface GameProps {
-  id: number; //--REQUIRED -> will do on server side
-  // user set
-  score?: number;
-  dateCompleted?: Date | null;
-  note?: string;
-  status: "Playing" | "Completed" | "Dropped"; //!--REQUIRED
-  // from rawg
-  igdbId: number; //!--REQUIRED
-  title: string; //!--REQUIRED
+export type GameSortConfig = SortState<
+  "title" | "score" | "dateCompleted" | "studio" | "dateReleased"
+>;
+
+export interface GameProps extends BaseMediaProps {
+  status: "Playing" | "Completed" | "Dropped";
+  igdbId: number;
   studio?: string;
   dateReleased?: number;
-  posterUrl?: string;
-  backdropUrl?: string;
-  //
   dlcIndex: number;
   mainTitle?: string;
-  dlcs?: IGDBInitProps[]; // 0 for original game
+  dlcs?: IGDBInitProps[];
 }
 
 export interface IGDBInitProps {

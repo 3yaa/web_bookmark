@@ -1,27 +1,14 @@
-export type SortConfig = {
-  type: "title" | "score" | "dateCompleted" | "author" | "datePublished";
-  order: "asc" | "desc";
-};
+import { BaseMediaProps, SortState } from "./media";
 
-export interface BookProps {
-  id: number; //--REQUIRED -> will do on server side
-  // user set
-  score?: number;
-  dateCompleted?: Date | null;
-  note?: string;
-  status: "Completed" | "Want to Read" | "Dropped"; //!--REQUIRED
-  // from ol&&google -- used for checking duplicate
-  key: string; //!--REQUIRED
-  // from ol||google
-  title: string; //!--REQUIRED
+export type BookSortConfig = SortState<
+  "title" | "score" | "dateCompleted" | "author" | "datePublished"
+>;
+
+export interface BookProps extends BaseMediaProps {
+  status: "Completed" | "Want to Read" | "Dropped";
+  key: string;
   author?: string;
-  coverUrl?: string;
   datePublished?: number;
-  // from WikidataProps
-  seriesTitle?: string;
-  placeInSeries?: string;
-  prequel?: string;
-  sequel?: string;
 }
 
 // export interface AllBooksProps {

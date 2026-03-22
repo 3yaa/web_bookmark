@@ -1,12 +1,13 @@
 "use client";
 import { GameProps } from "@/types/game";
 import { useCallback, useEffect, useState } from "react";
-import { GameDesktopDetails } from "./detailsViews/GameDesktopDetails";
 import { GameMobileDetails } from "./detailsViews/GameMobileDetails";
+import { DesktopDetails } from "@/app/shared/detailView/DesktopDetails";
+import { gameStatusOptions } from "@/utils/dropDownDetails";
 
 export type GameAction =
   | { type: "closeModal" }
-  | { type: "deleteGame" }
+  | { type: "delete" }
   | { type: "changeStatus"; payload: "Playing" | "Completed" | "Dropped" }
   | { type: "changeScore"; payload: number }
   | { type: "changeNote"; payload: string }
@@ -23,7 +24,7 @@ interface GameDetailsProps {
   onUpdate: (
     gameId: number,
     updates?: Partial<GameProps>,
-    takeAction?: boolean
+    takeAction?: boolean,
   ) => void;
   addGame?: () => void;
   showDlc?: (igdbId: number, dlcIndex: number) => void;
@@ -53,7 +54,7 @@ export function GameDetails({
       case "closeModal":
         handleModalClose();
         break;
-      case "deleteGame":
+      case "delete":
         handleDelete();
         break;
       case "needYearField":
@@ -178,14 +179,33 @@ export function GameDetails({
   return (
     <>
       <div className="lg:block hidden">
-        <GameDesktopDetails
-          game={game}
-          onClose={onClose}
+        <DesktopDetails
+          item={game}
           localNote={localNote}
+          statusOptions={gameStatusOptions}
+          mediaType="game"
           isLoading={isLoading}
-          addingGame={!!addGame}
-          onAddGame={handleAddGame}
-          onAction={handleAction}
+          isAdding={!!addGame}
+          onAdd={handleAddGame}
+          onClose={onClose}
+          onAction={
+            handleAction as (action: {
+              type: string;
+              payload?: unknown;
+            }) => void
+          }
+          differentColumns={[
+            {
+              label: "Studio",
+              sortKey: "studio",
+              render: (g: GameProps) => g.studio,
+            },
+            {
+              label: "Released",
+              sortKey: "dateReleased",
+              render: (g: GameProps) => g.dateReleased,
+            },
+          ]}
           backdropUrls={backdropUrls}
           backdropIndex={backdropIndex}
         />

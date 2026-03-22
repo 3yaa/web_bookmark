@@ -9,7 +9,7 @@ import {
 } from "react";
 import { Plus } from "lucide-react";
 import { MediaStatus } from "@/types/media";
-import { MovieProps, SortConfig } from "@/types/movie";
+import { MovieProps, MovieSortConfig } from "@/types/movie";
 // hooks
 import { useSortMovies } from "@/app/movies/hooks/useSortMovies";
 import { useMovieData } from "@/app/movies/hooks/useMovieData";
@@ -27,7 +27,7 @@ export default function MoviesHub() {
     useMovieData();
   // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
-  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  const [sortConfig, setSortConfig] = useState<MovieSortConfig | null>(null);
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   //delegation
@@ -104,7 +104,7 @@ export default function MoviesHub() {
     [deleteMovie, selectedMovie, updateMovie],
   );
 
-  const handleSortConfig = (sortType: SortConfig["type"]) => {
+  const handleSortConfig = (sortType: MovieSortConfig["type"]) => {
     setSortConfig((prev) => {
       if (!prev || prev.type !== sortType) {
         return { type: sortType, order: "desc" };
@@ -203,7 +203,7 @@ export default function MoviesHub() {
           searchQuery={searchQuery}
           emptyListText="No movies yet — add one!"
           onItemClicked={handleMovieClicked}
-          onSortConfig={(key) => handleSortConfig(key as SortConfig["type"])}
+          onSortConfig={(key) => handleSortConfig(key as MovieSortConfig["type"])}
           onSearchChange={handleSearchQueryChange}
           onStatusFilter={handleStatusFilterConfig}
         />
@@ -230,7 +230,7 @@ export default function MoviesHub() {
           ]}
           emptyListText="No movies yet — add one!"
           onItemClicked={handleMovieClicked}
-          onSortConfig={(key) => handleSortConfig(key as SortConfig["type"])}
+          onSortConfig={(key) => handleSortConfig(key as MovieSortConfig["type"])}
           onStatusFilter={handleStatusFilterConfig}
         />
       </div>

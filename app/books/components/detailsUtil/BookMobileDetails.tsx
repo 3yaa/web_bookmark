@@ -148,7 +148,7 @@ export function BookMobileDetails({
     if (translateY > threshold || dragVelocity.current > velocityThreshold) {
       const finalY = Math.max(
         translateY + dragVelocity.current * 200,
-        window.innerHeight
+        window.innerHeight,
       );
       setTranslateY(finalY);
       setIsExiting(true);
@@ -176,8 +176,8 @@ export function BookMobileDetails({
           transition: isDragging
             ? "none"
             : isExiting
-            ? "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-            : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+              ? "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+              : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -235,7 +235,7 @@ export function BookMobileDetails({
                     <button
                       className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
                       onClick={() => {
-                        onAction({ type: "moreBooks" });
+                        onAction({ type: "more" });
                       }}
                       title={"More books"}
                     >

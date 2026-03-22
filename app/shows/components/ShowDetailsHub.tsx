@@ -1,13 +1,14 @@
 "use client";
 import { ShowProps } from "@/types/show";
 import React, { useCallback, useEffect, useState } from "react";
-import { ShowDesktopDetails } from "./detailsViews/ShowDesktopDetails";
-import { ShowMobileDetails } from "./detailsViews/ShowMobileDetails";
+import { ShowMobileDetails } from "./detailsUtil/ShowMobileDetails";
+import { DesktopDetails } from "@/app/shared/detailView/DesktopDetails";
+import { showStatusOptions } from "@/utils/dropDownDetails";
 
 export type ShowAction =
   | { type: "closeModal" }
-  | { type: "deleteShow" }
-  | { type: "needYear" }
+  | { type: "delete" }
+  | { type: "needYearField" }
   | {
       type: "changeStatus";
       payload: "Completed" | "Want to Watch" | "Dropped" | "Watching";
@@ -34,7 +35,7 @@ interface ShowDetailsProps {
   onUpdate: (
     showId: number,
     updates?: Partial<ShowProps>,
-    takeAction?: boolean
+    takeAction?: boolean,
   ) => void;
   addShow?: () => void;
 }
@@ -66,10 +67,10 @@ export function ShowDetails({
       case "closeModal":
         handleModalClose();
         break;
-      case "deleteShow":
+      case "delete":
         handleDelete();
         break;
-      case "needYear":
+      case "needYearField":
         handleNeedYear();
         break;
       // =========update actions=============
@@ -344,14 +345,33 @@ export function ShowDetails({
   return (
     <>
       <div className="lg:block hidden">
-        <ShowDesktopDetails
-          show={show}
-          onClose={onClose}
+        <DesktopDetails
+          item={show}
           localNote={localNote}
+          statusOptions={showStatusOptions}
+          mediaType="show"
           isLoading={isLoading}
-          addingShow={!!addShow}
-          onAddShow={handleAddShow}
-          onAction={handleAction}
+          isAdding={!!addShow}
+          onAdd={handleAddShow}
+          onClose={onClose}
+          onAction={
+            handleAction as (action: {
+              type: string;
+              payload?: unknown;
+            }) => void
+          }
+          differentColumns={[
+            {
+              label: "Studio",
+              sortKey: "studio",
+              render: (s: ShowProps) => s.studio,
+            },
+            {
+              label: "Released",
+              sortKey: "dateReleased",
+              render: (s: ShowProps) => s.dateReleased,
+            },
+          ]}
           editingMode={editingMode}
           inputValues={inputValues}
         />

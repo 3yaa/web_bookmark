@@ -9,7 +9,7 @@ import {
 } from "react";
 import { Plus } from "lucide-react";
 import { MediaStatus } from "@/types/media";
-import { GameProps, IGDBInitProps, SortConfig } from "@/types/game";
+import { GameProps, IGDBInitProps, GameSortConfig } from "@/types/game";
 // hooks
 import { useSortGames } from "@/app/games/hooks/useSortGames";
 import { useGameData } from "@/app/games/hooks/useGameData";
@@ -27,7 +27,7 @@ export default function GameList() {
     useGameData();
   // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
-  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  const [sortConfig, setSortConfig] = useState<GameSortConfig | null>(null);
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   // delegation
@@ -114,7 +114,7 @@ export default function GameList() {
     [deleteGame, selectedGame, updateGame],
   );
 
-  const handleSortConfig = (sortType: SortConfig["type"]) => {
+  const handleSortConfig = (sortType: GameSortConfig["type"]) => {
     setSortConfig((prev) => {
       if (!prev || prev.type !== sortType) {
         return { type: sortType, order: "desc" };
@@ -213,7 +213,7 @@ export default function GameList() {
           searchQuery={searchQuery}
           emptyListText="No games yet — add one!"
           onItemClicked={handleGameClicked}
-          onSortConfig={(key) => handleSortConfig(key as SortConfig["type"])}
+          onSortConfig={(key) => handleSortConfig(key as GameSortConfig["type"])}
           onSearchChange={handleSearchQueryChange}
           onStatusFilter={handleStatusFilterConfig}
         />
@@ -240,7 +240,7 @@ export default function GameList() {
           ]}
           emptyListText="No games yet — add one!"
           onItemClicked={handleGameClicked}
-          onSortConfig={(key) => handleSortConfig(key as SortConfig["type"])}
+          onSortConfig={(key) => handleSortConfig(key as GameSortConfig["type"])}
           onStatusFilter={handleStatusFilterConfig}
         />
       </div>

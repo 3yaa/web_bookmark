@@ -8,9 +8,9 @@ import {
 import { BaseMediaProps, MediaStatus } from "@/types/media";
 import { useEffect, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Loading } from "../components/ui/Loading";
+import { Loading } from "../../components/ui/Loading";
 import { ColumnConfig } from "./shared";
-import { MediaItem } from "./MediaItem";
+import { MediaDesktopItem } from "./MediaDesktopItem";
 
 interface MediaDesktopListingProps<T extends BaseMediaProps> {
   mediaItems: T[];
@@ -215,7 +215,7 @@ export function MediaDesktopListing<T extends BaseMediaProps>({
               }}
               onBlur={() => !searchQuery && setSearchOpen(false)}
               placeholder={"Search " + mediaType + "s..."}
-              className={`bg-transparent text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none flex-1 transition-all duration-300 ${
+              className={`bg-transparent text-sm text-zinc-100 font-medium placeholder-zinc-500 focus:outline-none flex-1 transition-all duration-300 ${
                 searchOpen
                   ? "w-full opacity-100 pointer-events-auto"
                   : "w-0 opacity-0 pointer-events-none"
@@ -370,7 +370,7 @@ export function MediaDesktopListing<T extends BaseMediaProps>({
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
-                  <MediaItem
+                  <MediaDesktopItem
                     item={item}
                     index={virtualItem.index}
                     total={mediaItems.length}

@@ -16,11 +16,11 @@ import { useGameData } from "@/app/games/hooks/useGameData";
 // components
 import { AddGame } from "./addGame/AddGame";
 import { GameDetails } from "./GameDetailsHub";
-import { GameMobileListing } from "./listing/GameMobileListing";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
-import { MediaDesktopListing } from "@/app/shared/MediaDesktopListing";
+import { MediaDesktopListing } from "@/app/shared/listView/MediaDesktopListing";
 import { gameStatusOptions } from "@/utils/dropDownDetails";
+import { MediaMobileListing } from "@/app/shared/listView/MediaMobileListing";
 
 export default function GameList() {
   const { games, addGame, updateGame, deleteGame, isProcessingGame } =
@@ -219,13 +219,28 @@ export default function GameList() {
         />
       </div>
       <div className="block lg:hidden">
-        <GameMobileListing
-          games={sortedGames}
-          isProcessingGame={isProcessingGame || isFilterPending}
+        <MediaMobileListing
+          mediaItems={sortedGames}
+          isProcessing={isProcessingGame || isFilterPending}
           sortConfig={sortConfig}
+          statusOptions={gameStatusOptions.map((status) => status.value)}
           curStatusFilter={statusFilter}
-          onGameClicked={handleGameClicked}
-          onSortConfig={handleSortConfig}
+          mediaType="game"
+          differentColumns={[
+            {
+              label: "Studio",
+              sortKey: "studio",
+              render: (game) => game.studio,
+            },
+            {
+              label: "Released",
+              sortKey: "dateReleased",
+              render: (game) => game.dateReleased,
+            },
+          ]}
+          emptyListText="No games yet — add one!"
+          onItemClicked={handleGameClicked}
+          onSortConfig={(key) => handleSortConfig(key as SortConfig["type"])}
           onStatusFilter={handleStatusFilterConfig}
         />
       </div>

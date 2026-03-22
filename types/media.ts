@@ -17,7 +17,10 @@ export interface BaseMediaProps {
   note?: string;
   posterUrl?: string;
   coverUrl?: string;
+  backdropUrl?: string;
   mainTitle?: string;
   seriesTitle?: string;
   placeInSeries?: string;
+  prequel?: string;
+  sequel?: string;
 }

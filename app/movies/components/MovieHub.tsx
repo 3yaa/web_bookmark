@@ -16,11 +16,11 @@ import { useMovieData } from "@/app/movies/hooks/useMovieData";
 // components
 import { AddMovie } from "./addMovie/AddMovie";
 import { MovieDetails } from "./MovieDetailsHub";
-import { MovieMobileListing } from "./listingViews/MovieMobileListing";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
-import { MediaDesktopListing } from "@/app/shared/MediaDesktopListing";
+import { MediaDesktopListing } from "@/app/shared/listView/MediaDesktopListing";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
+import { MediaMobileListing } from "@/app/shared/listView/MediaMobileListing";
 
 export default function MoviesHub() {
   const { movies, addMovie, updateMovie, deleteMovie, isProcessingMovie } =
@@ -209,13 +209,28 @@ export default function MoviesHub() {
         />
       </div>
       <div className="block lg:hidden">
-        <MovieMobileListing
-          movies={sortedMovies}
-          isProcessingMovie={isProcessingMovie || isFilterPending}
+        <MediaMobileListing
+          mediaItems={sortedMovies}
+          isProcessing={isProcessingMovie || isFilterPending}
           sortConfig={sortConfig}
+          statusOptions={movieStatusOptions.map((status) => status.value)}
           curStatusFilter={statusFilter}
-          onMovieClicked={handleMovieClicked}
-          onSortConfig={handleSortConfig}
+          mediaType="movie"
+          differentColumns={[
+            {
+              label: "Director",
+              sortKey: "director",
+              render: (movie) => movie.director,
+            },
+            {
+              label: "Released",
+              sortKey: "dateReleased",
+              render: (movie) => movie.dateReleased,
+            },
+          ]}
+          emptyListText="No movies yet — add one!"
+          onItemClicked={handleMovieClicked}
+          onSortConfig={(key) => handleSortConfig(key as SortConfig["type"])}
           onStatusFilter={handleStatusFilterConfig}
         />
       </div>

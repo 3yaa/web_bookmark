@@ -5,3 +5,5 @@ export interface ColumnConfig<T> {
   sortKey: string;
   render: (item: T) => ReactNode;
 }
+
+

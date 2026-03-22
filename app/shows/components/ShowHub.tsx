@@ -16,11 +16,11 @@ import { useShowData } from "@/app/shows/hooks/useShowData";
 // components
 import { AddShow } from "./addShow/AddShow";
 import { ShowDetails } from "./ShowDetailsHub";
-import { ShowMobileListing } from "./listing/ShowMobileListing";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
-import { MediaDesktopListing } from "@/app/shared/MediaDesktopListing";
+import { MediaDesktopListing } from "@/app/shared/listView/MediaDesktopListing";
 import { showStatusOptions } from "@/utils/dropDownDetails";
+import { MediaMobileListing } from "@/app/shared/listView/MediaMobileListing";
 
 export default function ShowHub() {
   const { shows, addShow, updateShow, deleteShow, isProcessingShow } =
@@ -185,13 +185,28 @@ export default function ShowHub() {
         />
       </div>
       <div className="block lg:hidden">
-        <ShowMobileListing
-          shows={sortedShows}
-          isProcessingShow={isProcessingShow || isFilterPending}
+        <MediaMobileListing
+          mediaItems={sortedShows}
+          isProcessing={isProcessingShow || isFilterPending}
           sortConfig={sortConfig}
-          onSortConfig={handleSortConfig}
-          onShowClicked={handleShowClicked}
+          statusOptions={showStatusOptions.map((status) => status.value)}
           curStatusFilter={statusFilter}
+          mediaType="show"
+          differentColumns={[
+            {
+              label: "Studio",
+              sortKey: "studio",
+              render: (show) => show.studio,
+            },
+            {
+              label: "Released",
+              sortKey: "dateReleased",
+              render: (show) => show.dateReleased,
+            },
+          ]}
+          emptyListText="No shows yet — add one!"
+          onItemClicked={handleShowClicked}
+          onSortConfig={(key) => handleSortConfig(key as SortConfig["type"])}
           onStatusFilter={handleStatusFilterConfig}
         />
       </div>

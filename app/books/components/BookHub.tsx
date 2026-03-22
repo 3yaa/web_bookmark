@@ -16,11 +16,11 @@ import { useBookData } from "@/app/books/hooks/useBookData";
 // components
 import { AddBook } from "./addingBook/AddBook";
 import { BookDetails } from "./BookDetailsHub";
-import { BookMobileListing } from "./listingViews/BookMobileListing";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
-import { MediaDesktopListing } from "@/app/shared/MediaDesktopListing";
+import { MediaDesktopListing } from "@/app/shared/listView/MediaDesktopListing";
 import { bookStatusOptions } from "@/utils/dropDownDetails";
+import { MediaMobileListing } from "@/app/shared/listView/MediaMobileListing";
 
 export default function BookHub() {
   const { books, addBook, updateBook, deleteBook, isProcessingBook } =
@@ -207,13 +207,28 @@ export default function BookHub() {
         />
       </div>
       <div className="block lg:hidden">
-        <BookMobileListing
-          books={sortedBooks}
-          isProcessingBook={isProcessingBook || isFilterPending}
+        <MediaMobileListing
+          mediaItems={sortedBooks}
+          isProcessing={isProcessingBook || isFilterPending}
           sortConfig={sortConfig}
+          statusOptions={bookStatusOptions.map((status) => status.value)}
           curStatusFilter={statusFilter}
-          onBookClicked={handleBookClicked}
-          onSortConfig={handleSortConfig}
+          mediaType="book"
+          differentColumns={[
+            {
+              label: "Author",
+              sortKey: "author",
+              render: (book) => book.author,
+            },
+            {
+              label: "Published",
+              sortKey: "datePublished",
+              render: (book) => book.datePublished,
+            },
+          ]}
+          emptyListText="No books yet — add one!"
+          onItemClicked={handleBookClicked}
+          onSortConfig={(key) => handleSortConfig(key as SortConfig["type"])}
           onStatusFilter={handleStatusFilterConfig}
         />
       </div>

@@ -17,9 +17,10 @@ import { useMovieData } from "@/app/movies/hooks/useMovieData";
 import { AddMovie } from "./addMovie/AddMovie";
 import { MovieDetails } from "./MovieDetailsHub";
 import { MovieMobileListing } from "./listingViews/MovieMobileListing";
-import { MovieDesktopListing } from "./listingViews/MovieDesktopListing";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
+import { MediaDesktopListing } from "@/app/shared/MediaDesktopListing";
+import { movieStatusOptions } from "@/utils/dropDownDetails";
 
 export default function MoviesHub() {
   const { movies, addMovie, updateMovie, deleteMovie, isProcessingMovie } =
@@ -42,14 +43,14 @@ export default function MoviesHub() {
   const debouncedSetQuery = useRef(
     debounce((value: string) => {
       setDebouncedQuery(value);
-    }, 300)
+    }, 300),
   ).current;
   // SEARCH
   const searchedMovies = useMemo(() => {
     if (!debouncedQuery) return movies;
 
     return movies.filter((movie) =>
-      movie.title.toLowerCase().trim().includes(debouncedQuery)
+      movie.title.toLowerCase().trim().includes(debouncedQuery),
     );
   }, [movies, debouncedQuery]);
   // FILTER
@@ -69,7 +70,7 @@ export default function MoviesHub() {
         const targetMovie = movies.find(
           (movie) =>
             movie.title.toLowerCase().trim() ===
-            targetTitle.toLowerCase().trim()
+            targetTitle.toLowerCase().trim(),
         );
 
         if (targetMovie) {
@@ -82,14 +83,14 @@ export default function MoviesHub() {
         return;
       }
     },
-    [movies]
+    [movies],
   );
 
   const handleMovieUpdates = useCallback(
     async (
       movieId: number,
       updates?: Partial<MovieProps>,
-      shouldDelete?: boolean
+      shouldDelete?: boolean,
     ) => {
       if (updates) {
         if (selectedMovie?.id === movieId) {
@@ -100,7 +101,7 @@ export default function MoviesHub() {
         await deleteMovie(movieId);
       }
     },
-    [deleteMovie, selectedMovie, updateMovie]
+    [deleteMovie, selectedMovie, updateMovie],
   );
 
   const handleSortConfig = (sortType: SortConfig["type"]) => {
@@ -180,16 +181,31 @@ export default function MoviesHub() {
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">
-        <MovieDesktopListing
-          movies={sortedMovies}
-          isProcessingMovie={isProcessingMovie}
+        <MediaDesktopListing
+          mediaItems={sortedMovies}
+          isProcessing={isProcessingMovie}
           sortConfig={sortConfig}
-          onSortConfig={handleSortConfig}
-          onMovieClicked={handleMovieClicked}
+          statusOptions={movieStatusOptions.map((status) => status.value)}
           curStatusFilter={statusFilter}
-          onStatusFilter={handleStatusFilterConfig}
+          mediaType="movie"
+          differentColumns={[
+            {
+              label: "Director",
+              sortKey: "director",
+              render: (movie) => movie.director,
+            },
+            {
+              label: "Released",
+              sortKey: "dateReleased",
+              render: (movie) => movie.dateReleased,
+            },
+          ]}
           searchQuery={searchQuery}
+          emptyListText="No movies yet — add one!"
+          onItemClicked={handleMovieClicked}
+          onSortConfig={(key) => handleSortConfig(key as SortConfig["type"])}
           onSearchChange={handleSearchQueryChange}
+          onStatusFilter={handleStatusFilterConfig}
         />
       </div>
       <div className="block lg:hidden">

@@ -17,9 +17,10 @@ import { useGameData } from "@/app/games/hooks/useGameData";
 import { AddGame } from "./addGame/AddGame";
 import { GameDetails } from "./GameDetailsHub";
 import { GameMobileListing } from "./listing/GameMobileListing";
-import { GameDesktopListing } from "./listing/GameDesktopListing";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
+import { MediaDesktopListing } from "@/app/shared/MediaDesktopListing";
+import { gameStatusOptions } from "@/utils/dropDownDetails";
 
 export default function GameList() {
   const { games, addGame, updateGame, deleteGame, isProcessingGame } =
@@ -46,14 +47,14 @@ export default function GameList() {
   const debouncedSetQuery = useRef(
     debounce((value: string) => {
       setDebouncedQuery(value);
-    }, 300)
+    }, 300),
   ).current;
   // SEARCH
   const searchedGames = useMemo(() => {
     if (!debouncedQuery) return games;
 
     return games.filter((game) =>
-      game.title.toLowerCase().trim().includes(debouncedQuery)
+      game.title.toLowerCase().trim().includes(debouncedQuery),
     );
   }, [games, debouncedQuery]);
   // FILTER
@@ -92,14 +93,14 @@ export default function GameList() {
         return;
       }
     },
-    [games, selectedGame]
+    [games, selectedGame],
   );
 
   const handleGameUpdates = useCallback(
     async (
       gameId: number,
       updates?: Partial<GameProps>,
-      shouldDelete?: boolean
+      shouldDelete?: boolean,
     ) => {
       if (updates) {
         if (selectedGame?.id === gameId) {
@@ -110,7 +111,7 @@ export default function GameList() {
         await deleteGame(gameId);
       }
     },
-    [deleteGame, selectedGame, updateGame]
+    [deleteGame, selectedGame, updateGame],
   );
 
   const handleSortConfig = (sortType: SortConfig["type"]) => {
@@ -190,16 +191,31 @@ export default function GameList() {
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">
-        <GameDesktopListing
-          games={sortedGames}
-          isProcessingGame={isProcessingGame}
+        <MediaDesktopListing
+          mediaItems={sortedGames}
+          isProcessing={isProcessingGame}
           sortConfig={sortConfig}
-          onSortConfig={handleSortConfig}
-          onGameClicked={handleGameClicked}
+          statusOptions={gameStatusOptions.map((status) => status.value)}
           curStatusFilter={statusFilter}
-          onStatusFilter={handleStatusFilterConfig}
+          mediaType="game"
+          differentColumns={[
+            {
+              label: "Studio",
+              sortKey: "studio",
+              render: (game) => game.studio,
+            },
+            {
+              label: "Released",
+              sortKey: "dateReleased",
+              render: (game) => game.dateReleased,
+            },
+          ]}
           searchQuery={searchQuery}
+          emptyListText="No games yet — add one!"
+          onItemClicked={handleGameClicked}
+          onSortConfig={(key) => handleSortConfig(key as SortConfig["type"])}
           onSearchChange={handleSearchQueryChange}
+          onStatusFilter={handleStatusFilterConfig}
         />
       </div>
       <div className="block lg:hidden">

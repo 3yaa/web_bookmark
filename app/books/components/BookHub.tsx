@@ -17,9 +17,10 @@ import { useBookData } from "@/app/books/hooks/useBookData";
 import { AddBook } from "./addingBook/AddBook";
 import { BookDetails } from "./BookDetailsHub";
 import { BookMobileListing } from "./listingViews/BookMobileListing";
-import { BookDesktopListing } from "./listingViews/BookDesktopListing";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
+import { MediaDesktopListing } from "@/app/shared/MediaDesktopListing";
+import { bookStatusOptions } from "@/utils/dropDownDetails";
 
 export default function BookHub() {
   const { books, addBook, updateBook, deleteBook, isProcessingBook } =
@@ -42,14 +43,14 @@ export default function BookHub() {
   const debouncedSetQuery = useRef(
     debounce((value: string) => {
       setDebouncedQuery(value);
-    }, 300)
+    }, 300),
   ).current;
   // SEARCH
   const searchedBooks = useMemo(() => {
     if (!debouncedQuery) return books;
 
     return books.filter((book) =>
-      book.title.toLowerCase().trim().includes(debouncedQuery)
+      book.title.toLowerCase().trim().includes(debouncedQuery),
     );
   }, [books, debouncedQuery]);
   // FILTER
@@ -67,7 +68,7 @@ export default function BookHub() {
       if (targetTitle) {
         // !NEEDS TO MAKE THIS CALL WITH THE ENTIRE DB
         const targetBook = books.find(
-          (book) => book.title.toLowerCase() === targetTitle.toLowerCase()
+          (book) => book.title.toLowerCase() === targetTitle.toLowerCase(),
         );
 
         if (targetBook) {
@@ -80,14 +81,14 @@ export default function BookHub() {
         return;
       }
     },
-    [books]
+    [books],
   );
 
   const handleBookUpdates = useCallback(
     async (
       bookId: number,
       updates?: Partial<BookProps>,
-      shouldDelete?: boolean
+      shouldDelete?: boolean,
     ) => {
       if (updates) {
         if (selectedBook?.id === bookId) {
@@ -98,7 +99,7 @@ export default function BookHub() {
         await deleteBook(bookId);
       }
     },
-    [deleteBook, selectedBook, updateBook]
+    [deleteBook, selectedBook, updateBook],
   );
 
   const handleSortConfig = (sortType: SortConfig["type"]) => {
@@ -178,16 +179,31 @@ export default function BookHub() {
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">
-        <BookDesktopListing
-          books={sortedBooks}
-          isProcessingBook={isProcessingBook}
+        <MediaDesktopListing
+          mediaItems={sortedBooks}
+          isProcessing={isProcessingBook}
           sortConfig={sortConfig}
-          onSortConfig={handleSortConfig}
-          onBookClicked={handleBookClicked}
+          statusOptions={bookStatusOptions.map((status) => status.value)}
           curStatusFilter={statusFilter}
-          onStatusFilter={handleStatusFilterConfig}
+          mediaType="book"
+          differentColumns={[
+            {
+              label: "Author",
+              sortKey: "author",
+              render: (book) => book.author,
+            },
+            {
+              label: "Published",
+              sortKey: "datePublished",
+              render: (book) => book.datePublished,
+            },
+          ]}
           searchQuery={searchQuery}
+          emptyListText="No books yet — add one!"
+          onItemClicked={handleBookClicked}
+          onSortConfig={(key) => handleSortConfig(key as SortConfig["type"])}
           onSearchChange={handleSearchQueryChange}
+          onStatusFilter={handleStatusFilterConfig}
         />
       </div>
       <div className="block lg:hidden">

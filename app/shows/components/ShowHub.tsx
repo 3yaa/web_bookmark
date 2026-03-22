@@ -16,10 +16,11 @@ import { useShowData } from "@/app/shows/hooks/useShowData";
 // components
 import { AddShow } from "./addShow/AddShow";
 import { ShowDetails } from "./ShowDetailsHub";
-import { ShowMobileListing } from "./listingViews/ShowMobileListing";
-import { ShowDesktopListing } from "./listingViews/ShowDesktopListing";
+import { ShowMobileListing } from "./listing/ShowMobileListing";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
+import { MediaDesktopListing } from "@/app/shared/MediaDesktopListing";
+import { showStatusOptions } from "@/utils/dropDownDetails";
 
 export default function ShowHub() {
   const { shows, addShow, updateShow, deleteShow, isProcessingShow } =
@@ -42,14 +43,14 @@ export default function ShowHub() {
   const debouncedSetQuery = useRef(
     debounce((value: string) => {
       setDebouncedQuery(value);
-    }, 300)
+    }, 300),
   ).current;
   // SEARCH
   const searchedShows = useMemo(() => {
     if (!debouncedQuery) return shows;
 
     return shows.filter((show) =>
-      show.title.toLowerCase().trim().includes(debouncedQuery)
+      show.title.toLowerCase().trim().includes(debouncedQuery),
     );
   }, [shows, debouncedQuery]);
   // FILTER
@@ -66,7 +67,7 @@ export default function ShowHub() {
     async (
       showId: number,
       updates?: Partial<ShowProps>,
-      shouldDelete?: boolean
+      shouldDelete?: boolean,
     ) => {
       if (updates) {
         if (selectedShow?.id === showId) {
@@ -77,7 +78,7 @@ export default function ShowHub() {
         await deleteShow(showId);
       }
     },
-    [deleteShow, selectedShow, updateShow]
+    [deleteShow, selectedShow, updateShow],
   );
 
   const handleSortConfig = (sortType: SortConfig["type"]) => {
@@ -156,16 +157,31 @@ export default function ShowHub() {
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">
-        <ShowDesktopListing
-          shows={sortedShows}
-          isProcessingShow={isProcessingShow || isFilterPending}
+        <MediaDesktopListing
+          mediaItems={sortedShows}
+          isProcessing={isProcessingShow}
           sortConfig={sortConfig}
-          onSortConfig={handleSortConfig}
-          onShowClicked={handleShowClicked}
+          statusOptions={showStatusOptions.map((status) => status.value)}
           curStatusFilter={statusFilter}
-          onStatusFilter={handleStatusFilterConfig}
+          mediaType="show"
+          differentColumns={[
+            {
+              label: "Studio",
+              sortKey: "studio",
+              render: (show) => show.studio,
+            },
+            {
+              label: "Released",
+              sortKey: "dateReleased",
+              render: (show) => show.dateReleased,
+            },
+          ]}
           searchQuery={searchQuery}
+          emptyListText="No shows yet — add one!"
+          onItemClicked={handleShowClicked}
+          onSortConfig={(key) => handleSortConfig(key as SortConfig["type"])}
           onSearchChange={handleSearchQueryChange}
+          onStatusFilter={handleStatusFilterConfig}
         />
       </div>
       <div className="block lg:hidden">

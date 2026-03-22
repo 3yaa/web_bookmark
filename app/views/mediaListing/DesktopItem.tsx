@@ -9,7 +9,7 @@ import {
   getStatusWaveColor,
 } from "@/utils/formattingUtils";
 import { ShowProps } from "@/types/show";
-import { ShowProgressBarDesktop } from "../../shows/components/listingUtil/showProgress";
+import { ShowProgressBarDesktop } from "../../shows/components/showProgressListing";
 
 interface DesktopItemProps<T extends BaseMediaProps> {
   item: T;

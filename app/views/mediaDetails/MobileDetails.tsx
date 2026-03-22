@@ -1,14 +1,14 @@
 import Image from "next/image";
 import { Option } from "@/app/components/ui/Dropdown";
 import { BaseMediaProps } from "@/types/media";
-import { ColumnConfig } from "../listView/shared";
+import { ColumnConfig } from "../mediaListing/shared";
 import { useEffect, useRef, useState } from "react";
 import { MobileScorePicker } from "@/app/components/ui/MobileScorePicker";
 import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
 import { Loading } from "@/app/components/ui/Loading";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
-import { BookCoverChange } from "@/app/books/components/detailsUtil/BookCoverChange";
+import { BookCoverChange } from "@/app/books/components/BookCoverChangeDetails";
 import { MobileProgressPicker } from "@/app/components/ui/MobileSeasonEpPicker";
 import { MobileSeriesNav } from "./shared/MobileSeriesNav";
 import { calcCurProgress } from "@/app/shows/utils/progressCalc";

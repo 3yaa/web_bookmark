@@ -1,9 +1,9 @@
 "use client";
 import { MovieProps } from "@/types/movie";
 import { useCallback, useEffect, useState } from "react";
-import { DesktopDetails } from "@/app/shared/detailView/DesktopDetails";
+import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
-import { MobileDetails } from "@/app/shared/detailView/MobileDetails";
+import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
 
 export type MovieAction =
   | { type: "closeModal" }

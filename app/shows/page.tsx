@@ -1,4 +1,4 @@
-import Shows from "./components/ShowHub";
+import Shows from "./ShowHub";
 
 export default function Page() {
   return <Shows />;

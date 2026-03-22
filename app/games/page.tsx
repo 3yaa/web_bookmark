@@ -1,4 +1,4 @@
-import Games from "./components/GameHub";
+import Games from "./GameHub";
 
 export default function Page() {
   return <Games />;

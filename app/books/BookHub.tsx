@@ -2,39 +2,39 @@
 import {
   useCallback,
   useEffect,
-  useState,
-  useTransition,
   useMemo,
   useRef,
+  useState,
+  useTransition,
 } from "react";
 import { Plus } from "lucide-react";
 import { MediaStatus } from "@/types/media";
-import { ShowProps, ShowSortConfig } from "@/types/show";
+import { BookProps, BookSortConfig } from "@/types/book";
 // hooks
-import { useSortShows } from "@/app/shows/hooks/useSortShow";
-import { useShowData } from "@/app/shows/hooks/useShowData";
+import { useSortBooks } from "@/app/books/hooks/useSortBooks";
+import { useBookData } from "@/app/books/hooks/useBookData";
 // components
-import { AddShow } from "./addShow/AddShow";
-import { ShowDetails } from "./ShowDetailsHub";
+import { AddBook } from "./addingBook/AddBook";
+import { BookDetails } from "./BookDetailsHub";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
-import { DesktopListing } from "@/app/shared/listView/DesktopListing";
-import { showStatusOptions } from "@/utils/dropDownDetails";
-import { MobileListing } from "@/app/shared/listView/MobileListing";
+import { bookStatusOptions } from "@/utils/dropDownDetails";
+import { DesktopListing } from "@/app/views/mediaListing/DesktopListing";
+import { MobileListing } from "@/app/views/mediaListing/MobileListing";
 
-export default function ShowHub() {
-  const { shows, addShow, updateShow, deleteShow, isProcessingShow } =
-    useShowData();
+export default function BookHub() {
+  const { books, addBook, updateBook, deleteBook, isProcessingBook } =
+    useBookData();
   // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
-  const [sortConfig, setSortConfig] = useState<ShowSortConfig | null>(null);
+  const [sortConfig, setSortConfig] = useState<BookSortConfig | null>(null);
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   // delegation
-  const [selectedShow, setSelectedShow] = useState<ShowProps | null>(null);
+  const [selectedBook, setSelectedBook] = useState<BookProps | null>(null);
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
-    "showDetails" | "addShow" | null
+    "bookDetails" | "addBook" | null
   >(null);
   //
   const isButtonsVisible = useScrollVisibility(30);
@@ -46,42 +46,63 @@ export default function ShowHub() {
     }, 300),
   ).current;
   // SEARCH
-  const searchedShows = useMemo(() => {
-    if (!debouncedQuery) return shows;
+  const searchedBooks = useMemo(() => {
+    if (!debouncedQuery) return books;
 
-    return shows.filter((show) =>
-      show.title.toLowerCase().trim().includes(debouncedQuery),
+    return books.filter((book) =>
+      book.title.toLowerCase().trim().includes(debouncedQuery),
     );
-  }, [shows, debouncedQuery]);
+  }, [books, debouncedQuery]);
   // FILTER
   const [isFilterPending, startTransition] = useTransition();
-  const filteredShows = useMemo(() => {
-    if (!statusFilter) return searchedShows;
+  const filteredBooks = useMemo(() => {
+    if (!statusFilter) return searchedBooks;
     //
-    return searchedShows.filter((show) => show.status === statusFilter);
-  }, [searchedShows, statusFilter]);
-  // SORT
-  const sortedShows = useSortShows(filteredShows, sortConfig);
+    return searchedBooks.filter((book) => book.status === statusFilter);
+  }, [searchedBooks, statusFilter]);
+  //
+  const sortedBooks = useSortBooks(filteredBooks, sortConfig);
 
-  const handleShowUpdates = useCallback(
+  const showSequelPrequel = useCallback(
+    (targetTitle: string) => {
+      if (targetTitle) {
+        // !NEEDS TO MAKE THIS CALL WITH THE ENTIRE DB
+        const targetBook = books.find(
+          (book) => book.title.toLowerCase() === targetTitle.toLowerCase(),
+        );
+
+        if (targetBook) {
+          setSelectedBook(targetBook);
+        } else {
+          // need to call external API
+          setTitleToUse(targetTitle);
+          setActiveModal("addBook");
+        }
+        return;
+      }
+    },
+    [books],
+  );
+
+  const handleBookUpdates = useCallback(
     async (
-      showId: number,
-      updates?: Partial<ShowProps>,
+      bookId: number,
+      updates?: Partial<BookProps>,
       shouldDelete?: boolean,
     ) => {
       if (updates) {
-        if (selectedShow?.id === showId) {
-          setSelectedShow({ ...selectedShow, ...updates });
+        if (selectedBook?.id === bookId) {
+          setSelectedBook({ ...selectedBook, ...updates });
         }
-        updateShow(showId, updates);
+        updateBook(bookId, updates);
       } else if (shouldDelete) {
-        await deleteShow(showId);
+        await deleteBook(bookId);
       }
     },
-    [deleteShow, selectedShow, updateShow],
+    [deleteBook, selectedBook, updateBook],
   );
 
-  const handleSortConfig = (sortType: ShowSortConfig["type"]) => {
+  const handleSortConfig = (sortType: BookSortConfig["type"]) => {
     setSortConfig((prev) => {
       if (!prev || prev.type !== sortType) {
         return { type: sortType, order: "desc" };
@@ -108,13 +129,13 @@ export default function ShowHub() {
     // wait a frame before clearing state
     requestAnimationFrame(() => {
       setTitleToUse("");
-      setSelectedShow(null);
+      setSelectedBook(null);
     });
   }, []);
 
-  const handleShowClicked = useCallback((show: ShowProps) => {
-    setActiveModal("showDetails");
-    setSelectedShow(show);
+  const handleBookClicked = useCallback((book: BookProps) => {
+    setActiveModal("bookDetails");
+    setSelectedBook(book);
   }, []);
 
   const handleSearchQueryChange = (value: string) => {
@@ -135,9 +156,10 @@ export default function ShowHub() {
           e.target instanceof HTMLTextAreaElement
         )
       ) {
-        setActiveModal("addShow");
+        setActiveModal("addBook");
       }
     };
+    //
     window.addEventListener("keydown", handleEnter);
     return () => window.removeEventListener("keydown", handleEnter);
   }, [activeModal]);
@@ -158,29 +180,29 @@ export default function ShowHub() {
     <div className="min-h-screen">
       <div className="lg:block hidden">
         <DesktopListing
-          mediaItems={sortedShows}
-          isProcessing={isProcessingShow}
+          mediaItems={sortedBooks}
+          isProcessing={isProcessingBook}
           sortConfig={sortConfig}
-          statusOptions={showStatusOptions.map((status) => status.value)}
+          statusOptions={bookStatusOptions.map((status) => status.value)}
           curStatusFilter={statusFilter}
-          mediaType="show"
+          mediaType="book"
           differentColumns={[
             {
-              label: "Studio",
-              sortKey: "studio",
-              render: (show) => show.studio,
+              label: "Author",
+              sortKey: "author",
+              render: (book) => book.author,
             },
             {
-              label: "Released",
-              sortKey: "dateReleased",
-              render: (show) => show.dateReleased,
+              label: "Published",
+              sortKey: "datePublished",
+              render: (book) => book.datePublished,
             },
           ]}
           searchQuery={searchQuery}
-          emptyListText="No shows yet — add one!"
-          onItemClicked={handleShowClicked}
+          emptyListText="No books yet — add one!"
+          onItemClicked={handleBookClicked}
           onSortConfig={(key) =>
-            handleSortConfig(key as ShowSortConfig["type"])
+            handleSortConfig(key as BookSortConfig["type"])
           }
           onSearchChange={handleSearchQueryChange}
           onStatusFilter={handleStatusFilterConfig}
@@ -188,28 +210,28 @@ export default function ShowHub() {
       </div>
       <div className="block lg:hidden">
         <MobileListing
-          mediaItems={sortedShows}
-          isProcessing={isProcessingShow || isFilterPending}
+          mediaItems={sortedBooks}
+          isProcessing={isProcessingBook || isFilterPending}
           sortConfig={sortConfig}
-          statusOptions={showStatusOptions.map((status) => status.value)}
+          statusOptions={bookStatusOptions.map((status) => status.value)}
           curStatusFilter={statusFilter}
-          mediaType="show"
+          mediaType="book"
           differentColumns={[
             {
-              label: "Studio",
-              sortKey: "studio",
-              render: (show) => show.studio,
+              label: "Author",
+              sortKey: "author",
+              render: (book) => book.author,
             },
             {
-              label: "Released",
-              sortKey: "dateReleased",
-              render: (show) => show.dateReleased,
+              label: "Published",
+              sortKey: "datePublished",
+              render: (book) => book.datePublished,
             },
           ]}
-          emptyListText="No shows yet — add one!"
-          onItemClicked={handleShowClicked}
+          emptyListText="No books yet — add one!"
+          onItemClicked={handleBookClicked}
           onSortConfig={(key) =>
-            handleSortConfig(key as ShowSortConfig["type"])
+            handleSortConfig(key as BookSortConfig["type"])
           }
           onStatusFilter={handleStatusFilterConfig}
         />
@@ -221,7 +243,7 @@ export default function ShowHub() {
         ${isButtonsVisible ? "translate-y-0" : "translate-y-24"}`}
       >
         <button
-          onClick={() => setActiveModal("addShow")}
+          onClick={() => setActiveModal("addBook")}
           className="flex items-center justify-center w-14 h-14 lg:w-14 lg:h-14 rounded-full 
           bg-linear-to-br from-zinc-transparent to-zinc-800/60 
           hover:bg-linear-to-br hover:from-zinc-800/60 hover:to-transparent
@@ -232,20 +254,21 @@ export default function ShowHub() {
           <Plus className="w-5 h-5 text-zinc-300" />
         </button>
       </div>
-      <AddShow
-        isOpen={activeModal === "addShow"}
+      <AddBook
+        isOpen={activeModal === "addBook"}
         onClose={handleModalClose}
-        existingShows={shows}
-        onAddShow={addShow}
+        existingBooks={books}
+        onAddBook={addBook}
         titleFromAbove={titleToUse}
       />
-      {/* SHOW DETAILS */}
-      {selectedShow && (
-        <ShowDetails
-          isOpen={activeModal === "showDetails"}
-          show={selectedShow}
+      {/* BOOK DETAILS */}
+      {selectedBook && (
+        <BookDetails
+          isOpen={activeModal === "bookDetails"}
+          book={selectedBook}
           onClose={handleModalClose}
-          onUpdate={handleShowUpdates}
+          onUpdate={handleBookUpdates}
+          showSequelPrequel={showSequelPrequel}
         />
       )}
     </div>

@@ -4,7 +4,7 @@ import {
   getStatusBg,
   getStatusWaveColor,
 } from "@/utils/formattingUtils";
-import { calcCurProgress } from "../../utils/progressCalc";
+import { calcCurProgress } from "../utils/progressCalc";
 
 export function ShowProgressBarMobile({ show }: { show: ShowProps }) {
   return (

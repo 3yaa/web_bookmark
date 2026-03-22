@@ -100,7 +100,7 @@ export function AddMovie({
       if (!posters) return null;
       setNewMovie((prev) => ({ ...prev, ...mapTMDBToMovie(posters) }));
     },
-    [searchForPosters]
+    [searchForPosters],
   );
 
   const handleSeriesSearch = useCallback(
@@ -118,7 +118,7 @@ export function AddMovie({
         status: "Want to Watch",
       }));
     },
-    [searchForSeriesInfo]
+    [searchForSeriesInfo],
   );
 
   const handleMovieSearch = useCallback(async () => {
@@ -150,7 +150,7 @@ export function AddMovie({
     async (
       _movieId: number,
       updates?: Partial<MovieProps>,
-      needYearField?: boolean
+      needYearField?: boolean,
     ) => {
       if (needYearField) {
         setActiveModal(null);
@@ -162,7 +162,7 @@ export function AddMovie({
       }
       setNewMovie((prev) => ({ ...prev, ...updates }));
     },
-    []
+    [],
   );
 
   const handleMovieAdd = async () => {
@@ -199,7 +199,7 @@ export function AddMovie({
         ...mappedData,
       }));
     },
-    [allSeries, curSeries]
+    [allSeries, curSeries],
   );
 
   const handleMovieDetailsClose = () => {

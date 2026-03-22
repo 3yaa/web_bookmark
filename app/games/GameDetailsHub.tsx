@@ -1,9 +1,9 @@
 "use client";
 import { GameProps } from "@/types/game";
 import { useCallback, useEffect, useState } from "react";
-import { DesktopDetails } from "@/app/shared/detailView/DesktopDetails";
 import { gameStatusOptions } from "@/utils/dropDownDetails";
-import { MobileDetails } from "@/app/shared/detailView/MobileDetails";
+import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
+import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
 
 export type GameAction =
   | { type: "closeModal" }

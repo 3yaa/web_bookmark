@@ -1,9 +1,9 @@
 "use client";
 import { BookProps } from "@/types/book";
 import { useCallback, useEffect, useState } from "react";
-import { DesktopDetails } from "@/app/shared/detailView/DesktopDetails";
+import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { bookStatusOptions } from "@/utils/dropDownDetails";
-import { MobileDetails } from "@/app/shared/detailView/MobileDetails";
+import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
 
 export type BookAction =
   | { type: "closeModal" }

@@ -15,14 +15,14 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { BackdropImage } from "@/app/components/ui/Backdrop";
-import { ColumnConfig } from "../listView/shared";
+import { ColumnConfig } from "../mediaListing/shared";
 import { Dropdown, Option } from "@/app/components/ui/Dropdown";
 import { scoreOptions } from "@/utils/dropDownDetails";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
-import { BookCoverChange } from "@/app/books/components/detailsUtil/BookCoverChange";
+import { BookCoverChange } from "@/app/books/components/BookCoverChangeDetails";
 import { BackdropImageBook } from "@/app/components/ui/BackdropBook";
 import { SeriesNav } from "./shared/SeriesNav";
-import { EditProgress } from "@/app/shows/components/detailsUtil/EditProgress";
+import { EditProgress } from "@/app/shows/components/EditProgressDetail";
 
 interface DesktopDetailsProps<T extends BaseMediaProps> {
   item: T;

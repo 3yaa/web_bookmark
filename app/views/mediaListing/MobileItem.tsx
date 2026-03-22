@@ -4,7 +4,7 @@ import { BaseMediaProps } from "@/types/media";
 import { ColumnConfig } from "./shared";
 import { BackdropImageMobile } from "../../components/ui/BackdropMobile";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
-import { ShowProgressBarMobile } from "../../shows/components/listingUtil/showProgress";
+import { ShowProgressBarMobile } from "../../shows/components/showProgressListing";
 import { ShowProps } from "@/types/show";
 import { GameProps } from "@/types/game";
 

@@ -1,4 +1,4 @@
-import Movies from "./components/MovieHub";
+import Movies from "./MovieHub";
 
 export default function Page() {
   return <Movies />;

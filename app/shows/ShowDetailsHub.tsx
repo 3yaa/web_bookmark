@@ -1,9 +1,9 @@
 "use client";
 import { ShowProps } from "@/types/show";
 import React, { useCallback, useEffect, useState } from "react";
-import { DesktopDetails } from "@/app/shared/detailView/DesktopDetails";
+import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { showStatusOptions } from "@/utils/dropDownDetails";
-import { MobileDetails } from "@/app/shared/detailView/MobileDetails";
+import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
 
 export type ShowAction =
   | { type: "closeModal" }

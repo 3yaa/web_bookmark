@@ -9,32 +9,36 @@ import {
 } from "react";
 import { Plus } from "lucide-react";
 import { MediaStatus } from "@/types/media";
-import { MovieProps, MovieSortConfig } from "@/types/movie";
+import { GameProps, IGDBInitProps, GameSortConfig } from "@/types/game";
 // hooks
-import { useSortMovies } from "@/app/movies/hooks/useSortMovies";
-import { useMovieData } from "@/app/movies/hooks/useMovieData";
+import { useSortGames } from "@/app/games/hooks/useSortGames";
+import { useGameData } from "@/app/games/hooks/useGameData";
 // components
-import { AddMovie } from "./addMovie/AddMovie";
-import { MovieDetails } from "./MovieDetailsHub";
+import { AddGame } from "./addGame/AddGame";
+import { GameDetails } from "./GameDetailsHub";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
-import { DesktopListing } from "@/app/shared/listView/DesktopListing";
-import { movieStatusOptions } from "@/utils/dropDownDetails";
-import { MobileListing } from "@/app/shared/listView/MobileListing";
+import { gameStatusOptions } from "@/utils/dropDownDetails";
+import { DesktopListing } from "@/app/views/mediaListing/DesktopListing";
+import { MobileListing } from "@/app/views/mediaListing/MobileListing";
 
-export default function MoviesHub() {
-  const { movies, addMovie, updateMovie, deleteMovie, isProcessingMovie } =
-    useMovieData();
+export default function GameList() {
+  const { games, addGame, updateGame, deleteGame, isProcessingGame } =
+    useGameData();
   // filter/sort config
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
-  const [sortConfig, setSortConfig] = useState<MovieSortConfig | null>(null);
+  const [sortConfig, setSortConfig] = useState<GameSortConfig | null>(null);
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  //delegation
-  const [selectedMovie, setSelectedMovie] = useState<MovieProps | null>(null);
-  const [titleToUse, setTitleToUse] = useState<string>("");
+  // delegation
+  const [selectedGame, setSelectedGame] = useState<GameProps | null>(null);
+  const [titleToAdd, setTitleToAdd] = useState<{
+    dlcIndex: number;
+    mainTitle: string;
+    dlcs: IGDBInitProps[];
+  } | null>(null);
   const [activeModal, setActiveModal] = useState<
-    "movieDetails" | "addMovie" | null
+    "gameDetails" | "addGame" | null
   >(null);
   //
   const isButtonsVisible = useScrollVisibility(30);
@@ -46,65 +50,71 @@ export default function MoviesHub() {
     }, 300),
   ).current;
   // SEARCH
-  const searchedMovies = useMemo(() => {
-    if (!debouncedQuery) return movies;
+  const searchedGames = useMemo(() => {
+    if (!debouncedQuery) return games;
 
-    return movies.filter((movie) =>
-      movie.title.toLowerCase().trim().includes(debouncedQuery),
+    return games.filter((game) =>
+      game.title.toLowerCase().trim().includes(debouncedQuery),
     );
-  }, [movies, debouncedQuery]);
+  }, [games, debouncedQuery]);
   // FILTER
   const [isFilterPending, startTransition] = useTransition();
-  const filteredMovies = useMemo(() => {
-    if (!statusFilter) return searchedMovies;
+  const filteredGames = useMemo(() => {
+    if (!statusFilter) return searchedGames;
     //
-    return searchedMovies.filter((movie) => movie.status === statusFilter);
-  }, [searchedMovies, statusFilter]);
+    return searchedGames.filter((game) => game.status === statusFilter);
+  }, [searchedGames, statusFilter]);
   // SORT
-  const sortedMovies = useSortMovies(filteredMovies, sortConfig);
+  const sortedGames = useSortGames(filteredGames, sortConfig);
 
-  const showSequelPrequel = useCallback(
-    (targetTitle: string) => {
-      if (targetTitle) {
+  const showDlc = useCallback(
+    (targetIgdbId: number, dlcIndex: number) => {
+      if (targetIgdbId) {
         // !NEEDS TO MAKE THIS CALL WITH THE ENTIRE DB
-        const targetMovie = movies.find(
-          (movie) =>
-            movie.title.toLowerCase().trim() ===
-            targetTitle.toLowerCase().trim(),
-        );
+        const targetGame = games.find((game) => game.igdbId === targetIgdbId);
 
-        if (targetMovie) {
-          setSelectedMovie(targetMovie);
-        } else {
+        if (targetGame) {
+          setSelectedGame(targetGame);
+        } else if (selectedGame && selectedGame.dlcs) {
+          let mainTitle;
+          if (dlcIndex === 1) {
+            mainTitle = selectedGame.title;
+          } else {
+            mainTitle = selectedGame.mainTitle;
+          }
           // need to call external API
-          setTitleToUse(targetTitle);
-          setActiveModal("addMovie");
+          setTitleToAdd({
+            dlcIndex: dlcIndex,
+            mainTitle: mainTitle || "",
+            dlcs: selectedGame.dlcs,
+          });
+          setActiveModal("addGame");
         }
         return;
       }
     },
-    [movies],
+    [games, selectedGame],
   );
 
-  const handleMovieUpdates = useCallback(
+  const handleGameUpdates = useCallback(
     async (
-      movieId: number,
-      updates?: Partial<MovieProps>,
+      gameId: number,
+      updates?: Partial<GameProps>,
       shouldDelete?: boolean,
     ) => {
       if (updates) {
-        if (selectedMovie?.id === movieId) {
-          setSelectedMovie({ ...selectedMovie, ...updates });
+        if (selectedGame?.id === gameId) {
+          setSelectedGame({ ...selectedGame, ...updates });
         }
-        updateMovie(movieId, updates);
+        updateGame(gameId, updates);
       } else if (shouldDelete) {
-        await deleteMovie(movieId);
+        await deleteGame(gameId);
       }
     },
-    [deleteMovie, selectedMovie, updateMovie],
+    [deleteGame, selectedGame, updateGame],
   );
 
-  const handleSortConfig = (sortType: MovieSortConfig["type"]) => {
+  const handleSortConfig = (sortType: GameSortConfig["type"]) => {
     setSortConfig((prev) => {
       if (!prev || prev.type !== sortType) {
         return { type: sortType, order: "desc" };
@@ -130,14 +140,14 @@ export default function MoviesHub() {
     setActiveModal(null);
     // wait a frame before clearing state
     requestAnimationFrame(() => {
-      setTitleToUse("");
-      setSelectedMovie(null);
+      setTitleToAdd(null);
+      setSelectedGame(null);
     });
   }, []);
 
-  const handleMovieClicked = useCallback((movie: MovieProps) => {
-    setActiveModal("movieDetails");
-    setSelectedMovie(movie);
+  const handleGameClicked = useCallback((game: GameProps) => {
+    setActiveModal("gameDetails");
+    setSelectedGame(game);
   }, []);
 
   const handleSearchQueryChange = (value: string) => {
@@ -158,7 +168,7 @@ export default function MoviesHub() {
           e.target instanceof HTMLTextAreaElement
         )
       ) {
-        setActiveModal("addMovie");
+        setActiveModal("addGame");
       }
     };
     //
@@ -182,55 +192,59 @@ export default function MoviesHub() {
     <div className="min-h-screen">
       <div className="lg:block hidden">
         <DesktopListing
-          mediaItems={sortedMovies}
-          isProcessing={isProcessingMovie}
+          mediaItems={sortedGames}
+          isProcessing={isProcessingGame}
           sortConfig={sortConfig}
-          statusOptions={movieStatusOptions.map((status) => status.value)}
+          statusOptions={gameStatusOptions.map((status) => status.value)}
           curStatusFilter={statusFilter}
-          mediaType="movie"
+          mediaType="game"
           differentColumns={[
             {
-              label: "Director",
-              sortKey: "director",
-              render: (movie) => movie.director,
+              label: "Studio",
+              sortKey: "studio",
+              render: (game) => game.studio,
             },
             {
               label: "Released",
               sortKey: "dateReleased",
-              render: (movie) => movie.dateReleased,
+              render: (game) => game.dateReleased,
             },
           ]}
           searchQuery={searchQuery}
-          emptyListText="No movies yet — add one!"
-          onItemClicked={handleMovieClicked}
-          onSortConfig={(key) => handleSortConfig(key as MovieSortConfig["type"])}
+          emptyListText="No games yet — add one!"
+          onItemClicked={handleGameClicked}
+          onSortConfig={(key) =>
+            handleSortConfig(key as GameSortConfig["type"])
+          }
           onSearchChange={handleSearchQueryChange}
           onStatusFilter={handleStatusFilterConfig}
         />
       </div>
       <div className="block lg:hidden">
         <MobileListing
-          mediaItems={sortedMovies}
-          isProcessing={isProcessingMovie || isFilterPending}
+          mediaItems={sortedGames}
+          isProcessing={isProcessingGame || isFilterPending}
           sortConfig={sortConfig}
-          statusOptions={movieStatusOptions.map((status) => status.value)}
+          statusOptions={gameStatusOptions.map((status) => status.value)}
           curStatusFilter={statusFilter}
-          mediaType="movie"
+          mediaType="game"
           differentColumns={[
             {
-              label: "Director",
-              sortKey: "director",
-              render: (movie) => movie.director,
+              label: "Studio",
+              sortKey: "studio",
+              render: (game) => game.studio,
             },
             {
               label: "Released",
               sortKey: "dateReleased",
-              render: (movie) => movie.dateReleased,
+              render: (game) => game.dateReleased,
             },
           ]}
-          emptyListText="No movies yet — add one!"
-          onItemClicked={handleMovieClicked}
-          onSortConfig={(key) => handleSortConfig(key as MovieSortConfig["type"])}
+          emptyListText="No games yet — add one!"
+          onItemClicked={handleGameClicked}
+          onSortConfig={(key) =>
+            handleSortConfig(key as GameSortConfig["type"])
+          }
           onStatusFilter={handleStatusFilterConfig}
         />
       </div>
@@ -241,7 +255,7 @@ export default function MoviesHub() {
         ${isButtonsVisible ? "translate-y-0" : "translate-y-24"}`}
       >
         <button
-          onClick={() => setActiveModal("addMovie")}
+          onClick={() => setActiveModal("addGame")}
           className="flex items-center justify-center w-14 h-14 lg:w-14 lg:h-14 rounded-full 
           bg-linear-to-br from-zinc-transparent to-zinc-800/60 
           hover:bg-linear-to-br hover:from-zinc-800/60 hover:to-transparent
@@ -252,21 +266,21 @@ export default function MoviesHub() {
           <Plus className="w-5 h-5 text-zinc-300" />
         </button>
       </div>
-      <AddMovie
-        isOpen={activeModal === "addMovie"}
+      <AddGame
+        isOpen={activeModal === "addGame"}
         onClose={handleModalClose}
-        existingMovies={movies}
-        onAddMovie={addMovie}
-        titleFromAbove={titleToUse}
+        existingGames={games}
+        onAddGame={addGame}
+        titleFromAbove={titleToAdd}
       />
-      {/* MOVIE DETAILS */}
-      {selectedMovie && (
-        <MovieDetails
-          isOpen={activeModal === "movieDetails"}
-          movie={selectedMovie}
+      {/* GAME DETAILS */}
+      {selectedGame && (
+        <GameDetails
+          isOpen={activeModal === "gameDetails"}
+          game={selectedGame}
           onClose={handleModalClose}
-          onUpdate={handleMovieUpdates}
-          showSequelPrequel={showSequelPrequel}
+          onUpdate={handleGameUpdates}
+          showDlc={showDlc}
         />
       )}
     </div>

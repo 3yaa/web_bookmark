@@ -32,7 +32,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 }: DesktopItemProps<T>) {
   return (
     <div
-      className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_1fr_6rem_7rem_11rem_6.5rem_0.85fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-900 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
+      className={`group max-w-[99%] mx-auto grid md:grid-cols-[2rem_6rem_1fr_6rem_7rem_11rem_6.5rem_0.85fr] px-3 py-0.5 items-center bg-zinc-900/65 scale-100 hover:scale-101 hover:rounded-xl hover:bg-zinc-800/65 transition-all duration-200 shadow-sm border-l-4 rounded-md ${getStatusBorderColor(
         item.status,
       )} border-b border-b-zinc-700/20 backdrop-blur-sm group ${
         index === 0 ? "rounded-bl-none" : "rounded-l-none"
@@ -42,7 +42,7 @@ export const DesktopItem = React.memo(function DesktopItem<
       onClick={() => onClick(item)}
     >
       <span className="font-medium text-zinc-300 text-sm">{index + 1}</span>
-      <div className="w-14 h-21">
+      <div className="w-16 h-24">
         {(item.posterUrl ?? item.coverUrl) ? (
           <Image
             src={(item.posterUrl ?? item.coverUrl)!}
@@ -50,14 +50,14 @@ export const DesktopItem = React.memo(function DesktopItem<
             width={1280}
             height={720}
             priority
-            className="w-full h-full object-fill rounded-sm"
+            className={`w-full h-full rounded-sm ${mediaType === "game" ? "object-cover" : "object-fill"}`}
           />
         ) : (
           <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30"></div>
         )}
       </div>
       <div className="flex flex-col min-w-0 flex-1 relative">
-        <span className="font-semibold text-zinc-400 text-[70%] group-hover:text-zinc-300 flex gap-1">
+        <span className="font-semibold text-zinc-400 text-sm group-hover:text-zinc-300 flex gap-1">
           {(item.seriesTitle ?? item.mainTitle) ? (
             <>
               <span className="block max-w-[88%] whitespace-nowrap text-ellipsis overflow-hidden shrink">
@@ -70,7 +70,7 @@ export const DesktopItem = React.memo(function DesktopItem<
             ""
           )}
         </span>
-        <span className="font-semibold text-zinc-100 text-[95%] group-hover:text-zinc-300 transition-colors duration-200 truncate max-w-full">
+        <span className="font-semibold text-zinc-100/90 text-[15.5px] group-hover:text-zinc-300 transition-colors duration-200 truncate max-w-full">
           {item.title || "-"}
         </span>
         {mediaType === "show" ? (

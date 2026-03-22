@@ -422,7 +422,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
                         onBlur={() => {
                           onAction({ type: "saveNote" });
                         }}
-                        placeholder="Add your thoughts about this item..."
+                        placeholder={
+                          "Add your thoughts about this " + mediaType + "..."
+                        }
                         className="text-gray-300/90 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500 font-medium"
                       />
                     </div>

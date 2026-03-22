@@ -57,9 +57,9 @@ export function DesktopListing<T extends BaseMediaProps>({
   const virtualizer = useVirtualizer({
     count: mediaItems.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 88,
+    estimateSize: () => 101,
     overscan: 5,
-    measureElement: (element) => element?.getBoundingClientRect().height ?? 88,
+    measureElement: (element) => element?.getBoundingClientRect().height ?? 101,
   });
   // use / to open search
   useEffect(() => {

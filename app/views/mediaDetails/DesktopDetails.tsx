@@ -21,7 +21,7 @@ import { scoreOptions } from "@/utils/dropDownDetails";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { BookCoverChange } from "@/app/books/components/detailsUtil/BookCoverChange";
 import { BackdropImageBook } from "@/app/components/ui/BackdropBook";
-import { SeriesNav } from "./SeriesNav";
+import { SeriesNav } from "./shared/SeriesNav";
 import { EditProgress } from "@/app/shows/components/detailsUtil/EditProgress";
 
 interface DesktopDetailsProps<T extends BaseMediaProps> {

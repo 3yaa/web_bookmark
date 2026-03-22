@@ -10,7 +10,7 @@ import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
 import { BookCoverChange } from "@/app/books/components/detailsUtil/BookCoverChange";
 import { MobileProgressPicker } from "@/app/components/ui/MobileSeasonEpPicker";
-import { MobileSeriesNav } from "./MobileSeriesNav";
+import { MobileSeriesNav } from "./shared/MobileSeriesNav";
 import { calcCurProgress } from "@/app/shows/utils/progressCalc";
 
 interface MobileDetailsProps<T extends BaseMediaProps> {

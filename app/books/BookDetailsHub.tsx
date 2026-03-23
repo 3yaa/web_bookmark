@@ -1,5 +1,5 @@
 "use client";
-import { BookProps } from "@/types/book";
+import { BookProps, DIFF_COLUMNS_BOOK } from "@/types/book";
 import { useCallback, useEffect, useState } from "react";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { bookStatusOptions } from "@/utils/dropDownDetails";
@@ -191,18 +191,7 @@ export function BookDetails({
               payload?: unknown;
             }) => void
           }
-          differentColumns={[
-            {
-              label: "Author",
-              sortKey: "author",
-              render: (b: BookProps) => b.author,
-            },
-            {
-              label: "Published",
-              sortKey: "datePublished",
-              render: (b: BookProps) => b.datePublished,
-            },
-          ]}
+          differentColumns={DIFF_COLUMNS_BOOK}
           coverUrls={coverUrls}
           coverIndex={coverIndex}
         />
@@ -224,18 +213,7 @@ export function BookDetails({
               payload?: unknown;
             }) => void
           }
-          differentColumns={[
-            {
-              label: "Author",
-              sortKey: "author",
-              render: (b: BookProps) => b.author,
-            },
-            {
-              label: "Published",
-              sortKey: "datePublished",
-              render: (b: BookProps) => b.datePublished,
-            },
-          ]}
+          differentColumns={DIFF_COLUMNS_BOOK}
           coverUrls={coverUrls}
           coverIndex={coverIndex}
         />

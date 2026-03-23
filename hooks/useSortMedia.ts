@@ -1,58 +1,10 @@
 import { useMemo } from "react";
-import { BaseMediaProps } from "@/types/media";
-import { BookProps, BookSortConfig } from "@/types/book";
-import { GameProps, GameSortConfig } from "@/types/game";
-import { ShowProps, ShowSortConfig } from "@/types/show";
-import { MovieProps, MovieSortConfig } from "@/types/movie";
+import { BaseMediaProps, ColumnConfig } from "@/types/media";
 
-export const useSortBooks = (
-  books: BookProps[],
-  sortConfig: BookSortConfig | null,
-) =>
-  useSortMedia(books, sortConfig, [
-    { key: "author", type: "string", getValue: (b) => b.author },
-    { key: "datePublished", type: "number", getValue: (b) => b.datePublished },
-  ]);
-
-export const useSortMovies = (
-  movies: MovieProps[],
-  sortConfig: MovieSortConfig | null,
-) =>
-  useSortMedia(movies, sortConfig, [
-    { key: "director", type: "string", getValue: (m) => m.director },
-    { key: "dateReleased", type: "number", getValue: (m) => m.dateReleased },
-  ]);
-
-export const useSortShows = (
-  shows: ShowProps[],
-  sortConfig: ShowSortConfig | null,
-) =>
-  useSortMedia(shows, sortConfig, [
-    { key: "studio", type: "string", getValue: (s) => s.studio },
-    { key: "dateReleased", type: "number", getValue: (s) => s.dateReleased },
-  ]);
-
-export const useSortGames = (
-  games: GameProps[],
-  sortConfig: GameSortConfig | null,
-) =>
-  useSortMedia(games, sortConfig, [
-    { key: "studio", type: "string", getValue: (g) => g.studio },
-    { key: "dateReleased", type: "number", getValue: (g) => g.dateReleased },
-  ]);
-
-// =========GENERIC SORT=========
-
-type SortColumn<T> = {
-  key: string;
-  getValue: (item: T) => string | number | null | undefined;
-  type: "string" | "number";
-};
-
-function useSortMedia<T extends BaseMediaProps>(
+export function useSortMedia<T extends BaseMediaProps>(
   items: T[],
   sortConfig: { type: string; order: "asc" | "desc" } | null,
-  extraColumns: SortColumn<T>[],
+  extraColumns: [ColumnConfig<T>, ColumnConfig<T>],
 ): T[] {
   return useMemo(() => {
     // if no sort config, return items as-is (no copying)
@@ -103,7 +55,7 @@ function useSortMedia<T extends BaseMediaProps>(
         break;
 
       default: {
-        const col = extraColumns.find((c) => c.key === sortConfig.type);
+        const col = extraColumns.find((c) => c.sortKey === sortConfig.type);
         if (!col) break;
 
         sortedItems.sort((a, b) => {
@@ -114,8 +66,8 @@ function useSortMedia<T extends BaseMediaProps>(
           if (valA == null) return 1;
           if (valB == null) return -1;
 
-          if (col.type === "string") {
-            const comparison = String(valA).localeCompare(String(valB));
+          if (typeof valA === "string" && typeof valB === "string") {
+            const comparison = valA.localeCompare(valB);
             return sortConfig.order === "desc" ? comparison : -comparison;
           } else {
             const comparison = Number(valA) - Number(valB);

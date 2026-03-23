@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { Option } from "@/app/components/ui/Dropdown";
-import { BaseMediaProps } from "@/types/media";
-import { ColumnConfig } from "../mediaListing/shared";
+import { BaseMediaProps, ColumnConfig } from "@/types/media";
 import { useEffect, useRef, useState } from "react";
 import { MobileScorePicker } from "@/app/components/ui/MobileScorePicker";
 import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
@@ -343,10 +342,10 @@ export function MobileDetails<T extends BaseMediaProps>({
               {/* AUTHOR/STUDIO/DIRECTOR AND DATES */}
               <div className="text-zinc-400 text-sm font-medium flex items-center gap-2">
                 <span>
-                  {differentColumns[0].render(item) ||
+                  {differentColumns[0].getValue(item) ||
                     "Unknown " + differentColumns[0].label}
                 </span>
-                •<span>{differentColumns[1].render(item) || "Unknown"}</span>
+                •<span>{differentColumns[1].getValue(item) || "Unknown"}</span>
                 {item.dateCompleted && (
                   <>
                     •<span>{formatDateShort(item.dateCompleted)}</span>

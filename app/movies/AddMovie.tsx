@@ -14,7 +14,7 @@ import { cleanName } from "@/utils/cleanName";
 import { MovieDetails } from "./MovieDetailsHub";
 import { ManualAddMovie } from "./components/ManualAddMovie";
 //
-import { useMovieSearch } from "@/app/movies/hooks/useMovieSearch";
+import { useMovieSearch } from "@/hooks/external/useMovieSearch";
 interface AddMovieProps {
   isOpen: boolean;
   onClose: () => void;

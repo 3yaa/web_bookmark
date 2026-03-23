@@ -1,221 +1,100 @@
 "use client";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
-import { Plus } from "lucide-react";
-import { MediaStatus } from "@/types/media";
-import { GameProps, IGDBInitProps, GameSortConfig } from "@/types/game";
-// hooks
-import { useSortGames } from "@/app/games/hooks/useSortGames";
-import { useGameData } from "@/app/games/hooks/useGameData";
-// components
+import { useCallback, useState } from "react";
+import { GameProps, IGDBInitProps, DIFF_COLUMNS_GAME } from "@/types/game";
+import { useMediaData } from "@/hooks/useMediaData";
+import { useManageMedia } from "@/hooks/useManageMedia";
+import { useSortMedia } from "@/hooks/useSortMedia";
+import { gameStatusOptions } from "@/utils/dropDownDetails";
 import { AddGame } from "./AddGame";
 import { GameDetails } from "./GameDetailsHub";
-import { debounce } from "@/utils/debounce";
-import { useScrollVisibility } from "@/hooks/useScrollVisibility";
-import { gameStatusOptions } from "@/utils/dropDownDetails";
 import { DesktopListing } from "@/app/views/mediaListing/DesktopListing";
 import { MobileListing } from "@/app/views/mediaListing/MobileListing";
+import { AddButton } from "../components/ui/AddButton";
 
 export default function GameList() {
-  const { games, addGame, updateGame, deleteGame, isProcessingGame } =
-    useGameData();
-  // filter/sort config
-  const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
-  const [sortConfig, setSortConfig] = useState<GameSortConfig | null>(null);
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  // delegation
-  const [selectedGame, setSelectedGame] = useState<GameProps | null>(null);
+  const { items, add, update, remove, isProcessing } = useMediaData<GameProps>({
+    endpoint: "games",
+    requiredFieldsToPost: ["title", "status", "igdbId"],
+    statusOrder: { Playing: 0, Completed: 1, Dropped: 2 },
+  });
+
+  const {
+    filteredItems,
+    sortConfig,
+    statusFilter,
+    searchQuery,
+    selectedItem,
+    setSelectedItem,
+    activeModal,
+    setActiveModal,
+    isMenuButtonsVisible,
+    isFilterPending,
+    handleSortConfig,
+    handleStatusFilterConfig,
+    handleModalClose,
+    handleItemClicked,
+    handleSearchQueryChange,
+    handleItemUpdates,
+  } = useManageMedia<GameProps>({
+    items: items,
+    onRemove: remove,
+    onUpdate: update,
+  });
+
+  const sortedGames = useSortMedia(
+    filteredItems,
+    sortConfig,
+    DIFF_COLUMNS_GAME,
+  );
+
+  // for when searching for dlcs within details
   const [titleToAdd, setTitleToAdd] = useState<{
     dlcIndex: number;
     mainTitle: string;
     dlcs: IGDBInitProps[];
   } | null>(null);
-  const [activeModal, setActiveModal] = useState<
-    "gameDetails" | "addGame" | null
-  >(null);
-  //
-  const isButtonsVisible = useScrollVisibility(30);
-
-  // set deboucne
-  const debouncedSetQuery = useRef(
-    debounce((value: string) => {
-      setDebouncedQuery(value);
-    }, 300),
-  ).current;
-  // SEARCH
-  const searchedGames = useMemo(() => {
-    if (!debouncedQuery) return games;
-
-    return games.filter((game) =>
-      game.title.toLowerCase().trim().includes(debouncedQuery),
-    );
-  }, [games, debouncedQuery]);
-  // FILTER
-  const [isFilterPending, startTransition] = useTransition();
-  const filteredGames = useMemo(() => {
-    if (!statusFilter) return searchedGames;
-    //
-    return searchedGames.filter((game) => game.status === statusFilter);
-  }, [searchedGames, statusFilter]);
-  // SORT
-  const sortedGames = useSortGames(filteredGames, sortConfig);
 
   const showDlc = useCallback(
     (targetIgdbId: number, dlcIndex: number) => {
-      if (targetIgdbId) {
-        // !NEEDS TO MAKE THIS CALL WITH THE ENTIRE DB
-        const targetGame = games.find((game) => game.igdbId === targetIgdbId);
-
-        if (targetGame) {
-          setSelectedGame(targetGame);
-        } else if (selectedGame && selectedGame.dlcs) {
-          let mainTitle;
-          if (dlcIndex === 1) {
-            mainTitle = selectedGame.title;
-          } else {
-            mainTitle = selectedGame.mainTitle;
-          }
-          // need to call external API
-          setTitleToAdd({
-            dlcIndex: dlcIndex,
-            mainTitle: mainTitle || "",
-            dlcs: selectedGame.dlcs,
-          });
-          setActiveModal("addGame");
-        }
-        return;
+      if (!targetIgdbId) return;
+      const targetGame = items.find((game) => game.igdbId === targetIgdbId);
+      if (targetGame) {
+        setSelectedItem(targetGame);
+      } else if (selectedItem?.dlcs) {
+        const mainTitle =
+          dlcIndex === 1 ? selectedItem.title : selectedItem.mainTitle;
+        setTitleToAdd({
+          dlcIndex,
+          mainTitle: mainTitle || "",
+          dlcs: selectedItem.dlcs,
+        });
+        setActiveModal("addModal");
       }
     },
-    [games, selectedGame],
+    [items, selectedItem, setSelectedItem, setActiveModal],
   );
 
-  const handleGameUpdates = useCallback(
-    async (
-      gameId: number,
-      updates?: Partial<GameProps>,
-      shouldDelete?: boolean,
-    ) => {
-      if (updates) {
-        if (selectedGame?.id === gameId) {
-          setSelectedGame({ ...selectedGame, ...updates });
-        }
-        updateGame(gameId, updates);
-      } else if (shouldDelete) {
-        await deleteGame(gameId);
-      }
-    },
-    [deleteGame, selectedGame, updateGame],
-  );
-
-  const handleSortConfig = (sortType: GameSortConfig["type"]) => {
-    setSortConfig((prev) => {
-      if (!prev || prev.type !== sortType) {
-        return { type: sortType, order: "desc" };
-      } else if (prev.order === "desc") {
-        return { type: sortType, order: "asc" };
-      } else {
-        return null;
-      }
-    });
-  };
-
-  const handleStatusFilterConfig = (status: MediaStatus) => {
-    startTransition(() => {
-      if (statusFilter === status) {
-        setStatusFilter(null);
-      } else {
-        setStatusFilter(status);
-      }
-    });
-  };
-
-  const handleModalClose = useCallback(() => {
-    setActiveModal(null);
-    // wait a frame before clearing state
-    requestAnimationFrame(() => {
-      setTitleToAdd(null);
-      setSelectedGame(null);
-    });
-  }, []);
-
-  const handleGameClicked = useCallback((game: GameProps) => {
-    setActiveModal("gameDetails");
-    setSelectedGame(game);
-  }, []);
-
-  const handleSearchQueryChange = (value: string) => {
-    setSearchQuery(value);
-    debouncedSetQuery(value.toLowerCase().trim());
-  };
-
-  useEffect(() => {
-    const handleEnter = (e: KeyboardEvent) => {
-      const isDesktop = window.matchMedia("(min-width: 900px)").matches;
-      if (!isDesktop) return;
-      // if no modal is open and not typing in an input/textarea
-      if (
-        e.key === "Enter" &&
-        !activeModal &&
-        !(
-          e.target instanceof HTMLInputElement ||
-          e.target instanceof HTMLTextAreaElement
-        )
-      ) {
-        setActiveModal("addGame");
-      }
-    };
-    //
-    window.addEventListener("keydown", handleEnter);
-    return () => window.removeEventListener("keydown", handleEnter);
-  }, [activeModal]);
-
-  useEffect(() => {
-    if (activeModal) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [activeModal]);
+  // override generic close to also clear titleToAdd
+  const handleGameModalClose = useCallback(() => {
+    handleModalClose();
+    setTitleToAdd(null);
+  }, [handleModalClose]);
 
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">
         <DesktopListing
           mediaItems={sortedGames}
-          isProcessing={isProcessingGame}
+          isProcessing={isProcessing}
           sortConfig={sortConfig}
           statusOptions={gameStatusOptions.map((status) => status.value)}
           curStatusFilter={statusFilter}
           mediaType="game"
-          differentColumns={[
-            {
-              label: "Studio",
-              sortKey: "studio",
-              render: (game) => game.studio,
-            },
-            {
-              label: "Released",
-              sortKey: "dateReleased",
-              render: (game) => game.dateReleased,
-            },
-          ]}
+          differentColumns={DIFF_COLUMNS_GAME}
           searchQuery={searchQuery}
           emptyListText="No games yet — add one!"
-          onItemClicked={handleGameClicked}
-          onSortConfig={(key) =>
-            handleSortConfig(key as GameSortConfig["type"])
-          }
+          onItemClicked={handleItemClicked}
+          onSortConfig={handleSortConfig}
           onSearchChange={handleSearchQueryChange}
           onStatusFilter={handleStatusFilterConfig}
         />
@@ -223,63 +102,35 @@ export default function GameList() {
       <div className="block lg:hidden">
         <MobileListing
           mediaItems={sortedGames}
-          isProcessing={isProcessingGame || isFilterPending}
+          isProcessing={isProcessing || isFilterPending}
           sortConfig={sortConfig}
           statusOptions={gameStatusOptions.map((status) => status.value)}
           curStatusFilter={statusFilter}
           mediaType="game"
-          differentColumns={[
-            {
-              label: "Studio",
-              sortKey: "studio",
-              render: (game) => game.studio,
-            },
-            {
-              label: "Released",
-              sortKey: "dateReleased",
-              render: (game) => game.dateReleased,
-            },
-          ]}
+          differentColumns={DIFF_COLUMNS_GAME}
           emptyListText="No games yet — add one!"
-          onItemClicked={handleGameClicked}
-          onSortConfig={(key) =>
-            handleSortConfig(key as GameSortConfig["type"])
-          }
+          onItemClicked={handleItemClicked}
+          onSortConfig={handleSortConfig}
           onStatusFilter={handleStatusFilterConfig}
         />
       </div>
-      {/* ADD BUTTON */}
-      <div
-        className={`fixed lg:bottom-8 lg:right-10 bottom-2 right-2 z-10
-        lg:translate-y-0 transition-transform duration-300 ease-in-out
-        ${isButtonsVisible ? "translate-y-0" : "translate-y-24"}`}
-      >
-        <button
-          onClick={() => setActiveModal("addGame")}
-          className="flex items-center justify-center w-14 h-14 lg:w-14 lg:h-14 rounded-full 
-          bg-linear-to-br from-zinc-transparent to-zinc-800/60 
-          hover:bg-linear-to-br hover:from-zinc-800/60 hover:to-transparent
-          backdrop-blur-xl shadow-md shadow-black/20
-          hover:scale-105 active:scale-95 
-          transition-all duration-200 relative z-10 hover:cursor-pointer focus:outline-none"
-        >
-          <Plus className="w-5 h-5 text-zinc-300" />
-        </button>
-      </div>
+      <AddButton
+        onClick={() => setActiveModal("addModal")}
+        isVisible={isMenuButtonsVisible}
+      />
       <AddGame
-        isOpen={activeModal === "addGame"}
-        onClose={handleModalClose}
-        existingGames={games}
-        onAddGame={addGame}
+        isOpen={activeModal === "addModal"}
+        onClose={handleGameModalClose}
+        existingGames={items}
+        onAddGame={add}
         titleFromAbove={titleToAdd}
       />
-      {/* GAME DETAILS */}
-      {selectedGame && (
+      {selectedItem && (
         <GameDetails
-          isOpen={activeModal === "gameDetails"}
-          game={selectedGame}
-          onClose={handleModalClose}
-          onUpdate={handleGameUpdates}
+          isOpen={activeModal === "detailsModal"}
+          game={selectedItem}
+          onClose={handleGameModalClose}
+          onUpdate={handleItemUpdates}
           showDlc={showDlc}
         />
       )}

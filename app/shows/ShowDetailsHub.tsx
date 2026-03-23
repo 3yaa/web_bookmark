@@ -1,5 +1,5 @@
 "use client";
-import { ShowProps } from "@/types/show";
+import { DIFF_COLUMNS_SHOW, ShowProps } from "@/types/show";
 import React, { useCallback, useEffect, useState } from "react";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { showStatusOptions } from "@/utils/dropDownDetails";
@@ -360,18 +360,7 @@ export function ShowDetails({
               payload?: unknown;
             }) => void
           }
-          differentColumns={[
-            {
-              label: "Studio",
-              sortKey: "studio",
-              render: (s: ShowProps) => s.studio,
-            },
-            {
-              label: "Released",
-              sortKey: "dateReleased",
-              render: (s: ShowProps) => s.dateReleased,
-            },
-          ]}
+          differentColumns={DIFF_COLUMNS_SHOW}
           editingMode={editingMode}
           inputValues={inputValues}
         />
@@ -392,18 +381,7 @@ export function ShowDetails({
               payload?: unknown;
             }) => void
           }
-          differentColumns={[
-            {
-              label: "Studio",
-              sortKey: "studio",
-              render: (s: ShowProps) => s.studio,
-            },
-            {
-              label: "Released",
-              sortKey: "dateReleased",
-              render: (s: ShowProps) => s.dateReleased,
-            },
-          ]}
+          differentColumns={DIFF_COLUMNS_SHOW}
         />
       </div>
     </>

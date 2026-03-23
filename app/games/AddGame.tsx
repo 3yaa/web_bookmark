@@ -14,7 +14,7 @@ import { GameDetails } from "./GameDetailsHub";
 import { ShowMultGames } from "./components/ShowMultGames";
 import { ManualAddGame } from "./components/ManualAddGame";
 //
-import { useGameSearch } from "@/app/games/hooks/useGameSearch";
+import { useGameSearch } from "@/hooks/external/useGameSearch";
 
 interface AddGameProps {
   isOpen: boolean;

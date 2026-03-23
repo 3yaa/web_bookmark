@@ -6,8 +6,7 @@ import {
   ChevronUp,
   Circle,
 } from "lucide-react";
-import { BaseMediaProps, MediaStatus } from "@/types/media";
-import { ColumnConfig } from "./shared";
+import { BaseMediaProps, MediaStatus, ColumnConfig } from "@/types/media";
 import { useNav } from "../../components/NavContext";
 import { useRef, useState } from "react";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";

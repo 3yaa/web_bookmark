@@ -11,6 +11,12 @@ export type MediaStatus =
 
 export type SortState<K extends string> = { type: K; order: "asc" | "desc" };
 
+export interface ColumnConfig<T> {
+  label: string;
+  sortKey: string;
+  getValue: (item: T) => string | number | null | undefined;
+}
+
 export interface BaseMediaProps {
   id: number;
   title: string;

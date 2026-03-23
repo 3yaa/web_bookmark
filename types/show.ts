@@ -1,8 +1,20 @@
-import { BaseMediaProps, SortState } from "./media";
+import { BaseMediaProps, ColumnConfig, SortState } from "./media";
 
 export type ShowSortConfig = SortState<
   "title" | "score" | "dateCompleted" | "studio" | "dateReleased"
 >;
+
+export const DIFF_COLUMNS_SHOW: [
+  ColumnConfig<ShowProps>,
+  ColumnConfig<ShowProps>,
+] = [
+  { label: "Studio", sortKey: "studio", getValue: (s) => s.studio?.[0] },
+  {
+    label: "Released",
+    sortKey: "dateReleased",
+    getValue: (s) => s.dateReleased,
+  },
+];
 
 export interface ShowProps extends BaseMediaProps {
   status: "Completed" | "Want to Watch" | "Dropped" | "Watching";
@@ -13,7 +25,6 @@ export interface ShowProps extends BaseMediaProps {
   curSeasonIndex: number;
   curEpisode: number;
 }
-
 
 export interface TMDBProps {
   tmdbId: string;

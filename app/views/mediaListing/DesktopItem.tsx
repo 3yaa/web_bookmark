@@ -1,7 +1,6 @@
 import React, { ReactNode } from "react";
 import Image from "next/image";
-import { ColumnConfig } from "./shared";
-import { BaseMediaProps } from "@/types/media";
+import { BaseMediaProps, ColumnConfig } from "@/types/media";
 import {
   formatDateShort,
   getStatusBg,
@@ -102,11 +101,11 @@ export const DesktopItem = React.memo(function DesktopItem<
       </span>
       {/* AUTHOR/STUDIO/DIRECTOR */}
       <span className="text-center font-medium text-zinc-300/95 text-sm truncate">
-        {differentColumns[0].render(item) || "-"}
+        {differentColumns[0].getValue(item) || "-"}
       </span>
       {/* RELEASE/PUBLISHED DATE */}
       <span className="text-center font-medium text-zinc-400 text-sm truncate pl-0.5">
-        {differentColumns[1].render(item) || "-"}
+        {differentColumns[1].getValue(item) || "-"}
       </span>
       <span className="text-zinc-300/95 text-sm line-clamp-2 whitespace-normal overflow-hidden pl-0.5 text-center font-semibold group-hover:underline">
         {item.note || "No notes"}

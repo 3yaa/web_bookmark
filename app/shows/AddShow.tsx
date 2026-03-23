@@ -9,7 +9,7 @@ import { mapTMDBToShow, mapTMDBTVToShow } from "@/app/shows/utils/showMapping";
 import { ShowDetails } from "./ShowDetailsHub";
 import { ManualAddShow } from "./components/ManualAddShow";
 //
-import { useShowSearch } from "@/app/shows/hooks/useShowSearch";
+import { useShowSearch } from "@/hooks/external/useShowSearch";
 interface AddShowProps {
   isOpen: boolean;
   onClose: () => void;

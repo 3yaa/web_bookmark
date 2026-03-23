@@ -1,5 +1,5 @@
 "use client";
-import { MovieProps } from "@/types/movie";
+import { DIFF_COLUMNS_MOVIE, MovieProps } from "@/types/movie";
 import { useCallback, useEffect, useState } from "react";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
@@ -168,18 +168,7 @@ export function MovieDetails({
               payload?: unknown;
             }) => void
           }
-          differentColumns={[
-            {
-              label: "Director",
-              sortKey: "director",
-              render: (m: MovieProps) => m.director,
-            },
-            {
-              label: "Released",
-              sortKey: "dateReleased",
-              render: (m: MovieProps) => m.dateReleased,
-            },
-          ]}
+          differentColumns={DIFF_COLUMNS_MOVIE}
         />
       </div>
       <div className="block lg:hidden">
@@ -199,18 +188,7 @@ export function MovieDetails({
               payload?: unknown;
             }) => void
           }
-          differentColumns={[
-            {
-              label: "Director",
-              sortKey: "director",
-              render: (m: MovieProps) => m.director,
-            },
-            {
-              label: "Released",
-              sortKey: "dateReleased",
-              render: (m: MovieProps) => m.dateReleased,
-            },
-          ]}
+          differentColumns={DIFF_COLUMNS_MOVIE}
         />
       </div>
     </>

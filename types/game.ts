@@ -1,8 +1,20 @@
-import { BaseMediaProps, SortState } from "./media";
+import { BaseMediaProps, ColumnConfig, SortState } from "./media";
 
 export type GameSortConfig = SortState<
   "title" | "score" | "dateCompleted" | "studio" | "dateReleased"
 >;
+
+export const DIFF_COLUMNS_GAME: [
+  ColumnConfig<GameProps>,
+  ColumnConfig<GameProps>,
+] = [
+  { label: "Studio", sortKey: "studio", getValue: (g) => g.studio?.[0] },
+  {
+    label: "Released",
+    sortKey: "dateReleased",
+    getValue: (g) => g.dateReleased,
+  },
+];
 
 export interface GameProps extends BaseMediaProps {
   status: "Playing" | "Completed" | "Dropped";

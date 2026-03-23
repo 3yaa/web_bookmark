@@ -3,19 +3,20 @@ import { useAuthFetch } from "./useAuthFetch";
 
 interface MediaDataConfig<T> {
   endpoint: string;
+  extraFieldsToUpdate?: string[];
   requiredFieldsToPost: (keyof T)[];
   statusOrder: Record<string, number>;
-  extraFieldsToUpdate?: string[];
 }
 
-export function useMediaData<T extends { id: number; status: string }>(
-  config: MediaDataConfig<T>,
-) {
+export function useMediaData<T extends { id: number; status: string }>({
+  endpoint,
+  statusOrder,
+  extraFieldsToUpdate,
+  requiredFieldsToPost,
+}: MediaDataConfig<T>) {
   const { authFetch } = useAuthFetch();
   const [items, setItems] = useState<T[]>([]);
   const [isProcessing, setIsProcessing] = useState(true);
-  const { endpoint, requiredFieldsToPost, statusOrder, extraFieldsToUpdate } =
-    config;
 
   // READ
   const load = useCallback(async () => {

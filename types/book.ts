@@ -1,8 +1,20 @@
-import { BaseMediaProps, SortState } from "./media";
+import { BaseMediaProps, ColumnConfig, SortState } from "./media";
 
 export type BookSortConfig = SortState<
   "title" | "score" | "dateCompleted" | "author" | "datePublished"
 >;
+
+export const DIFF_COLUMNS_BOOK: [
+  ColumnConfig<BookProps>,
+  ColumnConfig<BookProps>,
+] = [
+  { label: "Author", sortKey: "author", getValue: (b) => b.author },
+  {
+    label: "Published",
+    sortKey: "datePublished",
+    getValue: (b) => b.datePublished,
+  },
+];
 
 export interface BookProps extends BaseMediaProps {
   status: "Completed" | "Want to Read" | "Dropped";

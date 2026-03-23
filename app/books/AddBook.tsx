@@ -15,7 +15,7 @@ import { BookDetails } from "./BookDetailsHub";
 import { ShowMultBooks } from "./components/ShowMultBooks";
 import { ManualAddBook } from "./components/ManualAddBook";
 //
-import { useBookSearch } from "@/app/books/hooks/useBookSearch";
+import { useBookSearch } from "@/hooks/external/useBookSearch";
 // import { filterCovers } from "@/app/games/utils/filterCovers";
 
 interface AddBookProps {

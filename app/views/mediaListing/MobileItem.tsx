@@ -1,7 +1,6 @@
 import Image from "next/image";
 import React, { ReactNode } from "react";
-import { BaseMediaProps } from "@/types/media";
-import { ColumnConfig } from "./shared";
+import { BaseMediaProps, ColumnConfig } from "@/types/media";
 import { BackdropImageMobile } from "../../components/ui/BackdropMobile";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { ShowProgressBarMobile } from "../../shows/components/showProgressListing";
@@ -90,10 +89,10 @@ export const MobileItem = React.memo(function MobileItem<
         <div className="text-zinc-500 text-xs font-medium flex space-x-1 pt-1">
           {/* AUTHOR/STUDIO/DIRECTOR */}
           <span className="truncate max-w-35">
-            {differentColumns[0].render(item) || "-"},
+            {differentColumns[0].getValue(item) || "-"},
           </span>
           {/* RELEASE/PUBLISHED DATE */}
-          <span>{differentColumns[1].render(item) || "-"}</span>
+          <span>{differentColumns[1].getValue(item) || "-"}</span>
         </div>
         {/* DATE COMPLETE AND STATUS BAR */}
         {mediaType === "show" ? (

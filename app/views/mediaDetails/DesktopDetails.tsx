@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Loading } from "@/app/components/ui/Loading";
-import { BaseMediaProps } from "@/types/media";
+import { BaseMediaProps, ColumnConfig } from "@/types/media";
 import {
   formatDateShort,
   getStatusBorderGradient,
@@ -15,7 +15,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { BackdropImage } from "@/app/components/ui/Backdrop";
-import { ColumnConfig } from "../mediaListing/shared";
 import { Dropdown, Option } from "@/app/components/ui/Dropdown";
 import { scoreOptions } from "@/utils/dropDownDetails";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
@@ -318,7 +317,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
                   {/* AUTHOR/STUDIO/DIRECTOR AND DATES */}
                   <div className="flex justify-start items-center gap-2 w-full mb-3">
                     <span className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 leading-6">
-                      {differentColumns[0].render(item) ||
+                      {differentColumns[0].getValue(item) ||
                         "Unknown " + differentColumns[0].label}
                     </span>
                     <div className="font-medium text-zinc-200/70 text-md leading-6">
@@ -328,7 +327,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
                       className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
                       title="Date Published"
                     >
-                      {differentColumns[1].render(item) || "Unknown"}
+                      {differentColumns[1].getValue(item) || "Unknown"}
                     </span>
                     {item.status === "Completed" && (
                       <div className="flex items-center gap-2">

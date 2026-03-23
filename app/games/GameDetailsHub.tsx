@@ -1,5 +1,5 @@
 "use client";
-import { GameProps } from "@/types/game";
+import { DIFF_COLUMNS_GAME, GameProps } from "@/types/game";
 import { useCallback, useEffect, useState } from "react";
 import { gameStatusOptions } from "@/utils/dropDownDetails";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
@@ -194,18 +194,7 @@ export function GameDetails({
               payload?: unknown;
             }) => void
           }
-          differentColumns={[
-            {
-              label: "Studio",
-              sortKey: "studio",
-              render: (g: GameProps) => g.studio,
-            },
-            {
-              label: "Released",
-              sortKey: "dateReleased",
-              render: (g: GameProps) => g.dateReleased,
-            },
-          ]}
+          differentColumns={DIFF_COLUMNS_GAME}
           backdropUrls={backdropUrls}
           backdropIndex={backdropIndex}
         />
@@ -226,18 +215,7 @@ export function GameDetails({
               payload?: unknown;
             }) => void
           }
-          differentColumns={[
-            {
-              label: "Studio",
-              sortKey: "studio",
-              render: (g: GameProps) => g.studio,
-            },
-            {
-              label: "Released",
-              sortKey: "dateReleased",
-              render: (g: GameProps) => g.dateReleased,
-            },
-          ]}
+          differentColumns={DIFF_COLUMNS_GAME}
         />
       </div>
     </>

@@ -5,11 +5,10 @@ import {
   Circle,
   Search,
 } from "lucide-react";
-import { BaseMediaProps, MediaStatus } from "@/types/media";
+import { BaseMediaProps, MediaStatus, ColumnConfig } from "@/types/media";
 import { useEffect, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Loading } from "../../components/ui/Loading";
-import { ColumnConfig } from "./shared";
 import { DesktopItem } from "./DesktopItem";
 
 interface DesktopListingProps<T extends BaseMediaProps> {

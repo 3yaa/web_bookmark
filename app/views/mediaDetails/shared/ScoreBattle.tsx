@@ -144,8 +144,12 @@ export function ScoreBattler<T extends BaseMediaProps>({
                   <button
                     key={choice}
                     type="button"
+                    disabled={
+                      (choice === "better" && curScore === 11) ||
+                      (choice === "worse" && curScore === 1)
+                    }
                     onClick={() => handlePick(choice)}
-                    className="px-18 py-3 text-sm rounded-xl font-semibold uppercase tracking-[0.15em]transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] cursor-pointer bg-[#1a1a1a] border-none shadow-island mb-2 text-zinc-300"
+                    className="px-18 py-3 text-sm rounded-xl font-semibold uppercase tracking-[0.15em]transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] cursor-pointer bg-[#1a1a1a] border-none shadow-island mb-2 text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     {choice === "settle" ? "Settle" : choice}
                   </button>

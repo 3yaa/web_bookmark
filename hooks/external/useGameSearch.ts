@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { IGDBProps, IGDBDlcProps } from "@/types/game";
-import { useAuthFetch } from "@/hooks/useAuthFetch";
+import { useAuthFetch } from "@/app/auth/hooks/useAuthFetch";
 
 export function useGameSearch() {
   const { authFetch, isAuthLoading } = useAuthFetch();
@@ -11,7 +11,7 @@ export function useGameSearch() {
 
   const searchForGame = async (
     title: string,
-    limit: number
+    limit: number,
   ): Promise<IGDBProps[] | null | { isDuplicate: boolean; title: string }> => {
     try {
       setIsSearching(true);
@@ -42,7 +42,7 @@ export function useGameSearch() {
   };
 
   const searchForGameDlc = async (
-    igdbId: number
+    igdbId: number,
   ): Promise<
     IGDBDlcProps[] | null | { isDuplicate: boolean; title: string }
   > => {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useAuthFetch } from "./useAuthFetch";
+import { useAuthFetch } from "../app/auth/hooks/useAuthFetch";
 
 interface MediaDataConfig<T> {
   endpoint: string;

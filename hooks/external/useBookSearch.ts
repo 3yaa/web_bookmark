@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { OpenLibraryProps, WikidataProps } from "@/types/book";
-import { useAuthFetch } from "@/hooks/useAuthFetch";
+import { useAuthFetch } from "@/app/auth/hooks/useAuthFetch";
 // import { extractTitle } from "../utils/extractTitle";
 
 export function useBookSearch() {
@@ -13,7 +13,7 @@ export function useBookSearch() {
   // OPEN LIBRARY API -- BOOK PRIMINARY
   const searchForBooks = async (
     query: string,
-    limit: number
+    limit: number,
   ): Promise<
     OpenLibraryProps[] | null | { isDuplicate: boolean; title: string }
   > => {
@@ -49,7 +49,7 @@ export function useBookSearch() {
 
   // WikidataProps API -- SERIES INFO
   const searchForSeriesInfo = async (
-    olid: string
+    olid: string,
   ): Promise<WikidataProps[] | null> => {
     try {
       setIsSearching(true);

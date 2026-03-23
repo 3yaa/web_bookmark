@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TMDBProps, TMDBTvProps } from "@/types/show";
-import { useAuthFetch } from "@/hooks/useAuthFetch";
+import { useAuthFetch } from "@/app/auth/hooks/useAuthFetch";
 
 export function useShowSearch() {
   const { authFetch, isAuthLoading } = useAuthFetch();
@@ -12,7 +12,7 @@ export function useShowSearch() {
   // TMDB SEARCH API -- BASIC METADATA
   const searchForShow = async (
     title: string,
-    year?: number | undefined
+    year?: number | undefined,
   ): Promise<TMDBProps | null | { isDuplicate: boolean; title: string }> => {
     try {
       setIsSearching(true);
@@ -44,7 +44,7 @@ export function useShowSearch() {
 
   // TMDB TV API -- SEASON METADATA
   const searchForShowSeasonInfo = async (
-    tmdbId: string
+    tmdbId: string,
   ): Promise<TMDBTvProps | null> => {
     try {
       setIsSearching(true);

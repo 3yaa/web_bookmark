@@ -16,8 +16,8 @@ import { useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
-import { useLogout } from "@/hooks/useLogout";
+import { useAuth } from "@/app/auth/hooks/useAuth";
+import { useLogout } from "@/app/auth/hooks/useLogout";
 import { useNav } from "./NavContext";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";
 

@@ -1,5 +1,5 @@
 "use client";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/app/auth/hooks/useAuth";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserPlus, Mail, Lock, Eye, EyeOff, User } from "lucide-react";

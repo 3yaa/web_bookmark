@@ -1,5 +1,5 @@
 "use client";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/app/auth/hooks/useAuth";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, ReactNode } from "react";
 import { Loading } from "../components/ui/Loading";
@@ -19,12 +19,12 @@ export function RouteGuard({ children }: RouteGuardProps) {
 
   // Check if current path is public
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   );
 
   // Check if current path is protected
   const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   );
 
   // Home page is protected unless explicitly public

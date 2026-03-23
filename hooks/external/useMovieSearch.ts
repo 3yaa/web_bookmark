@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { OMDbProps, TMDBProps, WikidataProps } from "@/types/movie";
-import { useAuthFetch } from "@/hooks/useAuthFetch";
+import { useAuthFetch } from "@/app/auth/hooks/useAuthFetch";
 
 export function useMovieSearch() {
   const { authFetch, isAuthLoading } = useAuthFetch();
@@ -12,7 +12,7 @@ export function useMovieSearch() {
   // OMDb API -- MOVIE METADATA
   const searchForMovie = async (
     title: string,
-    year?: number | undefined
+    year?: number | undefined,
   ): Promise<OMDbProps | null | { isDuplicate: boolean; title: string }> => {
     try {
       setIsSearching(true);
@@ -44,7 +44,7 @@ export function useMovieSearch() {
 
   // TMDB API -- MOVIE POSTERS
   const searchForPosters = async (
-    imdbId: string
+    imdbId: string,
   ): Promise<TMDBProps | null> => {
     try {
       setIsSearching(true);
@@ -71,7 +71,7 @@ export function useMovieSearch() {
 
   // WikidataProps API -- SERIES INFO
   const searchForSeriesInfo = async (
-    imdbId: string
+    imdbId: string,
   ): Promise<WikidataProps[] | null> => {
     try {
       setIsSearching(true);

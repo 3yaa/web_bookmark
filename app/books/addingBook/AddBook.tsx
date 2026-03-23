@@ -5,11 +5,11 @@ import { Book } from "lucide-react";
 import { BookProps, OpenLibraryProps, WikidataProps } from "@/types/book";
 //
 import {
-  cleanName,
   mapOpenLibDataToBook,
   mapWikidataToBook,
   resetBookValues,
 } from "@/app/books/utils/bookMapping";
+import { cleanName } from "@/utils/cleanName";
 //
 import { BookDetails } from "../BookDetailsHub";
 import { ShowMultBooks } from "./ShowMultBooks";

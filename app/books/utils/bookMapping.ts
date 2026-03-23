@@ -4,6 +4,7 @@ import {
   GoogleBooksProps,
   WikidataProps,
 } from "@/types/book";
+import { cleanName } from "@/utils/cleanName";
 
 export function resetBookValues(book: Partial<BookProps>): Partial<BookProps> {
   return {
@@ -72,36 +73,6 @@ function cleanTitle(title: string) {
       .replace(/[\s\-\–\—:;,\.\|#!]*$/, "")
       // Clean up multiple spaces
       .replace(/\s+/g, " ")
-      .trim()
-  );
-}
-
-export function cleanName(
-  title: string | undefined,
-  seriesTitle: string | undefined
-) {
-  if (!title || !seriesTitle) {
-    return title;
-  }
-  //in the case series and title are the same
-  if (title.trim() === seriesTitle.trim()) {
-    return title;
-  }
-  //
-  return (
-    title
-      .replace(`${seriesTitle}`, "")
-      // Remove common separators at start
-      .replace(/^[\s\-\–\—:;,\.\|#]*/, "")
-      // Remove book/volume indicators
-      .replace(
-        /^(Book|Vol|Volume|Part|Episode|Chapter|No|Number)[\s\d\.\-:#]*/,
-        ""
-      )
-      // Remove leading numbers with separators
-      .replace(/^\d+[\s\-\.\):]*/, "")
-      // Remove connecting words like "and the", "and", "&", "the"
-      .replace(/^(and the|and|&)\s+/i, "")
       .trim()
   );
 }

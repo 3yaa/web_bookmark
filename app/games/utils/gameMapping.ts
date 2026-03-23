@@ -1,4 +1,5 @@
 import { GameProps, IGDBProps, IGDBDlcProps } from "@/types/game";
+import { cleanName } from "@/utils/cleanName";
 
 export function resetGameValues(book: Partial<GameProps>): Partial<GameProps> {
   return {
@@ -45,34 +46,4 @@ export function mapIGDBDlcsDataToGame(
     posterUrl: dataDlc.cover_url,
     studio: dataDlc.developer?.[0]?.name,
   };
-}
-
-export function cleanName(
-  title: string | undefined,
-  seriesTitle: string | undefined
-) {
-  if (!title || !seriesTitle) {
-    return title;
-  }
-  //in the case series and title are the same
-  if (title.trim() === seriesTitle.trim()) {
-    return title;
-  }
-  //
-  return (
-    title
-      .replace(`${seriesTitle}`, "")
-      // Remove common separators at start
-      .replace(/^[\s\-\–\—:;,\.\|#]*/, "")
-      // Remove book/volume indicators
-      .replace(
-        /^(Book|Vol|Volume|Part|Episode|Chapter|No|Number)[\s\d\.\-:#]*/,
-        ""
-      )
-      // Remove leading numbers with separators
-      .replace(/^\d+[\s\-\.\):]*/, "")
-      // Remove connecting words like "and the", "and", "&", "the"
-      .replace(/^(and the|and|&)\s+/i, "")
-      .trim()
-  );
 }

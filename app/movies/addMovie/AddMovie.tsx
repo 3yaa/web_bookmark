@@ -5,11 +5,11 @@ import { Clapperboard } from "lucide-react";
 import { MovieProps, WikidataProps } from "@/types/movie";
 //
 import {
-  cleanName,
   mapOMDbToMovie,
   mapTMDBToMovie,
   mapWikidataToMovie,
 } from "@/app/movies/utils/movieMapping";
+import { cleanName } from "@/utils/cleanName";
 //
 import { MovieDetails } from "../MovieDetailsHub";
 import { ManualAddMovie } from "./ManualAddMovie";

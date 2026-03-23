@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-interface BookCoverChangeProps {
+interface BookCoverConfigProps {
   coverUrl?: string;
   title: string;
   coverUrls?: string[];
@@ -11,7 +11,7 @@ interface BookCoverChangeProps {
   width?: number;
 }
 
-export function BookCoverChange({
+export function BookCoverConfig({
   coverUrl,
   title,
   coverUrls,
@@ -20,7 +20,7 @@ export function BookCoverChange({
   className,
   width,
   height,
-}: BookCoverChangeProps) {
+}: BookCoverConfigProps) {
   return (
     <>
       {coverIndex !== undefined &&

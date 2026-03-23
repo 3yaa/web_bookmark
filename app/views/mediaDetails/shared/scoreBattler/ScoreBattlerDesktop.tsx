@@ -1,89 +1,18 @@
-import { BaseMediaProps } from "@/types/media";
-import { useMemo, useState, useCallback, useEffect } from "react";
 import Image from "next/image";
+import { BaseMediaProps } from "@/types/media";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
+import { actions, ScoreBattlerUIProps } from "./shared";
 
-interface ScoreBattlerProps<T extends BaseMediaProps> {
-  items: T[];
-  selectedItem: T;
-  mediaType?: string;
-  initialScore: number;
-  onClose: () => void;
-  onScoreFinal: (finalScore: number) => void;
-}
-
-export function ScoreBattler<T extends BaseMediaProps>({
-  items,
-  onClose,
-  mediaType,
-  initialScore,
+export function ScoreBattlerDesktop<T extends BaseMediaProps>({
   selectedItem,
-  onScoreFinal,
-}: ScoreBattlerProps<T>) {
-  const picks = ["better", "worse", "settle"] as const;
-  const [curScore, setCurScore] = useState(initialScore);
-  const [oldChoice, setOldChoice] = useState<"better" | "worse">();
-
-  const itemFacing = useMemo(() => {
-    return items
-      .filter((item) => item.score === curScore)
-      .reduce<T | null>((latest, item) => {
-        if (item.id === selectedItem.id) return latest;
-        if (!item.lastUpdated) return latest;
-        if (!latest?.lastUpdated) return item;
-        return item.lastUpdated > latest.lastUpdated ? item : latest;
-      }, null);
-  }, [items, curScore, selectedItem]);
-
-  useEffect(() => {
-    if (!itemFacing) {
-      if (curScore) onScoreFinal(curScore);
-      onClose();
-    }
-  }, [itemFacing, curScore, onScoreFinal, onClose]);
-
-  const finalize = useCallback(
-    (score: number) => {
-      onScoreFinal(score);
-      onClose();
-    },
-    [onScoreFinal, onClose],
-  );
-
-  const handlePick = (choice: "better" | "worse" | "settle") => {
-    if (!curScore) return;
-    //
-    if (choice === "better") {
-      if (curScore === 11) return finalize(curScore);
-      // pre check if theres any opponent left
-      const next = curScore + 1;
-      const hasOpponent = items.some((i) => i.score === next && i.lastUpdated);
-      if (!hasOpponent) return finalize(next);
-      //
-      setCurScore(next);
-      setOldChoice("better");
-      if (oldChoice === "worse") return finalize(next);
-    } else if (choice === "worse") {
-      if (curScore === 1) return finalize(curScore);
-      // pre check
-      const next = curScore - 1;
-      const hasOpponent = items.some((i) => i.score === next && i.lastUpdated);
-      if (!hasOpponent) return finalize(next);
-      //
-      setCurScore(next);
-      setOldChoice("worse");
-      if (oldChoice === "better") return finalize(next);
-    } else {
-      finalize(curScore);
-    }
-  };
-
+  itemFacing,
+  curScore,
+  mediaType,
+  onPick,
+  onClose,
+}: ScoreBattlerUIProps<T>) {
   const coverFor = (item: T | null) => item?.posterUrl ?? item?.coverUrl ?? "";
   const imgFit = mediaType === "game" ? "object-cover" : "object-fill";
-
-  if (!itemFacing) {
-    return null;
-  }
 
   return (
     <div className="fixed inset-0 bg-linear-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
@@ -100,10 +29,10 @@ export function ScoreBattler<T extends BaseMediaProps>({
             {/* LEFT */}
             <div
               className={`
-                group relative rounded-xl select-none
-                bg-[#1a1a1a] p-3.5 shadow-island
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30
-              `}
+									group relative rounded-xl select-none
+									bg-[#1a1a1a] p-3.5 shadow-island
+									focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30
+								`}
             >
               <div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg select-none">
                 <Image
@@ -140,7 +69,7 @@ export function ScoreBattler<T extends BaseMediaProps>({
               />
               {/* ACTION BUTTONS */}
               <div className="flex flex-col">
-                {picks.map((choice) => (
+                {actions.map((choice) => (
                   <button
                     key={choice}
                     type="button"
@@ -148,7 +77,7 @@ export function ScoreBattler<T extends BaseMediaProps>({
                       (choice === "better" && curScore === 11) ||
                       (choice === "worse" && curScore === 1)
                     }
-                    onClick={() => handlePick(choice)}
+                    onClick={() => onPick(choice)}
                     className="px-18 py-3 text-sm rounded-xl font-semibold uppercase tracking-[0.15em]transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] cursor-pointer bg-[#1a1a1a] border-none shadow-island mb-2 text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     {choice === "settle" ? "Settle" : choice}
@@ -159,10 +88,10 @@ export function ScoreBattler<T extends BaseMediaProps>({
             {/* RIGHT */}
             <div
               className={`
-                group relative rounded-xl select-none
-                bg-[#1a1a1a] p-3.5 shadow-island
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30
-              `}
+									group relative rounded-xl select-none
+									bg-[#1a1a1a] p-3.5 shadow-island
+									focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30
+								`}
             >
               <div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg select-none">
                 <Image

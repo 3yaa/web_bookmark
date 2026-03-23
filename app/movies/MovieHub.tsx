@@ -11,7 +11,7 @@ import { MovieDetails } from "./MovieDetailsHub";
 import { DesktopListing } from "@/app/views/mediaListing/DesktopListing";
 import { MobileListing } from "@/app/views/mediaListing/MobileListing";
 import { AddButton } from "../components/ui/AddButton";
-import { ScoreBattler } from "../views/mediaDetails/shared/ScoreBattle";
+import { ScoreBattlerHub } from "../views/mediaDetails/shared/scoreBattler/ScoreBattlerHub";
 
 export default function MoviesHub() {
   const { items, add, update, remove, isProcessing } = useMediaData<MovieProps>(
@@ -73,7 +73,6 @@ export default function MoviesHub() {
     [items, setSelectedItem, setTitleToUse, setActiveModal],
   );
 
-
   return (
     <div className="min-h-screen">
       <div className="lg:block hidden">
@@ -134,7 +133,7 @@ export default function MoviesHub() {
       )}
       {/* SCORE BATTLER */}
       {activeModal === "scoreBattlerModal" && selectedItem && (
-        <ScoreBattler
+        <ScoreBattlerHub
           items={items}
           initialScore={tempScore}
           onClose={() => {

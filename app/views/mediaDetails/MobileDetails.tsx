@@ -7,7 +7,7 @@ import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
 import { Loading } from "@/app/components/ui/Loading";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
-import { BookCoverChange } from "@/app/books/components/BookCoverChangeDetails";
+import { BookCoverConfig } from "@/app/books/components/BookCoverConfigDetails";
 import { MobileProgressPicker } from "@/app/components/ui/MobileSeasonEpPicker";
 import { MobileSeriesNav } from "./shared/MobileSeriesNav";
 import { calcCurProgress } from "@/app/shows/utils/progressCalc";
@@ -280,7 +280,7 @@ export function MobileDetails<T extends BaseMediaProps>({
             }
           >
             {mediaType === "book" ? (
-              <BookCoverChange
+              <BookCoverConfig
                 coverUrl={item.coverUrl}
                 title={item.title}
                 coverUrls={coverUrls}

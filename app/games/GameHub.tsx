@@ -10,7 +10,7 @@ import { GameDetails } from "./GameDetailsHub";
 import { DesktopListing } from "@/app/views/mediaListing/DesktopListing";
 import { MobileListing } from "@/app/views/mediaListing/MobileListing";
 import { AddButton } from "../components/ui/AddButton";
-import { ScoreBattler } from "../views/mediaDetails/shared/ScoreBattle";
+import { ScoreBattlerHub } from "../views/mediaDetails/shared/scoreBattler/ScoreBattlerHub";
 
 export default function GameList() {
   const { items, add, update, remove, isProcessing } = useMediaData<GameProps>({
@@ -143,7 +143,7 @@ export default function GameList() {
       )}
       {/* SCORE BATTLER */}
       {activeModal === "scoreBattlerModal" && selectedItem && (
-        <ScoreBattler
+        <ScoreBattlerHub
           items={items}
           initialScore={tempScore}
           onClose={() => {

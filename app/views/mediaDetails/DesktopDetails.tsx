@@ -18,7 +18,7 @@ import { BackdropImage } from "@/app/components/ui/Backdrop";
 import { Dropdown, Option } from "@/app/components/ui/Dropdown";
 import { scoreOptions } from "@/utils/dropDownDetails";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
-import { BookCoverChange } from "@/app/books/components/BookCoverChangeDetails";
+import { BookCoverConfig } from "@/app/books/components/BookCoverConfigDetails";
 import { BackdropImageBook } from "@/app/components/ui/BackdropBook";
 import { SeriesNav } from "./shared/SeriesNav";
 import { EditProgress } from "@/app/shows/components/EditProgressDetail";
@@ -208,7 +208,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
                       <div className="min-w-62 min-h-93 bg-linear-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
                     )
                   ) : (
-                    <BookCoverChange
+                    <BookCoverConfig
                       coverUrl={item.coverUrl}
                       title={item.title}
                       coverUrls={coverUrls}

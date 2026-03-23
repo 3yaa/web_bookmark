@@ -225,7 +225,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
                   className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
                   style={{
                     background:
-                      "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0) 50%, rgba(24,24,27,0.5) 100%)",
+                      "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0) 50%, rgba(24,24,27,0.3) 100%)",
                   }}
                 />
               </div>
@@ -271,9 +271,13 @@ export function DesktopDetails<T extends BaseMediaProps>({
                   )}
                 {/*  */}
                 <div
-                  className={`flex flex-col ${
-                    item.seriesTitle ? "justify-center" : "justify-center mt-12"
-                  } flex-1`}
+                  className={`flex flex-col flex-1 ${
+                    mediaType === "show"
+                      ? "justify-end"
+                      : item.seriesTitle || item.mainTitle
+                        ? "justify-center mt-3"
+                        : "justify-center mt-11.5"
+                  }`}
                 >
                   {/* SERIES TITLE */}
                   {(() => {

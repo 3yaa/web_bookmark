@@ -14,7 +14,7 @@ import { ShowProps, ShowSortConfig } from "@/types/show";
 import { useSortShows } from "@/app/shows/hooks/useSortShow";
 import { useShowData } from "@/app/shows/hooks/useShowData";
 // components
-import { AddShow } from "./addShow/AddShow";
+import { AddShow } from "./AddShow";
 import { ShowDetails } from "./ShowDetailsHub";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";

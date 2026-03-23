@@ -10,9 +10,9 @@ import {
   resetGameValues,
 } from "@/app/games/utils/gameMapping";
 //
-import { GameDetails } from "../GameDetailsHub";
-import { ShowMultGames } from "./ShowMultGames";
-import { ManualAddGame } from "./ManualAddGame";
+import { GameDetails } from "./GameDetailsHub";
+import { ShowMultGames } from "./components/ShowMultGames";
+import { ManualAddGame } from "./components/ManualAddGame";
 //
 import { useGameSearch } from "@/app/games/hooks/useGameSearch";
 
@@ -129,7 +129,7 @@ export function AddGame({
       //
       const mappedData = mapIGDBDlcsDataToGame(
         mainDlc,
-        titleFromAbove?.mainTitle || ""
+        titleFromAbove?.mainTitle || "",
       );
       setBackdropUrls(mainDlc.screenshot_urls?.map((ss) => ss.ss_url) || []);
       setNewGame((prev) => ({
@@ -138,7 +138,7 @@ export function AddGame({
         status: "Playing",
       }));
     },
-    [searchForGameDlc, titleFromAbove]
+    [searchForGameDlc, titleFromAbove],
   );
 
   const handleDlcSearch = useCallback(async () => {
@@ -188,7 +188,7 @@ export function AddGame({
     async (
       _gameId: number,
       updates?: Partial<GameProps>,
-      showMore?: boolean
+      showMore?: boolean,
     ) => {
       if (showMore) {
         setActiveModal("multOptions");
@@ -196,7 +196,7 @@ export function AddGame({
       }
       setNewGame((prev) => ({ ...prev, ...updates }));
     },
-    []
+    [],
   );
 
   const handleGameAdd = async () => {

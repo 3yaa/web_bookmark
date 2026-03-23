@@ -14,7 +14,7 @@ import { GameProps, IGDBInitProps, GameSortConfig } from "@/types/game";
 import { useSortGames } from "@/app/games/hooks/useSortGames";
 import { useGameData } from "@/app/games/hooks/useGameData";
 // components
-import { AddGame } from "./addGame/AddGame";
+import { AddGame } from "./AddGame";
 import { GameDetails } from "./GameDetailsHub";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";

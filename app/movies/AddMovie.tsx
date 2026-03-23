@@ -1,46 +1,57 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Tv } from "lucide-react";
+import { Clapperboard } from "lucide-react";
 //
-import { ShowProps } from "@/types/show";
+import { MovieProps, WikidataProps } from "@/types/movie";
 //
-import { mapTMDBToShow, mapTMDBTVToShow } from "@/app/shows/utils/showMapping";
+import {
+  mapOMDbToMovie,
+  mapTMDBToMovie,
+  mapWikidataToMovie,
+} from "@/app/movies/utils/movieMapping";
+import { cleanName } from "@/utils/cleanName";
 //
-import { ShowDetails } from "../ShowDetailsHub";
-import { ManualAddShow } from "./ManualAddShow";
+import { MovieDetails } from "./MovieDetailsHub";
+import { ManualAddMovie } from "./components/ManualAddMovie";
 //
-import { useShowSearch } from "@/app/shows/hooks/useShowSearch";
-interface AddShowProps {
+import { useMovieSearch } from "@/app/movies/hooks/useMovieSearch";
+interface AddMovieProps {
   isOpen: boolean;
   onClose: () => void;
-  existingShows: ShowProps[];
-  onAddShow: (show: ShowProps) => void;
+  existingMovies: MovieProps[];
+  onAddMovie: (movie: MovieProps) => void;
   titleFromAbove?: string;
 }
 
-export function AddShow({
+export function AddMovie({
   isOpen,
   onClose,
-  onAddShow,
+  onAddMovie,
   titleFromAbove,
-}: AddShowProps) {
+}: AddMovieProps) {
   //failure reasons && their fixes -- for user
   const [failedReason, setFailedReason] = useState("");
   //
   const [isAddManual, setIsAddManual] = useState(false);
   const [needYear, setNeedYear] = useState(false);
   const [activeModal, setActiveModal] = useState<
-    "showDetails" | "manualAdd" | null
+    "movieDetails" | "manualAdd" | null
   >(null);
   //
   const titleToSearch = useRef<HTMLInputElement>(null);
   const yearToSearch = useRef<HTMLInputElement>(null);
   const [isDupTitle, setIsDupTitle] = useState(false);
   //
-  const [newShow, setNewShow] = useState<Partial<ShowProps>>({});
+  const [newMovie, setNewMovie] = useState<Partial<MovieProps>>({});
+  const [allSeries, setAllSeries] = useState<WikidataProps[]>([]);
+  const [curSeries, setCurSeries] = useState<number>(0);
   //
-  const { searchForShow, searchForShowSeasonInfo, isShowSearching } =
-    useShowSearch();
+  const {
+    searchForMovie,
+    searchForPosters,
+    searchForSeriesInfo,
+    isMovieSearching,
+  } = useMovieSearch();
 
   const reset = useCallback(() => {
     setFailedReason("");
@@ -49,7 +60,7 @@ export function AddShow({
     setNeedYear(false);
     //
     setActiveModal(null);
-    setNewShow({});
+    setNewMovie({});
     if (titleToSearch.current) {
       titleToSearch.current.value = "";
       titleToSearch.current.focus();
@@ -67,60 +78,81 @@ export function AddShow({
       ? parseInt(yearSearchingStr, 10)
       : undefined;
     //
-    const showData = await searchForShow(titleSearching, yearSearching);
-    if (showData && "isDuplicate" in showData) {
+    const movieData = await searchForMovie(titleSearching, yearSearching);
+    if (movieData && "isDuplicate" in movieData) {
       return {
         isDuplicate: true,
-        title: showData.title,
+        title: movieData.title,
       };
     }
-    if (!showData) return null;
-    //format show
-    setNewShow(mapTMDBToShow(showData));
+    if (!movieData) return null;
+    //format movie
+    setNewMovie(mapOMDbToMovie(movieData));
     return {
-      title: showData.title,
-      tmdbId: showData.tmdbId,
+      title: movieData.title,
+      imdbId: movieData.imdbId,
     };
-  }, [searchForShow]);
+  }, [searchForMovie]);
 
-  const handleSeasonInfoSearch = useCallback(
-    async (tmdbId: string) => {
-      const seasonInfo = await searchForShowSeasonInfo(tmdbId);
-      if (!seasonInfo) return null;
-      setNewShow((prev) => ({
+  const handlePosterSearch = useCallback(
+    async (imdbId: string) => {
+      const posters = await searchForPosters(imdbId);
+      if (!posters) return null;
+      setNewMovie((prev) => ({ ...prev, ...mapTMDBToMovie(posters) }));
+    },
+    [searchForPosters],
+  );
+
+  const handleSeriesSearch = useCallback(
+    async (imdbId: string) => {
+      // make call
+      const seriesData = await searchForSeriesInfo(imdbId);
+      if (!seriesData || seriesData.length === 0) return null;
+      //
+      setAllSeries(seriesData);
+      const mappedData = mapWikidataToMovie(seriesData[0]);
+      setNewMovie((prev) => ({
         ...prev,
-        ...mapTMDBTVToShow(seasonInfo),
+        title: cleanName(prev.title, mappedData.seriesTitle),
+        ...mapWikidataToMovie(seriesData[0]),
         status: "Want to Watch",
       }));
     },
-    [searchForShowSeasonInfo]
+    [searchForSeriesInfo],
   );
 
-  const handleShowSearch = useCallback(async () => {
-    setActiveModal("showDetails");
+  const handleMovieSearch = useCallback(async () => {
+    setActiveModal("movieDetails");
     // make call to open lib
     const response = await handleTitleSearch();
     // dup logic --- NEEDS TO BE ABOVE EMPTY LOGIC CAUSE REPSONSE IS EMPTY
     if (response && "isDuplicate" in response) {
-      setFailedReason(`Already Have Show: ${response.title}`);
+      setFailedReason(`Already Have Movie: ${response.title}`);
       setIsDupTitle(true);
       setActiveModal(null);
       return;
     }
-    if (!response?.tmdbId || !response.title) {
-      setFailedReason("Could Not Find Show.");
+    // empty
+    if (!response?.imdbId || !response.title) {
+      setFailedReason("Could Not Find Movie.");
       setNeedYear(true);
       setIsAddManual(true);
       setActiveModal(null);
       return;
     }
-    // search for season info
-    if (response.tmdbId) await handleSeasonInfoSearch(response.tmdbId);
-  }, [handleTitleSearch, handleSeasonInfoSearch]);
+    // seearch for poster
+    if (response.imdbId) await handlePosterSearch(response.imdbId);
+    // do series search for main movie
+    if (response.imdbId) await handleSeriesSearch(response.imdbId);
+  }, [handleTitleSearch, handlePosterSearch, handleSeriesSearch]);
 
-  const handleShowDetailsUpdates = useCallback(
-    async (_id: number, updates?: Partial<ShowProps>, needYear?: boolean) => {
-      if (needYear) {
+  const handleMovieDetailsUpdates = useCallback(
+    async (
+      _movieId: number,
+      updates?: Partial<MovieProps>,
+      needYearField?: boolean,
+    ) => {
+      if (needYearField) {
         setActiveModal(null);
         setNeedYear(true);
         setTimeout(() => {
@@ -128,30 +160,49 @@ export function AddShow({
         }, 0);
         return;
       }
-      setNewShow((prev) => ({ ...prev, ...updates }));
+      setNewMovie((prev) => ({ ...prev, ...updates }));
     },
-    []
+    [],
   );
 
-  const handleShowAdd = async () => {
+  const handleMovieAdd = async () => {
     // double check not adding duplicate
-    if (newShow.tmdbId && isDupTitle) {
+    if (newMovie.imdbId && isDupTitle) {
       return;
     }
     //
-    let isStatus = newShow.status;
+    let isStatus = newMovie.status;
     if (!isStatus) {
       isStatus = "Want to Watch";
     }
-    const finalShow = {
-      ...newShow,
+    const finalMovie = {
+      ...newMovie,
       status: isStatus,
     };
-    onAddShow(finalShow as ShowProps);
+    onAddMovie(finalMovie as MovieProps);
     onClose();
   };
 
-  const handleShowDetailsClose = () => {
+  const handleSeriesChange = useCallback(
+    (option: "left" | "right") => {
+      let newSeries = curSeries;
+      if (option === "left") {
+        newSeries = curSeries === 0 ? allSeries.length - 1 : curSeries - 1;
+      } else if (option === "right") {
+        newSeries = curSeries === allSeries.length - 1 ? 0 : curSeries + 1;
+      }
+      setCurSeries(newSeries);
+      const mappedData = mapWikidataToMovie(allSeries[newSeries]);
+      setNewMovie((prev) => ({
+        ...prev,
+        title: cleanName(prev.title, mappedData.seriesTitle),
+        ...mappedData,
+      }));
+    },
+    [allSeries, curSeries],
+  );
+
+  const handleMovieDetailsClose = () => {
     reset();
     setActiveModal(null);
     if (titleFromAbove) {
@@ -162,7 +213,7 @@ export function AddShow({
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.stopPropagation();
-      handleShowSearch();
+      handleMovieSearch();
     }
   };
 
@@ -179,13 +230,19 @@ export function AddShow({
     reset();
   }, [isOpen, reset]);
 
-  // for when to search show without modal
+  // useEffect(() => {
+  //   if (activeModal === null && !failedReason) {
+  //     reset();
+  //   }
+  // }, [activeModal, reset, failedReason]);
+
+  // for when to search movie without modal
   useEffect(() => {
     if (titleFromAbove) {
       if (titleToSearch.current) {
         titleToSearch.current.value = titleFromAbove;
       }
-      handleShowSearch();
+      handleMovieSearch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [titleFromAbove]);
@@ -209,17 +266,17 @@ export function AddShow({
       {!titleFromAbove || needYear ? (
         <div className="bg-linear-to-b from-zinc-950/80 to-zinc-900/50 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
           <h2 className="text-xl font-semibold mb-4 text-zinc-300/90 flex justify-center items-center gap-2">
-            <Tv className="w-5 h-5 text-zinc-300/90" />
-            Search for New Show
+            <Clapperboard className="w-5 h-5 text-zinc-300/90" />
+            Search for New Movie
           </h2>
           <div className="flex gap-3">
             <input
               type="text"
               ref={titleToSearch}
-              placeholder="Search for show..."
+              placeholder="Search for movie..."
               onKeyDown={handleKeyPress}
               onInput={eraseErrMsg}
-              disabled={isShowSearching}
+              disabled={isMovieSearching}
               className="w-full bg-zinc-800/50 border border-zinc-800/50 rounded-xl px-4 py-3 text-zinc-300 font-medium placeholder-zinc-400 focus:border-zinc-800 focus:ring-1 focus:ring-zinc-900/50 outline-none transition-all duration-200 shadow-lg shadow-black/20"
             />
             {needYear && (
@@ -230,19 +287,19 @@ export function AddShow({
                   placeholder="Release Year"
                   onKeyDown={handleKeyPress}
                   onInput={eraseErrMsg}
-                  disabled={isShowSearching}
+                  disabled={isMovieSearching}
                   className="w-full bg-zinc-800/50 border border-zinc-800/50 rounded-xl px-4 py-3 text-zinc-300 font-medium placeholder-zinc-400 focus:border-zinc-800 focus:ring-1 focus:ring-zinc-900/50 outline-none transition-all duration-200"
                 />
               </div>
             )}
           </div>
           <div className="flex justify-between mx-2">
-            {failedReason && !isShowSearching && (
+            {failedReason && !isMovieSearching && (
               <div className="mt-3 text-zinc-400 text-sm font-medium">
                 {failedReason}
               </div>
             )}
-            {isAddManual && !isShowSearching && (
+            {isAddManual && !isMovieSearching && (
               <button
                 className="mt-3 text-zinc-400 font-medium text-sm hover:cursor-pointer underline transition-colors duration-200 hover:text-zinc-300/80 hover:scale-102"
                 onClick={() => setActiveModal("manualAdd")}
@@ -260,29 +317,32 @@ export function AddShow({
           style={{ display: "none" }}
         />
       )}
-      {activeModal === "showDetails" && (
-        <ShowDetails
-          isOpen={activeModal === "showDetails"}
-          show={newShow as ShowProps}
-          onClose={handleShowDetailsClose}
-          onUpdate={handleShowDetailsUpdates}
-          addShow={handleShowAdd}
+      {activeModal === "movieDetails" && (
+        <MovieDetails
+          isOpen={activeModal === "movieDetails"}
+          movie={newMovie as MovieProps}
+          onClose={handleMovieDetailsClose}
+          onUpdate={handleMovieDetailsUpdates}
+          addMovie={handleMovieAdd}
           isLoading={{
-            isTrue: isShowSearching,
+            isTrue: isMovieSearching,
             style: "h-8 w-8 border-emerald-400",
             text: "Searching...",
           }}
+          showAnotherSeries={
+            allSeries.length > 1 ? handleSeriesChange : undefined
+          }
         />
       )}
       {activeModal === "manualAdd" && (
-        <ManualAddShow
+        <ManualAddMovie
           isOpen={activeModal === "manualAdd"}
           onClose={() => setActiveModal(null)}
-          show={newShow}
-          onUpdate={(updates: Partial<ShowProps>) =>
-            setNewShow((prev) => ({ ...prev, ...updates }))
+          movie={newMovie}
+          onUpdate={(updates: Partial<MovieProps>) =>
+            setNewMovie((prev) => ({ ...prev, ...updates }))
           }
-          addShow={handleShowAdd}
+          addMovie={handleMovieAdd}
         />
       )}
     </div>

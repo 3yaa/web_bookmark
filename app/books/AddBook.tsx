@@ -11,9 +11,9 @@ import {
 } from "@/app/books/utils/bookMapping";
 import { cleanName } from "@/utils/cleanName";
 //
-import { BookDetails } from "../BookDetailsHub";
-import { ShowMultBooks } from "./ShowMultBooks";
-import { ManualAddBook } from "./ManualAddBook";
+import { BookDetails } from "./BookDetailsHub";
+import { ShowMultBooks } from "./components/ShowMultBooks";
+import { ManualAddBook } from "./components/ManualAddBook";
 //
 import { useBookSearch } from "@/app/books/hooks/useBookSearch";
 // import { filterCovers } from "@/app/games/utils/filterCovers";

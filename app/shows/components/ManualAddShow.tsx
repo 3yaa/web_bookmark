@@ -39,7 +39,7 @@ export function ManualAddShow({
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-linear-to-b ${getStatusBorderGradient(
-          show.status ?? "Want to Watch"
+          show.status ?? "Want to Watch",
         )} p-1.5 py-2`}
       >
         {/* ACTUAL DETAIL CARD */}

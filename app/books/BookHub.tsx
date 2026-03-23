@@ -14,7 +14,7 @@ import { BookProps, BookSortConfig } from "@/types/book";
 import { useSortBooks } from "@/app/books/hooks/useSortBooks";
 import { useBookData } from "@/app/books/hooks/useBookData";
 // components
-import { AddBook } from "./addingBook/AddBook";
+import { AddBook } from "./AddBook";
 import { BookDetails } from "./BookDetailsHub";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";

@@ -14,7 +14,7 @@ import { MovieProps, MovieSortConfig } from "@/types/movie";
 import { useSortMovies } from "@/app/movies/hooks/useSortMovies";
 import { useMovieData } from "@/app/movies/hooks/useMovieData";
 // components
-import { AddMovie } from "./addMovie/AddMovie";
+import { AddMovie } from "./AddMovie";
 import { MovieDetails } from "./MovieDetailsHub";
 import { debounce } from "@/utils/debounce";
 import { useScrollVisibility } from "@/hooks/useScrollVisibility";

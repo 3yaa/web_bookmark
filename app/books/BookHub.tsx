@@ -11,6 +11,7 @@ import { BookDetails } from "./BookDetailsHub";
 import { DesktopListing } from "@/app/views/mediaListing/DesktopListing";
 import { MobileListing } from "@/app/views/mediaListing/MobileListing";
 import { AddButton } from "../components/ui/AddButton";
+import { ScoreBattler } from "../views/mediaDetails/shared/ScoreBattle";
 
 export default function BookHub() {
   // GET DATA FROM DB
@@ -22,6 +23,7 @@ export default function BookHub() {
 
   // MANAGEMENT OF STATES
   const {
+    tempScore,
     filteredItems,
     sortConfig,
     statusFilter,
@@ -40,6 +42,7 @@ export default function BookHub() {
     handleItemClicked,
     handleSearchQueryChange,
     handleItemUpdates,
+    handleScoreFinal,
   } = useManageMedia<BookProps>({
     items: items,
     onRemove: remove,
@@ -110,21 +113,34 @@ export default function BookHub() {
         isVisible={isMenuButtonsVisible}
       />
       {/* ADD MODAL */}
-      <AddBook
-        isOpen={activeModal === "addModal"}
-        onClose={handleModalClose}
-        existingBooks={items}
-        onAddBook={add}
-        titleFromAbove={titleToUse}
-      />
+      {activeModal === "addModal" && (
+        <AddBook
+          isOpen={activeModal === "addModal"}
+          onClose={handleModalClose}
+          existingBooks={items}
+          onAddBook={add}
+          titleFromAbove={titleToUse}
+        />
+      )}
       {/* DETAILS MODAL */}
-      {selectedItem && (
+      {activeModal === "detailsModal" && selectedItem && (
         <BookDetails
-          isOpen={activeModal === "detailsModal"}
           book={selectedItem}
           onClose={handleModalClose}
           onUpdate={handleItemUpdates}
           showSequelPrequel={showSequelPrequel}
+        />
+      )}
+      {/* SCORE BATTLER */}
+      {activeModal === "scoreBattlerModal" && selectedItem && (
+        <ScoreBattler
+          items={items}
+          initialScore={tempScore}
+          onClose={() => {
+            setActiveModal("detailsModal");
+          }}
+          selectedItem={selectedItem}
+          onScoreFinal={handleScoreFinal}
         />
       )}
     </div>

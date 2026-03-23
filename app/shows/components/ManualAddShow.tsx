@@ -7,7 +7,6 @@ import { getStatusBorderGradient } from "@/utils/formattingUtils";
 import { scoreOptions, showStatusOptions } from "@/utils/dropDownDetails";
 // NOT USED IN MOBILE
 interface ManualAddShowProps {
-  isOpen: boolean;
   onClose: () => void;
   addShow: () => void;
   show: Partial<ShowProps>;
@@ -15,14 +14,11 @@ interface ManualAddShowProps {
 }
 
 export function ManualAddShow({
-  isOpen,
   onClose,
   show,
   onUpdate,
   addShow,
 }: ManualAddShowProps) {
-  if (!isOpen) return null;
-
   const handleStatusChange = (value: string) => {
     const newStatus = value as "Completed" | "Want to Watch";
     const statusLoad: Partial<ShowProps> = {

@@ -319,7 +319,6 @@ export function AddMovie({
       )}
       {activeModal === "movieDetails" && (
         <MovieDetails
-          isOpen={activeModal === "movieDetails"}
           movie={newMovie as MovieProps}
           onClose={handleMovieDetailsClose}
           onUpdate={handleMovieDetailsUpdates}
@@ -336,7 +335,6 @@ export function AddMovie({
       )}
       {activeModal === "manualAdd" && (
         <ManualAddMovie
-          isOpen={activeModal === "manualAdd"}
           onClose={() => setActiveModal(null)}
           movie={newMovie}
           onUpdate={(updates: Partial<MovieProps>) =>

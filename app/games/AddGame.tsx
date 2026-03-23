@@ -326,7 +326,6 @@ export function AddGame({
       )}
       {activeModal === "gameDetails" && (
         <GameDetails
-          isOpen={activeModal === "gameDetails"}
           game={newGame as GameProps}
           onClose={handleGameDetailsClose}
           onUpdate={handleGameDetailsUpdates}
@@ -343,7 +342,6 @@ export function AddGame({
       )}
       {activeModal === "multOptions" && (
         <ShowMultGames
-          isOpen={activeModal === "multOptions"}
           onClose={handleMultOptionClose}
           games={allNewGames}
           prompt={titleToSearch.current?.value || ""}
@@ -353,7 +351,6 @@ export function AddGame({
       )}
       {activeModal === "manualAdd" && (
         <ManualAddGame
-          isOpen={activeModal === "manualAdd"}
           onClose={() => setActiveModal(null)}
           game={newGame}
           onUpdate={(updates: Partial<GameProps>) =>

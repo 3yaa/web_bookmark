@@ -10,6 +10,7 @@ import { GameDetails } from "./GameDetailsHub";
 import { DesktopListing } from "@/app/views/mediaListing/DesktopListing";
 import { MobileListing } from "@/app/views/mediaListing/MobileListing";
 import { AddButton } from "../components/ui/AddButton";
+import { ScoreBattler } from "../views/mediaDetails/shared/ScoreBattle";
 
 export default function GameList() {
   const { items, add, update, remove, isProcessing } = useMediaData<GameProps>({
@@ -35,6 +36,8 @@ export default function GameList() {
     handleItemClicked,
     handleSearchQueryChange,
     handleItemUpdates,
+    tempScore,
+    handleScoreFinal,
   } = useManageMedia<GameProps>({
     items: items,
     onRemove: remove,
@@ -114,24 +117,41 @@ export default function GameList() {
           onStatusFilter={handleStatusFilterConfig}
         />
       </div>
+      {/* ADD BUTTON */}
       <AddButton
         onClick={() => setActiveModal("addModal")}
         isVisible={isMenuButtonsVisible}
       />
-      <AddGame
-        isOpen={activeModal === "addModal"}
-        onClose={handleGameModalClose}
-        existingGames={items}
-        onAddGame={add}
-        titleFromAbove={titleToAdd}
-      />
-      {selectedItem && (
+      {/* ADD MODAL */}
+      {activeModal === "addModal" && (
+        <AddGame
+          isOpen={activeModal === "addModal"}
+          onClose={handleGameModalClose}
+          existingGames={items}
+          onAddGame={add}
+          titleFromAbove={titleToAdd}
+        />
+      )}
+      {/* DETAILS MODAL */}
+      {activeModal === "detailsModal" && selectedItem && (
         <GameDetails
-          isOpen={activeModal === "detailsModal"}
           game={selectedItem}
           onClose={handleGameModalClose}
           onUpdate={handleItemUpdates}
           showDlc={showDlc}
+        />
+      )}
+      {/* SCORE BATTLER */}
+      {activeModal === "scoreBattlerModal" && selectedItem && (
+        <ScoreBattler
+          items={items}
+          initialScore={tempScore}
+          onClose={() => {
+            setActiveModal("detailsModal");
+          }}
+          selectedItem={selectedItem}
+          onScoreFinal={handleScoreFinal}
+          mediaType="game"
         />
       )}
     </div>

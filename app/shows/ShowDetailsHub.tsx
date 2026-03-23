@@ -29,7 +29,6 @@ export type ShowAction =
 
 interface ShowDetailsProps {
   show: ShowProps;
-  isOpen: boolean;
   onClose: () => void;
   isLoading?: { isTrue: boolean; style: string; text: string };
   onUpdate: (
@@ -41,7 +40,6 @@ interface ShowDetailsProps {
 }
 
 export function ShowDetails({
-  isOpen,
   onClose,
   show,
   onUpdate,
@@ -340,7 +338,7 @@ export function ShowDetails({
     });
   }, [show.curSeasonIndex, show.curEpisode]);
 
-  if (!isOpen || !show) return null;
+  if (!show) return null;
 
   return (
     <>

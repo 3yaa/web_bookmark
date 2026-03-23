@@ -1,7 +1,7 @@
 import { MovieProps, OMDbProps, TMDBProps, WikidataProps } from "@/types/movie";
 
 export function resetMovieValues(
-  movie: Partial<MovieProps>
+  movie: Partial<MovieProps>,
 ): Partial<MovieProps> {
   return {
     id: movie.id,
@@ -18,6 +18,7 @@ export function resetMovieValues(
     prequel: undefined,
     sequel: undefined,
     status: "Want to Watch",
+    lastUpdated: undefined,
   };
 }
 
@@ -38,7 +39,7 @@ export function mapTMDBToMovie(dataTMDB: TMDBProps): Partial<MovieProps> {
 }
 
 export function mapWikidataToMovie(
-  dataWiki: WikidataProps
+  dataWiki: WikidataProps,
 ): Partial<MovieProps> {
   return {
     // title: cleanName(dataWiki.wikiTitle, sTitle),

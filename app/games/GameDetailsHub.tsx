@@ -18,7 +18,6 @@ export type GameAction =
 
 interface GameDetailsProps {
   game: GameProps;
-  isOpen: boolean;
   onClose: () => void;
   isLoading?: { isTrue: boolean; style: string; text: string };
   onUpdate: (
@@ -35,7 +34,6 @@ interface GameDetailsProps {
 }
 
 export function GameDetails({
-  isOpen,
   onClose,
   game,
   onUpdate,
@@ -174,7 +172,7 @@ export function GameDetails({
     return () => window.removeEventListener("keydown", handleLeave);
   }, [onClose, handleAddGame]);
 
-  if (!isOpen || !game) return null;
+  if (!game) return null;
 
   return (
     <>

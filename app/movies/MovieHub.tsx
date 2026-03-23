@@ -11,6 +11,7 @@ import { MovieDetails } from "./MovieDetailsHub";
 import { DesktopListing } from "@/app/views/mediaListing/DesktopListing";
 import { MobileListing } from "@/app/views/mediaListing/MobileListing";
 import { AddButton } from "../components/ui/AddButton";
+import { ScoreBattler } from "../views/mediaDetails/shared/ScoreBattle";
 
 export default function MoviesHub() {
   const { items, add, update, remove, isProcessing } = useMediaData<MovieProps>(
@@ -40,6 +41,8 @@ export default function MoviesHub() {
     handleItemClicked,
     handleSearchQueryChange,
     handleItemUpdates,
+    tempScore,
+    handleScoreFinal,
   } = useManageMedia<MovieProps>({
     items: items,
     onRemove: remove,
@@ -69,6 +72,7 @@ export default function MoviesHub() {
     },
     [items, setSelectedItem, setTitleToUse, setActiveModal],
   );
+
 
   return (
     <div className="min-h-screen">
@@ -110,21 +114,34 @@ export default function MoviesHub() {
         isVisible={isMenuButtonsVisible}
       />
       {/* ADD MODAL */}
-      <AddMovie
-        isOpen={activeModal === "addModal"}
-        onClose={handleModalClose}
-        existingMovies={items}
-        onAddMovie={add}
-        titleFromAbove={titleToUse}
-      />
+      {activeModal === "addModal" && (
+        <AddMovie
+          isOpen={activeModal === "addModal"}
+          onClose={handleModalClose}
+          existingMovies={items}
+          onAddMovie={add}
+          titleFromAbove={titleToUse}
+        />
+      )}
       {/* DETAILS MODAL */}
-      {selectedItem && (
+      {activeModal === "detailsModal" && selectedItem && (
         <MovieDetails
-          isOpen={activeModal === "detailsModal"}
           movie={selectedItem}
           onClose={handleModalClose}
           onUpdate={handleItemUpdates}
           showSequelPrequel={showSequelPrequel}
+        />
+      )}
+      {/* SCORE BATTLER */}
+      {activeModal === "scoreBattlerModal" && selectedItem && (
+        <ScoreBattler
+          items={items}
+          initialScore={tempScore}
+          onClose={() => {
+            setActiveModal("detailsModal");
+          }}
+          selectedItem={selectedItem}
+          onScoreFinal={handleScoreFinal}
         />
       )}
     </div>

@@ -4,7 +4,6 @@ import Image from "next/image";
 import { Loading } from "@/app/components/ui/Loading";
 
 interface MultSearchProps {
-  isOpen: boolean;
   onClose: (action: "manualAdd" | null) => void;
   prompt: string;
   books: OpenLibraryProps[];
@@ -13,17 +12,12 @@ interface MultSearchProps {
 }
 
 export function ShowMultBooks({
-  isOpen,
   onClose,
   books,
   prompt,
   onClickedBook,
   isLoading,
 }: MultSearchProps) {
-  if (!isOpen) return null;
-
-  console.log(books.forEach((book) => console.log(book.cover_urls?.[0])));
-
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 overflow-x-hidden">
       {/* Modal content */}

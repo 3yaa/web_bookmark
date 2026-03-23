@@ -54,7 +54,7 @@ export function SeriesNav({
         };
 
   return (
-    <div className="pt-2.5 border-t border-zinc-800/80">
+    <div className="pt-2.5 border-t border-zinc-800/80 pr-2">
       <div className="grid grid-cols-[1fr_3rem_1fr] gap-3 w-full pr-1.5 select-none">
         <div className="truncate text-left">
           {nav.prev && (

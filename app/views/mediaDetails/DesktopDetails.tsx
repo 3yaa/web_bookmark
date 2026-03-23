@@ -105,7 +105,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
           {isLoading?.isTrue && (
             <Loading customStyle={isLoading.style} text={isLoading.text} />
           )}
-          <div className={`px-8.5 py-7 border-0 rounded-2xl overflow-hidden`}>
+          <div className={`px-5 py-3.5 border-0 rounded-2xl overflow-hidden`}>
             {/* ACTION BUTTONS */}
             {isAdding ? (
               <div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
@@ -177,13 +177,12 @@ export function DesktopDetails<T extends BaseMediaProps>({
               </button>
             )}
 
-            <div className="flex gap-8">
+            <div className="flex gap-6">
               {/* LEFT SIDE -- PIC */}
               <div
-                className={`flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg select-none ${
+                className={`relative bg-[#141414] p-3.5 rounded-xl shadow-island select-none ${
                   coverUrls ? "hover:cursor-pointer" : ""
                 }`}
-                // FO BOOK ONLY
                 onClick={
                   mediaType === "book" && coverUrls && coverUrls.length > 1
                     ? handleCoverChange
@@ -195,9 +194,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
                     : ""
                 }
               >
-                {mediaType !== "book" ? (
-                  (item.posterUrl ?? item.coverUrl) ? (
-                    <>
+                <div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg">
+                  {mediaType !== "book" ? (
+                    (item.posterUrl ?? item.coverUrl) ? (
                       <Image
                         src={(item.posterUrl ?? item.coverUrl)!}
                         alt={item.title || "Untitled"}
@@ -205,29 +204,31 @@ export function DesktopDetails<T extends BaseMediaProps>({
                         height={720}
                         className={`min-w-62 min-h-93 ${mediaType === "game" ? "object-cover" : "object-fill"}`}
                       />
-                    </>
+                    ) : (
+                      <div className="min-w-62 min-h-93 bg-linear-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
+                    )
                   ) : (
-                    <div className="min-w-62 min-h-93 bg-linear-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30"></div>
-                  )
-                ) : (
-                  <BookCoverChange
-                    coverUrl={item.coverUrl}
-                    title={item.title}
-                    coverUrls={coverUrls}
-                    coverIndex={coverIndex}
-                    className={"min-w-62 min-h-93 object-cover"}
-                    height={372}
-                    width={248}
-                  />
-                )}
+                    <BookCoverChange
+                      coverUrl={item.coverUrl}
+                      title={item.title}
+                      coverUrls={coverUrls}
+                      coverIndex={coverIndex}
+                      className={"min-w-62 min-h-93 object-cover"}
+                      height={372}
+                      width={248}
+                    />
+                  )}
+                </div>
                 {/* gradient overlay */}
                 <div
-                  className="absolute inset-0 left-8.5 top-7 max-w-62 max-h-93"
+                  className="absolute inset-0 left-3.5 top-3.5 max-w-62 max-h-93 rounded-lg pointer-events-none"
                   style={{
                     background:
                       "linear-gradient(to bottom, transparent 0%, rgba(24,24,27,0) 50%, rgba(24,24,27,0.3) 100%)",
                   }}
                 />
+                {/* Inner vignette */}
+                <div className="absolute -inset-1 pointer-events-none rounded-xl shadow-[inset_0_0_12px_rgba(0,0,0,0.4)]" />
               </div>
 
               {/* RIGHT SIDE -- DETAILS */}

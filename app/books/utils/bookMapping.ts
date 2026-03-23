@@ -22,11 +22,12 @@ export function resetBookValues(book: Partial<BookProps>): Partial<BookProps> {
     prequel: undefined,
     sequel: undefined,
     status: "Want to Read",
+    lastUpdated: undefined,
   };
 }
 
 export function mapOpenLibDataToBook(
-  dataOL: OpenLibraryProps
+  dataOL: OpenLibraryProps,
 ): Partial<BookProps> {
   return {
     key: dataOL.key,
@@ -37,7 +38,7 @@ export function mapOpenLibDataToBook(
 }
 
 export function mapGoogleDataToBook(
-  dataGoogle: GoogleBooksProps
+  dataGoogle: GoogleBooksProps,
 ): Partial<BookProps> {
   return {
     key: dataGoogle.id,

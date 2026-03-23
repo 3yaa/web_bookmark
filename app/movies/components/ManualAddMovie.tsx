@@ -7,7 +7,6 @@ import { getStatusBorderGradient } from "@/utils/formattingUtils";
 import { scoreOptions, movieStatusOptions } from "@/utils/dropDownDetails";
 // NOT USED IN MOBILE
 interface ManualAddMovieProps {
-  isOpen: boolean;
   onClose: () => void;
   addMovie: () => void;
   movie: Partial<MovieProps>;
@@ -15,14 +14,11 @@ interface ManualAddMovieProps {
 }
 
 export function ManualAddMovie({
-  isOpen,
   onClose,
   movie,
   onUpdate,
   addMovie,
 }: ManualAddMovieProps) {
-  if (!isOpen) return null;
-
   const handleStatusChange = (value: string) => {
     const newStatus = value as "Completed" | "Want to Watch";
     const statusLoad: Partial<MovieProps> = {
@@ -39,7 +35,7 @@ export function ManualAddMovie({
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-linear-to-b ${getStatusBorderGradient(
-          movie.status ?? "Want to Read"
+          movie.status ?? "Want to Read",
         )} p-1.5 py-2`}
       >
         {/* ACTUAL DETAIL CARD */}

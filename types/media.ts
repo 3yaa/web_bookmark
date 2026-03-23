@@ -22,6 +22,7 @@ export interface BaseMediaProps {
   title: string;
   score?: number;
   status: MediaStatus;
+  lastUpdated: Date;
   dateCompleted?: Date | null;
   note?: string;
   posterUrl?: string;

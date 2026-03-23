@@ -18,7 +18,6 @@ export type BookAction =
 
 interface BookDetailsProps {
   book: BookProps;
-  isOpen: boolean;
   onClose: () => void;
   isLoading?: { isTrue: boolean; style: string; text: string };
   onUpdate: (
@@ -36,7 +35,6 @@ interface BookDetailsProps {
 }
 
 export function BookDetails({
-  isOpen,
   onClose,
   book,
   onUpdate,
@@ -170,7 +168,7 @@ export function BookDetails({
     return () => window.removeEventListener("keydown", handleLeave);
   }, [onClose, handleAddBook]);
 
-  if (!isOpen || !book) return null;
+  if (!book) return null;
 
   return (
     <>

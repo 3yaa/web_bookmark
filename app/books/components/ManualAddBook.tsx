@@ -6,7 +6,6 @@ import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
 import { bookStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 interface ManualAddBookProps {
-  isOpen: boolean;
   onClose: () => void;
   addBook: () => void;
   book: Partial<BookProps>;
@@ -14,14 +13,11 @@ interface ManualAddBookProps {
 }
 // NOT USED IN MOBILE
 export function ManualAddBook({
-  isOpen,
   onClose,
   book,
   onUpdate,
   addBook,
 }: ManualAddBookProps) {
-  if (!isOpen) return null;
-
   const handleStatusChange = (value: string) => {
     const newStatus = value as "Completed" | "Want to Read";
     const statusLoad: Partial<BookProps> = {
@@ -38,7 +34,7 @@ export function ManualAddBook({
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-linear-to-b ${getStatusBorderGradient(
-          book.status ?? "Want to Read"
+          book.status ?? "Want to Read",
         )} p-1.5 py-2`}
       >
         {/* ACTUAL DETAIL CARD */}

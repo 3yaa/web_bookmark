@@ -262,7 +262,6 @@ export function AddShow({
       )}
       {activeModal === "showDetails" && (
         <ShowDetails
-          isOpen={activeModal === "showDetails"}
           show={newShow as ShowProps}
           onClose={handleShowDetailsClose}
           onUpdate={handleShowDetailsUpdates}
@@ -276,7 +275,6 @@ export function AddShow({
       )}
       {activeModal === "manualAdd" && (
         <ManualAddShow
-          isOpen={activeModal === "manualAdd"}
           onClose={() => setActiveModal(null)}
           show={newShow}
           onUpdate={(updates: Partial<ShowProps>) =>

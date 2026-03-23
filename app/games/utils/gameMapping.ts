@@ -14,6 +14,7 @@ export function resetGameValues(book: Partial<GameProps>): Partial<GameProps> {
     dlcIndex: undefined,
     dlcs: undefined,
     status: "Playing",
+    lastUpdated: undefined,
   };
 }
 
@@ -37,7 +38,7 @@ export function mapIGDBDataToGame(dataGame: IGDBProps): Partial<GameProps> {
 
 export function mapIGDBDlcsDataToGame(
   dataDlc: IGDBDlcProps,
-  mainTitle: string
+  mainTitle: string,
 ): Partial<GameProps> {
   return {
     igdbId: dataDlc.igdbId,

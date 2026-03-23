@@ -9,6 +9,7 @@ import { ShowDetails } from "./ShowDetailsHub";
 import { DesktopListing } from "@/app/views/mediaListing/DesktopListing";
 import { MobileListing } from "@/app/views/mediaListing/MobileListing";
 import { AddButton } from "../components/ui/AddButton";
+import { ScoreBattler } from "../views/mediaDetails/shared/ScoreBattle";
 
 export default function ShowHub() {
   const { items, add, update, remove, isProcessing } = useMediaData<ShowProps>({
@@ -35,6 +36,8 @@ export default function ShowHub() {
     handleItemClicked,
     handleSearchQueryChange,
     handleItemUpdates,
+    tempScore,
+    handleScoreFinal,
   } = useManageMedia<ShowProps>({
     items: items,
     onRemove: remove,
@@ -87,20 +90,33 @@ export default function ShowHub() {
         isVisible={isMenuButtonsVisible}
       />
       {/* ADD MODAL */}
-      <AddShow
-        isOpen={activeModal === "addModal"}
-        onClose={handleModalClose}
-        existingShows={items}
-        onAddShow={add}
-        titleFromAbove={titleToUse}
-      />
+      {activeModal === "addModal" && (
+        <AddShow
+          isOpen={activeModal === "addModal"}
+          onClose={handleModalClose}
+          existingShows={items}
+          onAddShow={add}
+          titleFromAbove={titleToUse}
+        />
+      )}
       {/* DETAILS MODAL */}
-      {selectedItem && (
+      {activeModal === "detailsModal" && selectedItem && (
         <ShowDetails
-          isOpen={activeModal === "detailsModal"}
           show={selectedItem}
           onClose={handleModalClose}
           onUpdate={handleItemUpdates}
+        />
+      )}
+      {/* SCORE BATTLER */}
+      {activeModal === "scoreBattlerModal" && selectedItem && (
+        <ScoreBattler
+          items={items}
+          initialScore={tempScore}
+          onClose={() => {
+            setActiveModal("detailsModal");
+          }}
+          selectedItem={selectedItem}
+          onScoreFinal={handleScoreFinal}
         />
       )}
     </div>

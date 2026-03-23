@@ -12,6 +12,7 @@ export function resetMovieValues(show: Partial<ShowProps>): Partial<ShowProps> {
     posterUrl: undefined,
     dateReleased: undefined,
     status: "Want to Watch",
+    lastUpdated: undefined,
   };
 }
 

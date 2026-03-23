@@ -28,8 +28,10 @@ export function useManageMedia<T extends BaseMediaProps>({
   const [searchQuery, setSearchQuery] = useState("");
   const [titleToUse, setTitleToUse] = useState<string>("");
   const [activeModal, setActiveModal] = useState<
-    "detailsModal" | "addModal" | null
+    "detailsModal" | "addModal" | "scoreBattlerModal" | null
   >(null);
+  const [tempScore, setTempScore] = useState<number>(0);
+  const pendingUpdates = useRef<Partial<T>>({});
   // used for mobile only
   const isMenuButtonsVisible = useScrollVisibility(30);
 
@@ -88,28 +90,63 @@ export function useManageMedia<T extends BaseMediaProps>({
     setSelectedItem(item);
   }, []);
 
+  const handleScoreFinal = useCallback(
+    (finalScore: number) => {
+      if (!selectedItem?.id) return;
+      setSelectedItem({ ...selectedItem, score: finalScore });
+      // onUpdate(selectedItem.id, { score: finalScore } as Partial<T>);
+      pendingUpdates.current = {
+        ...pendingUpdates.current,
+        ...({ score: finalScore } as Partial<T>),
+      };
+      setTempScore(0);
+      setActiveModal("detailsModal");
+    },
+    [selectedItem],
+  );
+
   const handleItemUpdates = useCallback(
     async (itemId: number, updates?: Partial<T>, shouldDelete?: boolean) => {
-      if (updates) {
-        if (selectedItem?.id === itemId) {
-          setSelectedItem({ ...selectedItem, ...updates });
+      if (shouldDelete) return await onRemove(itemId);
+      if (!updates) return;
+      // for score update (select score x)
+      const isNewScore = updates.score && !selectedItem?.score;
+      if (isNewScore) {
+        // check if theres any item in same score tier
+        const hasOpponent = items.some(
+          (i) => i.score === updates.score && i.lastUpdated,
+        );
+        // commense score battle
+        if (hasOpponent && updates.score) {
+          setTempScore(updates.score);
+          setActiveModal("scoreBattlerModal");
+          return;
         }
-        onUpdate(itemId, updates);
-      } else if (shouldDelete) {
-        await onRemove(itemId);
       }
+
+      if (selectedItem?.id === itemId) {
+        setSelectedItem({ ...selectedItem, ...updates });
+      }
+      // onUpdate(itemId, updates);
+      pendingUpdates.current = { ...pendingUpdates.current, ...updates };
     },
-    [onRemove, selectedItem, onUpdate],
+    [onRemove, selectedItem, items],
   );
 
   const handleModalClose = useCallback(() => {
+    // push any pending update to db
+    if (selectedItem?.id && Object.keys(pendingUpdates.current).length > 0) {
+      onUpdate(selectedItem.id, pendingUpdates.current);
+    }
+    pendingUpdates.current = {};
+    //
     setActiveModal(null);
     // wait a frame before clearing state
     requestAnimationFrame(() => {
       setTitleToUse("");
       setSelectedItem(null);
     });
-  }, []);
+  }, [onUpdate, selectedItem]);
 
   useEffect(() => {
     const handleEnter = (e: KeyboardEvent) => {
@@ -148,23 +185,25 @@ export function useManageMedia<T extends BaseMediaProps>({
     // items
     filteredItems,
     // states
+    tempScore,
     sortConfig,
-    statusFilter,
-    searchQuery,
-    selectedItem,
-    setSelectedItem,
     titleToUse,
-    setTitleToUse,
     activeModal,
+    searchQuery,
+    statusFilter,
+    selectedItem,
+    setTitleToUse,
     setActiveModal,
-    isMenuButtonsVisible,
     isFilterPending,
+    setSelectedItem,
+    isMenuButtonsVisible,
     // handlers
+    handleScoreFinal,
     handleSortConfig,
-    handleStatusFilterConfig,
     handleModalClose,
+    handleItemUpdates,
     handleItemClicked,
     handleSearchQueryChange,
-    handleItemUpdates,
+    handleStatusFilterConfig,
   };
 }

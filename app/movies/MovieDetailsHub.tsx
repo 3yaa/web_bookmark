@@ -17,7 +17,6 @@ export type MovieAction =
 
 interface MovieDetailsProps {
   movie: MovieProps;
-  isOpen: boolean;
   onClose: () => void;
   isLoading?: { isTrue: boolean; style: string; text: string };
   onUpdate: (
@@ -31,7 +30,6 @@ interface MovieDetailsProps {
 }
 
 export function MovieDetails({
-  isOpen,
   onClose,
   movie,
   onUpdate,
@@ -147,7 +145,7 @@ export function MovieDetails({
     return () => window.removeEventListener("keydown", handleLeave);
   }, [onClose, handleAddMovie]);
 
-  if (!isOpen || !movie) return null;
+  if (!movie) return null;
 
   return (
     <>

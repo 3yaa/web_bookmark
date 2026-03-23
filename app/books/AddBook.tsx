@@ -378,7 +378,6 @@ export function AddBook({
       )}
       {activeModal === "bookDetails" && (
         <BookDetails
-          isOpen={activeModal === "bookDetails"}
           book={newBook as BookProps}
           onClose={handleBookDetailsClose}
           onUpdate={handleBookDetailsUpdates}
@@ -398,7 +397,6 @@ export function AddBook({
       )}
       {activeModal === "multOptions" && (
         <ShowMultBooks
-          isOpen={activeModal === "multOptions"}
           onClose={handleMultOptionClose}
           books={allNewBooks}
           prompt={titleToSearch.current?.value || ""}
@@ -408,7 +406,6 @@ export function AddBook({
       )}
       {activeModal === "manualAdd" && (
         <ManualAddBook
-          isOpen={activeModal === "manualAdd"}
           onClose={() => setActiveModal(null)}
           book={newBook}
           onUpdate={(updates: Partial<BookProps>) =>

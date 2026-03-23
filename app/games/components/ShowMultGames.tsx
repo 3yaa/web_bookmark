@@ -4,7 +4,6 @@ import Image from "next/image";
 import { Loading } from "@/app/components/ui/Loading";
 
 interface MultSearchProps {
-  isOpen: boolean;
   onClose: (action: "manualAdd" | null) => void;
   prompt: string;
   games: IGDBProps[];
@@ -13,15 +12,12 @@ interface MultSearchProps {
 }
 
 export function ShowMultGames({
-  isOpen,
   onClose,
   games,
   prompt,
   onClickedGame,
   isLoading,
 }: MultSearchProps) {
-  if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 overflow-x-hidden">
       {/* Modal content */}
@@ -87,7 +83,7 @@ export function ShowMultGames({
                       alt={game.title || "Untitled"}
                       width={50}
                       height={75}
-                      className="w-full h-full w-full h-full object-fill rounded-sm"
+                      className="w-full h-full object-fill rounded-sm"
                     />
                   ) : (
                     <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30"></div>

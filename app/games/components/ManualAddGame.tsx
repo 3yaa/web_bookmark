@@ -6,7 +6,6 @@ import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
 import { gameStatusOptions, scoreOptions } from "@/utils/dropDownDetails";
 interface ManualAddGameProps {
-  isOpen: boolean;
   onClose: () => void;
   addGame: () => void;
   game: Partial<GameProps>;
@@ -14,14 +13,11 @@ interface ManualAddGameProps {
 }
 // NOT USED IN MOBILE
 export function ManualAddGame({
-  isOpen,
   onClose,
   game,
   onUpdate,
   addGame,
 }: ManualAddGameProps) {
-  if (!isOpen) return null;
-
   const handleStatusChange = (value: string) => {
     const newStatus = value as "Completed" | "Playing";
     const statusLoad: Partial<GameProps> = {
@@ -38,7 +34,7 @@ export function ManualAddGame({
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-linear-to-b ${getStatusBorderGradient(
-          game.status ?? "Want to Read"
+          game.status ?? "Want to Read",
         )} p-1.5 py-2`}
       >
         {/* ACTUAL DETAIL CARD */}

@@ -263,7 +263,7 @@ export function AddMovie({
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-10 animate-in fade-in duration-200">
       <div className="fixed inset-0" onClick={onClose} />
-      {!titleFromAbove || needYear ? (
+      {!titleFromAbove || needYear || isDupTitle ? (
         <div className="bg-linear-to-b from-zinc-950/80 to-zinc-900/50 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
           <h2 className="text-xl font-semibold mb-4 text-zinc-300/90 flex justify-center items-center gap-2">
             <Clapperboard className="w-5 h-5 text-zinc-300/90" />

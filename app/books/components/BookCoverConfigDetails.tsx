@@ -44,7 +44,7 @@ export function BookCoverConfig({
           onLoad={onLoad}
         />
       ) : (
-        <div className="h-64 bg-linear-to-br from-zinc-700 to-zinc-800" />
+        <div className="min-w-62 min-h-93 bg-linear-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30" />
       )}
     </>
   );

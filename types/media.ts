@@ -25,8 +25,11 @@ export interface BaseMediaProps {
   lastUpdated: Date;
   dateCompleted?: Date | null;
   note?: string;
+  // the author and dateRepleased and cover i need to fix sometimes T_T
+  imageUrl?: string;
   posterUrl?: string;
   coverUrl?: string;
+  //
   backdropUrl?: string;
   // series (book/movie)
   seriesTitle?: string;

@@ -103,9 +103,9 @@ export default function LandingPage() {
                     rounded-xl px-4 py-4 sm:py-5
                     bg-zinc-800/60 border border-zinc-700/50 shadow-island
                     hover:bg-zinc-700/40 hover:border-zinc-600/50
-                    hover:shadow-[0_4px_16px_rgba(0,0,0,0.6),0_1px_3px_rgba(0,0,0,0.5)]
+                    hover:scale-[1.02] active:scale-[0.98]
                     active:shadow-[0_1px_4px_rgba(0,0,0,0.5)]
-                    active:translate-y-px
+                    hover:shadow-[0_4px_16px_rgba(0,0,0,0.6),0_1px_3px_rgba(0,0,0,0.5)]
                     cursor-pointer transition-all duration-200 ease-out"
                 >
                   <div className="flex items-center gap-3">

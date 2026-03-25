@@ -12,12 +12,14 @@ import { debounce } from "@/utils/debounce";
 
 interface ManageMediaConfig<T extends BaseMediaProps> {
   items: T[];
+  onAdd: (item: T) => Promise<T>;
   onRemove: (itemId: number) => Promise<void>;
   onUpdate: (itemId: number, updates: Partial<T>) => Promise<void>;
 }
 
 export function useManageMedia<T extends BaseMediaProps>({
   items,
+  onAdd,
   onRemove,
   onUpdate,
 }: ManageMediaConfig<T>) {
@@ -105,6 +107,25 @@ export function useManageMedia<T extends BaseMediaProps>({
     [selectedItem],
   );
 
+  const handleItemAdd = useCallback(
+    async (item: T) => {
+      const newItem = await onAdd(item);
+      if (!newItem.score) return;
+      // score battler shenanigans
+      const hasOpponent = items.some(
+        (i) => i.score === newItem.score && i.lastUpdated,
+      );
+      // commense score battle
+      if (hasOpponent) {
+        setActiveModal("scoreBattlerModal");
+        setSelectedItem(newItem);
+        setTempScore(newItem.score);
+        return;
+      }
+    },
+    [onAdd, items],
+  );
+
   const handleItemUpdates = useCallback(
     async (itemId: number, updates?: Partial<T>, shouldDelete?: boolean) => {
       if (shouldDelete) return await onRemove(itemId);
@@ -134,12 +155,12 @@ export function useManageMedia<T extends BaseMediaProps>({
   );
 
   const handleModalClose = useCallback(() => {
-    // push any pending update to db
+    // push any pending update to db -- have only one update
     if (selectedItem?.id && Object.keys(pendingUpdates.current).length > 0) {
       onUpdate(selectedItem.id, pendingUpdates.current);
     }
     pendingUpdates.current = {};
-    //
+    // normal
     setActiveModal(null);
     // wait a frame before clearing state
     requestAnimationFrame(() => {
@@ -198,6 +219,7 @@ export function useManageMedia<T extends BaseMediaProps>({
     setSelectedItem,
     isMenuButtonsVisible,
     // handlers
+    handleItemAdd,
     handleScoreFinal,
     handleSortConfig,
     handleModalClose,

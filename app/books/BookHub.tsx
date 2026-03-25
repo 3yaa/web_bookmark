@@ -43,7 +43,9 @@ export default function BookHub() {
     handleSearchQueryChange,
     handleItemUpdates,
     handleScoreFinal,
+    handleItemAdd,
   } = useManageMedia<BookProps>({
+    onAdd: add,
     items: items,
     onRemove: remove,
     onUpdate: update,
@@ -118,7 +120,7 @@ export default function BookHub() {
           isOpen={activeModal === "addModal"}
           onClose={handleModalClose}
           existingBooks={items}
-          onAddBook={add}
+          onAddBook={handleItemAdd}
           titleFromAbove={titleToUse}
         />
       )}

@@ -8,7 +8,7 @@ export const DIFF_COLUMNS_SHOW: [
   ColumnConfig<ShowProps>,
   ColumnConfig<ShowProps>,
 ] = [
-  { label: "Studio", sortKey: "studio", getValue: (s) => s.studio?.[0] },
+  { label: "Studio", sortKey: "studio", getValue: (s) => s.studio },
   {
     label: "Released",
     sortKey: "dateReleased",

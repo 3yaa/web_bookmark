@@ -79,6 +79,7 @@ export function useMediaData<T extends { id: number; status: string }>({
             ...prev.slice(firstIndexOfStatus),
           ];
         });
+        return newItem;
       } catch (e) {
         console.error("Error adding " + endpoint, e);
       } finally {
@@ -161,9 +162,6 @@ export function useMediaData<T extends { id: number; status: string }>({
         const url = `/api/${endpoint}/${itemId}`;
         const options = {
           method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
         };
         const response = await authFetch(url, options);
         if (!response.ok) {

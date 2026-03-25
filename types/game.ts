@@ -8,7 +8,7 @@ export const DIFF_COLUMNS_GAME: [
   ColumnConfig<GameProps>,
   ColumnConfig<GameProps>,
 ] = [
-  { label: "Studio", sortKey: "studio", getValue: (g) => g.studio?.[0] },
+  { label: "Studio", sortKey: "studio", getValue: (g) => g.studio },
   {
     label: "Released",
     sortKey: "dateReleased",

@@ -67,7 +67,7 @@ function cleanTitle(title: string) {
       .replace(/\[.*?\]/g, "")
       .replace(/\(.*?\)/g, "")
       .replace(/\{.*?\}/g, "")
-      .replace(/.g/, "")
+      // .replace(/.g/, "")
       //
       // Remove common separators at start and end
       .replace(/^[\s\-\–\—:;,\.\|#!]*/, "")

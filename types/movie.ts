@@ -8,7 +8,7 @@ export const DIFF_COLUMNS_MOVIE: [
   ColumnConfig<MovieProps>,
   ColumnConfig<MovieProps>,
 ] = [
-  { label: "Director", sortKey: "director", getValue: (m) => m.director?.[0] },
+  { label: "Director", sortKey: "director", getValue: (m) => m.director },
   {
     label: "Released",
     sortKey: "dateReleased",

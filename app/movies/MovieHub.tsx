@@ -43,7 +43,9 @@ export default function MoviesHub() {
     handleItemUpdates,
     tempScore,
     handleScoreFinal,
+    handleItemAdd,
   } = useManageMedia<MovieProps>({
+    onAdd: add,
     items: items,
     onRemove: remove,
     onUpdate: update,
@@ -118,7 +120,7 @@ export default function MoviesHub() {
           isOpen={activeModal === "addModal"}
           onClose={handleModalClose}
           existingMovies={items}
-          onAddMovie={add}
+          onAddMovie={handleItemAdd}
           titleFromAbove={titleToUse}
         />
       )}

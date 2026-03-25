@@ -143,8 +143,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
                   className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer transition-all group"
                   onClick={() => {
                     onAction({
-                      type:
-                        mediaType === "book" ? "moreBooks" : "needYearField",
+                      type: mediaType === "book" ? "more" : "needYearField",
                     });
                   }}
                   title={

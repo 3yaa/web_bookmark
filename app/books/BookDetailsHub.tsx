@@ -138,6 +138,7 @@ export function BookDetails({
   const handleMoreBook = () => {
     const showMoreBooks = true;
     onUpdate(book.id, undefined, showMoreBooks);
+    console.log("hiiiiiiiiii");
   };
 
   const handleAddBook = useCallback(() => {

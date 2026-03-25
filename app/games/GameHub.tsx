@@ -38,7 +38,9 @@ export default function GameList() {
     handleItemUpdates,
     tempScore,
     handleScoreFinal,
+    handleItemAdd,
   } = useManageMedia<GameProps>({
+    onAdd: add,
     items: items,
     onRemove: remove,
     onUpdate: update,
@@ -128,7 +130,7 @@ export default function GameList() {
           isOpen={activeModal === "addModal"}
           onClose={handleGameModalClose}
           existingGames={items}
-          onAddGame={add}
+          onAddGame={handleItemAdd}
           titleFromAbove={titleToAdd}
         />
       )}

@@ -38,7 +38,9 @@ export default function ShowHub() {
     handleItemUpdates,
     tempScore,
     handleScoreFinal,
+    handleItemAdd,
   } = useManageMedia<ShowProps>({
+    onAdd: add,
     items: items,
     onRemove: remove,
     onUpdate: update,
@@ -95,7 +97,7 @@ export default function ShowHub() {
           isOpen={activeModal === "addModal"}
           onClose={handleModalClose}
           existingShows={items}
-          onAddShow={add}
+          onAddShow={handleItemAdd}
           titleFromAbove={titleToUse}
         />
       )}

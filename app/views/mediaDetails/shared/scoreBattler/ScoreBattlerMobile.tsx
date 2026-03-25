@@ -193,7 +193,7 @@ export function ScoreBattlerMobile<T extends BaseMediaProps>({
             onClick={() => onPick(choice)}
             className="w-full min-h-12 px-18 py-3 text-sm rounded-xl font-semibold uppercase tracking-[0.15em] transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] cursor-pointer bg-[#1a1a1a] border-none shadow-island mb-2 text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
-            {choice === "settle" ? "Settle" : choice}
+            {choice === "same" ? "Same Tier" : choice}
           </button>
         ))}
       </div>

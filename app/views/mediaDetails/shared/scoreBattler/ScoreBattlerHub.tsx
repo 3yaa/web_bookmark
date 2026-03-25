@@ -49,7 +49,7 @@ export function ScoreBattlerHub<T extends BaseMediaProps>({
     [onScoreFinal, onClose],
   );
 
-  const handlePick = (choice: "better" | "worse" | "settle") => {
+  const handlePick = (choice: "better" | "worse" | "same") => {
     if (!curScore) return;
     //
     if (choice === "better") {

@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "https://pihole.tailffb772.ts.net/:path*",
+        destination: "https://mouthful-server.tailffb772.ts.net/:path*",
       },
     ];
   },

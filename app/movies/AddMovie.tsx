@@ -12,7 +12,6 @@ import {
 import { cleanName } from "@/utils/cleanName";
 //
 import { MovieDetails } from "./MovieDetailsHub";
-import { ManualAddMovie } from "./components/ManualAddMovie";
 //
 import { useMovieSearch } from "@/hooks/external/useMovieSearch";
 interface AddMovieProps {
@@ -32,11 +31,8 @@ export function AddMovie({
   //failure reasons && their fixes -- for user
   const [failedReason, setFailedReason] = useState("");
   //
-  const [isAddManual, setIsAddManual] = useState(false);
   const [needYear, setNeedYear] = useState(false);
-  const [activeModal, setActiveModal] = useState<
-    "movieDetails" | "manualAdd" | null
-  >(null);
+  const [activeModal, setActiveModal] = useState<"movieDetails" | null>(null);
   //
   const titleToSearch = useRef<HTMLInputElement>(null);
   const yearToSearch = useRef<HTMLInputElement>(null);
@@ -56,7 +52,6 @@ export function AddMovie({
   const reset = useCallback(() => {
     setFailedReason("");
     setIsDupTitle(false);
-    setIsAddManual(false);
     setNeedYear(false);
     //
     setActiveModal(null);
@@ -136,7 +131,6 @@ export function AddMovie({
     if (!response?.imdbId || !response.title) {
       setFailedReason("Could Not Find Movie.");
       setNeedYear(true);
-      setIsAddManual(true);
       setActiveModal(null);
       return;
     }
@@ -220,7 +214,6 @@ export function AddMovie({
   const eraseErrMsg = () => {
     if (failedReason) {
       setFailedReason("");
-      setIsAddManual(false);
       setIsDupTitle(false);
     }
   };
@@ -299,14 +292,6 @@ export function AddMovie({
                 {failedReason}
               </div>
             )}
-            {isAddManual && !isMovieSearching && (
-              <button
-                className="mt-3 text-zinc-400 font-medium text-sm hover:cursor-pointer underline transition-colors duration-200 hover:text-zinc-300/80 hover:scale-102"
-                onClick={() => setActiveModal("manualAdd")}
-              >
-                Manual Add
-              </button>
-            )}
           </div>
         </div>
       ) : (
@@ -331,16 +316,6 @@ export function AddMovie({
           showAnotherSeries={
             allSeries.length > 1 ? handleSeriesChange : undefined
           }
-        />
-      )}
-      {activeModal === "manualAdd" && (
-        <ManualAddMovie
-          onClose={() => setActiveModal(null)}
-          movie={newMovie}
-          onUpdate={(updates: Partial<MovieProps>) =>
-            setNewMovie((prev) => ({ ...prev, ...updates }))
-          }
-          addMovie={handleMovieAdd}
         />
       )}
     </div>

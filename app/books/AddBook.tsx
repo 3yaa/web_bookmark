@@ -7,13 +7,11 @@ import { BookProps, OpenLibraryProps, WikidataProps } from "@/types/book";
 import {
   mapOpenLibDataToBook,
   mapWikidataToBook,
-  resetBookValues,
 } from "@/app/books/utils/bookMapping";
 import { cleanName } from "@/utils/cleanName";
 //
 import { BookDetails } from "./BookDetailsHub";
 import { ShowMultBooks } from "./components/ShowMultBooks";
-import { ManualAddBook } from "./components/ManualAddBook";
 //
 import { useBookSearch } from "@/hooks/external/useBookSearch";
 // import { filterCovers } from "@/app/games/utils/filterCovers";
@@ -38,9 +36,8 @@ export function AddBook({
   //failure reasons && their fixes -- for user
   const [failedReason, setFailedReason] = useState("");
   //
-  const [isAddManual, setIsAddManual] = useState(false);
   const [activeModal, setActiveModal] = useState<
-    "bookDetails" | "multOptions" | "manualAdd" | null
+    "bookDetails" | "multOptions" | null
   >(null);
   //
   const titleToSearch = useRef<HTMLInputElement>(null);
@@ -61,7 +58,6 @@ export function AddBook({
   const reset = useCallback(() => {
     setFailedReason("");
     setIsDupTitle(false);
-    setIsAddManual(false);
     //
     setActiveModal(null);
     setNewBook({});
@@ -153,7 +149,6 @@ export function AddBook({
     // empty logic
     if (!response?.olKey || !response.title) {
       setFailedReason("Could Not Find Book.");
-      setIsAddManual(true);
       setActiveModal(null);
       return;
     }
@@ -269,18 +264,6 @@ export function AddBook({
     }
   };
 
-  const handleMultOptionClose = useCallback((action: "manualAdd" | null) => {
-    switch (action) {
-      case "manualAdd":
-        setNewBook((prev) => resetBookValues(prev));
-        setActiveModal("manualAdd");
-        return;
-      default:
-        setActiveModal("bookDetails");
-        return;
-    }
-  }, []);
-
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.stopPropagation();
@@ -291,7 +274,6 @@ export function AddBook({
   const eraseErrMsg = () => {
     if (failedReason) {
       setFailedReason("");
-      setIsAddManual(false);
       setIsDupTitle(false);
     }
   };
@@ -358,14 +340,6 @@ export function AddBook({
                 {failedReason}
               </div>
             )}
-            {isAddManual && !isBookSearching && (
-              <button
-                className="mt-3 text-zinc-400 font-medium text-sm hover:cursor-pointer underline transition-colors duration-200 hover:text-zinc-300/80 hover:scale-102"
-                onClick={() => setActiveModal("manualAdd")}
-              >
-                Manual Add
-              </button>
-            )}
           </div>
         </div>
       ) : (
@@ -397,21 +371,11 @@ export function AddBook({
       )}
       {activeModal === "multOptions" && (
         <ShowMultBooks
-          onClose={handleMultOptionClose}
+          onClose={() => setActiveModal("bookDetails")}
           books={allNewBooks}
           prompt={titleToSearch.current?.value || ""}
           onClickedBook={handlePickFromMultBooks}
           isLoading={isBookSearching}
-        />
-      )}
-      {activeModal === "manualAdd" && (
-        <ManualAddBook
-          onClose={() => setActiveModal(null)}
-          book={newBook}
-          onUpdate={(updates: Partial<BookProps>) =>
-            setNewBook((prev) => ({ ...prev, ...updates }))
-          }
-          addBook={handleBookAdd}
         />
       )}
     </div>

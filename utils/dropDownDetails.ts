@@ -1,5 +1,7 @@
 // STATUS
 
+import { TIERS } from "@/lib/tierConfig";
+
 const statusConfig = {
   "Want to Read": {
     textStyle: "text-blue-500",
@@ -62,30 +64,12 @@ export const gameStatusOptions = createStatusOptions([
   "Dropped",
 ]);
 
-// SCORE
+// TIERS
 
-const getScoreLabel = (score: number): string => {
-  if (score >= 11) return "Lobster";
-  if (score >= 10) return "Masterpiece";
-  if (score >= 9) return "Amazing";
-  if (score >= 8) return "Very Good";
-  if (score >= 7) return "Good";
-  if (score >= 6) return "Fine";
-  if (score >= 5) return "Disappointing";
-  if (score >= 4) return "Bad";
-  if (score >= 3) return "Yikes";
-  if (score >= 2) return "Awful";
-  if (score >= 1) return "Horrendous";
-  return "Select Option";
-};
-
-export const scoreOptions = Array.from({ length: 12 }, (_, i) => {
-  const scoreValue = i === 0 ? 0 : 12 - i;
-  return {
-    value: scoreValue.toString(),
-    label:
-      scoreValue !== 0
-        ? `${scoreValue} - ${getScoreLabel(scoreValue)}`
-        : `${getScoreLabel(scoreValue)}`,
-  };
-});
+export const tierOptions = [
+  { label: "Select Tier", value: "-" },
+  ...TIERS.map((tier) => ({
+    label: tier,
+    value: tier,
+  })),
+];

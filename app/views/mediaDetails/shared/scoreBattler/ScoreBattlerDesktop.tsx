@@ -6,17 +6,15 @@ import { actions, ScoreBattlerUIProps } from "./shared";
 export function ScoreBattlerDesktop<T extends BaseMediaProps>({
   selectedItem,
   itemFacing,
-  curScore,
   mediaType,
   onPick,
-  onClose,
 }: ScoreBattlerUIProps<T>) {
   const coverFor = (item: T | null) => item?.posterUrl ?? item?.coverUrl ?? "";
   const imgFit = mediaType === "game" ? "object-cover" : "object-fill";
 
   return (
     <div className="fixed inset-0 bg-linear-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
-      <div className="fixed inset-0" onClick={onClose} />
+      <div className="fixed inset-0" />
       {/* BACKGROUND BORDER GRADIENT */}
       <div
         className={`rounded-2xl bg-linear-to-b ${getStatusBorderGradient(selectedItem.status)} p-1.5 py-2 lg:min-w-215 lg:max-w-215`}
@@ -73,12 +71,8 @@ export function ScoreBattlerDesktop<T extends BaseMediaProps>({
                   <button
                     key={choice}
                     type="button"
-                    disabled={
-                      (choice === "better" && curScore === 11) ||
-                      (choice === "worse" && curScore === 1)
-                    }
                     onClick={() => onPick(choice)}
-                    className="px-18 py-3 text-sm rounded-xl font-semibold uppercase tracking-[0.15em]transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] cursor-pointer bg-[#1a1a1a] border-none shadow-island mb-2 text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="px-18 py-3 text-sm rounded-xl font-semibold uppercase tracking-[0.15em]transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] cursor-pointer bg-[#1a1a1a] border-none shadow-island mb-2 text-zinc-300"
                   >
                     {choice === "same" ? "Same Tier" : choice}
                   </button>

@@ -6,7 +6,7 @@ import {
   Search,
 } from "lucide-react";
 import { BaseMediaProps, MediaStatus, ColumnConfig } from "@/types/media";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Loading } from "../../components/ui/Loading";
 import { DesktopItem } from "./DesktopItem";
@@ -60,6 +60,34 @@ export function DesktopListing<T extends BaseMediaProps>({
     overscan: 5,
     measureElement: (element) => element?.getBoundingClientRect().height ?? 101,
   });
+  //
+  const ranks = useMemo(() => {
+    if (sortConfig?.type !== "score") {
+      return mediaItems.map((_, i) => i + 1);
+    }
+
+    const result: number[] = [];
+    let currentRank = 1;
+
+    for (let i = 0; i < mediaItems.length; i++) {
+      if (i === 0) {
+        result.push(currentRank);
+        continue;
+      }
+
+      const prevScore = mediaItems[i - 1].score?.mu;
+      const curScore = mediaItems[i].score?.mu;
+
+      if (prevScore != null && curScore != null && prevScore === curScore) {
+        result.push(result[i - 1]);
+      } else {
+        currentRank = i + 1;
+        result.push(currentRank);
+      }
+    }
+
+    return result;
+  }, [mediaItems, sortConfig]);
   // use / to open search
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -373,6 +401,7 @@ export function DesktopListing<T extends BaseMediaProps>({
                     item={item}
                     index={virtualItem.index}
                     total={mediaItems.length}
+                    rank={ranks[virtualItem.index]}
                     mediaType={mediaType}
                     onClick={onItemClicked}
                     differentColumns={differentColumns}

@@ -4,12 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { bookStatusOptions } from "@/utils/dropDownDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
+import { DEFAULT_PHI, getSeedMu, Tier } from "@/lib/tierConfig";
 
 export type BookAction =
   | { type: "closeModal" }
   | { type: "delete" }
   | { type: "changeStatus"; payload: "Completed" | "Want to Read" | "Dropped" }
-  | { type: "changeScore"; payload: number }
+  | { type: "resetScore" }
+  | { type: "setInitialTier"; payload: Tier }
   | { type: "changeNote"; payload: string }
   | { type: "saveNote" }
   | { type: "seriesNav"; payload: "sequel" | "prequel" }
@@ -61,8 +63,18 @@ export function BookDetails({
       case "changeStatus":
         handleStatusChange(action.payload);
         break;
-      case "changeScore":
-        onUpdate(book.id, { score: action.payload });
+      case "setInitialTier":
+        if (action.payload === "Masterpiece") {
+          // direct score, no comparisons
+          onUpdate(book.id, { score: { mu: 2000, phi: 150 } });
+        } else {
+          onUpdate(book.id, {
+            score: { mu: getSeedMu(action.payload), phi: DEFAULT_PHI },
+          });
+        }
+        break;
+      case "resetScore":
+        onUpdate(book.id, { score: null });
         break;
       case "changeNote":
         setLocalNote(action.payload);

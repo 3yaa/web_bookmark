@@ -6,6 +6,7 @@ import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { ShowProgressBarMobile } from "../../shows/components/showProgressListing";
 import { ShowProps } from "@/types/show";
 import { GameProps } from "@/types/game";
+import { getDisplayScore } from "@/lib/tierConfig";
 
 interface MobileItemProps<T extends BaseMediaProps> {
   item: T;
@@ -82,7 +83,7 @@ export const MobileItem = React.memo(function MobileItem<
             {item.title || "-"}
           </span>
           <span className="text-zinc-400 text-sm font-bold bg-zinc-900/60 px-2.5 py-1 rounded-md shadow-xl shadow-black/80 -mt-1.5">
-            {item.score || "-"}
+            {item.score?.mu ? getDisplayScore(item.score.mu) : "-"}
           </span>
         </div>
         {/* STUDIO/RELEASE DATE */}

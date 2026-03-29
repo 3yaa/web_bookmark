@@ -11,6 +11,7 @@ import { BookCoverConfig } from "@/app/books/components/BookCoverConfigDetails";
 import { MobileProgressPicker } from "@/app/components/ui/MobileSeasonEpPicker";
 import { MobileSeriesNav } from "./shared/MobileSeriesNav";
 import { calcCurProgress } from "@/app/shows/utils/progressCalc";
+import { getDisplayScore } from "@/lib/tierConfig";
 
 interface MobileDetailsProps<T extends BaseMediaProps> {
   item: T;
@@ -332,10 +333,16 @@ export function MobileDetails<T extends BaseMediaProps>({
                 {/* SCORE */}
                 <div data-no-drag>
                   <button
-                    onClick={() => setIsScorePickerOpen(true)}
+                    onClick={() => {
+                      if (!item.score) setIsScorePickerOpen(true);
+                    }}
                     className="relative text-zinc-300/90 font-bold bg-linear-to-br from-zinc-800/90 to-zinc-950 px-3.5 py-1.75 rounded-lg shadow-lg shadow-black"
                   >
-                    <span className="relative z-10">{item.score || "-"}</span>
+                    <span className="relative z-10">
+                      {item.score?.mu != null
+                        ? getDisplayScore(item.score.mu)
+                        : "-"}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -443,10 +450,9 @@ export function MobileDetails<T extends BaseMediaProps>({
       </div>
       <MobileScorePicker
         isOpen={isScorePickerOpen}
-        score={item.score ?? 0}
         onClose={() => setIsScorePickerOpen(false)}
-        onScoreChange={(nScore) =>
-          onAction({ type: "changeScore", payload: nScore })
+        onScoreChange={(tier) =>
+          onAction({ type: "setInitialTier", payload: tier })
         }
       />
       {mediaType === "show" && (

@@ -4,12 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import { gameStatusOptions } from "@/utils/dropDownDetails";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
+import { DEFAULT_PHI, getSeedMu, Tier } from "@/lib/tierConfig";
 
 export type GameAction =
   | { type: "closeModal" }
   | { type: "delete" }
   | { type: "changeStatus"; payload: "Playing" | "Completed" | "Dropped" }
-  | { type: "changeScore"; payload: number }
+  | { type: "resetScore" }
+  | { type: "setInitialTier"; payload: Tier }
   | { type: "changeNote"; payload: string }
   | { type: "saveNote" }
   | { type: "dlcNav"; payload: "next" | "prev" }
@@ -62,8 +64,18 @@ export function GameDetails({
       case "changeStatus":
         handleStatusChange(action.payload);
         break;
-      case "changeScore":
-        onUpdate(game.id, { score: Number(action.payload) });
+      case "setInitialTier":
+        if (action.payload === "Masterpiece") {
+          // direct score, no comparisons
+          onUpdate(game.id, { score: { mu: 2000, phi: 150 } });
+        } else {
+          onUpdate(game.id, {
+            score: { mu: getSeedMu(action.payload), phi: DEFAULT_PHI },
+          });
+        }
+        break;
+      case "resetScore":
+        onUpdate(game.id, { score: null });
         break;
       case "changeNote":
         setLocalNote(action.payload);

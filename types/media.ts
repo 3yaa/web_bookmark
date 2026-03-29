@@ -1,3 +1,4 @@
+import { Score } from "@/lib/tierConfig";
 import { IGDBInitProps } from "./game";
 import { TMDBSeasonProps } from "./show";
 
@@ -20,11 +21,11 @@ export interface ColumnConfig<T> {
 export interface BaseMediaProps {
   id: number;
   title: string;
-  score?: number;
   status: MediaStatus;
   lastUpdated: Date;
   dateCompleted?: Date | null;
   note?: string;
+  score: Score | null;
   // the author and dateRepleased and cover i need to fix sometimes T_T
   imageUrl?: string;
   posterUrl?: string;

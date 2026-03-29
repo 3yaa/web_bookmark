@@ -144,7 +144,7 @@ export default function GameList() {
         />
       )}
       {/* SCORE BATTLER */}
-      {activeModal === "scoreBattlerModal" && selectedItem && (
+      {activeModal === "scoreBattlerModal" && selectedItem && tempScore && (
         <ScoreBattlerHub
           items={items}
           initialScore={tempScore}
@@ -153,6 +153,7 @@ export default function GameList() {
           }}
           selectedItem={selectedItem}
           onScoreFinal={handleScoreFinal}
+          onOpponentUpdate={(id, score) => handleItemUpdates(id, { score })}
           mediaType="game"
         />
       )}

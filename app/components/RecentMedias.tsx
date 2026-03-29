@@ -1,6 +1,7 @@
 import { BaseMediaProps } from "@/types/media";
 import Image from "next/image";
 import { getStatusBg, getStatusWaveColor } from "@/utils/formattingUtils";
+import { getDisplayScore } from "@/lib/tierConfig";
 
 function timeAgo(date: Date): string {
   const diff = Date.now() - new Date(date).getTime();
@@ -57,7 +58,7 @@ export function RecentItems({ items }: { items: BaseMediaProps[] }) {
 
             {/* score */}
             <span className="shrink-0 flex items-center justify-center w-8 text-center font-bold text-zinc-300/75 sm:text-[14px] text-sm bg-linear-to-br from-zinc-800/80 to-zinc-900/90 rounded-lg shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)] border border-zinc-800/40 py-1.5 -mt-3">
-              {item.score || "-"}
+              {item.score?.mu ? getDisplayScore(item.score.mu) : "-"}
             </span>
 
             {/* status bar */}

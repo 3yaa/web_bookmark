@@ -7,12 +7,10 @@ import { GameProps, IGDBInitProps, IGDBProps } from "@/types/game";
 import {
   mapIGDBDataToGame,
   mapIGDBDlcsDataToGame,
-  resetGameValues,
 } from "@/app/games/utils/gameMapping";
 //
 import { GameDetails } from "./GameDetailsHub";
 import { ShowMultGames } from "./components/ShowMultGames";
-import { ManualAddGame } from "./components/ManualAddGame";
 //
 import { useGameSearch } from "@/hooks/external/useGameSearch";
 
@@ -39,9 +37,8 @@ export function AddGame({
   //failure reasons && their fixes -- for user
   const [failedReason, setFailedReason] = useState("");
   //
-  const [isAddManual, setIsAddManual] = useState(false);
   const [activeModal, setActiveModal] = useState<
-    "gameDetails" | "multOptions" | "manualAdd" | null
+    "gameDetails" | "multOptions" | null
   >(null);
   //
   const titleToSearch = useRef<HTMLInputElement>(null);
@@ -57,7 +54,6 @@ export function AddGame({
   const reset = useCallback(() => {
     setFailedReason("");
     setIsDupTitle(false);
-    setIsAddManual(false);
     //
     setBackdropUrls([]);
     setBackdropIndex(0);
@@ -108,7 +104,6 @@ export function AddGame({
     // empty logic
     if (!response?.igdbId || !response.title) {
       setFailedReason("Could Not Find Game.");
-      setIsAddManual(true);
       setActiveModal(null);
       return;
     }
@@ -151,7 +146,6 @@ export function AddGame({
     };
     if (!igdbId || !title) {
       setFailedReason("igdbId error for dlc details.");
-      setIsAddManual(true);
       setActiveModal(null);
       return;
     }
@@ -226,18 +220,6 @@ export function AddGame({
     }
   };
 
-  const handleMultOptionClose = useCallback((action: "manualAdd" | null) => {
-    switch (action) {
-      case "manualAdd":
-        setNewGame((prev) => resetGameValues(prev));
-        setActiveModal("manualAdd");
-        return;
-      default:
-        setActiveModal("gameDetails");
-        return;
-    }
-  }, []);
-
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.stopPropagation();
@@ -248,7 +230,6 @@ export function AddGame({
   const eraseErrMsg = () => {
     if (failedReason) {
       setFailedReason("");
-      setIsAddManual(false);
       setIsDupTitle(false);
     }
   };
@@ -306,14 +287,6 @@ export function AddGame({
                 {failedReason}
               </div>
             )}
-            {isAddManual && !isGameSearching && (
-              <button
-                className="mt-3 text-zinc-400 font-medium text-sm hover:cursor-pointer underline transition-colors duration-200 hover:text-zinc-300/80 hover:scale-102"
-                onClick={() => setActiveModal("manualAdd")}
-              >
-                Manual Add
-              </button>
-            )}
           </div>
         </div>
       ) : (
@@ -342,21 +315,11 @@ export function AddGame({
       )}
       {activeModal === "multOptions" && (
         <ShowMultGames
-          onClose={handleMultOptionClose}
+          onClose={() => setActiveModal("gameDetails")}
           games={allNewGames}
           prompt={titleToSearch.current?.value || ""}
           onClickedGame={handlePickFromMultGames}
           isLoading={isGameSearching}
-        />
-      )}
-      {activeModal === "manualAdd" && (
-        <ManualAddGame
-          onClose={() => setActiveModal(null)}
-          game={newGame}
-          onUpdate={(updates: Partial<GameProps>) =>
-            setNewGame((prev) => ({ ...prev, ...updates }))
-          }
-          addGame={handleGameAdd}
         />
       )}
     </div>

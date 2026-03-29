@@ -4,12 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
+import { DEFAULT_PHI, getSeedMu, Tier } from "@/lib/tierConfig";
 
 export type MovieAction =
   | { type: "closeModal" }
   | { type: "delete" }
   | { type: "changeStatus"; payload: "Completed" | "Want to Watch" | "Dropped" }
-  | { type: "changeScore"; payload: number }
+  | { type: "resetScore" }
+  | { type: "setInitialTier"; payload: Tier }
   | { type: "changeNote"; payload: string }
   | { type: "saveNote" }
   | { type: "seriesNav"; payload: "sequel" | "prequel" }
@@ -56,8 +58,18 @@ export function MovieDetails({
       case "changeStatus":
         handleStatusChange(action.payload);
         break;
-      case "changeScore":
-        onUpdate(movie.id, { score: Number(action.payload) });
+      case "setInitialTier":
+        if (action.payload === "Masterpiece") {
+          // direct score, no comparisons
+          onUpdate(movie.id, { score: { mu: 2000, phi: 150 } });
+        } else {
+          onUpdate(movie.id, {
+            score: { mu: getSeedMu(action.payload), phi: DEFAULT_PHI },
+          });
+        }
+        break;
+      case "resetScore":
+        onUpdate(movie.id, { score: null });
         break;
       case "changeNote":
         setLocalNote(action.payload);

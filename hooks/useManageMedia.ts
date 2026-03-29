@@ -9,6 +9,8 @@ import {
 } from "react";
 import { useScrollVisibility } from "./useScrollVisibility";
 import { debounce } from "@/utils/debounce";
+import { Score } from "@/lib/tierConfig";
+import { createSession } from "@/lib/battleSession";
 
 interface ManageMediaConfig<T extends BaseMediaProps> {
   items: T[];
@@ -32,7 +34,7 @@ export function useManageMedia<T extends BaseMediaProps>({
   const [activeModal, setActiveModal] = useState<
     "detailsModal" | "addModal" | "scoreBattlerModal" | null
   >(null);
-  const [tempScore, setTempScore] = useState<number>(0);
+  const [tempScore, setTempScore] = useState<Score | null>(null);
   const pendingUpdates = useRef<Partial<T>>({});
   // used for mobile only
   const isMenuButtonsVisible = useScrollVisibility(30);
@@ -93,7 +95,7 @@ export function useManageMedia<T extends BaseMediaProps>({
   }, []);
 
   const handleScoreFinal = useCallback(
-    (finalScore: number) => {
+    (finalScore: Score) => {
       if (!selectedItem?.id) return;
       setSelectedItem({ ...selectedItem, score: finalScore });
       // onUpdate(selectedItem.id, { score: finalScore } as Partial<T>);
@@ -101,7 +103,7 @@ export function useManageMedia<T extends BaseMediaProps>({
         ...pendingUpdates.current,
         ...({ score: finalScore } as Partial<T>),
       };
-      setTempScore(0);
+      setTempScore(null);
       setActiveModal("detailsModal");
     },
     [selectedItem],
@@ -111,47 +113,54 @@ export function useManageMedia<T extends BaseMediaProps>({
     async (item: T) => {
       const newItem = await onAdd(item);
       if (!newItem.score) return;
-      // score battler shenanigans
-      const hasOpponent = items.some(
-        (i) => i.score === newItem.score && i.lastUpdated,
-      );
-      // commense score battle
-      if (hasOpponent) {
-        setActiveModal("scoreBattlerModal");
-        setSelectedItem(newItem);
-        setTempScore(newItem.score);
-        return;
-      }
+      setActiveModal("scoreBattlerModal");
+      setSelectedItem(newItem);
+      setTempScore(newItem.score);
     },
-    [onAdd, items],
+    [onAdd],
   );
 
   const handleItemUpdates = useCallback(
     async (itemId: number, updates?: Partial<T>, shouldDelete?: boolean) => {
       if (shouldDelete) return await onRemove(itemId);
       if (!updates) return;
-      // for score update (select score x)
-      const isNewScore = updates.score && !selectedItem?.score;
-      if (isNewScore) {
-        // check if theres any item in same score tier
-        const hasOpponent = items.some(
-          (i) => i.score === updates.score && i.lastUpdated,
-        );
-        // commense score battle
-        if (hasOpponent && updates.score) {
-          setTempScore(updates.score);
-          setActiveModal("scoreBattlerModal");
+      // open score battler whenever setting a score for the first time (only for the selected item)
+      const isNewScore =
+        itemId === selectedItem?.id && updates.score && !selectedItem?.score;
+      if (isNewScore && updates.score) {
+        // PRE CHECK FOR OPPONENT
+        const scored = items
+          .filter((i) => i.score !== null && i.id !== itemId)
+          .map((i) => ({ id: i.id, score: i.score! }));
+        const session = createSession(scored, {
+          id: itemId,
+          score: updates.score,
+        });
+
+        if (session.done) {
+          // no opponents — just save the seed score directly
+          if (selectedItem?.id === itemId) {
+            setSelectedItem({ ...selectedItem, ...updates });
+          }
+          pendingUpdates.current = { ...pendingUpdates.current, ...updates };
           return;
         }
+        //
+        setTempScore(updates.score);
+        setActiveModal("scoreBattlerModal");
+        return;
       }
 
       if (selectedItem?.id === itemId) {
         setSelectedItem({ ...selectedItem, ...updates });
+        pendingUpdates.current = { ...pendingUpdates.current, ...updates };
+      } else {
+        // to update opponent
+        console.log("hii", itemId, updates);
+        onUpdate(itemId, updates);
       }
-      // onUpdate(itemId, updates);
-      pendingUpdates.current = { ...pendingUpdates.current, ...updates };
     },
-    [onRemove, selectedItem, items],
+    [onRemove, onUpdate, selectedItem, items],
   );
 
   const handleModalClose = useCallback(() => {

@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { showStatusOptions } from "@/utils/dropDownDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
+import { DEFAULT_PHI, getSeedMu, Tier } from "@/lib/tierConfig";
 
 export type ShowAction =
   | { type: "closeModal" }
@@ -13,7 +14,8 @@ export type ShowAction =
       type: "changeStatus";
       payload: "Completed" | "Want to Watch" | "Dropped" | "Watching";
     }
-  | { type: "changeScore"; payload: number }
+  | { type: "resetScore" }
+  | { type: "setInitialTier"; payload: Tier }
   | { type: "changeNote"; payload: string }
   | { type: "saveNote" }
   | { type: "changeSeason"; payload: "left" | "right" }
@@ -75,8 +77,18 @@ export function ShowDetails({
       case "changeStatus":
         handleStatusChange(action.payload);
         break;
-      case "changeScore":
-        onUpdate(show.id, { score: action.payload });
+      case "setInitialTier":
+        if (action.payload === "Masterpiece") {
+          // direct score, no comparisons
+          onUpdate(show.id, { score: { mu: 2000, phi: 150 } });
+        } else {
+          onUpdate(show.id, {
+            score: { mu: getSeedMu(action.payload), phi: DEFAULT_PHI },
+          });
+        }
+        break;
+      case "resetScore":
+        onUpdate(show.id, { score: null });
         break;
       case "changeNote":
         setLocalNote(action.payload);

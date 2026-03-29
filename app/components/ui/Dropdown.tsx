@@ -24,7 +24,7 @@ export function Dropdown({
   value,
   options,
   onChange,
-  customStyle = "text-zinc-200 font-semibold",
+  customStyle = "text-zinc-200 font-bold",
   disabled = false,
   dropStyle,
   dropDuration = 0.3,
@@ -87,7 +87,7 @@ export function Dropdown({
           transition-all duration-300 ease-out
           bg-linear-to-b shadow-md
           hover:scale-[1.02] hover:shadow-xl hover:shadow-black/30
-          focus:outline-none active:scale-[0.98]
+          focus:outline-none active:scale-[0.98] 
             ${
               isOpen
                 ? "border-zinc-800/50 from-transparent via-zinc-800/30 to-zinc-800/50 scale-[1.02]"
@@ -100,7 +100,7 @@ export function Dropdown({
           }
         `}
       >
-        <span className="text-sm font-medium tracking-wide">
+        <span className="text-sm font-bold tracking-wide">
           {selectedOption ? selectedOption.label : "Select Option"}
         </span>
         <ChevronDown
@@ -136,11 +136,11 @@ export function Dropdown({
                   key={option.value}
                   type="button"
                   onClick={() => handleSelect(option.value)}
-                  className={`w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-zinc-200 focus:outline-none border-b border-zinc-800/90 last:border-none transition-all duration-200 ease-out cursor-pointer
+                  className={`w-full flex items-center justify-between px-3 py-2 text-sm font-bold text-zinc-300 focus:outline-none border-b border-zinc-800/90 last:border-none transition-all duration-200 ease-out cursor-pointer
                   ${
                     option.value === value
                       ? `rounded-md bg-linear-to-r from-transparent ${bgStyle}`
-                      : "hover:bg-zinc-800/70 hover:text-white"
+                      : "hover:bg-zinc-800/70 hover:text-zinc-100"
                   }`}
                 >
                   <span

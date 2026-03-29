@@ -9,11 +9,13 @@ import {
 } from "@/utils/formattingUtils";
 import { ShowProps } from "@/types/show";
 import { ShowProgressBarDesktop } from "../../shows/components/showProgressListing";
+import { getDisplayScore } from "@/lib/tierConfig";
 
 interface DesktopItemProps<T extends BaseMediaProps> {
   item: T;
   index: number;
   total: number;
+  rank: number;
   mediaType: string;
   onClick: (item: T) => void;
   differentColumns: [ColumnConfig<T>, ColumnConfig<T>];
@@ -25,6 +27,7 @@ export const DesktopItem = React.memo(function DesktopItem<
   item,
   index,
   total,
+  rank,
   mediaType,
   onClick,
   differentColumns,
@@ -40,7 +43,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 							hover:cursor-pointer`}
       onClick={() => onClick(item)}
     >
-      <span className="font-medium text-zinc-300 text-sm">{index + 1}</span>
+      <span className="font-medium text-zinc-300 text-sm">{rank}</span>
       <div className="w-16 h-24">
         {(item.posterUrl ?? item.coverUrl) ? (
           <Image
@@ -92,7 +95,7 @@ export const DesktopItem = React.memo(function DesktopItem<
         )}
       </div>
       <span className="flex items-center justify-center font-bold text-zinc-300 text-sm bg-linear-to-br from-zinc-800/80 to-zinc-900/90 mx-7.5 py-2 pb-1 rounded-lg shadow-lg shadow-black/20 border border-zinc-800/40">
-        {item.score || "-"}
+        {item.score?.mu ? getDisplayScore(item.score.mu) : "-"}
       </span>
       <span className="text-center font-medium text-zinc-400 text-sm truncate">
         {item.status === "Completed"

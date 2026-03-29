@@ -13,15 +13,17 @@ import {
   ChevronsUp,
   ChevronLeft,
   ChevronRight,
+  RotateCcw,
 } from "lucide-react";
 import { BackdropImage } from "@/app/components/ui/Backdrop";
 import { Dropdown, Option } from "@/app/components/ui/Dropdown";
-import { scoreOptions } from "@/utils/dropDownDetails";
+import { tierOptions } from "@/utils/dropDownDetails";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { BookCoverConfig } from "@/app/books/components/BookCoverConfigDetails";
 import { BackdropImageBook } from "@/app/components/ui/BackdropBook";
 import { SeriesNav } from "./shared/SeriesNav";
 import { EditProgress } from "@/app/shows/components/EditProgressDetail";
+import { getDisplayScore, getTierFromMu, Tier } from "@/lib/tierConfig";
 
 interface DesktopDetailsProps<T extends BaseMediaProps> {
   item: T;
@@ -165,15 +167,28 @@ export function DesktopDetails<T extends BaseMediaProps>({
                 </button>
               </div>
             ) : (
-              <button
-                className="absolute right-3 top-3 p-1.5 rounded-lg bg-zinc-800/0 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group z-10"
-                onClick={() => {
-                  onAction({ type: "delete" });
-                }}
-                title={"Delete " + mediaType}
-              >
-                <Trash2 className="w-4 h-4 text-gray-400/5 group-hover:text-red-500 transition-colors duration-200" />
-              </button>
+              <div className="absolute right-3 top-3 flex items-center gap-1 z-10">
+                {item.score && (
+                  <button
+                    className="p-1.5 rounded-lg bg-zinc-800/0 hover:bg-blue-800/20 hover:cursor-pointer transition-all duration-200 group"
+                    onClick={() => {
+                      onAction({ type: "resetScore" });
+                    }}
+                    title={"Reset score"}
+                  >
+                    <RotateCcw className="w-4 h-4 text-black/0 group-hover:text-blue-400 transition-colors duration-200" />
+                  </button>
+                )}
+                <button
+                  className="p-1.5 rounded-lg bg-zinc-800/0 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group"
+                  onClick={() => {
+                    onAction({ type: "delete" });
+                  }}
+                  title={"Delete " + mediaType}
+                >
+                  <Trash2 className="w-4 h-4 text-black/0 group-hover:text-red-500 transition-colors duration-200" />
+                </button>
+              </div>
             )}
 
             <div className="flex gap-6">
@@ -366,7 +381,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
                           });
                         }}
                         options={statusOptions}
-                        customStyle="text-zinc-200/80 font-semibold"
+                        customStyle="text-zinc-300/85"
                         dropDuration={0.24}
                       />
                     </div>
@@ -374,28 +389,39 @@ export function DesktopDetails<T extends BaseMediaProps>({
                       <label className="ml-1 text-sm font-medium text-zinc-400 mb-1 block">
                         Score
                       </label>
-                      <Dropdown
-                        value={item.score?.toString() || "-"}
-                        onChange={(value) => {
-                          onAction({
-                            type: "changeScore",
-                            payload: Number(value),
-                          });
-                        }}
-                        options={scoreOptions}
-                        customStyle="text-zinc-200/80 font-semibold"
-                        dropStyle={(() => {
-                          const option = statusOptions.find(
-                            (opt) => opt.value === item.status,
-                          );
-                          return option
-                            ? [option.textStyle, option.bgStyle].filter(
-                                (s): s is string => s !== undefined,
-                              )
-                            : [];
-                        })()}
-                        dropDuration={0.4}
-                      />
+                      {item.score ? (
+                        <div className="w-full rounded-lg border backdrop-blur-md flex items-center justify-between gap-3 px-4 py-3 transition-all duration-300 ease-out bg-linear-to-b shadow-md border-zinc-800/50 from-transparent via-zinc-800/30 to-zinc-800/50 shadow-black/20">
+                          <span className="text-sm text-zinc-300/85 font-bold tracking-wide">
+                            {!isAdding &&
+                              `${getDisplayScore(item.score.mu)} - `}
+                            {getTierFromMu(item.score!.mu)}
+                          </span>
+                        </div>
+                      ) : (
+                        <Dropdown
+                          value={"-"}
+                          onChange={(value) => {
+                            if (value === "-") return;
+                            onAction({
+                              type: "setInitialTier",
+                              payload: value as Tier,
+                            });
+                          }}
+                          options={tierOptions}
+                          customStyle="text-zinc-300/85"
+                          dropStyle={(() => {
+                            const option = statusOptions.find(
+                              (opt) => opt.value === item.status,
+                            );
+                            return option
+                              ? [option.textStyle, option.bgStyle].filter(
+                                  (s): s is string => s !== undefined,
+                                )
+                              : [];
+                          })()}
+                          dropDuration={0.4}
+                        />
+                      )}
                     </div>
                   </div>
                   {/* SHOW PROGRESS (season/episode) */}

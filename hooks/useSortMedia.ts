@@ -27,11 +27,11 @@ export function useSortMedia<T extends BaseMediaProps>(
 
       case "score":
         sortedItems.sort((a, b) => {
-          if (!a.score && !b.score) return 0;
-          if (!a.score) return 1;
-          if (!b.score) return -1;
+          if (!a.score?.mu && !b.score?.mu) return 0;
+          if (!a.score?.mu) return 1;
+          if (!b.score?.mu) return -1;
 
-          const comparison = a.score - b.score;
+          const comparison = a.score.mu - b.score.mu;
           return sortConfig.order === "asc" ? comparison : -comparison;
         });
         break;

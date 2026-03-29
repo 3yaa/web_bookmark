@@ -134,7 +134,7 @@ export default function MoviesHub() {
         />
       )}
       {/* SCORE BATTLER */}
-      {activeModal === "scoreBattlerModal" && selectedItem && (
+      {activeModal === "scoreBattlerModal" && selectedItem && tempScore && (
         <ScoreBattlerHub
           items={items}
           initialScore={tempScore}
@@ -143,6 +143,7 @@ export default function MoviesHub() {
           }}
           selectedItem={selectedItem}
           onScoreFinal={handleScoreFinal}
+          onOpponentUpdate={(id, score) => handleItemUpdates(id, { score })}
         />
       )}
     </div>

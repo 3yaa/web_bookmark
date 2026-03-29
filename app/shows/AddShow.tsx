@@ -7,7 +7,6 @@ import { ShowProps } from "@/types/show";
 import { mapTMDBToShow, mapTMDBTVToShow } from "@/app/shows/utils/showMapping";
 //
 import { ShowDetails } from "./ShowDetailsHub";
-import { ManualAddShow } from "./components/ManualAddShow";
 //
 import { useShowSearch } from "@/hooks/external/useShowSearch";
 interface AddShowProps {
@@ -27,11 +26,8 @@ export function AddShow({
   //failure reasons && their fixes -- for user
   const [failedReason, setFailedReason] = useState("");
   //
-  const [isAddManual, setIsAddManual] = useState(false);
   const [needYear, setNeedYear] = useState(false);
-  const [activeModal, setActiveModal] = useState<
-    "showDetails" | "manualAdd" | null
-  >(null);
+  const [activeModal, setActiveModal] = useState<"showDetails" | null>(null);
   //
   const titleToSearch = useRef<HTMLInputElement>(null);
   const yearToSearch = useRef<HTMLInputElement>(null);
@@ -45,7 +41,6 @@ export function AddShow({
   const reset = useCallback(() => {
     setFailedReason("");
     setIsDupTitle(false);
-    setIsAddManual(false);
     setNeedYear(false);
     //
     setActiveModal(null);
@@ -110,7 +105,6 @@ export function AddShow({
     if (!response?.tmdbId || !response.title) {
       setFailedReason("Could Not Find Show.");
       setNeedYear(true);
-      setIsAddManual(true);
       setActiveModal(null);
       return;
     }
@@ -169,7 +163,6 @@ export function AddShow({
   const eraseErrMsg = () => {
     if (failedReason) {
       setFailedReason("");
-      setIsAddManual(false);
       setIsDupTitle(false);
     }
   };
@@ -242,14 +235,6 @@ export function AddShow({
                 {failedReason}
               </div>
             )}
-            {isAddManual && !isShowSearching && (
-              <button
-                className="mt-3 text-zinc-400 font-medium text-sm hover:cursor-pointer underline transition-colors duration-200 hover:text-zinc-300/80 hover:scale-102"
-                onClick={() => setActiveModal("manualAdd")}
-              >
-                Manual Add
-              </button>
-            )}
           </div>
         </div>
       ) : (
@@ -271,16 +256,6 @@ export function AddShow({
             style: "h-8 w-8 border-emerald-400",
             text: "Searching...",
           }}
-        />
-      )}
-      {activeModal === "manualAdd" && (
-        <ManualAddShow
-          onClose={() => setActiveModal(null)}
-          show={newShow}
-          onUpdate={(updates: Partial<ShowProps>) =>
-            setNewShow((prev) => ({ ...prev, ...updates }))
-          }
-          addShow={handleShowAdd}
         />
       )}
     </div>

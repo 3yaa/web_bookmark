@@ -156,7 +156,6 @@ export function useManageMedia<T extends BaseMediaProps>({
         pendingUpdates.current = { ...pendingUpdates.current, ...updates };
       } else {
         // to update opponent
-        console.log("hii", itemId, updates);
         onUpdate(itemId, updates);
       }
     },

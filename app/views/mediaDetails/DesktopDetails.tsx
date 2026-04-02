@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
   RotateCcw,
+  Unlink,
 } from "lucide-react";
 import { BackdropImage } from "@/app/components/ui/Backdrop";
 import { Dropdown, Option } from "@/app/components/ui/Dropdown";
@@ -168,6 +169,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
               </div>
             ) : (
               <div className="absolute right-3 top-3 flex items-center gap-1 z-10">
+                {/* RESET SCORE */}
                 {item.score && (
                   <button
                     className="p-1.5 rounded-lg bg-zinc-800/0 hover:bg-blue-800/20 hover:cursor-pointer transition-all duration-200 group"
@@ -179,6 +181,23 @@ export function DesktopDetails<T extends BaseMediaProps>({
                     <RotateCcw className="w-4 h-4 text-black/0 group-hover:text-blue-400 transition-colors duration-200" />
                   </button>
                 )}
+                {/* DELETE SERIES METADATA */}
+                {(item.seriesTitle ||
+                  item.placeInSeries ||
+                  item.prequel ||
+                  item.sequel) &&
+                  mediaType !== "game" && (
+                    <button
+                      className="p-1.5 rounded-lg bg-zinc-800/0 hover:bg-orange-700/20 hover:cursor-pointer transition-all duration-200 group"
+                      onClick={() => {
+                        onAction({ type: "clearSeriesMeta" });
+                      }}
+                      title={"Clear series metadata"}
+                    >
+                      <Unlink className="w-4 h-4 text-black/0 group-hover:text-orange-400 transition-colors duration-200" />
+                    </button>
+                  )}
+                {/* DELETE ITEM */}
                 <button
                   className="p-1.5 rounded-lg bg-zinc-800/0 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group"
                   onClick={() => {

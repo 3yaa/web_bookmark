@@ -19,6 +19,7 @@ export default function BookHub() {
     endpoint: "books",
     requiredFieldsToPost: ["title", "status", "key"],
     statusOrder: { "Want to Read": 0, Completed: 1, Dropped: 2 },
+    extraFieldsToUpdate: ["seriesTitle", "placeInSeries", "prequel", "sequel"],
   });
 
   // MANAGEMENT OF STATES

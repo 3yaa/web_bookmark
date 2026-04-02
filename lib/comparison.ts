@@ -23,7 +23,7 @@ export const isContradictory = (results: ResultProps[]): boolean => {
   return !(beatAbove && lostBelow);
 };
 
-// should be stale maybe?
+
 export const getCandidates = (
   item: ItemScore,
   items: ItemScore[],
@@ -31,23 +31,23 @@ export const getCandidates = (
   const tier = getTierFromMu(item.score.mu);
   const range = getTierAdjacentRange(tier);
 
-  // first try same tier only
-  const sameTier = items.filter(
+  // exclude masterpiece from being opponents
+  const eligible = items.filter(
+    (c) => c.id !== item.id && getTierFromMu(c.score.mu) !== "Masterpiece",
+  );
+
+  const sameTier = eligible.filter(
     (c) =>
-      c.id !== item.id &&
       c.score.mu >= TIER_THRESHOLDS[tier].muMin &&
       c.score.mu <= TIER_THRESHOLDS[tier].muMax,
   );
 
-  // if at least 1 same-tier item exists, include adjacent
   if (sameTier.length > 0) {
-    return items.filter(
-      (c) =>
-        c.id !== item.id && c.score.mu >= range.min && c.score.mu <= range.max,
+    return eligible.filter(
+      (c) => c.score.mu >= range.min && c.score.mu <= range.max,
     );
   }
 
-  // no same-tier items — skip comparisons
   return [];
 };
 

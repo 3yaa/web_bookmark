@@ -91,7 +91,7 @@ export function useMediaData<T extends { id: number; status: string }>({
 
   // UPDATE
   const update = useCallback(
-    async (itemId: number, updates: Partial<T>) => {
+    async (itemId: number, updates: Partial<T>, indirectUpdate?: boolean) => {
       try {
         // only updates these
         const allowedFields = [
@@ -99,6 +99,7 @@ export function useMediaData<T extends { id: number; status: string }>({
           "status",
           "note",
           "dateCompleted",
+          "indirectUpdate",
           ...(extraFieldsToUpdate ?? []),
         ];
 
@@ -136,7 +137,7 @@ export function useMediaData<T extends { id: number; status: string }>({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(updates),
+          body: JSON.stringify({ ...updates, indirectUpdate }),
         };
         const response = await authFetch(url, options);
         if (!response.ok) {

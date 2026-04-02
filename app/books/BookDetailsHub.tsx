@@ -4,7 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { bookStatusOptions } from "@/utils/dropDownDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
-import { DEFAULT_PHI, getSeedMu, Tier } from "@/lib/tierConfig";
+import {
+  DEFAULT_PHI,
+  getSeedMu,
+  MASTERPIECE_PHI,
+  Tier,
+} from "@/lib/tierConfig";
 
 export type BookAction =
   | { type: "closeModal" }
@@ -16,6 +21,7 @@ export type BookAction =
   | { type: "saveNote" }
   | { type: "seriesNav"; payload: "sequel" | "prequel" }
   | { type: "changeCover"; payload: "next" | "prev" }
+  | { type: "clearSeriesMeta" }
   | { type: "more" };
 
 interface BookDetailsProps {
@@ -64,14 +70,13 @@ export function BookDetails({
         handleStatusChange(action.payload);
         break;
       case "setInitialTier":
-        if (action.payload === "Masterpiece") {
-          // direct score, no comparisons
-          onUpdate(book.id, { score: { mu: 2000, phi: 150 } });
-        } else {
-          onUpdate(book.id, {
-            score: { mu: getSeedMu(action.payload), phi: DEFAULT_PHI },
-          });
-        }
+        onUpdate(book.id, {
+          score: {
+            mu: getSeedMu(action.payload),
+            phi:
+              action.payload === "Masterpiece" ? MASTERPIECE_PHI : DEFAULT_PHI,
+          },
+        });
         break;
       case "resetScore":
         onUpdate(book.id, { score: null });
@@ -84,6 +89,16 @@ export function BookDetails({
         break;
       case "changeCover":
         handleCoverChange(action.payload);
+        break;
+      case "clearSeriesMeta":
+        if (book.seriesTitle) {
+          onUpdate(book.id, {
+            seriesTitle: null,
+            placeInSeries: null,
+            prequel: null,
+            sequel: null,
+          });
+        }
         break;
       // =========other actions=============
       case "seriesNav":

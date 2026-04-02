@@ -66,7 +66,10 @@ function updateItemRating(
   const expectedOut = getExpectedOutputProb(self.mu, opponent.mu, reliability);
   const infoWeight = getInformationWeightProb(expectedOut, reliability);
   const phi = newConfidence(self.phi, infoWeight);
-  const mu = newRating(self.mu, phi, reliability, expectedOut, outcome);
+  const mu = Math.min(
+    2000,
+    Math.max(200, newRating(self.mu, phi, reliability, expectedOut, outcome)),
+  );
   return { mu, phi };
 }
 

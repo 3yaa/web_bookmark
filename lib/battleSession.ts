@@ -11,7 +11,6 @@ const MAX_COMPARISONS = 5;
 
 export interface BattleSession {
   selectedItem: ItemScore;
-  candidates: ItemScore[];
   comparedId: number[];
   results: ResultProps[];
   round: number;
@@ -25,7 +24,6 @@ export const createSession = (
   const candidates = getCandidates(selectedItem, items);
   return {
     selectedItem,
-    candidates,
     comparedId: [],
     results: [],
     round: 0,
@@ -33,17 +31,22 @@ export const createSession = (
   };
 };
 
-export const getNextOpponent = (session: BattleSession): ItemScore | null => {
+export const getNextOpponent = (
+  session: BattleSession,
+  allItems: ItemScore[],
+): ItemScore | null => {
   if (session.done) return null;
+  const freshCandidates = getCandidates(session.selectedItem, allItems);
   return pickOpponent(
     session.selectedItem,
-    session.candidates,
+    freshCandidates,
     session.comparedId,
   );
 };
 
 export const recordResult = (
   session: BattleSession,
+  allItems: ItemScore[],
   opponentId: number,
   opponentMu: number,
   won: boolean,
@@ -62,9 +65,10 @@ export const recordResult = (
   }
 
   if (!done) {
+    const freshCandidates = getCandidates(session.selectedItem, allItems);
     const next = pickOpponent(
       session.selectedItem,
-      session.candidates,
+      freshCandidates,
       newComparedIds,
     );
     if (!next) done = true;

@@ -4,7 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
-import { DEFAULT_PHI, getSeedMu, Tier } from "@/lib/tierConfig";
+import {
+  DEFAULT_PHI,
+  getSeedMu,
+  MASTERPIECE_PHI,
+  Tier,
+} from "@/lib/tierConfig";
 
 export type MovieAction =
   | { type: "closeModal" }
@@ -15,6 +20,7 @@ export type MovieAction =
   | { type: "changeNote"; payload: string }
   | { type: "saveNote" }
   | { type: "seriesNav"; payload: "sequel" | "prequel" }
+  | { type: "clearSeriesMeta" }
   | { type: "needYearField" };
 
 interface MovieDetailsProps {
@@ -59,14 +65,13 @@ export function MovieDetails({
         handleStatusChange(action.payload);
         break;
       case "setInitialTier":
-        if (action.payload === "Masterpiece") {
-          // direct score, no comparisons
-          onUpdate(movie.id, { score: { mu: 2000, phi: 150 } });
-        } else {
-          onUpdate(movie.id, {
-            score: { mu: getSeedMu(action.payload), phi: DEFAULT_PHI },
-          });
-        }
+        onUpdate(movie.id, {
+          score: {
+            mu: getSeedMu(action.payload),
+            phi:
+              action.payload === "Masterpiece" ? MASTERPIECE_PHI : DEFAULT_PHI,
+          },
+        });
         break;
       case "resetScore":
         onUpdate(movie.id, { score: null });
@@ -76,6 +81,16 @@ export function MovieDetails({
         break;
       case "saveNote":
         handleSaveNote();
+        break;
+      case "clearSeriesMeta":
+        if (movie.seriesTitle) {
+          onUpdate(movie.id, {
+            seriesTitle: null,
+            placeInSeries: null,
+            prequel: null,
+            sequel: null,
+          });
+        }
         break;
       // =========other actions=============
       case "seriesNav":

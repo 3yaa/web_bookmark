@@ -19,6 +19,12 @@ export default function MoviesHub() {
       endpoint: "movies",
       requiredFieldsToPost: ["title", "status", "imdbId"],
       statusOrder: { "Want to Watch": 0, Completed: 1, Dropped: 2 },
+      extraFieldsToUpdate: [
+        "seriesTitle",
+        "placeInSeries",
+        "prequel",
+        "sequel",
+      ],
     },
   );
 

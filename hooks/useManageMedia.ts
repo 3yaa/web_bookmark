@@ -16,7 +16,11 @@ interface ManageMediaConfig<T extends BaseMediaProps> {
   items: T[];
   onAdd: (item: T) => Promise<T>;
   onRemove: (itemId: number) => Promise<void>;
-  onUpdate: (itemId: number, updates: Partial<T>) => Promise<void>;
+  onUpdate: (
+    itemId: number,
+    updates: Partial<T>,
+    indirectUpdate?: boolean,
+  ) => Promise<void>;
 }
 
 export function useManageMedia<T extends BaseMediaProps>({
@@ -124,24 +128,31 @@ export function useManageMedia<T extends BaseMediaProps>({
     async (itemId: number, updates?: Partial<T>, shouldDelete?: boolean) => {
       if (shouldDelete) return await onRemove(itemId);
       if (!updates) return;
-      // open score battler whenever setting a score for the first time (only for the selected item)
-      const isNewScore =
-        itemId === selectedItem?.id && updates.score && !selectedItem?.score;
-      if (isNewScore && updates.score) {
-        // PRE CHECK FOR OPPONENT
-        const scored = items
-          .filter((i) => i.score !== null && i.id !== itemId)
-          .map((i) => ({ id: i.id, score: i.score! }));
-        const session = createSession(scored, {
-          id: itemId,
-          score: updates.score,
-        });
 
-        if (session.done) {
-          // no opponents — just save the seed score directly
-          if (selectedItem?.id === itemId) {
-            setSelectedItem({ ...selectedItem, ...updates });
-          }
+      const isSelectedItem = itemId === selectedItem?.id;
+
+      // for opponent updates
+      if (!isSelectedItem) {
+        const indirectUpdate = true;
+        onUpdate(itemId, updates, indirectUpdate);
+        return;
+      }
+
+      // check if first time score
+      const isNewScore = updates.score && !selectedItem?.score;
+
+      if (isNewScore && updates.score) {
+        const skipScoreBattle =
+          updates.score.mu >= 2000 ||
+          createSession(
+            items
+              .filter((i) => i.score !== null && i.id !== itemId)
+              .map((i) => ({ id: i.id, score: i.score! })),
+            { id: itemId, score: updates.score },
+          ).done;
+        //
+        if (skipScoreBattle) {
+          setSelectedItem({ ...selectedItem, ...updates });
           pendingUpdates.current = { ...pendingUpdates.current, ...updates };
           return;
         }
@@ -150,14 +161,9 @@ export function useManageMedia<T extends BaseMediaProps>({
         setActiveModal("scoreBattlerModal");
         return;
       }
-
-      if (selectedItem?.id === itemId) {
-        setSelectedItem({ ...selectedItem, ...updates });
-        pendingUpdates.current = { ...pendingUpdates.current, ...updates };
-      } else {
-        // to update opponent
-        onUpdate(itemId, updates);
-      }
+      // normal update
+      setSelectedItem({ ...selectedItem, ...updates });
+      pendingUpdates.current = { ...pendingUpdates.current, ...updates };
     },
     [onRemove, onUpdate, selectedItem, items],
   );

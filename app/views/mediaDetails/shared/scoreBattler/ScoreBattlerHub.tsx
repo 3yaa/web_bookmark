@@ -32,20 +32,26 @@ export function ScoreBattlerHub<T extends BaseMediaProps>({
   onScoreFinal,
   onOpponentUpdate,
 }: ScoreBattlerHubProps<T>) {
-  const [session, setSession] = useState<BattleSession | null>(() => {
-    if (!initialScore) return null;
-    return createSession(
+  const allScored = useMemo(
+    () =>
       items
         .filter((item) => item.score !== null)
         .map((item) => ({ id: item.id, score: item.score! })),
-      { id: selectedItem.id, score: initialScore },
-    );
+    [items],
+  );
+  // create session
+  const [session, setSession] = useState<BattleSession | null>(() => {
+    if (!initialScore) return null;
+    return createSession(allScored, {
+      id: selectedItem.id,
+      score: initialScore,
+    });
   });
-  //
+  // pick new opponent each round
   const [currentOpponent, setCurrentOpponent] = useState<ItemScore | null>(
     () => {
       if (!session) return null;
-      return getNextOpponent(session);
+      return getNextOpponent(session, allScored);
     },
   );
 
@@ -112,6 +118,7 @@ export function ScoreBattlerHub<T extends BaseMediaProps>({
       // update battle session
       const nextSession = recordResult(
         updatedSession,
+        allScored,
         currentOpponent.id,
         currentOpponent.score.mu,
         won,
@@ -119,7 +126,7 @@ export function ScoreBattlerHub<T extends BaseMediaProps>({
       console.log("OLD OP: ", getDisplayScore(currentOpponent.score.mu));
       console.group("NEW OP: ", getDisplayScore(updatedOpponent.mu));
       // find next opponent
-      const next = getNextOpponent(nextSession);
+      const next = getNextOpponent(nextSession, allScored);
       if (nextSession.done || !next) {
         finalizeScore(nextSession.selectedItem.score);
         return;

@@ -33,10 +33,10 @@ export interface BaseMediaProps {
   //
   backdropUrl?: string;
   // series (book/movie)
-  seriesTitle?: string;
-  placeInSeries?: string;
-  prequel?: string;
-  sequel?: string;
+  seriesTitle?: string | null;
+  placeInSeries?: string | null;
+  prequel?: string | null;
+  sequel?: string | null;
   // game only
   mainTitle?: string;
   dlcs?: IGDBInitProps[];

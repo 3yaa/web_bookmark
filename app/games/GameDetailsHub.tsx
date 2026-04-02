@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { gameStatusOptions } from "@/utils/dropDownDetails";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
-import { DEFAULT_PHI, getSeedMu, Tier } from "@/lib/tierConfig";
+import { DEFAULT_PHI, getSeedMu, MASTERPIECE_PHI, Tier } from "@/lib/tierConfig";
 
 export type GameAction =
   | { type: "closeModal" }
@@ -65,14 +65,13 @@ export function GameDetails({
         handleStatusChange(action.payload);
         break;
       case "setInitialTier":
-        if (action.payload === "Masterpiece") {
-          // direct score, no comparisons
-          onUpdate(game.id, { score: { mu: 2000, phi: 150 } });
-        } else {
-          onUpdate(game.id, {
-            score: { mu: getSeedMu(action.payload), phi: DEFAULT_PHI },
-          });
-        }
+        onUpdate(game.id, {
+          score: {
+            mu: getSeedMu(action.payload),
+            phi:
+              action.payload === "Masterpiece" ? MASTERPIECE_PHI : DEFAULT_PHI,
+          },
+        });
         break;
       case "resetScore":
         onUpdate(game.id, { score: null });

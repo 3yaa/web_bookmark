@@ -1,6 +1,6 @@
 export function cleanName(
   title: string | undefined,
-  seriesTitle: string | undefined,
+  seriesTitle: string | null | undefined,
 ) {
   if (!title || !seriesTitle) {
     return title;

@@ -135,7 +135,7 @@ export function ScoreBattlerHub<T extends BaseMediaProps>({
       setSession(nextSession);
       setCurrentOpponent(next);
     },
-    [session, currentOpponent, finalizeScore, onOpponentUpdate],
+    [session, currentOpponent, finalizeScore, onOpponentUpdate, allScored],
   );
 
   const opponentItem = useMemo(

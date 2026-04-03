@@ -70,7 +70,7 @@ export const getTierAdjacentRange = (
 };
 
 export const getDisplayScore = (mu: number): number => {
-  return Math.min(10, Math.max(1, Math.round((mu / 200) * 10) / 10));
+  return Math.min(10, Math.max(1, Math.floor((mu / 200) * 10) / 10));
 };
 
 export const getRatingNormal = (

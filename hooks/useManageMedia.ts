@@ -66,12 +66,15 @@ export function useManageMedia<T extends BaseMediaProps>({
   }, [searchedItems, statusFilter]);
 
   //
+  const DATE_SORT_KEYS = ["dateCompleted", "dateReleased", "datePublished"];
+
   const handleSortConfig = (sortType: string) => {
+    const isDateSort = DATE_SORT_KEYS.includes(sortType);
     setSortConfig((prev) => {
       if (!prev || prev.type !== sortType) {
-        return { type: sortType, order: "desc" };
-      } else if (prev.order === "desc") {
-        return { type: sortType, order: "asc" };
+        return { type: sortType, order: isDateSort ? "asc" : "desc" };
+      } else if (prev.order === (isDateSort ? "asc" : "desc")) {
+        return { type: sortType, order: isDateSort ? "desc" : "asc" };
       } else {
         return null;
       }

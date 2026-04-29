@@ -91,7 +91,7 @@ export function MobileProgressPicker({
 
   const episodeOptions = Array.from(
     { length: seasons[selectedSeasonIndex]?.episode_count || 0 },
-    (_, i) => i + 1,
+    (_, i) => i,
   );
 
   return (

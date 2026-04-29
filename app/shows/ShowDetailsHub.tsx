@@ -263,7 +263,7 @@ export function ShowDetails({
       const numValue = parseInt(value);
       setInputValues({
         ...inputValues,
-        episode: isNaN(numValue) ? "" : Math.max(1, numValue),
+        episode: isNaN(numValue) ? "" : Math.max(0, numValue),
       });
     }
   };
@@ -286,7 +286,7 @@ export function ShowDetails({
       //
       seasonIndex += 1;
     }
-    const curEp = 1;
+    const curEp = 0;
     onUpdate(show.id, { curSeasonIndex: seasonIndex, curEpisode: curEp });
   };
 
@@ -296,7 +296,7 @@ export function ShowDetails({
     let { curSeasonIndex: seasonIndex, curEpisode: curEp } = show;
     const seasons = show.seasons;
     //
-    const isFirstEpisode = seasonIndex === 0 && curEp === 1;
+    const isFirstEpisode = seasonIndex === 0 && curEp === 0;
     const isLastEpisode =
       seasonIndex === seasons.length - 1 &&
       curEp === seasons[seasonIndex].episode_count;
@@ -304,7 +304,7 @@ export function ShowDetails({
     if (dir === "left") {
       if (isFirstEpisode) return;
       // go back season's last ep
-      if (curEp === 1) {
+      if (curEp === 0) {
         seasonIndex -= 1;
         curEp = seasons[seasonIndex].episode_count;
       } else {
@@ -315,7 +315,7 @@ export function ShowDetails({
       // go to next season's first ep
       if (curEp === seasons[seasonIndex].episode_count) {
         seasonIndex += 1;
-        curEp = 1;
+        curEp = 0;
       } else {
         curEp += 1;
       }

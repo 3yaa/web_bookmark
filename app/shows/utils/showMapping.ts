@@ -24,7 +24,7 @@ export function mapTMDBToShow(dataTMDB: TMDBProps): Partial<ShowProps> {
     posterUrl: dataTMDB.poster_url,
     backdropUrl: dataTMDB.backdrop_url,
     curSeasonIndex: 0,
-    curEpisode: 1,
+    curEpisode: 0,
   };
 }
 

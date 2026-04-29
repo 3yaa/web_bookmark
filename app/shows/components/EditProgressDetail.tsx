@@ -150,7 +150,7 @@ export function EditProgress({
                       : { width: "1ch" }
                   }
                   autoFocus
-                  min="1"
+                  min="0"
                   max={maxEpisodes || 1}
                 />
               ) : (
@@ -168,7 +168,7 @@ export function EditProgress({
                 onClick={() =>
                   onAction({ type: "changeEpisode", payload: "left" })
                 }
-                disabled={curSeasonIndex === 0 && curEpisode === 1}
+                disabled={curSeasonIndex === 0 && curEpisode === 0}
               >
                 <ChevronLeft className={iconClass} />
               </button>

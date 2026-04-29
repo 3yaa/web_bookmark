@@ -17,7 +17,7 @@ export function ShowProgressBarMobile({ show }: { show: ShowProps }) {
         {/* PROGRESS TEXT */}
         <div className="text-zinc-400 text-xs font-semibold mb-0.5">
           <span className="pr-1">S{show.curSeasonIndex + 1 || "-"}</span>
-          <span>Ep {show.curEpisode || "-"}/</span>
+          <span>Ep {show.curEpisode ?? "-"}/</span>
           {show.seasons?.[show.curSeasonIndex]?.episode_count ? (
             <>
               <span>{show.seasons[show.curSeasonIndex].episode_count}</span>
@@ -40,7 +40,6 @@ export function ShowProgressBarMobile({ show }: { show: ShowProps }) {
                     show.seasons,
                     show.curSeasonIndex,
                     show.curEpisode,
-                    show.status,
                   )
                 : 100
             }%`,
@@ -56,7 +55,7 @@ export function ShowProgressBarDesktop({ show }: { show: ShowProps }) {
     <>
       {/* PROGRESS TEXT */}
       <div className="absolute right-0 -bottom-8 text-zinc-400 text-[13px] font-semibold mr-1 tracking-tight">
-        S{show.curSeasonIndex + 1 || "-"} · E{show.curEpisode || "-"}/
+        S{show.curSeasonIndex + 1 || "-"} · E{show.curEpisode ?? "-"}/
         {show.seasons?.[show.curSeasonIndex]?.episode_count || 0}
       </div>
       {/* PROGRESS BAR */}
@@ -70,7 +69,6 @@ export function ShowProgressBarDesktop({ show }: { show: ShowProps }) {
                     show.seasons,
                     show.curSeasonIndex,
                     show.curEpisode,
-                    show.status,
                   )
                 : 100
             }%`,

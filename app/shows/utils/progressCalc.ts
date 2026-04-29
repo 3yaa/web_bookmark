@@ -4,11 +4,8 @@ export const calcCurProgress = (
   seasons: TMDBSeasonProps[],
   curSeasonIndex: number,
   curEp: number,
-  status?: string
 ) => {
-  if (curSeasonIndex === 0 && curEp === 1 && status === "Want to Watch") {
-    return 100;
-  }
+  if (curSeasonIndex === 0 && curEp === 0) return 100;
 
   if (curSeasonIndex === 0 && curEp === 1) return 1;
 

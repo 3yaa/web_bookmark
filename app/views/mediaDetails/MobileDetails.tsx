@@ -372,7 +372,7 @@ export function MobileDetails<T extends BaseMediaProps>({
                           ? calcCurProgress(
                               item.seasons,
                               item.curSeasonIndex ?? 0,
-                              item.curEpisode ?? 1,
+                              item.curEpisode ?? 0,
                             )
                           : 100
                       }%`,
@@ -381,7 +381,7 @@ export function MobileDetails<T extends BaseMediaProps>({
                 </div>
                 <div className="mt-1 flex justify-between text-zinc-400 text-sm font-bold mb-0.5">
                   <span>Season: {(item.curSeasonIndex ?? 0) + 1 || "-"}</span>
-                  <span>Episode: {item.curEpisode || "-"}</span>
+                  <span>Episode: {item.curEpisode ?? "-"}</span>
                 </div>
               </div>
             )}

@@ -5,11 +5,12 @@ export interface Score {
 
 export const TIERS = [
   "Masterpiece",
-  "Amazing", //8-10 | 4-5
-  "Good", //6-8  | 3-4
-  "Average", //4-6  | 2-4
-  "Bad", //2-4  | 1-2
-  "Abysmal", //1-2  | 0.5-1
+  "Exceptional",
+  "Amazing",
+  "Good",
+  "Average",
+  "Bad",
+  "Disgusting",
 ] as const;
 
 export type Tier = (typeof TIERS)[number];
@@ -18,22 +19,30 @@ export const TIER_THRESHOLDS: Record<
   Tier,
   { min: number; muMin: number; muMax: number; seed: number }
 > = {
-  Masterpiece: { min: 10, muMin: 2000, muMax: Infinity, seed: 2000 },
-  Amazing: { min: 8.0, muMin: 1600, muMax: 2000, seed: 1800 },
-  Good: { min: 6.0, muMin: 1200, muMax: 1600, seed: 1400 },
+  Masterpiece: { min: 10.0, muMin: 2000, muMax: Infinity, seed: 2000 },
+  Exceptional: { min: 9.1, muMin: 1820, muMax: 2000, seed: 1910 },
+  Amazing: { min: 7.8, muMin: 1560, muMax: 1820, seed: 1690 },
+  Good: { min: 6.0, muMin: 1200, muMax: 1560, seed: 1380 },
   Average: { min: 4.0, muMin: 800, muMax: 1200, seed: 1000 },
   Bad: { min: 2.0, muMin: 400, muMax: 800, seed: 600 },
-  Abysmal: { min: 1.0, muMin: 200, muMax: 400, seed: 300 },
+  Disgusting: { min: 0.0, muMin: 0, muMax: 400, seed: 200 },
 };
 
-export const DEFAULT_PHI = 200;
-export const MASTERPIECE_PHI = 60;
+export const TIER_PHI_THRESHOLD: Record<Tier, number> = {
+  Masterpiece: 1,
+  Exceptional: 110,
+  Amazing: 159,
+  Good: 210,
+  Average: 232,
+  Bad: 232,
+  Disgusting: 232,
+};
 
 export const getTierFromMu = (mu: number): Tier => {
   for (const [name, tier] of Object.entries(TIER_THRESHOLDS)) {
     if (mu >= tier.muMin) return name as Tier;
   }
-  return "Abysmal";
+  return "Disgusting";
 };
 
 export const getSeedMu = (tier: Tier): number => {
@@ -70,7 +79,7 @@ export const getTierAdjacentRange = (
 };
 
 export const getDisplayScore = (mu: number): number => {
-  return Math.min(10, Math.max(1, Math.floor((mu / 200) * 10) / 10));
+  return Math.min(10, Math.max(0, Math.floor((mu / 200) * 10) / 10));
 };
 
 export const getRatingNormal = (

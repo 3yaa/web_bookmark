@@ -4,12 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { bookStatusOptions } from "@/utils/dropDownDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
-import {
-  DEFAULT_PHI,
-  getSeedMu,
-  MASTERPIECE_PHI,
-  Tier,
-} from "@/lib/tierConfig";
+import { TIER_PHI_THRESHOLD, getSeedMu, Tier } from "@/lib/tierConfig";
 
 export type BookAction =
   | { type: "closeModal" }
@@ -73,8 +68,7 @@ export function BookDetails({
         onUpdate(book.id, {
           score: {
             mu: getSeedMu(action.payload),
-            phi:
-              action.payload === "Masterpiece" ? MASTERPIECE_PHI : DEFAULT_PHI,
+            phi: TIER_PHI_THRESHOLD[action.payload],
           },
         });
         break;

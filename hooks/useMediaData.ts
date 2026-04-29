@@ -111,6 +111,7 @@ export function useMediaData<T extends { id: number; status: string }>({
           console.warn("Invalid fields attempted:", invalidFields);
           return;
         }
+
         // check if status update
         const isStatusUpdate = "status" in updates;
         // update local immediately

@@ -1,11 +1,6 @@
 // STATUS
 
-import {
-  getDisplayScore,
-  Tier,
-  TIER_THRESHOLDS,
-  TIERS,
-} from "@/lib/tierConfig";
+import { Tier, TIERS } from "@/lib/tierConfig";
 
 const statusConfig = {
   "Want to Read": {
@@ -72,18 +67,20 @@ export const gameStatusOptions = createStatusOptions([
 // TIERS
 
 export const TIER_GRADES: Record<Tier, string> = {
-  Masterpiece: "S",
-  Amazing: "A",
-  Good: "B",
-  Average: "C",
-  Bad: "D",
-  Abysmal: "F",
+  Masterpiece: "10.0",
+  Exceptional: "9.1",
+  Amazing: "7.8",
+  Good: "6.0",
+  Average: "4.0",
+  Bad: "2.0",
+  Disgusting: "0.0",
 };
 
 export const tierOptions = [
   { label: "Select Tier", value: "-" },
   ...TIERS.map((tier) => ({
-    label: `${TIER_GRADES[tier]} – ${tier}`,
+    label: tier,
     value: tier,
+    scoreLabel: TIER_GRADES[tier],
   })),
 ];

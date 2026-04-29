@@ -10,7 +10,7 @@ import {
   getNextOpponent,
   recordResult,
 } from "@/lib/battleSession";
-import { getDisplayScore, Score } from "@/lib/tierConfig";
+import { getDisplayScore, getTierFromMu, Score, TIER_THRESHOLDS } from "@/lib/tierConfig";
 import { ItemScore } from "@/lib/comparison";
 
 interface ScoreBattlerHubProps<T extends BaseMediaProps> {
@@ -72,6 +72,14 @@ export function ScoreBattlerHub<T extends BaseMediaProps>({
   }, [onClose, currentOpponent, session, onScoreFinal]);
 
   // ── Comparison pick ───────────────────────────────────────────────────
+  const muCap = useMemo(
+    () =>
+      getTierFromMu(initialScore.mu) !== "Masterpiece"
+        ? TIER_THRESHOLDS["Masterpiece"].muMin - 1
+        : Infinity,
+    [initialScore.mu],
+  );
+
   const handlePick = useCallback(
     (choice: "better" | "worse" | "same") => {
       if (!session || !currentOpponent) return;
@@ -105,6 +113,7 @@ export function ScoreBattlerHub<T extends BaseMediaProps>({
         updatedOpponent = b;
         won = false;
       }
+      updatedItem = { ...updatedItem, mu: Math.min(muCap, updatedItem.mu) };
       // update selectedItem
       const updatedSession: BattleSession = {
         ...session,
@@ -135,7 +144,7 @@ export function ScoreBattlerHub<T extends BaseMediaProps>({
       setSession(nextSession);
       setCurrentOpponent(next);
     },
-    [session, currentOpponent, finalizeScore, onOpponentUpdate, allScored],
+    [session, currentOpponent, finalizeScore, onOpponentUpdate, allScored, muCap],
   );
 
   const opponentItem = useMemo(

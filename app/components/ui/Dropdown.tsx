@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ArrowUpFromDot } from "lucide-react";
 import { motion } from "framer-motion";
 import { Portal } from "@/utils/portal";
 
 export interface Option {
   value: string;
   label: string;
+  scoreLabel?: string;
   bgStyle?: string;
   textStyle?: string;
 }
@@ -149,6 +150,16 @@ export function Dropdown({
                   >
                     {option.label}
                   </span>
+                  {option.scoreLabel && (
+                    <span className="flex justify-end items-center gap-1 shrink-0">
+                      {option.value !== "Masterpiece" && (
+                        <ArrowUpFromDot className="w-3.5 text-center text-zinc-400/70 text-sm leading-none" />
+                      )}
+                      <span className="text-sm font-mono text-zinc-400/90 shrink-0">
+                        {option.scoreLabel}
+                      </span>
+                    </span>
+                  )}
                 </button>
               );
             })}

@@ -251,7 +251,7 @@ export function ShowDetails({
   };
 
   const handleModalClose = () => {
-    if (addShow) return;
+    // if (addShow) return;
     onClose();
   };
 

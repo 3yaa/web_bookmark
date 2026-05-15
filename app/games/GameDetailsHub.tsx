@@ -136,7 +136,7 @@ export function GameDetails({
   };
 
   const handleModalClose = () => {
-    if (addGame) return;
+    // if (addGame) return;
     onClose();
   };
 

@@ -199,7 +199,7 @@ export function MovieDetails({
   };
 
   const handleModalClose = () => {
-    if (addMovie) return;
+    // if (addMovie) return;
     onClose();
   };
 

@@ -152,7 +152,7 @@ export function BookDetails({
   };
 
   const handleModalClose = () => {
-    if (addBook) return;
+    // if (addBook) return;
     onClose();
   };
 

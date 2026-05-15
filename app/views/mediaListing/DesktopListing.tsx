@@ -269,7 +269,7 @@ export function DesktopListing<T extends BaseMediaProps>({
       <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_1fr_6rem_7rem_11rem_6.5rem_0.85fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
         {mediaType === "show" && (
           <Link
-            href="/shows/new-show"
+            href="/shows/discover"
             title="Browse shows"
             className="absolute -right-14 top-0 opacity-60 hover:opacity-80 hover:scale-105 transition-all duration-300 origin-top"
             onClick={(e) => e.stopPropagation()}

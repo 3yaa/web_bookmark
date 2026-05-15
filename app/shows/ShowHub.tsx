@@ -107,6 +107,7 @@ export default function ShowHub() {
           show={selectedItem}
           onClose={handleModalClose}
           onUpdate={handleItemUpdates}
+          existingShows={items}
         />
       )}
       {/* SCORE BATTLER */}

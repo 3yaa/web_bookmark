@@ -5,11 +5,13 @@ import {
   Circle,
   Search,
 } from "lucide-react";
+import Link from "next/link";
 import { BaseMediaProps, MediaStatus, ColumnConfig } from "@/types/media";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Loading } from "../../components/ui/Loading";
 import { DesktopItem } from "./DesktopItem";
+import { ShowsBadge } from "./ShowsBadge";
 
 interface DesktopListingProps<T extends BaseMediaProps> {
   mediaItems: T[];
@@ -227,7 +229,7 @@ export function DesktopListing<T extends BaseMediaProps>({
             }}
           >
             <Search
-              className={`w-4 h-4 text-zinc-400 shrink-0 transition-all duration-300 ${
+              className={`w-4 h-4 text-zinc-400/75 font-bold shrink-0 transition-all duration-300 ${
                 searchOpen ? "ml-0" : "ml-2.5"
               }`}
             />
@@ -265,6 +267,16 @@ export function DesktopListing<T extends BaseMediaProps>({
       </div>
       {/* HEADING */}
       <div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_1fr_6rem_7rem_11rem_6.5rem_0.85fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
+        {mediaType === "show" && (
+          <Link
+            href="/shows/new-show"
+            title="Browse shows"
+            className="absolute -right-14 top-0 opacity-60 hover:opacity-80 hover:scale-105 transition-all duration-300 origin-top"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ShowsBadge />
+          </Link>
+        )}
         <span className="font-semibold text-zinc-300 text-sm">#</span>
         <span className="font-semibold text-zinc-300 text-sm">Cover</span>
         {/* TITLE */}

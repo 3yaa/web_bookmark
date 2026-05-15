@@ -19,6 +19,7 @@ export const DIFF_COLUMNS_MOVIE: [
 export interface MovieProps extends BaseMediaProps {
   status: "Completed" | "Want to Watch" | "Dropped";
   imdbId: string;
+  tmdbId?: string;
   normalizedTitle: string;
   director?: string;
   dateReleased?: number;
@@ -34,6 +35,7 @@ export interface OMDbProps {
 export interface TMDBProps {
   poster_url?: string;
   backdrop_url?: string;
+  tmdb_id?: string;
 }
 
 export interface WikidataProps {

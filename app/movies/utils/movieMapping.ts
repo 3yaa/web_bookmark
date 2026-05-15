@@ -35,6 +35,7 @@ export function mapTMDBToMovie(dataTMDB: TMDBProps): Partial<MovieProps> {
   return {
     posterUrl: dataTMDB.poster_url,
     backdropUrl: dataTMDB.backdrop_url,
+    tmdbId: dataTMDB.tmdb_id,
   };
 }
 

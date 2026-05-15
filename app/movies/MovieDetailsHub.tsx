@@ -1,10 +1,20 @@
 "use client";
 import { DIFF_COLUMNS_MOVIE, MovieProps } from "@/types/movie";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
 import { TIER_PHI_THRESHOLD, getSeedMu, Tier } from "@/lib/tierConfig";
+import {
+  ActorWork,
+  CastMember,
+  fetchActorWorks,
+  fetchMovieCast,
+} from "../../utils/getActorInfo";
+import ShowModal from "../components/ActorModal";
+import { AddShow } from "@/app/shows/AddShow";
+import { AddMovie } from "@/app/movies/AddMovie";
+import { useAuthFetch } from "@/app/auth/hooks/useAuthFetch";
 
 export type MovieAction =
   | { type: "closeModal" }
@@ -16,7 +26,8 @@ export type MovieAction =
   | { type: "saveNote" }
   | { type: "seriesNav"; payload: "sequel" | "prequel" }
   | { type: "clearSeriesMeta" }
-  | { type: "needYearField" };
+  | { type: "needYearField" }
+  | { type: "cast" };
 
 interface MovieDetailsProps {
   movie: MovieProps;
@@ -30,6 +41,7 @@ interface MovieDetailsProps {
   addMovie?: () => void;
   showSequelPrequel?: (sequelTitle: string) => void;
   showAnotherSeries?: (seriesDir: "left" | "right") => void;
+  existingMovies?: MovieProps[];
 }
 
 export function MovieDetails({
@@ -39,9 +51,29 @@ export function MovieDetails({
   addMovie,
   isLoading,
   showSequelPrequel,
-  showAnotherSeries, //when wiki gives more then 1 option
+  showAnotherSeries,
+  existingMovies = [],
 }: MovieDetailsProps) {
   const [localNote, setLocalNote] = useState(movie.note || "");
+  // actor related
+  const [castOpen, setCastOpen] = useState(false);
+  const [cast, setCast] = useState<CastMember[]>([]);
+  const [castLoading, setCastLoading] = useState(false);
+  const [selectedActor, setSelectedActor] = useState<CastMember | null>(null);
+  const [actorWorks, setActorWorks] = useState<ActorWork[]>([]);
+  const [actorLoading, setActorLoading] = useState(false);
+  const [filmSort, setFilmSort] = useState<"popularity" | "recent">(
+    "popularity",
+  );
+  const [pendingWork, setPendingWork] = useState<ActorWork | null>(null);
+  const [selectedWorkMovie, setSelectedWorkMovie] = useState<MovieProps | null>(
+    null,
+  );
+  const { authFetch } = useAuthFetch();
+
+  const handleWorkClick = useCallback((work: ActorWork) => {
+    setPendingWork(work);
+  }, []);
 
   const handleAction = (action: MovieAction) => {
     switch (action.type) {
@@ -90,8 +122,47 @@ export function MovieDetails({
       case "seriesNav":
         handleSeriesNav(action.payload);
         break;
+      case "cast":
+        handleCast();
+        break;
     }
   };
+
+  const handleCast = async () => {
+    if (!movie.tmdbId) return;
+    setCastOpen(true);
+    setCastLoading(true);
+    try {
+      setCast(await fetchMovieCast(Number(movie.tmdbId), authFetch));
+    } catch {
+      setCast([]);
+    } finally {
+      setCastLoading(false);
+    }
+  };
+
+  const handleActorClick = async (member: CastMember) => {
+    setSelectedActor(member);
+    setActorWorks([]);
+    setActorLoading(true);
+    try {
+      setActorWorks(await fetchActorWorks(member.id, authFetch));
+    } catch {
+      setActorWorks([]);
+    } finally {
+      setActorLoading(false);
+    }
+  };
+
+  const sortedWorks = useMemo(
+    () =>
+      [...actorWorks].sort((a, b) =>
+        filmSort === "recent"
+          ? b.date.localeCompare(a.date)
+          : b.popularity - a.popularity,
+      ),
+    [actorWorks, filmSort],
+  );
 
   const handleStatusChange = (value: string) => {
     const newStatus = value as "Completed" | "Want to Watch";
@@ -144,7 +215,7 @@ export function MovieDetails({
     onClose();
   }, [addMovie, onClose]);
 
-  // need to reset local note -- since changing movie (seuqel/prequel) doesn't remount
+  // need to reset local note -- since changing movie (sequel/prequel) doesn't remount
   useEffect(() => {
     setLocalNote(movie.note || "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -210,6 +281,65 @@ export function MovieDetails({
           differentColumns={DIFF_COLUMNS_MOVIE}
         />
       </div>
+      {castOpen && (
+        <ShowModal
+          mediaTitle={movie.title}
+          cast={cast}
+          castLoading={castLoading}
+          selectedActor={selectedActor}
+          sortedWorks={sortedWorks}
+          actorLoading={actorLoading}
+          filmSort={filmSort}
+          onClose={() => {
+            setCastOpen(false);
+            setSelectedActor(null);
+          }}
+          onActorClick={handleActorClick}
+          onActorBack={() => setSelectedActor(null)}
+          onFilmSortChange={setFilmSort}
+          onWorkClick={handleWorkClick}
+        />
+      )}
+      {pendingWork?.media_type === "tv" && (
+        <AddShow
+          isOpen={true}
+          titleFromAbove={pendingWork.title}
+          onClose={() => setPendingWork(null)}
+          existingShows={[]}
+          onAddShow={async (s) => {
+            await authFetch("/api/shows", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(s),
+            });
+            setPendingWork(null);
+          }}
+        />
+      )}
+      {pendingWork?.media_type === "movie" && (
+        <AddMovie
+          isOpen={true}
+          titleFromAbove={pendingWork.title}
+          onClose={() => setPendingWork(null)}
+          existingMovies={existingMovies}
+          onAddMovie={async (m) => {
+            await authFetch("/api/movies", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(m),
+            });
+            setPendingWork(null);
+          }}
+        />
+      )}
+      {selectedWorkMovie && (
+        <MovieDetails
+          movie={selectedWorkMovie}
+          onClose={() => setSelectedWorkMovie(null)}
+          onUpdate={onUpdate}
+          existingMovies={existingMovies}
+        />
+      )}
     </>
   );
 }

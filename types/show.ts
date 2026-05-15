@@ -43,3 +43,18 @@ export interface TMDBSeasonProps {
   season_number: number;
   episode_count: number;
 }
+
+//
+export type HollowShowProps = {
+  tmdbId: string;
+  imdbId: string;
+  title: string;
+  imdbRating: number | null;
+  poster_url: string | null;
+  //
+  currentEp: number | null;
+  totalEp: number | null;
+  //
+  airDays: string | null;
+  first_air_date: string;
+};

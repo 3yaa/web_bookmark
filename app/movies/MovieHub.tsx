@@ -137,6 +137,7 @@ export default function MoviesHub() {
           onClose={handleModalClose}
           onUpdate={handleItemUpdates}
           showSequelPrequel={showSequelPrequel}
+          existingMovies={items}
         />
       )}
       {/* SCORE BATTLER */}

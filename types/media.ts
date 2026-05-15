@@ -32,6 +32,7 @@ export interface BaseMediaProps {
   coverUrl?: string;
   //
   backdropUrl?: string;
+
   // series (book/movie)
   seriesTitle?: string | null;
   placeInSeries?: string | null;

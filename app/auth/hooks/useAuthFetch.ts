@@ -1,6 +1,8 @@
 import { useCallback } from "react";
 import { useAuth } from "./useAuth";
 
+export type AuthFetch = (url: string, options?: RequestInit) => Promise<Response>;
+
 export function useAuthFetch() {
   const { authToken, refreshToken, isRefreshing } = useAuth();
   //

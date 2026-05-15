@@ -48,9 +48,9 @@ export function EditProgress({
       <label className="text-sm font-medium text-zinc-400 block">
         Progress
       </label>
-      <div className="flex gap-3 max-w-[97.6%]">
+      <div className="flex gap-4 max-w-[94%]">
         {/* SEASON CONTROLS */}
-        <div className="flex-[1.05] bg-linear-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/50 select-none shadow-lg shadow-black/20">
+        <div className="flex-1 bg-linear-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/50 select-none shadow-lg shadow-black/20">
           <div className="flex items-center justify-between pl-1">
             <span
               className="mt-0.5 text-[15px] text-zinc-300/70 font-bold hover:cursor-pointer"
@@ -119,14 +119,14 @@ export function EditProgress({
         </div>
 
         {/* EPISODE CONTROLS */}
-        <div className="flex-[1.05] bg-linear-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/50 select-none shadow-lg shadow-black/20">
+        <div className="flex-1 bg-linear-to-b from-transparent via-zinc-800/20 to-zinc-700/20 rounded-lg py-1.5 px-3 border border-zinc-800/50 select-none shadow-lg shadow-black/20">
           <div className="flex items-center justify-between">
             <span
               className="mt-0.5 text-[15px] text-zinc-300/70 font-bold hover:cursor-pointer"
               onClick={() => onAction({ type: "clickEpisodeInput" })}
             >
               <span className="text-sm text-zinc-400/85 font-medium mr-2">
-                Episodes:
+                Ep:
               </span>
               {editingMode.episode ? (
                 <input

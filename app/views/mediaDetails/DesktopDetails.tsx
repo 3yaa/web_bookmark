@@ -15,6 +15,7 @@ import {
   ChevronRight,
   RotateCcw,
   Unlink,
+  Users,
 } from "lucide-react";
 import { BackdropImage } from "@/app/components/ui/Backdrop";
 import { Dropdown, Option } from "@/app/components/ui/Dropdown";
@@ -354,6 +355,15 @@ export function DesktopDetails<T extends BaseMediaProps>({
                   </div>
                   {/* AUTHOR/STUDIO/DIRECTOR AND DATES */}
                   <div className="flex justify-start items-center gap-2 w-full mb-3">
+                    {(mediaType === "show" || mediaType === "movie") && (
+                      <button
+                        onClick={() => onAction({ type: "cast" })}
+                        title="View cast"
+                        className="cursor-pointer text-zinc-400 hover:text-zinc-200 hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] transition-all duration-200 shrink-0 mr-0.5 hover:scale-105"
+                      >
+                        <Users className="w-4 h-3.75 -mt-0.5 ml-0.5" strokeWidth={2} />
+                      </button>
+                    )}
                     <span className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 leading-6">
                       {differentColumns[0].getValue(item) ||
                         "Unknown " + differentColumns[0].label}

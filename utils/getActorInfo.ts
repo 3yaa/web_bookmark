@@ -26,10 +26,14 @@ export async function fetchShowCast(
 }
 
 export async function fetchMovieCast(
-  tmdbId: number,
+  tmdbId: string,
+  imdbId: string,
+  movieId: number,
   authFetch: AuthFetch,
 ): Promise<CastMember[]> {
-  const res = await authFetch(`/api/movie-cast?tmdbId=${tmdbId}`);
+  const res = await authFetch(
+    `/api/movie-cast?tmdbId=${tmdbId}&imdbId=${imdbId}&movieId=${movieId}`,
+  );
   const data = await res.json();
   return data.cast;
 }

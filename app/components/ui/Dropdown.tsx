@@ -4,85 +4,87 @@ import { motion } from "framer-motion";
 import { Portal } from "@/utils/portal";
 
 export interface Option {
-  value: string;
-  label: string;
-  scoreLabel?: string;
-  bgStyle?: string;
-  textStyle?: string;
+	value: string;
+	label: string;
+	scoreLabel?: number;
+	bgStyle?: string;
+	textStyle?: string;
 }
 
 interface DropdownProps {
-  value: string;
-  options: Option[];
-  onChange: (value: string) => void;
-  disabled?: boolean;
-  dropStyle?: string[];
-  customStyle?: string;
-  dropDuration?: number;
+	value: string;
+	options: Option[];
+	onChange: (value: string) => void;
+	disabled?: boolean;
+	dropStyle?: string[];
+	customStyle?: string;
+	dropDuration?: number;
 }
 
 export function Dropdown({
-  value,
-  options,
-  onChange,
-  customStyle = "text-zinc-200 font-bold",
-  disabled = false,
-  dropStyle,
-  dropDuration = 0.3,
+	value,
+	options,
+	onChange,
+	customStyle = "text-zinc-200 font-bold",
+	disabled = false,
+	dropStyle,
+	dropDuration = 0.3,
 }: DropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const selectRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+	const [isOpen, setIsOpen] = useState(false);
+	const selectRef = useRef<HTMLDivElement>(null);
+	const buttonRef = useRef<HTMLButtonElement>(null);
+	const menuRef = useRef<HTMLDivElement>(null);
 
-  // makes dropdown close when clicking outside it
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        selectRef.current &&
-        menuRef.current &&
-        !selectRef.current.contains(event.target as Node) &&
-        !menuRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen]);
-  // makes dropdown close when pressing 'ecs' key
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
-    if (isOpen) {
-      document.addEventListener("keydown", handleEscapeKey);
-      return () => document.removeEventListener("keydown", handleEscapeKey);
-    }
-  }, [isOpen]);
+	// makes dropdown close when clicking outside it
+	useEffect(() => {
+		if (!isOpen) return;
+		const handleClickOutside = (event: MouseEvent) => {
+			if (
+				selectRef.current &&
+				menuRef.current &&
+				!selectRef.current.contains(event.target as Node) &&
+				!menuRef.current.contains(event.target as Node)
+			) {
+				setIsOpen(false);
+			}
+		};
+		document.addEventListener("mousedown", handleClickOutside);
+		return () =>
+			document.removeEventListener("mousedown", handleClickOutside);
+	}, [isOpen]);
+	// makes dropdown close when pressing 'ecs' key
+	useEffect(() => {
+		if (!isOpen) return;
+		const handleEscapeKey = (event: KeyboardEvent) => {
+			if (event.key === "Escape") {
+				setIsOpen(false);
+			}
+		};
+		if (isOpen) {
+			document.addEventListener("keydown", handleEscapeKey);
+			return () =>
+				document.removeEventListener("keydown", handleEscapeKey);
+		}
+	}, [isOpen]);
 
-  const selectedOption = options.find((option) => {
-    return option.value === value;
-  });
+	const selectedOption = options.find((option) => {
+		return option.value === value;
+	});
 
-  const handleSelect = (optionValue: string) => {
-    onChange(optionValue);
-    setIsOpen(false);
-  };
+	const handleSelect = (optionValue: string) => {
+		onChange(optionValue);
+		setIsOpen(false);
+	};
 
-  return (
-    <div ref={selectRef} className={`relative ${customStyle}`}>
-      {/* BUTTON FOR DROPDOWN */}
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        disabled={disabled}
-        className={`
+	return (
+		<div ref={selectRef} className={`relative ${customStyle}`}>
+			{/* BUTTON FOR DROPDOWN */}
+			<button
+				ref={buttonRef}
+				type="button"
+				onClick={() => !disabled && setIsOpen(!isOpen)}
+				disabled={disabled}
+				className={`
           w-full rounded-lg border backdrop-blur-md
           flex items-center justify-between gap-3 px-4 py-3
           transition-all duration-300 ease-out
@@ -90,82 +92,87 @@ export function Dropdown({
           hover:scale-[1.02] hover:shadow-xl hover:shadow-black/30
           focus:outline-none active:scale-[0.98] 
             ${
-              isOpen
-                ? "border-zinc-800/50 from-transparent via-zinc-800/30 to-zinc-800/50 scale-[1.02]"
-                : "border-zinc-800/50 from-transparent via-zinc-800/30 to-zinc-800/50 shadow-black/20"
-            }
+				isOpen
+					? "border-zinc-800/50 from-transparent via-zinc-800/30 to-zinc-800/50 scale-[1.02]"
+					: "border-zinc-800/50 from-transparent via-zinc-800/30 to-zinc-800/50 shadow-black/20"
+			}
           ${
-            disabled
-              ? "opacity-40 cursor-not-allowed hover:scale-100 hover:shadow-lg hover:shadow-black/20 active:scale-100"
-              : "cursor-pointer"
-          }
+				disabled
+					? "opacity-40 cursor-not-allowed hover:scale-100 hover:shadow-lg hover:shadow-black/20 active:scale-100"
+					: "cursor-pointer"
+			}
         `}
-      >
-        <span className="text-sm font-bold tracking-wide">
-          {selectedOption ? selectedOption.label : "Select Option"}
-        </span>
-        <ChevronDown
-          className={`w-4 h-4 text-zinc-400 transition-all duration-300 ease-out ${
-            isOpen ? "rotate-180 text-zinc-300" : "rotate-0"
-          }`}
-        />
-      </button>
-      {/* DROPDOWN */}
-      {isOpen && (
-        <Portal>
-          <motion.div
-            ref={menuRef}
-            initial={{ opacity: 0, clipPath: "inset(0 0 100% 0)" }}
-            animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }}
-            transition={{
-              duration: dropDuration,
-              ease: [0.25, 1, 0.5, 1],
-            }}
-            className="z-50 rounded-lg rounded-t-md border border-zinc-700/40 bg-zinc-900/70 backdrop-blur-md shadow-lg overflow-hidden min-w-max"
-            style={{
-              position: "fixed",
-              top: buttonRef.current?.getBoundingClientRect().bottom ?? 0,
-              left: buttonRef.current?.getBoundingClientRect().left ?? 0,
-              width: buttonRef.current?.offsetWidth, // keeps same width as button
-            }}
-          >
-            {options.map((option) => {
-              const textStyle = dropStyle?.[0] || option.textStyle;
-              const bgStyle = dropStyle?.[1] || option.bgStyle;
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => handleSelect(option.value)}
-                  className={`w-full flex items-center justify-between px-3 py-2 text-sm font-bold text-zinc-300 focus:outline-none border-b border-zinc-800/90 last:border-none transition-all duration-200 ease-out cursor-pointer
+			>
+				<span className="text-sm font-bold tracking-wide">
+					{selectedOption ? selectedOption.label : "Select Option"}
+				</span>
+				<ChevronDown
+					className={`w-4 h-4 text-zinc-400 transition-all duration-300 ease-out ${
+						isOpen ? "rotate-180 text-zinc-300" : "rotate-0"
+					}`}
+				/>
+			</button>
+			{/* DROPDOWN */}
+			{isOpen && (
+				<Portal>
+					<motion.div
+						ref={menuRef}
+						initial={{ opacity: 0, clipPath: "inset(0 0 100% 0)" }}
+						animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }}
+						transition={{
+							duration: dropDuration,
+							ease: [0.25, 1, 0.5, 1],
+						}}
+						className="z-50 rounded-lg rounded-t-md border border-zinc-700/40 bg-zinc-900/70 backdrop-blur-md shadow-lg overflow-hidden min-w-max"
+						style={{
+							position: "fixed",
+							top:
+								buttonRef.current?.getBoundingClientRect()
+									.bottom ?? 0,
+							left:
+								buttonRef.current?.getBoundingClientRect()
+									.left ?? 0,
+							width: buttonRef.current?.offsetWidth, // keeps same width as button
+						}}
+					>
+						{options.map((option) => {
+							const textStyle =
+								dropStyle?.[0] || option.textStyle;
+							const bgStyle = dropStyle?.[1] || option.bgStyle;
+							return (
+								<button
+									key={option.value}
+									type="button"
+									onClick={() => handleSelect(option.value)}
+									className={`w-full flex items-center justify-between px-3 py-2 text-sm font-bold text-zinc-300 focus:outline-none border-b border-zinc-800/90 last:border-none transition-all duration-200 ease-out cursor-pointer
                   ${
-                    option.value === value
-                      ? `rounded-md bg-linear-to-r from-transparent ${bgStyle}`
-                      : "hover:bg-zinc-800/70 hover:text-zinc-100"
-                  }`}
-                >
-                  <span
-                    className={`${option.value === value ? `${textStyle}` : ""}
+						option.value === value
+							? `rounded-md bg-linear-to-r from-transparent ${bgStyle}`
+							: "hover:bg-zinc-800/70 hover:text-zinc-100"
+					}`}
+								>
+									<span
+										className={`${option.value === value ? `${textStyle}` : ""}
                     `}
-                  >
-                    {option.label}
-                  </span>
-                  {option.scoreLabel && (
-                    <span className="flex justify-end items-center gap-1 shrink-0">
-                      {option.value !== "Masterpiece" && (
-                        <ArrowUpFromDot className="w-3.5 text-center text-zinc-400/70 text-sm leading-none" />
-                      )}
-                      <span className="text-sm font-mono text-zinc-400/90 shrink-0">
-                        {option.scoreLabel}
-                      </span>
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </motion.div>
-        </Portal>
-      )}
-    </div>
-  );
+									>
+										{option.label}
+									</span>
+									{option.scoreLabel && (
+										<span className="flex justify-end items-center gap-1 shrink-0">
+											{option.value !== "Goosebumps" && (
+												<ArrowUpFromDot className="w-3.5 text-center text-zinc-400/70 text-sm leading-none" />
+											)}
+											<span className="text-sm font-mono text-zinc-400/90 shrink-0">
+												{option.scoreLabel}
+											</span>
+										</span>
+									)}
+								</button>
+							);
+						})}
+					</motion.div>
+				</Portal>
+			)}
+		</div>
+	);
 }

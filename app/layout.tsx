@@ -9,28 +9,28 @@ import { NavProvider } from "./components/NavContext";
 const geist = Geist({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Mouthful",
-  description: "Manage all your libraries in one place",
-  icons: {
-    icon: "/logo.png",
-  },
+	title: "Mouthful",
+	description: "Manage all your libraries in one place",
+	icons: {
+		icon: "/logo.png",
+	},
 };
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" className={`${geist.className}`}>
-      <body className="antialiased bg-zinc-950 text-zinc-100">
-        <AuthProvider>
-          <NavProvider>
-            <RouteGuard>{children}</RouteGuard>
-            <NavMenu />
-          </NavProvider>
-        </AuthProvider>
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en" className={`${geist.className}`}>
+			<body className="antialiased bg-zinc-950 text-zinc-100">
+				<AuthProvider>
+					<NavProvider>
+						<RouteGuard>{children}</RouteGuard>
+						<NavMenu />
+					</NavProvider>
+				</AuthProvider>
+			</body>
+		</html>
+	);
 }

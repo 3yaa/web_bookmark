@@ -66,14 +66,14 @@ export const DesktopItem = React.memo(function DesktopItem<
 		>
 			{/* ISLAND - COVER */}
 			{(item.posterUrl ?? item.coverUrl) ? (
-				<div className="w-22 aspect-2/3 relative z-10 shrink-0">
+				<div className="w-20 aspect-2/3 relative z-10 shrink-0">
 					<Image
 						src={(item.posterUrl ?? item.coverUrl)!}
 						alt={item.title || "Untitled"}
 						width={1280}
 						height={720}
 						priority
-						className={`relative z-10 h-auto self-stretch aspect-2/3 rounded-l-lg rounded-r-sm transition-transform duration-450 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.04] group-hover:-translate-y-0.5 ${mediaType === "game" ? "object-cover" : "object-fill"}`}
+						className={`relative z-10 h-auto self-stretch aspect-2/3 rounded-l-lg rounded-r-sm transition-transform duration-450 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.04] group-hover:-translate-y-0.5 ${mediaType === "game" ? "object-cover" : "object-fill"} `}
 					/>
 				</div>
 			) : (
@@ -168,7 +168,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 				)}
 
 				{/* PROGRESS */}
-				{mediaType === "show" ? (
+				{/* {mediaType === "show" ? (
 					<ShowProgressBarDesktop
 						show={item as unknown as ShowProps}
 					/>
@@ -187,7 +187,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 							}}
 						/>
 					</div>
-				)}
+				)} */}
 
 				{/* NOTE */}
 				{item.note && (

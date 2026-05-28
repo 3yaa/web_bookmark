@@ -5,32 +5,30 @@ interface BackdropDesktopProps {
 	is_book?: boolean;
 }
 
+const maskH =
+	"linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 5%, rgba(0,0,0,0.2) 11%, rgba(0,0,0,0.45) 18%, rgba(0,0,0,0.72) 26%, rgba(0,0,0,0.92) 34%, black 42%, black 58%, rgba(0,0,0,0.92) 66%, rgba(0,0,0,0.72) 74%, rgba(0,0,0,0.45) 82%, rgba(0,0,0,0.2) 89%, rgba(0,0,0,0.05) 95%, transparent 100%)";
+
+const maskV =
+	"linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, black 18%, black 82%, rgba(0,0,0,0.2) 100%)";
+
 export const BackdropDesktop = ({ src, is_book }: BackdropDesktopProps) => (
-	<div className="relative overflow-hidden select-none h-full">
+	<div
+		className="relative overflow-hidden select-none h-full"
+		style={{
+			maskImage: `${maskH}, ${maskV}`,
+			WebkitMaskImage: `${maskH}, ${maskV}`,
+			maskComposite: "intersect",
+			WebkitMaskComposite: "source-in",
+		}}
+	>
 		<Image
 			src={src}
 			alt="Backdrop"
 			width={1280}
 			height={720}
-			className="absolute opacity-70"
+			className="absolute opacity-65"
 			style={{
 				objectPosition: is_book ? "center -40px" : "center -16px",
-			}}
-		/>
-		{/* HORIZONTAL */}
-		<div
-			className="absolute inset-0"
-			style={{
-				background:
-					"linear-gradient(to right, rgba(18,18,18,1) 0%, rgba(18,18,18,0.6) 15%, rgba(18,18,18,0) 30%, rgba(18,18,18,0) 70%, rgba(18,18,18,1) 100%)",
-			}}
-		/>
-		{/* VERTICAL */}
-		<div
-			className="absolute inset-0"
-			style={{
-				background:
-					"linear-gradient(to bottom, rgba(18,18,18,0.4) 0%, rgba(18,18,18,0.3) 20%, rgba(18,18,18,0) 50%, rgba(18,18,18,0.4) 80%, rgba(18,18,18,0.8) 100%)",
 			}}
 		/>
 	</div>

@@ -165,18 +165,18 @@ export const getStatusDetailWaveColor = (status: Partial<MediaStatus>) => {
 export const getStatusStrokeColor = (status?: MediaStatus): string => {
 	switch (status) {
 		case "Completed":
-			return "rgb(16, 185, 129)"; // emerald-500
+			return "rgb(5, 150, 105)"; // emerald-600
 		case "Dropped":
-			return "rgb(239, 68, 68)"; // red-500
+			return "rgb(220, 38, 38)"; // red-600
 		case "Want to Watch":
-			return "rgb(59, 130, 246)"; // blue-500
+			return "rgb(37, 99, 235)"; // blue-600
 		case "Watching":
-			return "rgb(8, 145, 178)"; // cyan-600
+			return "rgb(14, 116, 144)"; // cyan-700
 		case "Want to Read":
-			return "rgb(59, 130, 246)"; // blue-500
+			return "rgb(37, 99, 235)"; // blue-600
 		case "Playing":
-			return "rgb(59, 130, 246)"; // blue-500
+			return "rgb(37, 99, 235)"; // blue-600
 		default:
-			return "rgb(82, 82, 91)"; // zinc-600
+			return "rgb(63, 63, 70)"; // zinc-700
 	}
 };

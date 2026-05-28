@@ -47,7 +47,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 	return (
 		// hover:scale-[1.005]
 		<div
-			className={`relative group max-w-[99%] mx-auto grid md:grid-cols-[auto_1fr_0.8fr_0.4fr] gap-3 py-0.5 items-center
+			className={`relative group max-w-[99%] mx-auto grid md:grid-cols-[auto_1fr_1.2fr_0.6fr] gap-3 py-0.5 items-center
   bg-zinc-900/65 hover:bg-zinc-800/80
   shadow-sm hover:shadow-lg hover:shadow-black/40
   border-l-4 ${getStatusBorderColor(item.status)}
@@ -55,7 +55,6 @@ export const DesktopItem = React.memo(function DesktopItem<
   rounded-md rounded-l-xl
   backdrop-blur-sm
   hover:-translate-y-0.5 
-	
   transition-[transform,background-color,box-shadow]
   duration-[420ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]
   hover:cursor-pointer
@@ -168,7 +167,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 				)}
 
 				{/* PROGRESS */}
-				{/* {mediaType === "show" ? (
+				{mediaType === "show" ? (
 					<ShowProgressBarDesktop
 						show={item as unknown as ShowProps}
 					/>
@@ -187,7 +186,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 							}}
 						/>
 					</div>
-				)} */}
+				)}
 
 				{/* NOTE */}
 				{item.note && (
@@ -207,25 +206,33 @@ export const DesktopItem = React.memo(function DesktopItem<
 			)}
 
 			{/* ISLAND - SCORE */}
-			<div className="flex flex-col items-center justify-center gap-1">
+			<div className="relative z-10 flex flex-col items-center justify-center pr-2">
 				<ScoreBadge
-					score={
-						item.score?.mu
-							? getDisplayScore(item.score.mu)
-							: undefined
-					}
+					score={item.score?.mu ? getDisplayScore(item.score.mu) : undefined}
 					seed={item.id ?? item.title ?? index}
 				/>
-				<span
-					className="px-2 py-0.5 text-[11px] font-black uppercase whitespace-nowrap rounded-xs select-none tracking-wide -rotate-6 group-hover:rotate-0 transition-transform duration-300 ease-out"
-					style={{
-						color: getStatusStrokeColor(item.status),
-						border: `1.5px dashed ${getStatusStrokeColor(item.status)}`,
-						opacity: 0.82,
-					}}
-				>
-					{item.status}
-				</span>
+				{/* Connector */}
+				<div
+					className="w-px h-2.5 rounded-full opacity-25"
+					style={{ background: getStatusStrokeColor(item.status) }}
+				/>
+				{/* Status — text flanked by scan lines */}
+				<div className="flex items-center gap-1.5 w-full">
+					<div
+						className="h-px flex-1 rounded-full opacity-35"
+						style={{ background: getStatusStrokeColor(item.status) }}
+					/>
+					<span
+						className="text-[7.5px] font-black uppercase tracking-widest whitespace-nowrap select-none opacity-60"
+						style={{ color: getStatusStrokeColor(item.status) }}
+					>
+						{item.status}
+					</span>
+					<div
+						className="h-px flex-1 rounded-full opacity-35"
+						style={{ background: getStatusStrokeColor(item.status) }}
+					/>
+				</div>
 			</div>
 		</div>
 	);

@@ -14,15 +14,18 @@ export const BackdropImage = ({ src, width, height }: BackdropImageProps) => (
 				alt="Backdrop"
 				width={width}
 				height={height}
-				className="object-cover opacity-40"
-				style={{ objectPosition: "center -10px" }}
+				className="object-cover"
+				style={{
+					objectPosition: "center -10px",
+					filter: "brightness(0.40)",
+				}}
 			/>
 			{/* HORIZONTAL */}
 			<div
 				className="absolute inset-0"
 				style={{
 					background:
-						"linear-gradient(to right, rgba(18,18,18,1) 0%, rgba(18,18,18,0) 30%, transparent 50%, rgba(18,18,18,0) 100%)",
+						"linear-gradient(to right, rgba(18,18,18,1) 0%, rgba(18,18,18,0) 40%, transparent 100%)",
 				}}
 			/>
 			{/* VERTICAL */}

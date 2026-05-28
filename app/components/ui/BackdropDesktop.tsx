@@ -26,10 +26,12 @@ export const BackdropDesktop = ({ src, is_book }: BackdropDesktopProps) => (
 			alt="Backdrop"
 			width={1280}
 			height={720}
-			className="absolute opacity-65"
+			className="absolute"
 			style={{
 				objectPosition: is_book ? "center -40px" : "center -16px",
+				filter: "brightness(0.40)",
 			}}
+			priority
 		/>
 	</div>
 );

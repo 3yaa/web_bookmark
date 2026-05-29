@@ -403,7 +403,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 												/>
 											</button>
 										)}
-										<span className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 leading-6">
+										<span className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 leading-6 truncate max-w-60">
 											{differentColumns[0].getValue(
 												item,
 											) ||

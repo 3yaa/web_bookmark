@@ -274,119 +274,73 @@ export function DesktopListing<T extends BaseMediaProps>({
 				</div>
 			</div>
 			{/* HEADING */}
-			<div className="sticky top-0 z-10 grid md:grid-cols-[2rem_6rem_1fr_6rem_7rem_11rem_6.5rem_0.85fr] bg-zinc-800/70 backdrop-blur-3xl rounded-lg rounded-t-none px-5 py-2.5 shadow-lg border border-zinc-900 select-none">
-				{mediaType === "show" && (
-					<Link
-						href="/shows/discover"
-						title="Browse shows"
-						className="absolute -right-14 top-0 opacity-60 hover:opacity-80 hover:scale-105 transition-all duration-300 origin-top"
-						onClick={(e) => e.stopPropagation()}
-					>
-						<ShowsBadge />
-					</Link>
-				)}
-				<span className="font-semibold text-zinc-300 text-sm">#</span>
-				<span className="font-semibold text-zinc-300 text-sm">
-					Cover
-				</span>
-				{/* TITLE */}
-				<div
-					className="flex justify-start items-center gap-1 hover:cursor-pointer"
-					onClick={() => onSortConfig("title")}
-				>
-					<span className="font-semibold text-zinc-300 text-sm">
-						Title
-					</span>
-					{sortConfig?.type === "title" &&
-						(sortConfig?.order === "desc" ? (
-							<ChevronDown className="w-4 h-4" />
-						) : (
-							<ChevronUp className="w-4 h-4" />
-						))}
+			<div className="sticky top-0 z-10 w-full">
+				<div className="relative max-w-full mx-auto flex items-center gap-4 px-4 py-2 bg-zinc-900/75 backdrop-blur-xl border-x border-b border-zinc-800/50 rounded-b-lg select-none">
+					{mediaType === "show" && (
+						<Link
+							href="/shows/discover"
+							title="Browse shows"
+							className="absolute -right-14 top-0 opacity-60 hover:opacity-80 hover:scale-105 transition-all duration-300 origin-top"
+							onClick={(e) => e.stopPropagation()}
+						>
+							<ShowsBadge />
+						</Link>
+					)}
+					{/* media type + count */}
+					<div className="flex items-baseline gap-2 shrink-0">
+						<span className="text-[11px] font-bold tracking-[0.22em] uppercase text-zinc-400">
+							{mediaType}s
+						</span>
+						<span className="text-[12px] font-mono text-zinc-500 tracking-tight">
+							{mediaItems.length}
+						</span>
+					</div>
+					{/* sort options pushed right */}
+					<div className="flex items-center gap-0 ml-auto">
+						{(
+							[
+								{ key: "title", label: "Title" },
+								{ key: "score", label: "Score" },
+								{
+									key: differentColumns[0].sortKey,
+									label: differentColumns[0].label,
+								},
+								{
+									key: differentColumns[1].sortKey,
+									label: differentColumns[1].label,
+								},
+								{ key: "dateCompleted", label: "Completed" },
+							] as { key: string; label: string }[]
+						).map(({ key, label }, i, arr) => {
+							const active = sortConfig?.type === key;
+							return (
+								<div key={key} className="flex items-center">
+									<button
+										onClick={() => onSortConfig(key)}
+										className={`flex items-center gap-1 px-3 py-0.5 text-[12px] font-medium tracking-wide transition-all duration-200 cursor-pointer ${
+											active
+												? "text-zinc-100"
+												: "text-zinc-500 hover:text-zinc-300"
+										}`}
+									>
+										{active &&
+											(sortConfig?.order === "desc" ? (
+												<ChevronDown className="w-3 h-3 text-zinc-500" />
+											) : (
+												<ChevronUp className="w-3 h-3 text-zinc-500" />
+											))}
+										{label}
+									</button>
+									{i < arr.length - 1 && (
+										<span className="text-zinc-700 text-xs select-none">
+											|
+										</span>
+									)}
+								</div>
+							);
+						})}
+					</div>
 				</div>
-				{/* SCORE */}
-				<div
-					className="flex justify-center items-center gap-1 hover:cursor-pointer"
-					onClick={() => onSortConfig("score")}
-				>
-					<span
-						className={`text-center font-semibold text-zinc-300 text-sm ${
-							sortConfig?.type === "score" ? "ml-4" : ""
-						}`}
-					>
-						Score
-					</span>
-					{sortConfig?.type === "score" &&
-						(sortConfig?.order === "desc" ? (
-							<ChevronDown className="w-4 h-4" />
-						) : (
-							<ChevronUp className="w-4 h-4" />
-						))}
-				</div>
-				{/* DATE COMPLETED */}
-				<div
-					className="flex justify-center items-center gap-1 hover:cursor-pointer"
-					onClick={() => onSortConfig("dateCompleted")}
-				>
-					<span
-						className={`text-center font-semibold text-zinc-300 text-sm ${
-							sortConfig?.type === "dateCompleted" ? "ml-4" : ""
-						}`}
-					>
-						Completed
-					</span>
-					{sortConfig?.type === "dateCompleted" &&
-						(sortConfig?.order === "desc" ? (
-							<ChevronDown className="w-4 h-4" />
-						) : (
-							<ChevronUp className="w-4 h-4" />
-						))}
-				</div>
-				{/* AUTHOR/DIRECTOR/STUDIO */}
-				<div
-					className="flex justify-center items-center gap-1 hover:cursor-pointer"
-					onClick={() => onSortConfig(differentColumns[0].sortKey)}
-				>
-					<span
-						className={`text-center font-semibold text-zinc-300 text-sm ${
-							sortConfig?.type === differentColumns[0].sortKey
-								? "ml-4"
-								: ""
-						}`}
-					>
-						{differentColumns[0].label}
-					</span>
-					{sortConfig?.type === differentColumns[0].sortKey &&
-						(sortConfig?.order === "desc" ? (
-							<ChevronDown className="w-4 h-4" />
-						) : (
-							<ChevronUp className="w-4 h-4" />
-						))}
-				</div>
-				{/* DATE PUBLISHED/RELEASED */}
-				<div
-					className="flex justify-center items-center gap-1 hover:cursor-pointer"
-					onClick={() => onSortConfig(differentColumns[1].sortKey)}
-				>
-					<span
-						className={`text-center font-semibold text-zinc-300 text-sm ${
-							sortConfig?.type === differentColumns[1].sortKey
-								? "ml-4"
-								: ""
-						}`}
-					>
-						{differentColumns[1].label}
-					</span>
-					{sortConfig?.type === differentColumns[1].sortKey &&
-						(sortConfig?.order === "desc" ? (
-							<ChevronDown className="w-4 h-4" />
-						) : (
-							<ChevronUp className="w-4 h-4" />
-						))}
-				</div>
-				<span className="text-center font-semibold text-zinc-300 text-sm pl-0.5">
-					Notes
-				</span>
 			</div>
 			{/* LOADER */}
 			{isProcessing && (

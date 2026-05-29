@@ -13,18 +13,16 @@ function h(seed: string | number, salt: number): number {
 	return ((v >>> 0) % 1000) / 1000;
 }
 
-function accentFromScore(score: number | undefined): string {
-	if (score == null) return "#606060";
-	if (score >= 9) return "#e8b84b";
-	if (score >= 7) return "#60a5fa";
-	if (score >= 5) return "#a1a1aa";
-	if (score >= 3) return "#94a3b8";
-	return "#f87171";
-}
-
 export function ScoreBadge({ score, seed = 0 }: ScoreBadgeProps) {
-	const display = score != null ? String(score) : "–";
-	const accent = accentFromScore(score);
+	const display =
+		score == null
+			? "–"
+			: score === 10
+				? "10"
+				: Number.isInteger(score)
+					? `${score}.0`
+					: String(score);
+	const accent = "#a0a0a0";
 	const fontSize = display.length >= 3 ? 14 : 17;
 	const r = (salt: number) => h(seed, salt);
 
@@ -37,7 +35,6 @@ export function ScoreBadge({ score, seed = 0 }: ScoreBadgeProps) {
 	const outerR = Math.max(aTop, aBot, aLft, aRgt) + 2.5;
 	const dashed = r(7) > 0.5;
 
-	// diagonal mini-arms: angle nudged ±4° from true 45°
 	const diagAngles = [45, 135, 225, 315].map(
 		(base, i) => base + (r(10 + i) * 8 - 4),
 	);
@@ -48,17 +45,14 @@ export function ScoreBadge({ score, seed = 0 }: ScoreBadgeProps) {
 		y: Math.sin((deg * Math.PI) / 180) * rad,
 	});
 
-	// midpoint ticks along each main arm
 	const midTicks = [
-		{ x1: -1.8, y1: -(circleR + gap + aTop) / 2, x2: 1.8, y2: -(circleR + gap + aTop) / 2 },
-		{ x1: -1.8, y1:  (circleR + gap + aBot) / 2, x2: 1.8, y2:  (circleR + gap + aBot) / 2 },
+		{ x1: -1.8, y1: -(circleR + gap + aTop) / 2, x2: 1.8,  y2: -(circleR + gap + aTop) / 2 },
+		{ x1: -1.8, y1:  (circleR + gap + aBot) / 2, x2: 1.8,  y2:  (circleR + gap + aBot) / 2 },
 		{ x1: -(circleR + gap + aLft) / 2, y1: -1.8, x2: -(circleR + gap + aLft) / 2, y2: 1.8 },
 		{ x1:  (circleR + gap + aRgt) / 2, y1: -1.8, x2:  (circleR + gap + aRgt) / 2, y2: 1.8 },
 	];
 
-	const lc = "#3a3a4a"; // main line color
-	const tc = "#2e2e3e"; // tick color
-	const dc = "#252532"; // dim detail color
+	const sc = "#72727e";
 
 	return (
 		<svg
@@ -68,60 +62,63 @@ export function ScoreBadge({ score, seed = 0 }: ScoreBadgeProps) {
 			xmlns="http://www.w3.org/2000/svg"
 		>
 			{/* Outer ring */}
-			<circle cx="0" cy="0" r={outerR} fill="none" stroke={lc} strokeWidth="0.55" strokeDasharray={dashed ? "2.8 2.1" : undefined} opacity="0.65" />
-			{/* Second ring just inside outer */}
-			<circle cx="0" cy="0" r={outerR - 3.5} fill="none" stroke={dc} strokeWidth="0.4" strokeDasharray="1.6 2.6" opacity="0.6" />
+			<circle cx="0" cy="0" r={outerR} fill="none" stroke={sc} strokeWidth="0.55"
+				strokeDasharray={dashed ? "2.8 2.1" : undefined} opacity="0.60" />
+			{/* Second ring */}
+			<circle cx="0" cy="0" r={outerR - 3.5} fill="none" stroke={sc}
+				strokeWidth="0.4" strokeDasharray="1.6 2.6" opacity="0.36" />
 
 			{/* Main arms */}
-			<line x1="0" y1={-aTop} x2="0" y2={-(circleR + gap)} stroke={lc} strokeWidth="1" strokeLinecap="round" />
-			<line x1="0" y1={circleR + gap} x2="0" y2={aBot} stroke={lc} strokeWidth="1" strokeLinecap="round" />
-			<line x1={-aLft} y1="0" x2={-(circleR + gap)} y2="0" stroke={lc} strokeWidth="1" strokeLinecap="round" />
-			<line x1={circleR + gap} y1="0" x2={aRgt} y2="0" stroke={lc} strokeWidth="1" strokeLinecap="round" />
+			<line x1="0" y1={-aTop} x2="0" y2={-(circleR + gap)} stroke={sc} strokeWidth="1" strokeLinecap="round" opacity="0.3" />
+			<line x1="0" y1={circleR + gap} x2="0" y2={aBot} stroke={sc} strokeWidth="1" strokeLinecap="round" opacity="0.3" />
+			<line x1={-aLft} y1="0" x2={-(circleR + gap)} y2="0" stroke={sc} strokeWidth="1" strokeLinecap="round" opacity="0.3" />
+			<line x1={circleR + gap} y1="0" x2={aRgt} y2="0" stroke={sc} strokeWidth="1" strokeLinecap="round" opacity="0.3" />
 
-			{/* End ticks on main arms */}
-			<line x1="-3.5" y1={-aTop} x2="3.5" y2={-aTop} stroke={tc} strokeWidth="0.8" strokeLinecap="round" />
-			<line x1="-3.5" y1={aBot} x2="3.5" y2={aBot} stroke={tc} strokeWidth="0.8" strokeLinecap="round" />
-			<line x1={-aLft} y1="-3.5" x2={-aLft} y2="3.5" stroke={tc} strokeWidth="0.8" strokeLinecap="round" />
-			<line x1={aRgt} y1="-3.5" x2={aRgt} y2="3.5" stroke={tc} strokeWidth="0.8" strokeLinecap="round" />
+			{/* End ticks */}
+			<line x1="-3.5" y1={-aTop} x2="3.5" y2={-aTop} stroke={sc} strokeWidth="0.8" strokeLinecap="round" opacity="0.24" />
+			<line x1="-3.5" y1={aBot}  x2="3.5" y2={aBot}  stroke={sc} strokeWidth="0.8" strokeLinecap="round" opacity="0.24" />
+			<line x1={-aLft} y1="-3.5" x2={-aLft} y2="3.5" stroke={sc} strokeWidth="0.8" strokeLinecap="round" opacity="0.24" />
+			<line x1={aRgt}  y1="-3.5" x2={aRgt}  y2="3.5" stroke={sc} strokeWidth="0.8" strokeLinecap="round" opacity="0.24" />
 
-			{/* Midpoint ticks on main arms */}
+			{/* Midpoint ticks */}
 			{midTicks.map((t, i) => (
-				<line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke={dc} strokeWidth="0.55" strokeLinecap="round" opacity="0.7" />
+				<line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
+					stroke={sc} strokeWidth="0.55" strokeLinecap="round" opacity="0.16" />
 			))}
 
-			{/* Diagonal mini-arms with their own end ticks */}
+			{/* Diagonal mini-arms */}
 			{diagAngles.map((deg, i) => {
 				const inner = xy(deg, circleR + gap);
 				const outer = xy(deg, circleR + gap + diagLen[i]);
-				const perp = xy(deg + 90, 2.2);
+				const perp  = xy(deg + 90, 2.2);
 				return (
 					<g key={i}>
-						<line x1={inner.x} y1={inner.y} x2={outer.x} y2={outer.y} stroke={tc} strokeWidth="0.8" strokeLinecap="round" />
+						<line x1={inner.x} y1={inner.y} x2={outer.x} y2={outer.y}
+							stroke={sc} strokeWidth="0.8" strokeLinecap="round" opacity="0.22" />
 						<line
 							x1={outer.x - perp.x} y1={outer.y - perp.y}
 							x2={outer.x + perp.x} y2={outer.y + perp.y}
-							stroke={dc} strokeWidth="0.65" strokeLinecap="round"
-						/>
+							stroke={sc} strokeWidth="0.65" strokeLinecap="round" opacity="0.16" />
 					</g>
 				);
 			})}
 
-			{/* Inner circle */}
+			{/* Inner circle — accent (score-based) */}
 			<circle cx="0" cy="0" r={circleR} fill="#07070b" stroke={accent} strokeWidth="1.1" />
-			{/* Inner dashed ring */}
-			<circle cx="0" cy="0" r={circleR - 3.5} fill="none" stroke={accent} strokeWidth="0.5" strokeDasharray="2.2 2.8" opacity="0.28" />
+			<circle cx="0" cy="0" r={circleR - 3.5} fill="none" stroke={accent}
+				strokeWidth="0.5" strokeDasharray="2.2 2.8" opacity="0.28" />
 
 			{/* Score */}
 			<text
-				x="0"
-				y="0"
+				x={display === "10" ? "-0.9" : "0"}
+				y={display === "10" ? "1.4" : "0.7"}
 				textAnchor="middle"
-				dominantBaseline="central"
+				dominantBaseline="middle"
 				fill={accent}
 				fontSize={fontSize}
 				fontWeight="700"
 				fontFamily="system-ui, -apple-system, sans-serif"
-				letterSpacing="-0.5"
+				letterSpacing={display === "10" ? "0" : "-0.5"}
 			>
 				{display}
 			</text>

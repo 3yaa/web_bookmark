@@ -1,9 +1,10 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Loader2, Tv, ChevronLeft, ChevronRight, Leaf } from "lucide-react";
 import { useMediaData } from "@/hooks/useMediaData";
+import { getStatusBorderColor } from "@/utils/formattingUtils";
 import { useAuthFetch } from "@/app/auth/hooks/useAuthFetch";
 import type { ShowProps, HollowShowProps } from "@/types/show";
 import { AddShow } from "@/app/shows/AddShow";
@@ -56,7 +57,7 @@ export function MonthlyShows() {
   //
   const [shows, setShows] = useState<HollowShowProps[]>([]);
   const [addingTitle, setAddingTitle] = useState<string | null>(null);
-  const [selectAddedShow, setSelectAddedShow] = useState<ShowProps | null>(
+  const [selectAddedShowId, setSelectAddedShowId] = useState<number | null>(
     null,
   );
   //
@@ -71,6 +72,10 @@ export function MonthlyShows() {
     statusOrder: { Watching: 0, "Want to Watch": 1, Completed: 2, Dropped: 3 },
   });
   const { authFetch } = useAuthFetch();
+  const selectAddedShow =
+    selectAddedShowId != null
+      ? (items.find((s) => s.id === selectAddedShowId) ?? null)
+      : null;
 
   const isFuture = isFutureMonth(year, month);
 
@@ -123,12 +128,6 @@ export function MonthlyShows() {
       setMonth((m: number) => m + 1);
     }
   };
-
-  // cache existing shows
-  const exitingShows = useMemo(
-    () => new Set(items.map((s) => s.tmdbId)),
-    [items],
-  );
 
   return (
     <div className="relative min-h-screen bg-zinc-950 text-zinc-200">
@@ -218,21 +217,19 @@ export function MonthlyShows() {
         {!loading && !error && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-x-5 gap-y-7">
             {shows.map((show) => {
-              const inList = exitingShows.has(show.tmdbId);
+              const matchedItem = items.find((s) => s.tmdbId === show.tmdbId);
+              const inList = !!matchedItem;
               return (
                 <div
                   key={show.tmdbId}
                   onClick={
-                    inList
-                      ? () =>
-                          setSelectAddedShow(
-                            items.find((s) => s.tmdbId === show.tmdbId) ?? null,
-                          )
+                    matchedItem
+                      ? () => setSelectAddedShowId(matchedItem.id)
                       : () => setAddingTitle(show.title)
                   }
                   className={`group bg-linear-to-b from-zinc-900/70 to-zinc-950/85 backdrop-blur-sm rounded-xl border shadow-lg shadow-black/50 transition-all duration-300 ease-out overflow-hidden ${
-                    inList
-                      ? "cursor-pointer border-emerald-800 border-3 hover:shadow-2xl hover:shadow-black/70 hover:-translate-y-1"
+                    matchedItem
+                      ? `cursor-pointer ${getStatusBorderColor(matchedItem.status)} border-3 hover:shadow-2xl hover:shadow-black/70 hover:-translate-y-1`
                       : "cursor-pointer border-zinc-800/50 hover:shadow-2xl hover:shadow-black/70 hover:-translate-y-1 hover:border-zinc-700/70"
                   }`}
                 >
@@ -355,7 +352,7 @@ export function MonthlyShows() {
       {selectAddedShow && (
         <ShowDetailsModal
           show={selectAddedShow}
-          onClose={() => setSelectAddedShow(null)}
+          onClose={() => setSelectAddedShowId(null)}
           onUpdate={(id, updates) => {
             if (updates) update(id, updates);
           }}

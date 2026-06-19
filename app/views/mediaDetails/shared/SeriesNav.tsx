@@ -1,5 +1,6 @@
 // FOR GAME/MOVIE/BOOK
-import { BaseMediaProps } from "@/types/media";
+import { BaseMediaProps, SeriesMediaProps } from "@/types/media";
+import { GameProps } from "@/types/game";
 
 interface SeriesNavProps {
   item: BaseMediaProps;
@@ -16,42 +17,48 @@ export function SeriesNav({
 }: SeriesNavProps) {
   const nav =
     mediaType === "game"
-      ? {
-          prev:
-            item.dlcs && item.dlcIndex! - 1 >= 0
+      ? (() => {
+          const g = item as unknown as GameProps;
+          return {
+            prev:
+              g.dlcs && g.dlcIndex - 1 >= 0
+                ? {
+                    label: "Previous",
+                    name: g.dlcs[g.dlcIndex - 1].name,
+                    action: { type: "dlcNav", payload: "prev" },
+                  }
+                : null,
+            center: g.dlcIndex !== 0 ? String(g.dlcIndex) : null,
+            next:
+              g.dlcs && g.dlcIndex + 1 < g.dlcs.length
+                ? {
+                    label: "Next",
+                    name: g.dlcs[g.dlcIndex + 1].name,
+                    action: { type: "dlcNav", payload: "next" },
+                  }
+                : null,
+          };
+        })()
+      : (() => {
+          const s = item as unknown as SeriesMediaProps;
+          return {
+            prev: s.prequel
               ? {
-                  label: "Previous",
-                  name: item.dlcs[item.dlcIndex! - 1].name,
-                  action: { type: "dlcNav", payload: "prev" },
+                  label: "Prequel",
+                  name: s.prequel,
+                  action: { type: "seriesNav", payload: "prequel" },
                 }
               : null,
-          center: item.dlcIndex !== 0 ? String(item.dlcIndex) : null,
-          next:
-            item.dlcs && item.dlcIndex! + 1 < item.dlcs.length
+            center: s.placeInSeries ?? null,
+            next: s.sequel
               ? {
-                  label: "Next",
-                  name: item.dlcs[item.dlcIndex! + 1].name,
-                  action: { type: "dlcNav", payload: "next" },
+                  label: "Sequel",
+                  name: s.sequel,
+                  action: { type: "seriesNav", payload: "sequel" },
                 }
               : null,
-        }
-      : {
-          prev: item.prequel
-            ? {
-                label: "Prequel",
-                name: item.prequel,
-                action: { type: "seriesNav", payload: "prequel" },
-              }
-            : null,
-          center: item.placeInSeries ?? null,
-          next: item.sequel
-            ? {
-                label: "Sequel",
-                name: item.sequel,
-                action: { type: "seriesNav", payload: "sequel" },
-              }
-            : null,
-        };
+          };
+        })();
 
   return (
     <div className="pt-2.5 border-t border-zinc-800/80 pr-2">

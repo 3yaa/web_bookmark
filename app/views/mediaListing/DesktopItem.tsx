@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 import Image from "next/image";
-import { BaseMediaProps, ColumnConfig } from "@/types/media";
+import { BaseMediaProps, ColumnConfig, SeriesMediaProps } from "@/types/media";
+import { GameProps } from "@/types/game";
 import {
 	formatDateShort,
 	getStatusBg,
@@ -35,6 +36,9 @@ export const DesktopItem = React.memo(function DesktopItem<
 	onClick,
 	differentColumns,
 }: DesktopItemProps<T>) {
+	const s = item as unknown as SeriesMediaProps;
+	const g = item as unknown as GameProps;
+
 	function pseudoRand(seed: string | number, salt = 0): number {
 		const str = String(seed) + salt;
 		let h = 2166136261;
@@ -85,13 +89,13 @@ export const DesktopItem = React.memo(function DesktopItem<
 				<div className="flex-1 flex flex-col justify-center">
 					{/* SERIES TITLE */}
 					<div className="h-5 font-semibold text-zinc-400 text-sm group-hover:text-zinc-300 flex gap-1">
-						{(item.seriesTitle ?? item.mainTitle) && (
+						{(s.seriesTitle ?? g.mainTitle) && (
 							<>
 								<span className="block max-w-[88%] whitespace-nowrap text-ellipsis overflow-hidden shrink">
-									{item.seriesTitle ?? item.mainTitle} ᭡
+									{s.seriesTitle ?? g.mainTitle} ᭡
 								</span>
-								{item.placeInSeries && (
-									<span>{item.placeInSeries}</span>
+								{s.placeInSeries && (
+									<span>{s.placeInSeries}</span>
 								)}
 							</>
 						)}

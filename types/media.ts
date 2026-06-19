@@ -1,6 +1,4 @@
 import { Score } from "@/lib/tierConfig";
-import { IGDBInitProps } from "./game";
-import { TMDBSeasonProps } from "./show";
 
 export type MediaStatus =
   | "Completed"
@@ -18,6 +16,13 @@ export interface ColumnConfig<T> {
   getValue: (item: T) => string | number | null | undefined;
 }
 
+export interface SeriesMediaProps {
+  seriesTitle?: string | null;
+  placeInSeries?: string | null;
+  prequel?: string | null;
+  sequel?: string | null;
+}
+
 export interface BaseMediaProps {
   id: number;
   title: string;
@@ -32,18 +37,4 @@ export interface BaseMediaProps {
   coverUrl?: string;
   //
   backdropUrl?: string;
-
-  // series (book/movie)
-  seriesTitle?: string | null;
-  placeInSeries?: string | null;
-  prequel?: string | null;
-  sequel?: string | null;
-  // game only
-  mainTitle?: string;
-  dlcs?: IGDBInitProps[];
-  dlcIndex?: number;
-  // show only
-  seasons?: TMDBSeasonProps[];
-  curSeasonIndex?: number;
-  curEpisode?: number;
 }

@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { Option } from "@/app/components/ui/Dropdown";
-import { BaseMediaProps, ColumnConfig } from "@/types/media";
+import { BaseMediaProps, ColumnConfig, SeriesMediaProps } from "@/types/media";
+import { GameProps } from "@/types/game";
+import { ShowProps } from "@/types/show";
 import { useEffect, useRef, useState } from "react";
 import { MobileScorePicker } from "@/app/components/ui/MobileScorePicker";
 import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
@@ -57,6 +59,10 @@ export function MobileDetails<T extends BaseMediaProps>({
   const dragVelocity = useRef(0);
   const lastY = useRef(0);
   const lastTime = useRef(0);
+
+  const s = item as unknown as SeriesMediaProps;
+  const g = item as unknown as GameProps;
+  const show = item as unknown as ShowProps;
 
   const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -312,10 +318,10 @@ export function MobileDetails<T extends BaseMediaProps>({
               {(() => {
                 const seriesLabel =
                   mediaType === "game"
-                    ? item.dlcIndex !== 0
-                      ? item.mainTitle
+                    ? g.dlcIndex !== 0
+                      ? g.mainTitle
                       : null
-                    : item.seriesTitle;
+                    : s.seriesTitle;
 
                 return seriesLabel ? (
                   <div className="text-zinc-400 text-sm font-semibold -mt-2.5">
@@ -361,18 +367,18 @@ export function MobileDetails<T extends BaseMediaProps>({
               </div>
             </div>
             {/* PROGRESS BAR — show only */}
-            {mediaType === "show" && item.seasons && (
+            {mediaType === "show" && show.seasons && (
               <div onClick={() => setIsProgressPickerOpen(true)}>
                 <div className="mt-4.5 w-full bg-zinc-800/80 rounded-md h-1.5 overflow-hidden shadow-md shadow-black/50">
                   <div
                     className={`${getStatusBg(item.status)} h-1.5 transition-all duration-500 ease-out rounded-md`}
                     style={{
                       width: `${
-                        item.seasons?.[item.curSeasonIndex ?? 0]?.episode_count
+                        show.seasons?.[show.curSeasonIndex ?? 0]?.episode_count
                           ? calcCurProgress(
-                              item.seasons,
-                              item.curSeasonIndex ?? 0,
-                              item.curEpisode ?? 0,
+                              show.seasons,
+                              show.curSeasonIndex ?? 0,
+                              show.curEpisode ?? 0,
                             )
                           : 100
                       }%`,
@@ -380,8 +386,8 @@ export function MobileDetails<T extends BaseMediaProps>({
                   />
                 </div>
                 <div className="mt-1 flex justify-between text-zinc-400 text-sm font-bold mb-0.5">
-                  <span>Season: {(item.curSeasonIndex ?? 0) + 1 || "-"}</span>
-                  <span>Episode: {item.curEpisode ?? "-"}</span>
+                  <span>Season: {(show.curSeasonIndex ?? 0) + 1 || "-"}</span>
+                  <span>Episode: {show.curEpisode ?? "-"}</span>
                 </div>
               </div>
             )}
@@ -458,9 +464,9 @@ export function MobileDetails<T extends BaseMediaProps>({
       {mediaType === "show" && (
         <MobileProgressPicker
           isOpen={isProgressPickerOpen}
-          seasons={item.seasons || []}
-          curSeasonIndex={item.curSeasonIndex ?? 0}
-          curEpisode={item.curEpisode ?? 1}
+          seasons={show.seasons || []}
+          curSeasonIndex={show.curSeasonIndex ?? 0}
+          curEpisode={show.curEpisode ?? 1}
           onClose={() => setIsProgressPickerOpen(false)}
           onSeasonIndexChange={(seasonIndex) => {
             onAction({ type: "changeSeasonNum", payload: seasonIndex });

@@ -1,5 +1,6 @@
 // FOR GAME/MOVIE/BOOK
-import { BaseMediaProps } from "@/types/media";
+import { BaseMediaProps, SeriesMediaProps } from "@/types/media";
+import { GameProps } from "@/types/game";
 
 interface MobileSeriesNavProps {
   item: BaseMediaProps;
@@ -16,38 +17,44 @@ export function MobileSeriesNav({
 }: MobileSeriesNavProps) {
   const nav =
     mediaType === "game"
-      ? {
-          prev:
-            item.dlcs && item.dlcIndex! - 1 >= 0
+      ? (() => {
+          const g = item as unknown as GameProps;
+          return {
+            prev:
+              g.dlcs && g.dlcIndex - 1 >= 0
+                ? {
+                    name: g.dlcs[g.dlcIndex - 1].name,
+                    action: { type: "dlcNav", payload: "prev" },
+                  }
+                : null,
+            center: g.dlcIndex !== 0 ? String(g.dlcIndex) : null,
+            next:
+              g.dlcs && g.dlcIndex + 1 < g.dlcs.length
+                ? {
+                    name: g.dlcs[g.dlcIndex + 1].name,
+                    action: { type: "dlcNav", payload: "next" },
+                  }
+                : null,
+          };
+        })()
+      : (() => {
+          const s = item as unknown as SeriesMediaProps;
+          return {
+            prev: s.prequel
               ? {
-                  name: item.dlcs[item.dlcIndex! - 1].name,
-                  action: { type: "dlcNav", payload: "prev" },
+                  name: s.prequel,
+                  action: { type: "seriesNav", payload: "prequel" },
                 }
               : null,
-          center: item.dlcIndex !== 0 ? String(item.dlcIndex) : null,
-          next:
-            item.dlcs && item.dlcIndex! + 1 < item.dlcs.length
+            center: s.placeInSeries ?? null,
+            next: s.sequel
               ? {
-                  name: item.dlcs[item.dlcIndex! + 1].name,
-                  action: { type: "dlcNav", payload: "next" },
+                  name: s.sequel,
+                  action: { type: "seriesNav", payload: "sequel" },
                 }
               : null,
-        }
-      : {
-          prev: item.prequel
-            ? {
-                name: item.prequel,
-                action: { type: "seriesNav", payload: "prequel" },
-              }
-            : null,
-          center: item.placeInSeries ?? null,
-          next: item.sequel
-            ? {
-                name: item.sequel,
-                action: { type: "seriesNav", payload: "sequel" },
-              }
-            : null,
-        };
+          };
+        })();
 
   if (!nav.center) return null;
 

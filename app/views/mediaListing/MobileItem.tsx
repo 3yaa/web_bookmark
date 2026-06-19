@@ -1,6 +1,6 @@
 import Image from "next/image";
 import React, { ReactNode } from "react";
-import { BaseMediaProps, ColumnConfig } from "@/types/media";
+import { BaseMediaProps, ColumnConfig, SeriesMediaProps } from "@/types/media";
 import { BackdropImageMobile } from "../../components/ui/BackdropMobile";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { ShowProgressBarMobile } from "../../shows/components/showProgressListing";
@@ -38,11 +38,14 @@ export const MobileItem = React.memo(function MobileItem<
 						sequel: game.dlcs?.[game.dlcIndex + 1]?.name, //next
 					};
 				})()
-			: {
-					placement: item.placeInSeries,
-					prequel: item.prequel,
-					sequel: item.sequel,
-				};
+			: (() => {
+					const s = item as unknown as SeriesMediaProps;
+					return {
+						placement: s.placeInSeries,
+						prequel: s.prequel,
+						sequel: s.sequel,
+					};
+				})();
 
 	return (
 		<div

@@ -1,4 +1,4 @@
-import { BaseMediaProps, ColumnConfig, SortState } from "./media";
+import { BaseMediaProps, ColumnConfig, SeriesMediaProps, SortState } from "./media";
 
 export type MovieSortConfig = SortState<
   "title" | "score" | "dateCompleted" | "director" | "dateReleased"
@@ -16,7 +16,7 @@ export const DIFF_COLUMNS_MOVIE: [
   },
 ];
 
-export interface MovieProps extends BaseMediaProps {
+export interface MovieProps extends BaseMediaProps, SeriesMediaProps {
   status: "Completed" | "Want to Watch" | "Dropped";
   imdbId: string;
   tmdbId?: string;

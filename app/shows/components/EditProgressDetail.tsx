@@ -1,4 +1,4 @@
-import { BaseMediaProps } from "@/types/media";
+import { ShowProps } from "@/types/show";
 import { getStatusTextColor } from "@/utils/formattingUtils";
 import {
   ChevronLeft,
@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 interface EditProgressProps {
-  item: BaseMediaProps;
+  item: ShowProps;
   editingMode: { season: boolean; episode: boolean };
   inputValues: { season: number | ""; episode: number | "" };
   onAction: (action: { type: string; payload?: unknown }) => void;

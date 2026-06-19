@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Loading } from "@/app/components/ui/Loading";
-import { BaseMediaProps, ColumnConfig } from "@/types/media";
+import { BaseMediaProps, ColumnConfig, SeriesMediaProps } from "@/types/media";
+import { GameProps } from "@/types/game";
 import {
 	formatDateShort,
 	getStatusBorderGradient,
@@ -26,6 +27,7 @@ import { BackdropImageBook } from "@/app/components/ui/BackdropBook";
 import { SeriesNav } from "./shared/SeriesNav";
 import { EditProgress } from "@/app/shows/components/EditProgressDetail";
 import { getDisplayScore, getTierFromMu, Tier } from "@/lib/tierConfig";
+import { ShowProps } from "@/types/show";
 
 interface DesktopDetailsProps<T extends BaseMediaProps> {
 	item: T;
@@ -76,6 +78,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 			e.currentTarget.blur(); // remove focus
 		}
 	};
+	const s = item as unknown as SeriesMediaProps;
+	const g = item as unknown as GameProps;
+
 	// only for game/book
 	const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
 		//detects which side of the div was clicked
@@ -191,10 +196,10 @@ export function DesktopDetails<T extends BaseMediaProps>({
 									</button>
 								)}
 								{/* DELETE SERIES METADATA */}
-								{(item.seriesTitle ||
-									item.placeInSeries ||
-									item.prequel ||
-									item.sequel) &&
+								{(s.seriesTitle ||
+									s.placeInSeries ||
+									s.prequel ||
+									s.sequel) &&
 									mediaType !== "game" && (
 										<button
 											className="p-1.5 rounded-lg bg-zinc-800/0 hover:bg-orange-700/20 hover:cursor-pointer transition-all duration-200 group"
@@ -338,7 +343,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 									className={`flex flex-col flex-1 ${
 										mediaType === "show"
 											? "justify-end"
-											: item.seriesTitle || item.mainTitle
+											: s.seriesTitle || g.mainTitle
 												? "justify-center mt-3"
 												: "justify-center mt-11.5"
 									}`}
@@ -347,10 +352,10 @@ export function DesktopDetails<T extends BaseMediaProps>({
 									{(() => {
 										const seriesLabel =
 											mediaType === "game"
-												? item.dlcIndex !== 0
-													? item.mainTitle
+												? g.dlcIndex !== 0
+													? g.mainTitle
 													: null
-												: item.seriesTitle;
+												: s.seriesTitle;
 
 										return (
 											seriesLabel && (
@@ -518,7 +523,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 										editingMode &&
 										inputValues && (
 											<EditProgress
-												item={item}
+												item={item as unknown as ShowProps}
 												editingMode={editingMode}
 												inputValues={inputValues}
 												onAction={onAction}

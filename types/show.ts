@@ -19,6 +19,7 @@ export const DIFF_COLUMNS_SHOW: [
 export interface ShowProps extends BaseMediaProps {
   status: "Completed" | "Want to Watch" | "Dropped" | "Watching";
   tmdbId: string;
+  imdbId?: string;
   studio?: string;
   dateReleased?: number;
   seasons?: TMDBSeasonProps[];
@@ -37,6 +38,7 @@ export interface TMDBProps {
 export interface TMDBTvProps {
   seasons?: TMDBSeasonProps[];
   studio?: string;
+  imdbId?: string | null;
 }
 
 export interface TMDBSeasonProps {
@@ -54,7 +56,7 @@ export type HollowShowProps = {
   //
   currentEp: number | null;
   totalEp: number | null;
-  //
+  // 
   airDays: string | null;
   first_air_date: string;
 };

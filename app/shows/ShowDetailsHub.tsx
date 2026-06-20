@@ -15,6 +15,7 @@ import ShowModal from "../components/ActorModal";
 import { AddShow } from "./AddShow";
 import { AddMovie } from "@/app/movies/AddMovie";
 import { useAuthFetch } from "@/app/auth/hooks/useAuthFetch";
+import { EpisodeRatingsModal } from "./components/EpisodeRatingsModal";
 
 export type ShowAction =
   | { type: "closeModal" }
@@ -38,7 +39,8 @@ export type ShowAction =
   | { type: "changeEpisodeInput"; payload: string }
   | { type: "changeSeasonNum"; payload: number }
   | { type: "changeEpisodeNum"; payload: number }
-  | { type: "cast" };
+  | { type: "cast" }
+  | { type: "openRatings" };
 
 interface ShowDetailsProps {
   show: ShowProps;
@@ -74,6 +76,7 @@ export function ShowDetails({
     episode: show.curEpisode,
   });
   // actor related
+  const [ratingsOpen, setRatingsOpen] = useState(false);
   const [castOpen, setCastOpen] = useState(false);
   const [cast, setCast] = useState<CastMember[]>([]);
   const [castLoading, setCastLoading] = useState(false);
@@ -181,6 +184,9 @@ export function ShowDetails({
         break;
       case "cast":
         handleCast();
+        break;
+      case "openRatings":
+        setRatingsOpen(true);
         break;
     }
   };
@@ -479,6 +485,13 @@ export function ShowDetails({
           differentColumns={DIFF_COLUMNS_SHOW}
         />
       </div>
+      {ratingsOpen && (
+        <EpisodeRatingsModal
+          show={show}
+          onClose={() => setRatingsOpen(false)}
+          authFetch={authFetch}
+        />
+      )}
       {castOpen && (
         <ShowModal
           mediaTitle={show.title}

@@ -32,5 +32,6 @@ export function mapTMDBTVToShow(dataTMDBTV: TMDBTvProps): Partial<ShowProps> {
   return {
     seasons: dataTMDBTV.seasons,
     studio: dataTMDBTV.studio,
+    ...(dataTMDBTV.imdbId ? { imdbId: dataTMDBTV.imdbId } : {}),
   };
 }

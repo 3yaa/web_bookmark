@@ -17,6 +17,7 @@ import {
 	RotateCcw,
 	Unlink,
 	Users,
+	BarChart2,
 } from "lucide-react";
 import { BackdropImage } from "@/app/components/ui/Backdrop";
 import { Dropdown, Option } from "@/app/components/ui/Dropdown";
@@ -478,6 +479,22 @@ export function DesktopDetails<T extends BaseMediaProps>({
 															item.score!.mu,
 														)}
 													</span>
+													{mediaType === "show" && (
+														<button
+															onClick={() =>
+																onAction({
+																	type: "openRatings",
+																})
+															}
+															title="Episode ratings"
+															className="cursor-pointer text-zinc-500 hover:text-zinc-200 transition-colors duration-200"
+														>
+															<BarChart2
+																className="w-5 h-5"
+																strokeWidth={2}
+															/>
+														</button>
+													)}
 												</div>
 											) : (
 												<Dropdown
@@ -523,7 +540,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 										editingMode &&
 										inputValues && (
 											<EditProgress
-												item={item as unknown as ShowProps}
+												item={
+													item as unknown as ShowProps
+												}
 												editingMode={editingMode}
 												inputValues={inputValues}
 												onAction={onAction}

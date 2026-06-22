@@ -409,6 +409,20 @@ export function DesktopDetails<T extends BaseMediaProps>({
 												/>
 											</button>
 										)}
+										{mediaType === "show" && (
+											<button
+												onClick={() =>
+													onAction({ type: "openRatings" })
+												}
+												title="Episode ratings"
+												className="cursor-pointer text-zinc-400 hover:text-zinc-200 hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] transition-all duration-200 shrink-0 mr-0.5 hover:scale-105"
+											>
+												<BarChart2
+													className="w-4 h-3.75 -mt-0.5"
+													strokeWidth={2}
+												/>
+											</button>
+										)}
 										<span className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 leading-6 truncate max-w-60">
 											{differentColumns[0].getValue(
 												item,
@@ -479,23 +493,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 															item.score!.mu,
 														)}
 													</span>
-													{mediaType === "show" && (
-														<button
-															onClick={() =>
-																onAction({
-																	type: "openRatings",
-																})
-															}
-															title="Episode ratings"
-															className="cursor-pointer text-zinc-500 hover:text-zinc-200 transition-colors duration-200"
-														>
-															<BarChart2
-																className="w-5 h-5"
-																strokeWidth={2}
-															/>
-														</button>
-													)}
-												</div>
+													</div>
 											) : (
 												<Dropdown
 													value={"-"}

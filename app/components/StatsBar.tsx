@@ -111,7 +111,7 @@ export function StatsBar({
       <div className="h-4 flex items-center justify-between">
         {hoveredStatus ? (
           <span
-            className="text-[15px] text-zinc-400 font-bold mx-auto transition-opacity duration-200"
+            className="text-[0.9375rem] text-zinc-400 font-bold mx-auto transition-opacity duration-200"
             key={hoveredStatus}
           >
             {hoveredStatus}: {data[hoveredStatus]}
@@ -119,12 +119,12 @@ export function StatsBar({
         ) : (
           <>
             <span className="text-zinc-400 pl-0.5">
-              <span className="font-medium text-[15px]">Total: </span>
-              <span className="font-bold text-[15px] text-zinc-300/85">
+              <span className="font-medium text-[0.9375rem]">Total: </span>
+              <span className="font-bold text-[0.9375rem] text-zinc-300/85">
                 {total}
               </span>
             </span>
-            <span className="text-[15px] font-bold text-zinc-300/85 pr-1">
+            <span className="text-[0.9375rem] font-bold text-zinc-300/85 pr-1">
               {avgScore != null ? `${avgScore.toFixed(1)}` : ""}
             </span>
           </>

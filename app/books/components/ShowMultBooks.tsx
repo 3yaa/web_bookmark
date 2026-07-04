@@ -2,6 +2,7 @@ import { OpenLibraryProps } from "@/types/book";
 import { X, DiamondPlus } from "lucide-react";
 import Image from "next/image";
 import { Loading } from "@/app/components/ui/Loading";
+import { ModalBackdrop, ModalPanel } from "@/app/components/ui/ModalMotion";
 
 interface MultSearchProps {
   onClose: (action: "manualAdd" | null) => void;
@@ -19,9 +20,9 @@ export function ShowMultBooks({
   isLoading,
 }: MultSearchProps) {
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 overflow-x-hidden">
+    <ModalBackdrop className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 overflow-x-hidden">
       {/* Modal content */}
-      <div className="relative bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] flex flex-col shadow-xl">
+      <ModalPanel className="relative bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] flex flex-col shadow-xl">
         {isLoading && (
           <Loading
             customStyle={"border-emerald-400 h-8 w-8"}
@@ -122,7 +123,7 @@ export function ShowMultBooks({
             ))
           )}
         </div>
-      </div>
-    </div>
+      </ModalPanel>
+    </ModalBackdrop>
   );
 }

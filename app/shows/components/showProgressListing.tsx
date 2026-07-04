@@ -61,7 +61,7 @@ export function ShowProgressBarDesktop({ show }: { show: ShowProps }) {
 	return (
 		<div className="mt-1.5">
 			{/* PROGRESS TEXT */}
-			<div className="absolute right-0 bottom-10 text-[11px] font-medium tracking-wide tabular-nums text-zinc-400 mb-0.5">
+			<div className="absolute right-0 bottom-10 text-[0.6875rem] font-medium tracking-wide tabular-nums text-zinc-400 mb-0.5">
 				{`S${show.curSeasonIndex + 1 || "-"} · E${show.curEpisode ?? "-"}/${show.seasons?.[show.curSeasonIndex]?.episode_count || 0}`}
 			</div>
 			{/* PROGRESS BAR */}

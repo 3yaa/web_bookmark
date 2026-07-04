@@ -1,12 +1,14 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { ModalBackdrop } from "@/app/components/ui/ModalMotion";
+import { AnimatePresence } from "framer-motion";
 import { Gamepad2 } from "lucide-react";
 //
 import { GameProps, IGDBInitProps, IGDBProps } from "@/types/game";
 //
 import {
-  mapIGDBDataToGame,
-  mapIGDBDlcsDataToGame,
+	mapIGDBDataToGame,
+	mapIGDBDlcsDataToGame,
 } from "@/app/games/utils/gameMapping";
 //
 import { GameDetails } from "./GameDetailsHub";
@@ -15,313 +17,321 @@ import { ShowMultGames } from "./components/ShowMultGames";
 import { useGameSearch } from "@/hooks/external/useGameSearch";
 
 interface AddGameProps {
-  isOpen: boolean;
-  onClose: () => void;
-  existingGames: GameProps[];
-  onAddGame: (game: GameProps) => void;
-  titleFromAbove?: {
-    dlcIndex: number;
-    mainTitle: string;
-    dlcs: IGDBInitProps[];
-  } | null;
+	isOpen: boolean;
+	onClose: () => void;
+	existingGames: GameProps[];
+	onAddGame: (game: GameProps) => void;
+	titleFromAbove?: {
+		dlcIndex: number;
+		mainTitle: string;
+		dlcs: IGDBInitProps[];
+	} | null;
 }
 
 const GAMELIMIT = 10;
 
 export function AddGame({
-  isOpen,
-  onClose,
-  onAddGame,
-  titleFromAbove,
+	isOpen,
+	onClose,
+	onAddGame,
+	titleFromAbove,
 }: AddGameProps) {
-  //failure reasons && their fixes -- for user
-  const [failedReason, setFailedReason] = useState("");
-  //
-  const [activeModal, setActiveModal] = useState<
-    "gameDetails" | "multOptions" | null
-  >(null);
-  //
-  const titleToSearch = useRef<HTMLInputElement>(null);
-  const [isDupTitle, setIsDupTitle] = useState(false);
-  //
-  const [allNewGames, setAllNewGames] = useState<IGDBProps[]>([]);
-  const [newGame, setNewGame] = useState<Partial<GameProps>>({});
-  const [backdropUrls, setBackdropUrls] = useState<string[]>([]);
-  const [backdropIndex, setBackdropIndex] = useState(0);
-  //
-  const { searchForGame, searchForGameDlc, isGameSearching } = useGameSearch();
+	//failure reasons && their fixes -- for user
+	const [failedReason, setFailedReason] = useState("");
+	//
+	const [activeModal, setActiveModal] = useState<
+		"gameDetails" | "multOptions" | null
+	>(null);
+	//
+	const titleToSearch = useRef<HTMLInputElement>(null);
+	const [isDupTitle, setIsDupTitle] = useState(false);
+	//
+	const [allNewGames, setAllNewGames] = useState<IGDBProps[]>([]);
+	const [newGame, setNewGame] = useState<Partial<GameProps>>({});
+	const [backdropUrls, setBackdropUrls] = useState<string[]>([]);
+	const [backdropIndex, setBackdropIndex] = useState(0);
+	//
+	const { searchForGame, searchForGameDlc, isGameSearching } =
+		useGameSearch();
 
-  const reset = useCallback(() => {
-    setFailedReason("");
-    setIsDupTitle(false);
-    //
-    setBackdropUrls([]);
-    setBackdropIndex(0);
-    //
-    setActiveModal(null);
-    setAllNewGames([]);
-    setNewGame({});
-    if (titleToSearch.current) {
-      titleToSearch.current.value = "";
-      titleToSearch.current.focus();
-    }
-  }, []);
+	const reset = useCallback(() => {
+		setFailedReason("");
+		setIsDupTitle(false);
+		//
+		setBackdropUrls([]);
+		setBackdropIndex(0);
+		//
+		setActiveModal(null);
+		setAllNewGames([]);
+		setNewGame({});
+		if (titleToSearch.current) {
+			titleToSearch.current.value = "";
+			titleToSearch.current.focus();
+		}
+	}, []);
 
-  const handleTitleSearch = useCallback(async () => {
-    const titleSearching = titleToSearch.current?.value.trim();
-    if (!titleSearching) return null;
-    //
-    const response = await searchForGame(titleSearching, GAMELIMIT);
-    if (response && "isDuplicate" in response) {
-      return {
-        isDuplicate: true,
-        title: response.title,
-      };
-    }
-    const mainGame = response?.[0];
-    if (!mainGame) return null;
-    //
-    setBackdropUrls(mainGame.screenshot_urls?.map((ss) => ss.ss_url) || []);
-    setNewGame({ ...mapIGDBDataToGame(mainGame), status: "Playing" });
-    setAllNewGames(response);
-    return {
-      title: mainGame.title,
-      igdbId: mainGame.igdbId,
-    };
-  }, [searchForGame]);
+	const handleTitleSearch = useCallback(async () => {
+		const titleSearching = titleToSearch.current?.value.trim();
+		if (!titleSearching) return null;
+		//
+		const response = await searchForGame(titleSearching, GAMELIMIT);
+		if (response && "isDuplicate" in response) {
+			return {
+				isDuplicate: true,
+				title: response.title,
+			};
+		}
+		const mainGame = response?.[0];
+		if (!mainGame) return null;
+		//
+		setBackdropUrls(mainGame.screenshot_urls?.map((ss) => ss.ss_url) || []);
+		setNewGame({ ...mapIGDBDataToGame(mainGame), status: "Playing" });
+		setAllNewGames(response);
+		return {
+			title: mainGame.title,
+			igdbId: mainGame.igdbId,
+		};
+	}, [searchForGame]);
 
-  const handleGameSearch = useCallback(async () => {
-    setActiveModal("gameDetails");
-    //
-    const response = await handleTitleSearch();
-    // dup logic --- NEEDS TO BE ABOVE EMPTY LOGIC CAUSE REPSONSE IS EMPTY
-    if (response && "isDuplicate" in response) {
-      setFailedReason(`Already Have Game: ${response.title}`);
-      setIsDupTitle(true);
-      setActiveModal(null);
-      return;
-    }
-    // empty logic
-    if (!response?.igdbId || !response.title) {
-      setFailedReason("Could Not Find Game.");
-      setActiveModal(null);
-      return;
-    }
-  }, [handleTitleSearch]);
+	const handleGameSearch = useCallback(async () => {
+		setActiveModal("gameDetails");
+		//
+		const response = await handleTitleSearch();
+		// dup logic --- NEEDS TO BE ABOVE EMPTY LOGIC CAUSE REPSONSE IS EMPTY
+		if (response && "isDuplicate" in response) {
+			setFailedReason(`Already Have Game: ${response.title}`);
+			setIsDupTitle(true);
+			setActiveModal(null);
+			return;
+		}
+		// empty logic
+		if (!response?.igdbId || !response.title) {
+			setFailedReason("Could Not Find Game.");
+			setActiveModal(null);
+			return;
+		}
+	}, [handleTitleSearch]);
 
-  const handleDlcTitleSearch = useCallback(
-    async (igdbId: number) => {
-      // make call
-      const response = await searchForGameDlc(igdbId);
-      if (response && "isDuplicate" in response) {
-        return {
-          isDuplicate: true,
-          title: response.title,
-        };
-      }
-      const mainDlc = response?.[0];
-      if (!mainDlc) return null;
-      //
-      const mappedData = mapIGDBDlcsDataToGame(
-        mainDlc,
-        titleFromAbove?.mainTitle || "",
-      );
-      setBackdropUrls(mainDlc.screenshot_urls?.map((ss) => ss.ss_url) || []);
-      setNewGame((prev) => ({
-        ...prev,
-        ...mappedData,
-        status: "Playing",
-      }));
-    },
-    [searchForGameDlc, titleFromAbove],
-  );
+	const handleDlcTitleSearch = useCallback(
+		async (igdbId: number) => {
+			// make call
+			const response = await searchForGameDlc(igdbId);
+			if (response && "isDuplicate" in response) {
+				return {
+					isDuplicate: true,
+					title: response.title,
+				};
+			}
+			const mainDlc = response?.[0];
+			if (!mainDlc) return null;
+			//
+			const mappedData = mapIGDBDlcsDataToGame(
+				mainDlc,
+				titleFromAbove?.mainTitle || "",
+			);
+			setBackdropUrls(
+				mainDlc.screenshot_urls?.map((ss) => ss.ss_url) || [],
+			);
+			setNewGame((prev) => ({
+				...prev,
+				...mappedData,
+				status: "Playing",
+			}));
+		},
+		[searchForGameDlc, titleFromAbove],
+	);
 
-  const handleDlcSearch = useCallback(async () => {
-    setActiveModal("gameDetails");
-    //
-    const selectedDlc = titleFromAbove?.dlcs[titleFromAbove.dlcIndex];
-    const { igdbId, title } = {
-      igdbId: selectedDlc?.id,
-      title: selectedDlc?.name,
-    };
-    if (!igdbId || !title) {
-      setFailedReason("igdbId error for dlc details.");
-      setActiveModal(null);
-      return;
-    }
-    //
-    const response = await handleDlcTitleSearch(igdbId);
-    //check for duplicate
-    if (response && "isDuplicate" in response) {
-      setFailedReason(`Already Have Game: ${response.title}`);
-      setIsDupTitle(true);
-      setActiveModal(null);
-      return;
-    }
-    setNewGame((prev) => ({
-      ...prev,
-      ...{
-        mainTitle: titleFromAbove?.mainTitle,
-        dlcIndex: titleFromAbove?.dlcIndex,
-        dlcs: titleFromAbove?.dlcs,
-      },
-    }));
-  }, [titleFromAbove, handleDlcTitleSearch]);
+	const handleDlcSearch = useCallback(async () => {
+		setActiveModal("gameDetails");
+		//
+		const selectedDlc = titleFromAbove?.dlcs[titleFromAbove.dlcIndex];
+		const { igdbId, title } = {
+			igdbId: selectedDlc?.id,
+			title: selectedDlc?.name,
+		};
+		if (!igdbId || !title) {
+			setFailedReason("igdbId error for dlc details.");
+			setActiveModal(null);
+			return;
+		}
+		//
+		const response = await handleDlcTitleSearch(igdbId);
+		//check for duplicate
+		if (response && "isDuplicate" in response) {
+			setFailedReason(`Already Have Game: ${response.title}`);
+			setIsDupTitle(true);
+			setActiveModal(null);
+			return;
+		}
+		setNewGame((prev) => ({
+			...prev,
+			...{
+				mainTitle: titleFromAbove?.mainTitle,
+				dlcIndex: titleFromAbove?.dlcIndex,
+				dlcs: titleFromAbove?.dlcs,
+			},
+		}));
+	}, [titleFromAbove, handleDlcTitleSearch]);
 
-  const handlePickFromMultGames = useCallback((game: IGDBProps) => {
-    try {
-      setBackdropUrls(game.screenshot_urls?.map((ss) => ss.ss_url) || []);
-      setBackdropIndex(0);
-      setNewGame({ ...mapIGDBDataToGame(game), status: "Playing" });
-    } finally {
-      setActiveModal("gameDetails");
-    }
-  }, []);
+	const handlePickFromMultGames = useCallback((game: IGDBProps) => {
+		try {
+			setBackdropUrls(game.screenshot_urls?.map((ss) => ss.ss_url) || []);
+			setBackdropIndex(0);
+			setNewGame({ ...mapIGDBDataToGame(game), status: "Playing" });
+		} finally {
+			setActiveModal("gameDetails");
+		}
+	}, []);
 
-  const handleGameDetailsUpdates = useCallback(
-    async (
-      _gameId: number,
-      updates?: Partial<GameProps>,
-      showMore?: boolean,
-    ) => {
-      if (showMore) {
-        setActiveModal("multOptions");
-        return;
-      }
-      setNewGame((prev) => ({ ...prev, ...updates }));
-    },
-    [],
-  );
+	const handleGameDetailsUpdates = useCallback(
+		async (
+			_gameId: number,
+			updates?: Partial<GameProps>,
+			showMore?: boolean,
+		) => {
+			if (showMore) {
+				setActiveModal("multOptions");
+				return;
+			}
+			setNewGame((prev) => ({ ...prev, ...updates }));
+		},
+		[],
+	);
 
-  const handleGameAdd = async () => {
-    // double check not adding duplicate
-    if (newGame.igdbId && isDupTitle) {
-      return;
-    }
-    //
-    let isStatus = newGame.status;
-    if (!isStatus) {
-      isStatus = "Playing";
-    }
-    const finalGame = {
-      ...newGame,
-      backdropUrl: backdropUrls[backdropIndex],
-      status: isStatus,
-    };
-    onAddGame(finalGame as GameProps);
-    onClose();
-  };
+	const handleGameAdd = async () => {
+		// double check not adding duplicate
+		if (newGame.igdbId && isDupTitle) {
+			return;
+		}
+		//
+		let isStatus = newGame.status;
+		if (!isStatus) {
+			isStatus = "Playing";
+		}
+		const finalGame = {
+			...newGame,
+			backdropUrl: backdropUrls[backdropIndex],
+			status: isStatus,
+		};
+		onAddGame(finalGame as GameProps);
+		onClose();
+	};
 
-  const handleGameDetailsClose = () => {
-    reset();
-    setActiveModal(null);
-    if (titleFromAbove) {
-      onClose();
-    }
-  };
+	const handleGameDetailsClose = () => {
+		reset();
+		setActiveModal(null);
+		if (titleFromAbove) {
+			onClose();
+		}
+	};
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.stopPropagation();
-      handleGameSearch();
-    }
-  };
+	const handleKeyPress = (e: React.KeyboardEvent) => {
+		if (e.key === "Enter") {
+			e.stopPropagation();
+			handleGameSearch();
+		}
+	};
 
-  const eraseErrMsg = () => {
-    if (failedReason) {
-      setFailedReason("");
-      setIsDupTitle(false);
-    }
-  };
+	const eraseErrMsg = () => {
+		if (failedReason) {
+			setFailedReason("");
+			setIsDupTitle(false);
+		}
+	};
 
-  //reset on both because sometimes when opening some ui artificate
-  useEffect(() => {
-    reset();
-  }, [isOpen, reset]);
+	//reset on both because sometimes when opening some ui artificate
+	useEffect(() => {
+		reset();
+	}, [isOpen, reset]);
 
-  // for when to search game without modal
-  useEffect(() => {
-    if (titleFromAbove) {
-      handleDlcSearch();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [titleFromAbove]);
+	// for when to search game without modal
+	useEffect(() => {
+		if (titleFromAbove) {
+			handleDlcSearch();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [titleFromAbove]);
 
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    //
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [onClose]);
+	useEffect(() => {
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === "Escape") {
+				onClose();
+			}
+		};
+		//
+		window.addEventListener("keydown", handleEscape);
+		return () => window.removeEventListener("keydown", handleEscape);
+	}, [onClose]);
 
-  if (!isOpen) return null;
+	if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-10 animate-in fade-in duration-200">
-      {/* maybe not allow user to close modal as new game coming? */}
-      <div className="fixed inset-0" onClick={onClose} />
-      {!titleFromAbove ? (
-        <div className="bg-linear-to-b from-zinc-950/80 to-zinc-900/50 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
-          <h2 className="text-xl font-semibold mb-4 text-zinc-300/90 flex justify-center items-center gap-2">
-            <Gamepad2 className="w-5 h-5 text-zinc-300/90" />
-            Search for New Game
-          </h2>
-          <div className="flex gap-3">
-            <input
-              type="text"
-              ref={titleToSearch}
-              placeholder="Search for game..."
-              onKeyDown={handleKeyPress}
-              onInput={eraseErrMsg}
-              disabled={isGameSearching}
-              className="w-full bg-zinc-800/50 border border-zinc-800/50 rounded-xl px-4 py-3 text-zinc-300 font-medium placeholder-zinc-400 focus:border-zinc-800 focus:ring-1 focus:ring-zinc-900/50 outline-none transition-all duration-200 shadow-lg shadow-black/20"
-            />
-          </div>
-          <div className="flex justify-between mx-2">
-            {failedReason && !isGameSearching && (
-              <div className="mt-3 text-zinc-400 text-sm font-medium">
-                {failedReason}
-              </div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <input
-          type="text"
-          ref={titleToSearch}
-          disabled
-          style={{ display: "none" }}
-        />
-      )}
-      {activeModal === "gameDetails" && (
-        <GameDetails
-          game={newGame as GameProps}
-          onClose={handleGameDetailsClose}
-          onUpdate={handleGameDetailsUpdates}
-          addGame={handleGameAdd}
-          isLoading={{
-            isTrue: isGameSearching,
-            style: "h-8 w-8 border-emerald-400",
-            text: "Searching...",
-          }}
-          backdropUrls={backdropUrls}
-          backdropIndex={backdropIndex}
-          updateBackdropIndex={(newIndex: number) => setBackdropIndex(newIndex)}
-        />
-      )}
-      {activeModal === "multOptions" && (
-        <ShowMultGames
-          onClose={() => setActiveModal("gameDetails")}
-          games={allNewGames}
-          prompt={titleToSearch.current?.value || ""}
-          onClickedGame={handlePickFromMultGames}
-          isLoading={isGameSearching}
-        />
-      )}
-    </div>
-  );
+	return (
+		<ModalBackdrop className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-10">
+			{/* maybe not allow user to close modal as new game coming? */}
+			<div className="fixed inset-0" onClick={onClose} />
+			{!titleFromAbove ? (
+				<div className="bg-linear-to-b from-zinc-950/80 to-zinc-900/50 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
+					<h2 className="text-xl font-semibold mb-4 text-zinc-300/90 flex justify-center items-center gap-2">
+						<Gamepad2 className="w-5 h-5 text-zinc-300/90" />
+						Search for New Game
+					</h2>
+					<div className="flex gap-3">
+						<input
+							type="text"
+							ref={titleToSearch}
+							placeholder="Search for game..."
+							onKeyDown={handleKeyPress}
+							onInput={eraseErrMsg}
+							disabled={isGameSearching}
+							className="w-full bg-zinc-800/50 border border-zinc-800/50 rounded-xl px-4 py-3 text-zinc-300 font-medium placeholder-zinc-400 focus:border-zinc-800 focus:ring-1 focus:ring-zinc-900/50 outline-none transition-all duration-200 shadow-lg shadow-black/20"
+						/>
+					</div>
+					<div className="flex justify-between mx-2">
+						{failedReason && !isGameSearching && (
+							<div className="mt-3 text-zinc-400 text-sm font-medium">
+								{failedReason}
+							</div>
+						)}
+					</div>
+				</div>
+			) : (
+				<input
+					type="text"
+					ref={titleToSearch}
+					disabled
+					style={{ display: "none" }}
+				/>
+			)}
+			{activeModal === "gameDetails" && (
+				<GameDetails
+					game={newGame as GameProps}
+					onClose={handleGameDetailsClose}
+					onUpdate={handleGameDetailsUpdates}
+					addGame={handleGameAdd}
+					isLoading={{
+						isTrue: isGameSearching,
+						style: "h-8 w-8 border-emerald-400",
+						text: "Searching...",
+					}}
+					backdropUrls={backdropUrls}
+					backdropIndex={backdropIndex}
+					updateBackdropIndex={(newIndex: number) =>
+						setBackdropIndex(newIndex)
+					}
+				/>
+			)}
+			<AnimatePresence>
+				{activeModal === "multOptions" && (
+					<ShowMultGames
+						key="mult"
+						onClose={() => setActiveModal("gameDetails")}
+						games={allNewGames}
+						prompt={titleToSearch.current?.value || ""}
+						onClickedGame={handlePickFromMultGames}
+						isLoading={isGameSearching}
+					/>
+				)}
+			</AnimatePresence>
+		</ModalBackdrop>
+	);
 }

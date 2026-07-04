@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { BaseMediaProps } from "@/types/media";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
+import { ModalBackdrop, ModalPanel } from "@/app/components/ui/ModalMotion";
 import { actions, ScoreBattlerUIProps } from "./shared";
 
 export function ScoreBattlerDesktop<T extends BaseMediaProps>({
@@ -13,14 +14,14 @@ export function ScoreBattlerDesktop<T extends BaseMediaProps>({
   const imgFit = mediaType === "game" ? "object-cover" : "object-fill";
 
   return (
-    <div className="fixed inset-0 bg-linear-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20 animate-in fade-in duration-300">
+    <ModalBackdrop className="fixed inset-0 bg-linear-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20">
       <div className="fixed inset-0" />
       {/* BACKGROUND BORDER GRADIENT */}
-      <div
+      <ModalPanel
         className={`rounded-2xl bg-linear-to-b ${getStatusBorderGradient(selectedItem.status)} p-1.5 py-2 lg:min-w-215 lg:max-w-215`}
       >
         {/* ACTUAL DETAIL CARD */}
-        <div className="bg-linear-to-br bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 w-full max-h-[calc(100vh-3rem)]">
+        <div className="bg-linear-to-br bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl w-full max-h-[calc(100vh-3rem)]">
           <div
             className={`flex justify-between px-5 py-3.5 border-0 rounded-2xl overflow-hidden`}
           >
@@ -109,7 +110,7 @@ export function ScoreBattlerDesktop<T extends BaseMediaProps>({
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </ModalPanel>
+    </ModalBackdrop>
   );
 }

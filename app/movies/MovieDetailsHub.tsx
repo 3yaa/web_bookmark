@@ -11,10 +11,14 @@ import {
 	fetchActorWorks,
 	fetchMovieCast,
 } from "../../utils/getActorInfo";
-import ShowModal from "../components/ActorModal";
+import ActorItemsModal from "../components/ActorModal";
+import { AnimatePresence } from "framer-motion";
 import { AddShow } from "@/app/shows/AddShow";
 import { AddMovie } from "@/app/movies/AddMovie";
 import { useAuthFetch } from "@/app/auth/hooks/useAuthFetch";
+import { ShowProps } from "@/types/show";
+import { ShowDetails } from "../shows/ShowDetailsHub";
+import { MediaStatus } from "@/types/media";
 
 export type MovieAction =
 	| { type: "closeModal" }
@@ -45,6 +49,15 @@ interface MovieDetailsProps {
 	showSequelPrequel?: (sequelTitle: string) => void;
 	showAnotherSeries?: (seriesDir: "left" | "right") => void;
 	existingMovies?: MovieProps[];
+	onAddWork?: (movie: MovieProps) => Promise<unknown>;
+	//
+	onShowUpdate?: (
+		showId: number,
+		updates?: Partial<ShowProps>,
+		takeAction?: boolean,
+	) => void;
+	existingShows?: ShowProps[];
+	onAddShow?: (movie: ShowProps) => Promise<unknown>;
 }
 
 export function MovieDetails({
@@ -56,6 +69,10 @@ export function MovieDetails({
 	showSequelPrequel,
 	showAnotherSeries,
 	existingMovies = [],
+	existingShows = [],
+	onShowUpdate,
+	onAddWork,
+	onAddShow,
 }: MovieDetailsProps) {
 	const [localNote, setLocalNote] = useState(movie.note || "");
 	// actor related
@@ -69,13 +86,56 @@ export function MovieDetails({
 		"popularity",
 	);
 	const [pendingWork, setPendingWork] = useState<ActorWork | null>(null);
-	const [selectedWorkMovie, setSelectedWorkMovie] =
-		useState<MovieProps | null>(null);
+	const [selectedWorkItem, setSelectedWorkItem] = useState<
+		{ type: "movie"; id: number } | { type: "tv"; id: number } | null
+	>(null);
 	const { authFetch } = useAuthFetch();
 
-	const handleWorkClick = useCallback((work: ActorWork) => {
-		setPendingWork(work);
-	}, []);
+	const addedStatusById = useMemo(() => {
+		const map = new Map<string, MediaStatus>();
+		for (const m of existingMovies)
+			if (m.tmdbId) map.set(`movie:${m.tmdbId}`, m.status);
+		for (const s of existingShows)
+			if (s.tmdbId) map.set(`tv:${s.tmdbId}`, s.status);
+		return map;
+	}, [existingMovies, existingShows]);
+
+	// change, so an update made inside the nested modal is reflected right away
+	const selectedMovie =
+		selectedWorkItem?.type === "movie"
+			? existingMovies.find((m) => m.id === selectedWorkItem.id)
+			: undefined;
+
+	const selectedShow =
+		selectedWorkItem?.type === "tv"
+			? existingShows.find((s) => s.id === selectedWorkItem.id)
+			: undefined;
+
+	const handleWorkClick = useCallback(
+		(work: ActorWork) => {
+			if (work.media_type === "movie") {
+				const existing = existingMovies.find(
+					(m) => m.tmdbId === String(work.id),
+				);
+				if (existing)
+					return setSelectedWorkItem({
+						type: "movie",
+						id: existing.id,
+					});
+			} else {
+				const existing = existingShows.find(
+					(s) => s.tmdbId === String(work.id),
+				);
+				if (existing)
+					return setSelectedWorkItem({
+						type: "tv",
+						id: existing.id,
+					});
+			}
+			setPendingWork(work);
+		},
+		[existingMovies, existingShows],
+	);
 
 	const handleAction = (action: MovieAction) => {
 		switch (action.type) {
@@ -134,7 +194,14 @@ export function MovieDetails({
 		setCastOpen(true);
 		setCastLoading(true);
 		try {
-			setCast(await fetchMovieCast(movie.tmdbId ?? "-1", movie.imdbId, movie.id, authFetch));
+			setCast(
+				await fetchMovieCast(
+					movie.tmdbId ?? "-1",
+					movie.imdbId,
+					movie.id,
+					authFetch,
+				),
+			);
 		} catch {
 			setCast([]);
 		} finally {
@@ -283,41 +350,29 @@ export function MovieDetails({
 					differentColumns={DIFF_COLUMNS_MOVIE}
 				/>
 			</div>
-			{castOpen && (
-				<ShowModal
-					mediaTitle={movie.title}
-					cast={cast}
-					castLoading={castLoading}
-					selectedActor={selectedActor}
-					sortedWorks={sortedWorks}
-					actorLoading={actorLoading}
-					filmSort={filmSort}
-					onClose={() => {
-						setCastOpen(false);
-						setSelectedActor(null);
-					}}
-					onActorClick={handleActorClick}
-					onActorBack={() => setSelectedActor(null)}
-					onFilmSortChange={setFilmSort}
-					onWorkClick={handleWorkClick}
-				/>
-			)}
-			{pendingWork?.media_type === "tv" && (
-				<AddShow
-					isOpen={true}
-					titleFromAbove={pendingWork.title}
-					onClose={() => setPendingWork(null)}
-					existingShows={[]}
-					onAddShow={async (s) => {
-						await authFetch("/api/shows", {
-							method: "POST",
-							headers: { "Content-Type": "application/json" },
-							body: JSON.stringify(s),
-						});
-						setPendingWork(null);
-					}}
-				/>
-			)}
+			<AnimatePresence>
+				{castOpen && (
+					<ActorItemsModal
+						key="cast"
+						mediaTitle={movie.title}
+						cast={cast}
+						castLoading={castLoading}
+						selectedActor={selectedActor}
+						sortedWorks={sortedWorks}
+						actorLoading={actorLoading}
+						filmSort={filmSort}
+						onClose={() => {
+							setCastOpen(false);
+							setSelectedActor(null);
+						}}
+						onActorClick={handleActorClick}
+						onActorBack={() => setSelectedActor(null)}
+						onFilmSortChange={setFilmSort}
+						onWorkClick={handleWorkClick}
+						addedStatusById={addedStatusById}
+					/>
+				)}
+			</AnimatePresence>
 			{pendingWork?.media_type === "movie" && (
 				<AddMovie
 					isOpen={true}
@@ -325,21 +380,64 @@ export function MovieDetails({
 					onClose={() => setPendingWork(null)}
 					existingMovies={existingMovies}
 					onAddMovie={async (m) => {
-						await authFetch("/api/movies", {
-							method: "POST",
-							headers: { "Content-Type": "application/json" },
-							body: JSON.stringify(m),
-						});
+						// route through the parent's data hook so the listing
+						// updates without a refresh; fall back to a raw POST
+						if (onAddWork) {
+							await onAddWork(m);
+						} else {
+							await authFetch("/api/movies", {
+								method: "POST",
+								headers: { "Content-Type": "application/json" },
+								body: JSON.stringify(m),
+							});
+						}
 						setPendingWork(null);
 					}}
 				/>
 			)}
-			{selectedWorkMovie && (
+			{selectedMovie && (
 				<MovieDetails
-					movie={selectedWorkMovie}
-					onClose={() => setSelectedWorkMovie(null)}
+					movie={selectedMovie}
+					onClose={() => setSelectedWorkItem(null)}
 					onUpdate={onUpdate}
 					existingMovies={existingMovies}
+					existingShows={existingShows}
+					onShowUpdate={onShowUpdate}
+					onAddWork={onAddWork}
+					onAddShow={onAddShow}
+				/>
+			)}
+			{/* SHOW STUFF */}
+			{selectedShow && onShowUpdate && (
+				<ShowDetails
+					show={selectedShow}
+					onClose={() => setSelectedWorkItem(null)}
+					onUpdate={onShowUpdate}
+					existingShows={existingShows}
+					existingMovies={existingMovies}
+					onMovieUpdate={onUpdate}
+					onAddWork={onAddShow}
+					onAddMovie={onAddWork}
+				/>
+			)}
+			{pendingWork?.media_type === "tv" && (
+				<AddShow
+					isOpen={true}
+					titleFromAbove={pendingWork.title}
+					onClose={() => setPendingWork(null)}
+					existingShows={existingShows}
+					onAddShow={async (s) => {
+						if (onAddShow) {
+							await onAddShow(s);
+						} else {
+							await authFetch("/api/shows", {
+								method: "POST",
+								headers: { "Content-Type": "application/json" },
+								body: JSON.stringify(s),
+							});
+						}
+						setPendingWork(null);
+					}}
 				/>
 			)}
 		</>

@@ -150,7 +150,7 @@ export function MonthlyShows() {
             >
               <ChevronLeft className="w-4 h-4" strokeWidth={2.25} />
             </button>
-            <h1 className="text-zinc-300 text-[13px] uppercase tracking-[0.2em] font-semibold tabular-nums">
+            <h1 className="text-zinc-300 text-[0.8125rem] uppercase tracking-[0.2em] font-semibold tabular-nums">
               {isFuture ? (
                 <>
                   {year}{" "}
@@ -184,7 +184,7 @@ export function MonthlyShows() {
                     setOrigin(o.code);
                     setPage(1);
                   }}
-                  className={`px-3 py-1 rounded-md text-[11px] uppercase tracking-[0.12em] font-semibold transition-all duration-200 cursor-pointer ${
+                  className={`px-3 py-1 rounded-md text-[0.6875rem] uppercase tracking-[0.12em] font-semibold transition-all duration-200 cursor-pointer ${
                     active
                       ? "bg-zinc-700/70 text-zinc-300 shadow-sm"
                       : "text-zinc-500 hover:text-zinc-300"
@@ -236,7 +236,7 @@ export function MonthlyShows() {
                   {/* Poster */}
                   <div className="relative aspect-2/3 bg-zinc-900 overflow-hidden">
                     {inList && (
-                      <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-zinc-900/80 backdrop-blur-sm border border-zinc-700/60 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-300">
+                      <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-zinc-900/80 backdrop-blur-sm border border-zinc-700/60 text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-zinc-300">
                         In List
                       </div>
                     )}
@@ -262,7 +262,7 @@ export function MonthlyShows() {
 
                   {/* Info strip */}
                   <div className="px-3.5 py-3 grid grid-cols-3 items-center">
-                    <div className="text-[13px] text-zinc-300 font-medium">
+                    <div className="text-[0.8125rem] text-zinc-300 font-medium">
                       {show.currentEp != null ? (
                         <span className="tabular-nums">
                           Ep {show.currentEp}
@@ -274,7 +274,7 @@ export function MonthlyShows() {
                           )}
                         </span>
                       ) : show.first_air_date ? (
-                        <span className="text-zinc-300 font-medium text-[13px]">
+                        <span className="text-zinc-300 font-medium text-[0.8125rem]">
                           {new Date(
                             show.first_air_date + "T00:00:00",
                           ).toLocaleDateString("en-US", {
@@ -283,12 +283,12 @@ export function MonthlyShows() {
                           })}
                         </span>
                       ) : (
-                        <span className="text-zinc-500 italic text-[12.5px]">
+                        <span className="text-zinc-500 italic text-[0.78125rem]">
                           no info
                         </span>
                       )}
                     </div>
-                    <div className="text-center text-[12px] text-zinc-300/80 font-medium tracking-wide truncate">
+                    <div className="text-center text-[0.75rem] text-zinc-300/80 font-medium tracking-wide truncate">
                       {show.airDays ?? ""}
                     </div>
                     <div className="flex justify-end">
@@ -298,7 +298,7 @@ export function MonthlyShows() {
                             className="w-3 h-3 text-emerald-300/75 fill-emerald-300/15"
                             strokeWidth={1.75}
                           />
-                          <span className="text-[13px] font-bold tabular-nums text-zinc-100 tracking-tight">
+                          <span className="text-[0.8125rem] font-bold tabular-nums text-zinc-100 tracking-tight">
                             {show.imdbRating.toFixed(1)}
                           </span>
                         </span>
@@ -333,7 +333,7 @@ export function MonthlyShows() {
             >
               <ChevronLeft className="w-3.5 h-3.5" strokeWidth={2.25} />
             </button>
-            <span className="text-zinc-400 text-[11px] tabular-nums uppercase tracking-[0.12em] font-semibold min-w-14 text-center">
+            <span className="text-zinc-400 text-[0.6875rem] tabular-nums uppercase tracking-[0.12em] font-semibold min-w-14 text-center">
               {String(page).padStart(2, "0")}
               <span className="text-zinc-700 mx-1">/</span>
               {String(totalPages).padStart(2, "0")}

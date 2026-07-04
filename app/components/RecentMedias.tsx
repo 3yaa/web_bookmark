@@ -51,13 +51,13 @@ export function RecentItems({ items }: { items: BaseMediaProps[] }) {
               <p className="text-sm sm:text-base font-semibold text-zinc-300 truncate leading-snug">
                 {item.title}
               </p>
-              <p className="text-xs sm:text-[14px] font-semibold text-zinc-500/90 mt-0.5">
+              <p className="text-xs sm:text-[0.875rem] font-semibold text-zinc-500/90 mt-0.5">
                 {item.lastUpdated ? timeAgo(item.lastUpdated) : "- ago"}
               </p>
             </div>
 
             {/* score */}
-            <span className="shrink-0 flex items-center justify-center w-8 text-center font-bold text-zinc-300/75 sm:text-[14px] text-sm bg-linear-to-br from-zinc-800/80 to-zinc-900/90 rounded-lg shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)] border border-zinc-800/40 py-1.5 -mt-3">
+            <span className="shrink-0 flex items-center justify-center w-8 text-center font-bold text-zinc-300/75 sm:text-[0.875rem] text-sm bg-linear-to-br from-zinc-800/80 to-zinc-900/90 rounded-lg shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)] border border-zinc-800/40 py-1.5 -mt-3">
               {item.score?.mu ? getDisplayScore(item.score.mu) : "-"}
             </span>
 

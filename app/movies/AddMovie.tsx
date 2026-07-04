@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { ModalBackdrop } from "@/app/components/ui/ModalMotion";
 import { Clapperboard } from "lucide-react";
 //
 import { MovieProps, WikidataProps } from "@/types/movie";
@@ -257,7 +258,7 @@ export function AddMovie({
 	if (!isOpen) return null;
 
 	return (
-		<div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-30 animate-in fade-in duration-200">
+		<ModalBackdrop className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-30">
 			<div className="fixed inset-0" onClick={onClose} />
 			{!titleFromAbove || needYear || isDupTitle ? (
 				<div className="bg-linear-to-b from-zinc-950/80 to-zinc-900/50 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 w-full max-w-xl mx-4 animate-in zoom-in-95 duration-200 relative">
@@ -322,6 +323,6 @@ export function AddMovie({
 					}
 				/>
 			)}
-		</div>
+		</ModalBackdrop>
 	);
 }

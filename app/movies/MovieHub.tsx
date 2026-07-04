@@ -12,6 +12,8 @@ import { DesktopListing } from "@/app/views/mediaListing/DesktopListing";
 import { MobileListing } from "@/app/views/mediaListing/MobileListing";
 import { AddButton } from "../components/ui/AddButton";
 import { ScoreBattlerHub } from "../views/mediaDetails/shared/scoreBattler/ScoreBattlerHub";
+import { AnimatePresence } from "framer-motion";
+import { ShowProps } from "@/types/show";
 
 export default function MoviesHub() {
 	const { items, add, update, remove, isProcessing } =
@@ -26,6 +28,31 @@ export default function MoviesHub() {
 				"sequel",
 			],
 		});
+
+	// IN-CASE NEED SHOW DATA
+	const {
+		items: showItems,
+		add: showAdd,
+		update: showUpdate,
+		remove: showRemove,
+	} = useMediaData<ShowProps>({
+		endpoint: "shows",
+		requiredFieldsToPost: ["title", "status", "tmdbId"],
+		statusOrder: {
+			Watching: 0,
+			"Want to Watch": 1,
+			Completed: 2,
+			Dropped: 3,
+		},
+		extraFieldsToUpdate: ["curSeasonIndex", "curEpisode"],
+	});
+
+	const { handleItemUpdates: handleShowUpdates } = useManageMedia<ShowProps>({
+		onAdd: showAdd,
+		items: showItems,
+		onRemove: showRemove,
+		onUpdate: showUpdate,
+	});
 
 	const {
 		filteredItems,
@@ -125,42 +152,56 @@ export default function MoviesHub() {
 				isVisible={isMenuButtonsVisible}
 			/>
 			{/* ADD MODAL */}
-			{activeModal === "addModal" && (
-				<AddMovie
-					isOpen={activeModal === "addModal"}
-					onClose={handleModalClose}
-					existingMovies={items}
-					onAddMovie={handleItemAdd}
-					titleFromAbove={titleToUse}
-				/>
-			)}
-			{/* DETAILS MODAL */}
-			{activeModal === "detailsModal" && selectedItem && (
-				<MovieDetails
-					movie={selectedItem}
-					onClose={handleModalClose}
-					onUpdate={handleItemUpdates}
-					showSequelPrequel={showSequelPrequel}
-					existingMovies={items}
-				/>
-			)}
-			{/* SCORE BATTLER */}
-			{activeModal === "scoreBattlerModal" &&
-				selectedItem &&
-				tempScore && (
-					<ScoreBattlerHub
-						items={items}
-						initialScore={tempScore}
-						onClose={() => {
-							setActiveModal("detailsModal");
-						}}
-						selectedItem={selectedItem}
-						onScoreFinal={handleScoreFinal}
-						onOpponentUpdate={(id, score) =>
-							handleItemUpdates(id, { score })
-						}
+			<AnimatePresence>
+				{activeModal === "addModal" && (
+					<AddMovie
+						key="add"
+						isOpen={activeModal === "addModal"}
+						onClose={handleModalClose}
+						existingMovies={items}
+						onAddMovie={handleItemAdd}
+						titleFromAbove={titleToUse}
 					/>
 				)}
+			</AnimatePresence>
+			{/* DETAILS MODAL */}
+			<AnimatePresence>
+				{activeModal === "detailsModal" && selectedItem && (
+					<MovieDetails
+						key="details"
+						movie={selectedItem}
+						onClose={handleModalClose}
+						onUpdate={handleItemUpdates}
+						showSequelPrequel={showSequelPrequel}
+						existingMovies={items}
+						onAddWork={add}
+						//
+						existingShows={showItems}
+						onShowUpdate={handleShowUpdates}
+						onAddShow={showAdd}
+					/>
+				)}
+			</AnimatePresence>
+			{/* SCORE BATTLER */}
+			<AnimatePresence>
+				{activeModal === "scoreBattlerModal" &&
+					selectedItem &&
+					tempScore && (
+						<ScoreBattlerHub
+							key="battler"
+							items={items}
+							initialScore={tempScore}
+							onClose={() => {
+								setActiveModal("detailsModal");
+							}}
+							selectedItem={selectedItem}
+							onScoreFinal={handleScoreFinal}
+							onOpponentUpdate={(id, score) =>
+								handleItemUpdates(id, { score })
+							}
+						/>
+					)}
+			</AnimatePresence>
 		</div>
 	);
 }

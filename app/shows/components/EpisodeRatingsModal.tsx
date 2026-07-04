@@ -6,6 +6,7 @@ import { ShowProps } from "@/types/show";
 import type { AuthFetch } from "@/app/auth/hooks/useAuthFetch";
 import Image from "next/image";
 import { Loading } from "@/app/components/ui/Loading";
+import { ModalBackdrop, ModalPanel } from "@/app/components/ui/ModalMotion";
 
 interface EpisodeRating {
 	season: number;
@@ -148,9 +149,9 @@ export function EpisodeRatingsModal({
 	});
 
 	return (
-		<div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-30 animate-in fade-in duration-200">
+		<ModalBackdrop className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-30">
 			<div className="fixed inset-0" onClick={onClose} />
-			<div className="relative bg-zinc-950 rounded-2xl shadow-2xl p-6 max-w-[94vw] max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+			<ModalPanel className="relative bg-zinc-950 rounded-2xl shadow-2xl p-6 max-w-[94vw] max-h-[90vh] overflow-hidden">
 				<div className="flex gap-3 items-center">
 					{/* LEFT PANEL */}
 					<div className="flex flex-col gap-3 w-75 shrink-0">
@@ -483,7 +484,7 @@ export function EpisodeRatingsModal({
 							})()}
 					</div>
 				</div>
-			</div>
-		</div>
+			</ModalPanel>
+		</ModalBackdrop>
 	);
 }

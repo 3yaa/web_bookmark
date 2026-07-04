@@ -11,6 +11,7 @@ import { DesktopListing } from "@/app/views/mediaListing/DesktopListing";
 import { MobileListing } from "@/app/views/mediaListing/MobileListing";
 import { AddButton } from "../components/ui/AddButton";
 import { ScoreBattlerHub } from "../views/mediaDetails/shared/scoreBattler/ScoreBattlerHub";
+import { AnimatePresence } from "framer-motion";
 
 export default function GameList() {
   const { items, add, update, remove, isProcessing } = useMediaData<GameProps>({
@@ -125,38 +126,47 @@ export default function GameList() {
         isVisible={isMenuButtonsVisible}
       />
       {/* ADD MODAL */}
-      {activeModal === "addModal" && (
-        <AddGame
-          isOpen={activeModal === "addModal"}
-          onClose={handleGameModalClose}
-          existingGames={items}
-          onAddGame={handleItemAdd}
-          titleFromAbove={titleToAdd}
-        />
-      )}
+      <AnimatePresence>
+        {activeModal === "addModal" && (
+          <AddGame
+            key="add"
+            isOpen={activeModal === "addModal"}
+            onClose={handleGameModalClose}
+            existingGames={items}
+            onAddGame={handleItemAdd}
+            titleFromAbove={titleToAdd}
+          />
+        )}
+      </AnimatePresence>
       {/* DETAILS MODAL */}
-      {activeModal === "detailsModal" && selectedItem && (
-        <GameDetails
-          game={selectedItem}
-          onClose={handleGameModalClose}
-          onUpdate={handleItemUpdates}
-          showDlc={showDlc}
-        />
-      )}
+      <AnimatePresence>
+        {activeModal === "detailsModal" && selectedItem && (
+          <GameDetails
+            key="details"
+            game={selectedItem}
+            onClose={handleGameModalClose}
+            onUpdate={handleItemUpdates}
+            showDlc={showDlc}
+          />
+        )}
+      </AnimatePresence>
       {/* SCORE BATTLER */}
-      {activeModal === "scoreBattlerModal" && selectedItem && tempScore && (
-        <ScoreBattlerHub
-          items={items}
-          initialScore={tempScore}
-          onClose={() => {
-            setActiveModal("detailsModal");
-          }}
-          selectedItem={selectedItem}
-          onScoreFinal={handleScoreFinal}
-          onOpponentUpdate={(id, score) => handleItemUpdates(id, { score })}
-          mediaType="game"
-        />
-      )}
+      <AnimatePresence>
+        {activeModal === "scoreBattlerModal" && selectedItem && tempScore && (
+          <ScoreBattlerHub
+            key="battler"
+            items={items}
+            initialScore={tempScore}
+            onClose={() => {
+              setActiveModal("detailsModal");
+            }}
+            selectedItem={selectedItem}
+            onScoreFinal={handleScoreFinal}
+            onOpponentUpdate={(id, score) => handleItemUpdates(id, { score })}
+            mediaType="game"
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

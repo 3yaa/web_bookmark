@@ -54,14 +54,29 @@ export function DesktopListing<T extends BaseMediaProps>({
 	const searchBarRef = useRef<HTMLInputElement>(null);
 	const statusFilterRef = useRef<HTMLDivElement>(null);
 	const [openStatusOption, setOpenStatusOption] = useState(false);
+	// row-height estimate scales with the fluid root font-size so the
+	// scrollbar thumb doesn't visibly resize as rows are measured on 4K.
+	const [rowEstimate, setRowEstimate] = useState(101);
+	useEffect(() => {
+		const update = () => {
+			const root =
+				parseFloat(
+					getComputedStyle(document.documentElement).fontSize,
+				) || 16;
+			setRowEstimate((101 / 16) * root);
+		};
+		update();
+		window.addEventListener("resize", update);
+		return () => window.removeEventListener("resize", update);
+	}, []);
 	//
 	const virtualizer = useVirtualizer({
 		count: mediaItems.length,
 		getScrollElement: () => parentRef.current,
-		estimateSize: () => 101,
+		estimateSize: () => rowEstimate,
 		overscan: 5,
 		measureElement: (element) =>
-			element?.getBoundingClientRect().height ?? 101,
+			element?.getBoundingClientRect().height ?? rowEstimate,
 	});
 	//
 	const ranks = useMemo(() => {
@@ -288,10 +303,10 @@ export function DesktopListing<T extends BaseMediaProps>({
 					)}
 					{/* media type + count */}
 					<div className="flex items-baseline gap-2 shrink-0">
-						<span className="text-[11px] font-bold tracking-[0.22em] uppercase text-zinc-400">
+						<span className="text-[0.6875rem] font-bold tracking-[0.22em] uppercase text-zinc-400">
 							{mediaType}s
 						</span>
-						<span className="text-[12px] font-mono text-zinc-500 tracking-tight">
+						<span className="text-[0.75rem] font-mono text-zinc-500 tracking-tight">
 							{mediaItems.length}
 						</span>
 					</div>
@@ -317,7 +332,7 @@ export function DesktopListing<T extends BaseMediaProps>({
 								<div key={key} className="flex items-center">
 									<button
 										onClick={() => onSortConfig(key)}
-										className={`flex items-center gap-1 px-3 py-0.5 text-[12px] font-medium tracking-wide transition-all duration-200 cursor-pointer ${
+										className={`flex items-center gap-1 px-3 py-0.5 text-[0.75rem] font-medium tracking-wide transition-all duration-200 cursor-pointer ${
 											active
 												? "text-zinc-100"
 												: "text-zinc-500 hover:text-zinc-300"

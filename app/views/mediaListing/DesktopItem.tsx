@@ -103,7 +103,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 					{/* TITLE */}
 					<div className="flex items-start justify-between gap-4 min-w-0 -mt-0.75">
 						<div className="flex items-baseline gap-2 min-w-0 max-w-full">
-							<span className="title-line font-semibold text-zinc-300 text-[18px] group-hover:text-zinc-100/90 transition-colors duration-200 max-w-full inline-block align-bottom">
+							<span className="title-line font-semibold text-zinc-300 text-[1.125rem] group-hover:text-zinc-100/90 transition-colors duration-200 max-w-full inline-block align-bottom">
 								<span className="block truncate">
 									{item.title || "-"}
 								</span>
@@ -150,7 +150,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 						</div>
 					</div>
 
-					<div className="flex items-center gap-x-1.5 group-hover:mt-1.25 ml-px text-[13px] text-zinc-500 font-semibold min-w-0 transition-[margin] ease-out">
+					<div className="flex items-center gap-x-1.5 group-hover:mt-1.25 ml-px text-[0.8125rem] text-zinc-500 font-semibold min-w-0 transition-[margin] ease-out">
 						{/* AUTHOR */}
 						<span className="truncate">
 							{differentColumns[0].getValue(item)}
@@ -195,7 +195,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 				</div>
 
 				{/* NOTE */}
-				<span className="block text-center text-[13px] font-medium text-zinc-400/90 truncate pb-1.5">
+				<span className="block text-center text-[0.8125rem] font-medium text-zinc-400/90 truncate pb-1.5">
 					{item.note ? (
 						<>&ldquo;{item.note}&rdquo;</>
 					) : (

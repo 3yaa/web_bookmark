@@ -281,8 +281,7 @@ export function MovieDetails({
 	const handleAddMovie = useCallback(() => {
 		if (!addMovie) return;
 		addMovie();
-		onClose();
-	}, [addMovie, onClose]);
+	}, [addMovie]);
 
 	// need to reset local note -- since changing movie (sequel/prequel) doesn't remount
 	useEffect(() => {

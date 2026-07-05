@@ -164,8 +164,7 @@ export function BookDetails({
   const handleAddBook = useCallback(() => {
     if (!addBook) return;
     addBook();
-    onClose();
-  }, [addBook, onClose]);
+  }, [addBook]);
 
   // need to reset local note -- since changing book (seuqel/prequel) doesn't remount
   useEffect(() => {

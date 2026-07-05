@@ -310,8 +310,7 @@ export function ShowDetails({
 	const handleAddShow = useCallback(() => {
 		if (!addShow) return;
 		addShow();
-		onClose();
-	}, [addShow, onClose]);
+	}, [addShow]);
 
 	const handleNeedYear = () => {
 		const needYear = true;

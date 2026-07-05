@@ -148,8 +148,7 @@ export function GameDetails({
   const handleAddGame = useCallback(() => {
     if (!addGame) return;
     addGame();
-    onClose();
-  }, [addGame, onClose]);
+  }, [addGame]);
 
   const handleCoverChange = (dir: string) => {
     if (!updateBackdropIndex || backdropIndex === undefined || !backdropUrls) {

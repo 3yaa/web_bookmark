@@ -51,32 +51,32 @@ export const DesktopItem = React.memo(function DesktopItem<
 	return (
 		// hover:scale-[1.005]
 		<div
-			className={`relative group max-w-[99%] mx-auto grid md:grid-cols-[auto_1fr_1.2fr_0.3fr] gap-3 py-0.5 items-center
-  bg-zinc-900/65 hover:bg-zinc-800/80
-  shadow-sm hover:shadow-lg hover:shadow-black/40
-  border-l-4 ${getStatusBorderColor(item.status)}
-  border-b border-b-zinc-700/20
-  rounded-md rounded-l-xl
-  backdrop-blur-sm
-  hover:-translate-y-0.5 
-  transition-[transform,background-color,box-shadow]
-  duration-420 ease-[cubic-bezier(0.34,1.56,0.64,1)]
-  hover:cursor-pointer
-  ${index === 0 ? "" : "my-0.5"}
-  ${index === total - 1 && "rounded-bl-md"}
-`}
+			className={`relative group max-w-[99%] mx-auto grid md:grid-cols-[auto_1fr_1.2fr_0.3fr] gap-3 pt-0.5 items-center
+		bg-zinc-900/65 hover:bg-zinc-800/80
+			shadow-sm hover:shadow-lg hover:shadow-black/40
+			border-l-4 ${getStatusBorderColor(item.status)}
+			border-b border-b-zinc-700/20
+			rounded-md rounded-l-xl
+			backdrop-blur-sm
+			hover:-translate-y-0.5 
+			transition-[transform,background-color,box-shadow]
+			duration-420 ease-[cubic-bezier(0.34,1.56,0.64,1)]
+			hover:cursor-pointer
+			${index === 0 ? "" : "my-0.5"}
+			${index === total - 1 && "rounded-bl-md"}
+		`}
 			onClick={() => onClick(item)}
 		>
 			{/* ISLAND - COVER */}
 			{(item.posterUrl ?? item.coverUrl) ? (
-				<div className="w-20 aspect-2/3 relative shrink-0">
+				<div className="w-20 aspect-2/3 relative shrink-0 overflow-hidden rounded-l-lg rounded-r-sm">
 					<Image
 						src={(item.posterUrl ?? item.coverUrl)!}
 						alt={item.title || "Untitled"}
 						width={1280}
 						height={720}
 						priority
-						className={`relative h-auto self-stretch aspect-2/3 rounded-l-lg rounded-r-sm transition-transform duration-450 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.04] group-hover:-translate-y-0.5 ${mediaType === "game" ? "object-cover" : "object-fill"} `}
+						className={`relative h-auto self-stretch aspect-2/3 transition-transform duration-450 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.04] ${mediaType === "game" ? "object-cover" : "object-fill"} `}
 					/>
 				</div>
 			) : (
@@ -207,10 +207,10 @@ export const DesktopItem = React.memo(function DesktopItem<
 			{/* ISLAND - BACKDROP */}
 			{item.backdropUrl ? (
 				<BackdropDesktop src={item.backdropUrl} />
+			) : item.coverUrl ? (
+				<BackdropDesktop src={item.coverUrl} is_book={true} />
 			) : (
-				item.coverUrl && (
-					<BackdropDesktop src={item.coverUrl} is_book={true} />
-				)
+				<div />
 			)}
 
 			{/* ISLAND - SCORE */}

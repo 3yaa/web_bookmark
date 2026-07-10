@@ -11,7 +11,7 @@ import {
 	fetchActorWorks,
 	fetchMovieCast,
 } from "../../utils/getActorInfo";
-import ActorItemsModal from "../components/ActorModal";
+import { ActorItemsModal } from "../components/ActorModal";
 import { AnimatePresence } from "framer-motion";
 import { AddShow } from "@/app/shows/AddShow";
 import { AddMovie } from "@/app/movies/AddMovie";

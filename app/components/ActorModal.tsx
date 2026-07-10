@@ -24,7 +24,7 @@ type Props = {
 	addedStatusById?: Map<string, MediaStatus>;
 };
 
-export default function ActorItemModal({
+export function ActorItemsModal({
 	mediaTitle,
 	cast,
 	castLoading,
@@ -307,11 +307,11 @@ export default function ActorItemModal({
 															)}
 														</div>
 														<div className="h-px bg-linear-to-r from-transparent via-zinc-700/40 to-transparent" />
-														<div className="px-2.5 pt-2.5">
+														<div className="px-2.5 pt-2 pb-0.5">
 															<p className="font-semibold text-zinc-200 text-[0.75rem] leading-snug line-clamp-1">
 																{work.title}
 															</p>
-															<div className="flex items-center justify-between mt-1">
+															<div className="flex items-center justify-between">
 																<span className="text-zinc-500 text-[0.6875rem] font-medium">
 																	{work.media_type ===
 																	"tv"
@@ -327,6 +327,7 @@ export default function ActorItemModal({
 																	</span>
 																)}
 															</div>
+															<div></div>
 														</div>
 													</div>
 												);

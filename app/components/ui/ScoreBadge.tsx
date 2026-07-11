@@ -56,8 +56,8 @@ export function ScoreBadge({ score, seed = 0 }: ScoreBadgeProps) {
 
 	return (
 		<svg
-			width="66"
-			height="66"
+			width="4.125rem"
+			height="4.125rem"
 			viewBox="-30 -30 60 60"
 			xmlns="http://www.w3.org/2000/svg"
 		>

@@ -495,14 +495,14 @@ export function DesktopDetails<T extends BaseMediaProps>({
 													item.status ===
 														"Want to Watch" &&
 													m.imdbRating != null && (
-														<div className="flex items-center gap-1 mr-3">
+														<div className="flex items-center gap-1 mr-2">
 															<Leaf
-																className="w-3 h-3 text-emerald-300/75 fill-emerald-300/15"
+																className="w-3 h-3 text-emerald-300/65 fill-emerald-300/15"
 																strokeWidth={
 																	1.75
 																}
 															/>
-															<span className="text-[0.8125rem] font-bold tabular-nums text-zinc-300/80 tracking-tight">
+															<span className="text-[0.8125rem] font-semibold tabular-nums text-zinc-300/80 tracking-tight">
 																{m.imdbRating.toFixed(
 																	1,
 																)}

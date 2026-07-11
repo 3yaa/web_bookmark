@@ -19,6 +19,7 @@ import {
 	Unlink,
 	Users,
 	BarChart2,
+	Leaf,
 } from "lucide-react";
 import { BackdropImage } from "@/app/components/ui/Backdrop";
 import { Dropdown, Option } from "@/app/components/ui/Dropdown";
@@ -30,6 +31,7 @@ import { SeriesNav } from "./shared/SeriesNav";
 import { EditProgress } from "@/app/shows/components/EditProgressDetail";
 import { getDisplayScore, getTierFromMu, Tier } from "@/lib/tierConfig";
 import { ShowProps } from "@/types/show";
+import { MovieProps } from "@/types/movie";
 
 interface DesktopDetailsProps<T extends BaseMediaProps> {
 	item: T;
@@ -80,8 +82,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 			e.currentTarget.blur(); // remove focus
 		}
 	};
-	const s = item as unknown as SeriesMediaProps;
+	const series = item as unknown as SeriesMediaProps;
 	const g = item as unknown as GameProps;
+	const m = item as unknown as MovieProps;
 
 	// only for game/book
 	const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
@@ -198,10 +201,10 @@ export function DesktopDetails<T extends BaseMediaProps>({
 									</button>
 								)}
 								{/* DELETE SERIES METADATA */}
-								{(s.seriesTitle ||
-									s.placeInSeries ||
-									s.prequel ||
-									s.sequel) &&
+								{(series.seriesTitle ||
+									series.placeInSeries ||
+									series.prequel ||
+									series.sequel) &&
 									mediaType !== "game" && (
 										<button
 											className="p-1.5 rounded-lg bg-zinc-800/0 hover:bg-orange-700/20 hover:cursor-pointer transition-all duration-200 group"
@@ -345,7 +348,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 									className={`flex flex-col flex-1 ${
 										mediaType === "show"
 											? "justify-end"
-											: s.seriesTitle || g.mainTitle
+											: series.seriesTitle || g.mainTitle
 												? "justify-center mt-3"
 												: "justify-center mt-11.5"
 									}`}
@@ -357,7 +360,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 												? g.dlcIndex !== 0
 													? g.mainTitle
 													: null
-												: s.seriesTitle;
+												: series.seriesTitle;
 
 										return (
 											seriesLabel && (
@@ -413,7 +416,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 										{mediaType === "show" && (
 											<button
 												onClick={() =>
-													onAction({ type: "openRatings" })
+													onAction({
+														type: "openRatings",
+													})
 												}
 												title="Episode ratings"
 												className="cursor-pointer text-zinc-400 hover:text-zinc-200 hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] transition-all duration-200 shrink-0 mr-0.5 hover:scale-105"
@@ -482,9 +487,29 @@ export function DesktopDetails<T extends BaseMediaProps>({
 											/>
 										</div>
 										<div className="flex-[0.865] lg:min-w-48.75">
-											<label className="ml-1 text-sm font-medium text-zinc-400 mb-1 block">
-												Score
-											</label>
+											<div className="flex justify-between">
+												<label className="ml-1 text-sm font-medium text-zinc-400 mb-1 block">
+													Score
+												</label>
+												{mediaType === "movie" &&
+													item.status ===
+														"Want to Watch" &&
+													m.imdbRating != null && (
+														<div className="flex items-center gap-1 mr-3">
+															<Leaf
+																className="w-3 h-3 text-emerald-300/75 fill-emerald-300/15"
+																strokeWidth={
+																	1.75
+																}
+															/>
+															<span className="text-[0.8125rem] font-bold tabular-nums text-zinc-300/80 tracking-tight">
+																{m.imdbRating.toFixed(
+																	1,
+																)}
+															</span>
+														</div>
+													)}
+											</div>
 											{item.score ? (
 												<div className="w-full rounded-lg border backdrop-blur-md flex items-center justify-between gap-3 px-4 py-3 transition-all duration-300 ease-out bg-linear-to-b shadow-md border-zinc-800/50 from-transparent via-zinc-800/30 to-zinc-800/50 shadow-black/20">
 													<span className="text-sm text-zinc-300/85 font-bold tracking-wide">
@@ -494,7 +519,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 															item.score!.mu,
 														)}
 													</span>
-													</div>
+												</div>
 											) : (
 												<Dropdown
 													value={"-"}

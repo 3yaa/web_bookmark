@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, ReactNode } from "react";
 import { ChevronDown, ArrowUpFromDot } from "lucide-react";
 import { motion } from "framer-motion";
 import { Portal } from "@/utils/portal";
@@ -19,6 +19,7 @@ interface DropdownProps {
 	dropStyle?: string[];
 	customStyle?: string;
 	dropDuration?: number;
+	trailing?: ReactNode;
 }
 
 export function Dropdown({
@@ -29,6 +30,7 @@ export function Dropdown({
 	disabled = false,
 	dropStyle,
 	dropDuration = 0.3,
+	trailing,
 }: DropdownProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const selectRef = useRef<HTMLDivElement>(null);
@@ -103,9 +105,12 @@ export function Dropdown({
 			}
         `}
 			>
-				<span className="text-sm font-bold tracking-wide">
-					{selectedOption ? selectedOption.label : "Select Option"}
-				</span>
+				<div className="flex items-center gap-2">
+					<span className="text-sm font-bold tracking-wide">
+						{selectedOption ? selectedOption.label : "Select Option"}
+					</span>
+					{trailing}
+				</div>
 				<ChevronDown
 					className={`w-4 h-4 text-zinc-400 transition-all duration-300 ease-out ${
 						isOpen ? "rotate-180 text-zinc-300" : "rotate-0"

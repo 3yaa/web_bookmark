@@ -1,47 +1,53 @@
-import { BaseMediaProps, ColumnConfig, SeriesMediaProps, SortState } from "./media";
+import {
+	BaseMediaProps,
+	ColumnConfig,
+	SeriesMediaProps,
+	SortState,
+} from "./media";
 
 export type MovieSortConfig = SortState<
-  "title" | "score" | "dateCompleted" | "director" | "dateReleased"
+	"title" | "score" | "dateCompleted" | "director" | "dateReleased"
 >;
 
 export const DIFF_COLUMNS_MOVIE: [
-  ColumnConfig<MovieProps>,
-  ColumnConfig<MovieProps>,
+	ColumnConfig<MovieProps>,
+	ColumnConfig<MovieProps>,
 ] = [
-  { label: "Director", sortKey: "director", getValue: (m) => m.director },
-  {
-    label: "Released",
-    sortKey: "dateReleased",
-    getValue: (m) => m.dateReleased,
-  },
+	{ label: "Director", sortKey: "director", getValue: (m) => m.director },
+	{
+		label: "Released",
+		sortKey: "dateReleased",
+		getValue: (m) => m.dateReleased,
+	},
 ];
 
 export interface MovieProps extends BaseMediaProps, SeriesMediaProps {
-  status: "Completed" | "Want to Watch" | "Dropped";
-  imdbId: string;
-  tmdbId?: string;
-  normalizedTitle: string;
-  director?: string;
-  dateReleased?: number;
+	status: "Completed" | "Want to Watch" | "Dropped";
+	imdbId: string;
+	tmdbId?: string;
+	normalizedTitle: string;
+	director?: string;
+	dateReleased?: number;
+	imdbRating?: number | null;
 }
 
 export interface OMDbProps {
-  imdbId: string; // used to call other api
-  title: string;
-  director?: string;
-  released_date?: number;
+	imdbId: string; // used to call other api
+	title: string;
+	director?: string;
+	released_date?: number;
 }
 
 export interface TMDBProps {
-  poster_url?: string;
-  backdrop_url?: string;
-  tmdb_id?: string;
+	poster_url?: string;
+	backdrop_url?: string;
+	tmdb_id?: string;
 }
 
 export interface WikidataProps {
-  wiki_title?: string; // another title
-  series_title?: string;
-  place_in_series?: string;
-  prequel?: string;
-  sequel?: string;
+	wiki_title?: string; // another title
+	series_title?: string;
+	place_in_series?: string;
+	prequel?: string;
+	sequel?: string;
 }

@@ -19,6 +19,7 @@ export function resetMovieValues(
 		sequel: undefined,
 		status: "Want to Watch",
 		lastUpdated: undefined,
+		imdbRating: undefined,
 	};
 }
 

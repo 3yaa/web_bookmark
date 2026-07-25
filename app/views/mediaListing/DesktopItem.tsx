@@ -14,6 +14,9 @@ import { BackdropDesktop } from "../../components/ui/BackdropDesktop";
 import { ScoreBadge } from "../../components/ui/ScoreBadge";
 import { ShowProgressBarDesktop } from "@/app/shows/components/showProgressListing";
 import { ShowProps } from "@/types/show";
+import { BookProps } from "@/types/book";
+import { MovieProps } from "@/types/movie";
+import { Leaf } from "lucide-react";
 
 interface DesktopItemProps<T extends BaseMediaProps> {
 	item: T;
@@ -36,8 +39,10 @@ export const DesktopItem = React.memo(function DesktopItem<
 	onClick,
 	differentColumns,
 }: DesktopItemProps<T>) {
-	const s = item as unknown as SeriesMediaProps;
-	const g = item as unknown as GameProps;
+	const series = item as unknown as SeriesMediaProps;
+	const gameItem = item as unknown as GameProps;
+	const bookItem = item as unknown as BookProps;
+	const movieItem = item as unknown as MovieProps;
 
 	function pseudoRand(seed: string | number, salt = 0): number {
 		const str = String(seed) + salt;
@@ -68,10 +73,16 @@ export const DesktopItem = React.memo(function DesktopItem<
 			onClick={() => onClick(item)}
 		>
 			{/* ISLAND - COVER */}
-			{(item.posterUrl ?? item.coverUrl) ? (
+			{(item.posterUrl ??
+			(mediaType === "book" ? bookItem.cover?.url : undefined)) ? (
 				<div className="w-20 aspect-2/3 relative shrink-0 overflow-hidden rounded-l-lg rounded-r-sm">
 					<Image
-						src={(item.posterUrl ?? item.coverUrl)!}
+						src={
+							(item.posterUrl ??
+								(mediaType === "book"
+									? bookItem.cover?.url
+									: undefined))!
+						}
 						alt={item.title || "Untitled"}
 						width={1280}
 						height={720}
@@ -80,7 +91,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 					/>
 				</div>
 			) : (
-				<div className="relative self-stretch aspect-2/3 bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30" />
+				<div className="w-20 relative self-stretch aspect-2/3 bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30" />
 			)}
 
 			{/* ISLAND - CONTENT */}
@@ -89,13 +100,13 @@ export const DesktopItem = React.memo(function DesktopItem<
 				<div className="flex-1 flex flex-col justify-center">
 					{/* SERIES TITLE */}
 					<div className="h-5 font-semibold text-zinc-400 text-sm group-hover:text-zinc-300 flex gap-1">
-						{(s.seriesTitle ?? g.mainTitle) && (
+						{(series.seriesTitle ?? gameItem.mainTitle) && (
 							<>
 								<span className="block max-w-[88%] whitespace-nowrap text-ellipsis overflow-hidden shrink">
-									{s.seriesTitle ?? g.mainTitle} ᭡
+									{series.seriesTitle ?? gameItem.mainTitle} ᭡
 								</span>
-								{s.placeInSeries && (
-									<span>{s.placeInSeries}</span>
+								{series.placeInSeries && (
+									<span>{series.placeInSeries}</span>
 								)}
 							</>
 						)}
@@ -169,6 +180,26 @@ export const DesktopItem = React.memo(function DesktopItem<
 								</span>
 							</span>
 						)}
+						{/* RATING */}
+						{((mediaType === "movie" &&
+							item.status === "Want to Watch" &&
+							movieItem.imdbRating != null) ||
+							(mediaType === "book" &&
+								item.status === "Want to Read" &&
+								bookItem.rating != null)) && (
+							<span className="flex items-center gap-1 shrink-0 ml-auto">
+								<Leaf
+									className="w-2.25 h-2.25 text-emerald-300/65 fill-emerald-300/15"
+									strokeWidth={1.75}
+								/>
+								<span className="text-[0.75rem] tabular-nums text-zinc-400">
+									{(mediaType === "movie"
+										? movieItem.imdbRating
+										: bookItem.rating
+									)?.toFixed(1)}
+								</span>
+							</span>
+						)}
 					</div>
 				</div>
 
@@ -207,8 +238,8 @@ export const DesktopItem = React.memo(function DesktopItem<
 			{/* ISLAND - BACKDROP */}
 			{item.backdropUrl ? (
 				<BackdropDesktop src={item.backdropUrl} />
-			) : item.coverUrl ? (
-				<BackdropDesktop src={item.coverUrl} is_book={true} />
+			) : mediaType === "book" && bookItem.cover?.url ? (
+				<BackdropDesktop src={bookItem.cover.url} is_book={true} />
 			) : (
 				<div />
 			)}

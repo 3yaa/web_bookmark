@@ -7,6 +7,7 @@ import { ShowProgressBarMobile } from "../../shows/components/showProgressListin
 import { ShowProps } from "@/types/show";
 import { GameProps } from "@/types/game";
 import { getDisplayScore } from "@/lib/tierConfig";
+import { BookProps } from "@/types/book";
 
 interface MobileItemProps<T extends BaseMediaProps> {
 	item: T;
@@ -58,9 +59,17 @@ export const MobileItem = React.memo(function MobileItem<
 				className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40"
 				style={{ aspectRatio: mediaType === "game" ? "3/4" : "0.677" }}
 			>
-				{(item.posterUrl ?? item.coverUrl) ? (
+				{(item.posterUrl ??
+				(mediaType === "book"
+					? (item as unknown as BookProps).cover?.url
+					: undefined)) ? (
 					<Image
-						src={(item.posterUrl ?? item.coverUrl)!}
+						src={
+							item.posterUrl ??
+							(mediaType === "book"
+								? (item as unknown as BookProps).cover?.url
+								: undefined)!
+						}
 						alt={item.title || "Untitled"}
 						width={300}
 						height={450}

@@ -1,5 +1,5 @@
 "use client";
-import { BookProps, DIFF_COLUMNS_BOOK } from "@/types/book";
+import { BookCoverProps, BookProps, DIFF_COLUMNS_BOOK } from "@/types/book";
 import { useCallback, useEffect, useState } from "react";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { bookStatusOptions } from "@/utils/dropDownDetails";
@@ -7,235 +7,230 @@ import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
 import { TIER_PHI_THRESHOLD, getSeedMu, Tier } from "@/lib/tierConfig";
 
 export type BookAction =
-  | { type: "closeModal" }
-  | { type: "delete" }
-  | { type: "changeStatus"; payload: "Completed" | "Want to Read" | "Dropped" }
-  | { type: "resetScore" }
-  | { type: "setInitialTier"; payload: Tier }
-  | { type: "changeNote"; payload: string }
-  | { type: "saveNote" }
-  | { type: "seriesNav"; payload: "sequel" | "prequel" }
-  | { type: "changeCover"; payload: "next" | "prev" }
-  | { type: "clearSeriesMeta" }
-  | { type: "more" };
+	| { type: "closeModal" }
+	| { type: "delete" }
+	| {
+			type: "changeStatus";
+			payload: "Completed" | "Want to Read" | "Dropped";
+	  }
+	| { type: "resetScore" }
+	| { type: "setInitialTier"; payload: Tier }
+	| { type: "changeNote"; payload: string }
+	| { type: "saveNote" }
+	| { type: "seriesNav"; payload: "sequel" | "prequel" }
+	| { type: "changeCover"; payload: "next" | "prev" }
+	| { type: "clearSeriesMeta" }
 
 interface BookDetailsProps {
-  book: BookProps;
-  onClose: () => void;
-  isLoading?: { isTrue: boolean; style: string; text: string };
-  onUpdate: (
-    bookId: number,
-    updates?: Partial<BookProps>,
-    takeAction?: boolean,
-  ) => void;
-  addBook?: () => void;
-  showSequelPrequel?: (sequelTitle: string) => void;
-  showBookInSeries?: (seriesDir: "left" | "right") => void;
-  //
-  coverUrls?: string[];
-  coverIndex?: number;
-  updateCoverIndex?: (newIndex: number) => void;
+	book: BookProps;
+	onClose: () => void;
+	isLoading?: { isTrue: boolean; style: string; text: string };
+	onUpdate: (
+		bookId: number,
+		updates?: Partial<BookProps>,
+		takeAction?: boolean,
+	) => void;
+	addBook?: () => void;
+	showSequelPrequel?: (sequelTitle: string) => void;
+	showBookInSeries?: (seriesDir: "left" | "right") => void;
+	//
+	coverUrls?: BookCoverProps[];
+	coverIndex?: number;
+	updateCoverIndex?: (newIndex: number) => void;
 }
 
 export function BookDetails({
-  onClose,
-  book,
-  onUpdate,
-  addBook,
-  isLoading,
-  showBookInSeries, //when wiki gives more then 1 option
-  showSequelPrequel,
-  coverUrls,
-  coverIndex,
-  updateCoverIndex,
+	onClose,
+	book,
+	onUpdate,
+	addBook,
+	isLoading,
+	showBookInSeries, //when wiki gives more then 1 option
+	showSequelPrequel,
+	coverUrls,
+	coverIndex,
+	updateCoverIndex,
 }: BookDetailsProps) {
-  const [localNote, setLocalNote] = useState(book.note || "");
+	const [localNote, setLocalNote] = useState(book.note || "");
 
-  const handleAction = (action: BookAction) => {
-    switch (action.type) {
-      // =========modal actions=============
-      case "closeModal":
-        handleModalClose();
-        break;
-      case "delete":
-        handleDelete();
-        break;
-      // =========update actions=============
-      case "changeStatus":
-        handleStatusChange(action.payload);
-        break;
-      case "setInitialTier":
-        onUpdate(book.id, {
-          score: {
-            mu: getSeedMu(action.payload),
-            phi: TIER_PHI_THRESHOLD[action.payload],
-          },
-        });
-        break;
-      case "resetScore":
-        onUpdate(book.id, { score: null });
-        break;
-      case "changeNote":
-        setLocalNote(action.payload);
-        break;
-      case "saveNote":
-        handleSaveNote();
-        break;
-      case "changeCover":
-        handleCoverChange(action.payload);
-        break;
-      case "clearSeriesMeta":
-        if (book.seriesTitle) {
-          onUpdate(book.id, {
-            seriesTitle: null,
-            placeInSeries: null,
-            prequel: null,
-            sequel: null,
-          });
-        }
-        break;
-      // =========other actions=============
-      case "seriesNav":
-        handleSeriesOpen(action.payload);
-        break;
-      case "more":
-        handleMoreBook();
-        break;
-    }
-  };
+	const handleAction = (action: BookAction) => {
+		switch (action.type) {
+			// =========modal actions=============
+			case "closeModal":
+				handleModalClose();
+				break;
+			case "delete":
+				handleDelete();
+				break;
+			// =========update actions=============
+			case "changeStatus":
+				handleStatusChange(action.payload);
+				break;
+			case "setInitialTier":
+				onUpdate(book.id, {
+					score: {
+						mu: getSeedMu(action.payload),
+						phi: TIER_PHI_THRESHOLD[action.payload],
+					},
+				});
+				break;
+			case "resetScore":
+				onUpdate(book.id, { score: null });
+				break;
+			case "changeNote":
+				setLocalNote(action.payload);
+				break;
+			case "saveNote":
+				handleSaveNote();
+				break;
+			case "changeCover":
+				handleCoverChange(action.payload);
+				break;
+			case "clearSeriesMeta":
+				if (book.seriesTitle) {
+					onUpdate(book.id, {
+						seriesTitle: null,
+						placeInSeries: null,
+						prequel: null,
+						sequel: null,
+					});
+				}
+				break;
+			// =========other actions=============
+			case "seriesNav":
+				handleSeriesOpen(action.payload);
+				break;
+		}
+	};
 
-  const handleStatusChange = (value: string) => {
-    const newStatus = value as "Completed" | "Want to Read";
-    const statusLoad: Partial<BookProps> = {
-      status: newStatus,
-    };
-    if (newStatus === "Completed") {
-      statusLoad.dateCompleted = new Date();
-    } else if (book.dateCompleted) {
-      statusLoad.dateCompleted = null;
-    }
-    onUpdate(book.id, statusLoad);
-  };
+	const handleStatusChange = (value: string) => {
+		const newStatus = value as "Completed" | "Want to Read";
+		const statusLoad: Partial<BookProps> = {
+			status: newStatus,
+		};
+		if (newStatus === "Completed") {
+			statusLoad.dateCompleted = new Date();
+		} else if (book.dateCompleted) {
+			statusLoad.dateCompleted = null;
+		}
+		onUpdate(book.id, statusLoad);
+	};
 
-  const handleCoverChange = (dir: string) => {
-    if (!updateCoverIndex || coverIndex === undefined || !coverUrls) {
-      return;
-    }
-    //
-    let newCoverIndex = coverIndex;
-    if (dir === "next") {
-      newCoverIndex = (coverIndex + 1) % coverUrls.length;
-    } else if (dir === "prev") {
-      newCoverIndex = coverIndex === 0 ? coverUrls.length - 1 : coverIndex - 1;
-    }
-    updateCoverIndex(newCoverIndex);
-  };
+	const handleCoverChange = (dir: string) => {
+		if (!updateCoverIndex || coverIndex === undefined || !coverUrls) {
+			return;
+		}
+		//
+		let newCoverIndex = coverIndex;
+		if (dir === "next") {
+			newCoverIndex = (coverIndex + 1) % coverUrls.length;
+		} else if (dir === "prev") {
+			newCoverIndex =
+				coverIndex === 0 ? coverUrls.length - 1 : coverIndex - 1;
+		}
+		updateCoverIndex(newCoverIndex);
+	};
 
-  const handleSeriesOpen = (seriesDir: string) => {
-    if (!showSequelPrequel) return;
-    const targetTitle = seriesDir === "sequel" ? book.sequel : book.prequel;
-    if (targetTitle) {
-      showSequelPrequel(targetTitle);
-    }
-  };
+	const handleSeriesOpen = (seriesDir: string) => {
+		if (!showSequelPrequel) return;
+		const targetTitle = seriesDir === "sequel" ? book.sequel : book.prequel;
+		if (targetTitle) {
+			showSequelPrequel(targetTitle);
+		}
+	};
 
-  const handleSaveNote = () => {
-    if (localNote !== book.note) {
-      onUpdate(book.id, { note: localNote });
-    }
-  };
+	const handleSaveNote = () => {
+		if (localNote !== book.note) {
+			onUpdate(book.id, { note: localNote });
+		}
+	};
 
-  const handleDelete = () => {
-    onClose();
-    const shouldDelete = true;
-    onUpdate(book.id, undefined, shouldDelete);
-  };
+	const handleDelete = () => {
+		onClose();
+		const shouldDelete = true;
+		onUpdate(book.id, undefined, shouldDelete);
+	};
 
-  const handleModalClose = () => {
-    // if (addBook) return;
-    onClose();
-  };
+	const handleModalClose = () => {
+		// if (addBook) return;
+		onClose();
+	};
 
-  const handleMoreBook = () => {
-    const showMoreBooks = true;
-    onUpdate(book.id, undefined, showMoreBooks);
-  };
+	const handleAddBook = useCallback(() => {
+		if (!addBook) return;
+		addBook();
+	}, [addBook]);
 
-  const handleAddBook = useCallback(() => {
-    if (!addBook) return;
-    addBook();
-  }, [addBook]);
+	// need to reset local note -- since changing book (seuqel/prequel) doesn't remount
+	useEffect(() => {
+		setLocalNote(book.note || "");
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [book.id]);
 
-  // need to reset local note -- since changing book (seuqel/prequel) doesn't remount
-  useEffect(() => {
-    setLocalNote(book.note || "");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [book.id]);
+	useEffect(() => {
+		const handleLeave = (e: KeyboardEvent) => {
+			if (e.key === "Enter") {
+				const activeElement = document.activeElement;
+				const isInTextarea = activeElement?.tagName === "TEXTAREA";
+				const isInInput = activeElement?.tagName === "INPUT";
+				if (!isInTextarea && !isInInput) {
+					handleAddBook();
+				}
+			}
+		};
+		//
+		window.addEventListener("keydown", handleLeave);
+		return () => window.removeEventListener("keydown", handleLeave);
+	}, [onClose, handleAddBook]);
 
-  useEffect(() => {
-    const handleLeave = (e: KeyboardEvent) => {
-      if (e.key === "Enter") {
-        const activeElement = document.activeElement;
-        const isInTextarea = activeElement?.tagName === "TEXTAREA";
-        const isInInput = activeElement?.tagName === "INPUT";
-        if (!isInTextarea && !isInInput) {
-          handleAddBook();
-        }
-      }
-    };
-    //
-    window.addEventListener("keydown", handleLeave);
-    return () => window.removeEventListener("keydown", handleLeave);
-  }, [onClose, handleAddBook]);
+	if (!book) return null;
 
-  if (!book) return null;
-
-  return (
-    <>
-      <div className="lg:block hidden">
-        <DesktopDetails
-          item={book}
-          localNote={localNote}
-          statusOptions={bookStatusOptions}
-          mediaType="book"
-          isLoading={isLoading}
-          isAdding={!!addBook}
-          onAdd={handleAddBook}
-          onClose={onClose}
-          onSeriesNav={showBookInSeries}
-          onAction={
-            handleAction as (action: {
-              type: string;
-              payload?: unknown;
-            }) => void
-          }
-          differentColumns={DIFF_COLUMNS_BOOK}
-          coverUrls={coverUrls}
-          coverIndex={coverIndex}
-        />
-      </div>
-      <div className="block lg:hidden">
-        <MobileDetails
-          item={book}
-          localNote={localNote}
-          statusOptions={bookStatusOptions}
-          mediaType="book"
-          isLoading={isLoading}
-          isAdding={!!addBook}
-          onAdd={handleAddBook}
-          onClose={onClose}
-          onSeriesNav={showBookInSeries}
-          onAction={
-            handleAction as (action: {
-              type: string;
-              payload?: unknown;
-            }) => void
-          }
-          differentColumns={DIFF_COLUMNS_BOOK}
-          coverUrls={coverUrls}
-          coverIndex={coverIndex}
-        />
-      </div>
-    </>
-  );
+	return (
+		<>
+			<div className="lg:block hidden">
+				<DesktopDetails
+					item={book}
+					localNote={localNote}
+					statusOptions={bookStatusOptions}
+					mediaType="book"
+					isLoading={isLoading}
+					isAdding={!!addBook}
+					onAdd={handleAddBook}
+					onClose={onClose}
+					onSeriesNav={showBookInSeries}
+					onAction={
+						handleAction as (action: {
+							type: string;
+							payload?: unknown;
+						}) => void
+					}
+					differentColumns={DIFF_COLUMNS_BOOK}
+					coverUrls={coverUrls}
+					coverIndex={coverIndex}
+				/>
+			</div>
+			<div className="block lg:hidden">
+				<MobileDetails
+					item={book}
+					localNote={localNote}
+					statusOptions={bookStatusOptions}
+					mediaType="book"
+					isLoading={isLoading}
+					isAdding={!!addBook}
+					onAdd={handleAddBook}
+					onClose={onClose}
+					onSeriesNav={showBookInSeries}
+					onAction={
+						handleAction as (action: {
+							type: string;
+							payload?: unknown;
+						}) => void
+					}
+					differentColumns={DIFF_COLUMNS_BOOK}
+					coverUrls={coverUrls}
+					coverIndex={coverIndex}
+				/>
+			</div>
+		</>
+	);
 }

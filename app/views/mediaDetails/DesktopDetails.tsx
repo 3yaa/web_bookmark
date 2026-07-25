@@ -32,6 +32,7 @@ import { EditProgress } from "@/app/shows/components/EditProgressDetail";
 import { getDisplayScore, getTierFromMu, Tier } from "@/lib/tierConfig";
 import { ShowProps } from "@/types/show";
 import { MovieProps } from "@/types/movie";
+import { BookCoverProps, BookProps } from "@/types/book";
 
 interface DesktopDetailsProps<T extends BaseMediaProps> {
 	item: T;
@@ -46,7 +47,7 @@ interface DesktopDetailsProps<T extends BaseMediaProps> {
 	differentColumns: [ColumnConfig<T>, ColumnConfig<T>];
 	onAction: (action: { type: string; payload?: unknown }) => void;
 	// only for book
-	coverUrls?: string[];
+	coverUrls?: BookCoverProps[];
 	coverIndex?: number;
 	// only for game
 	backdropUrls?: string[];
@@ -83,8 +84,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 		}
 	};
 	const series = item as unknown as SeriesMediaProps;
-	const g = item as unknown as GameProps;
-	const m = item as unknown as MovieProps;
+	const gameItem = item as unknown as GameProps;
+	const movieItem = item as unknown as MovieProps;
+	const bookItem = item as unknown as BookProps;
 
 	// only for game/book
 	const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
@@ -157,25 +159,20 @@ export function DesktopDetails<T extends BaseMediaProps>({
 								>
 									<Plus className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors duration-0" />
 								</button>
-								{/* NEED YEAR | SHOW MORE BOOKS*/}
-								<button
-									className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer transition-all group"
-									onClick={() => {
-										onAction({
-											type:
-												mediaType === "book"
-													? "more"
-													: "needYearField",
-										});
-									}}
-									title={
-										mediaType === "book"
-											? "See More Options"
-											: "Search with year"
-									}
-								>
-									<ChevronsUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
-								</button>
+								{/* NEED YEAR */}
+								{mediaType !== "book" && (
+									<button
+										className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer transition-all group"
+										onClick={() => {
+											onAction({
+												type: "needYearField",
+											});
+										}}
+										title={"Search with year"}
+									>
+										<ChevronsUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
+									</button>
+								)}
 								{/* CLOSE BUTTON */}
 								<button
 									className="py-1.5 px-2 rounded-lg bg-zinc-800/50 hover:bg-red-600/50 
@@ -254,12 +251,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 							>
 								<div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg">
 									{mediaType !== "book" ? (
-										(item.posterUrl ?? item.coverUrl) ? (
+										item.posterUrl ? (
 											<Image
-												src={
-													(item.posterUrl ??
-														item.coverUrl)!
-												}
+												src={item.posterUrl!}
 												alt={item.title || "Untitled"}
 												width={1280}
 												height={720}
@@ -270,15 +264,15 @@ export function DesktopDetails<T extends BaseMediaProps>({
 										)
 									) : (
 										<BookCoverConfig
-											coverUrl={item.coverUrl}
+											coverUrl={bookItem.cover?.url}
 											title={item.title}
 											coverUrls={coverUrls}
 											coverIndex={coverIndex}
 											className={
-												"min-w-62 min-h-93 object-cover"
+												"min-w-62 min-h-93 object-fill"
 											}
-											height={372}
-											width={248}
+											height={1280}
+											width={720}
 										/>
 									)}
 								</div>
@@ -298,9 +292,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 							<div className="flex flex-col flex-1 min-h-93 min-w-62 relative">
 								{/* BACKDROP */}
 								{mediaType === "book"
-									? item.coverUrl && (
+									? item.backdropUrl && (
 											<BackdropImageBook
-												src={item.coverUrl}
+												src={item.backdropUrl}
 												width={1280}
 												height={720}
 											/>
@@ -348,7 +342,8 @@ export function DesktopDetails<T extends BaseMediaProps>({
 									className={`flex flex-col flex-1 ${
 										mediaType === "show"
 											? "justify-end"
-											: series.seriesTitle || g.mainTitle
+											: series.seriesTitle ||
+												  gameItem.mainTitle
 												? "justify-center mt-3"
 												: "justify-center mt-11.5"
 									}`}
@@ -357,8 +352,8 @@ export function DesktopDetails<T extends BaseMediaProps>({
 									{(() => {
 										const seriesLabel =
 											mediaType === "game"
-												? g.dlcIndex !== 0
-													? g.mainTitle
+												? gameItem.dlcIndex !== 0
+													? gameItem.mainTitle
 													: null
 												: series.seriesTitle;
 
@@ -494,7 +489,8 @@ export function DesktopDetails<T extends BaseMediaProps>({
 												{mediaType === "movie" &&
 													item.status ===
 														"Want to Watch" &&
-													m.imdbRating != null && (
+													movieItem.imdbRating !=
+														null && (
 														<div className="flex items-center gap-1 mr-2">
 															<Leaf
 																className="w-3 h-3 text-emerald-300/65 fill-emerald-300/15"
@@ -503,7 +499,26 @@ export function DesktopDetails<T extends BaseMediaProps>({
 																}
 															/>
 															<span className="text-[0.8125rem] font-semibold tabular-nums text-zinc-300/80 tracking-tight">
-																{m.imdbRating.toFixed(
+																{movieItem.imdbRating.toFixed(
+																	1,
+																)}
+															</span>
+														</div>
+													)}
+												{mediaType === "book" &&
+													item.status ===
+														"Want to Read" &&
+													bookItem.rating !=
+														null && (
+														<div className="flex items-center gap-1 mr-2">
+															<Leaf
+																className="w-3 h-3 text-emerald-300/65 fill-emerald-300/15"
+																strokeWidth={
+																	1.75
+																}
+															/>
+															<span className="text-[0.8125rem] font-semibold tabular-nums text-zinc-300/80 tracking-tight">
+																{bookItem.rating.toFixed(
 																	1,
 																)}
 															</span>

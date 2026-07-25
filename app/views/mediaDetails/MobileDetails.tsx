@@ -14,6 +14,7 @@ import { MobileProgressPicker } from "@/app/components/ui/MobileSeasonEpPicker";
 import { MobileSeriesNav } from "./shared/MobileSeriesNav";
 import { calcCurProgress } from "@/app/shows/utils/progressCalc";
 import { getDisplayScore } from "@/lib/tierConfig";
+import { BookCoverProps, BookProps } from "@/types/book";
 
 interface MobileDetailsProps<T extends BaseMediaProps> {
 	item: T;
@@ -27,7 +28,7 @@ interface MobileDetailsProps<T extends BaseMediaProps> {
 	onAction: (action: { type: string; payload?: unknown }) => void;
 	differentColumns: [ColumnConfig<T>, ColumnConfig<T>];
 	onSeriesNav?: (dir: "left" | "right") => void; // book + movie
-	coverUrls?: string[]; // book only
+	coverUrls?: BookCoverProps[]; // book only
 	coverIndex?: number; // book only
 }
 
@@ -301,7 +302,7 @@ export function MobileDetails<T extends BaseMediaProps>({
 					>
 						{mediaType === "book" ? (
 							<BookCoverConfig
-								coverUrl={item.coverUrl}
+								coverUrl={(item as unknown as BookProps).cover?.url}
 								title={item.title}
 								coverUrls={coverUrls}
 								coverIndex={coverIndex}

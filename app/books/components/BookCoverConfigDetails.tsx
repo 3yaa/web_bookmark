@@ -1,9 +1,10 @@
+import { BookCoverProps } from "@/types/book";
 import Image from "next/image";
 
 interface BookCoverConfigProps {
   coverUrl?: string;
   title: string;
-  coverUrls?: string[];
+  coverUrls?: BookCoverProps[];
   coverIndex?: number;
   className?: string;
   onLoad?: () => void;
@@ -27,7 +28,7 @@ export function BookCoverConfig({
       coverUrls !== undefined &&
       coverUrls[coverIndex] ? (
         <Image
-          src={coverUrls[coverIndex]}
+          src={coverUrls[coverIndex].url}
           alt={title || "Untitled"}
           width={width}
           height={height}

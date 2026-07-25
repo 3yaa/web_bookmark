@@ -1,55 +1,68 @@
-import { BaseMediaProps, ColumnConfig, SeriesMediaProps, SortState } from "./media";
+import {
+	BaseMediaProps,
+	ColumnConfig,
+	SeriesMediaProps,
+	SortState,
+} from "./media";
 
 export type BookSortConfig = SortState<
-  "title" | "score" | "dateCompleted" | "author" | "datePublished"
+	"title" | "score" | "dateCompleted" | "author" | "datePublished"
 >;
 
 export const DIFF_COLUMNS_BOOK: [
-  ColumnConfig<BookProps>,
-  ColumnConfig<BookProps>,
+	ColumnConfig<BookProps>,
+	ColumnConfig<BookProps>,
 ] = [
-  { label: "Author", sortKey: "author", getValue: (b) => b.author },
-  {
-    label: "Published",
-    sortKey: "datePublished",
-    getValue: (b) => b.datePublished,
-  },
+	{ label: "Author", sortKey: "author", getValue: (b) => b.author },
+	{
+		label: "Published",
+		sortKey: "datePublished",
+		getValue: (b) => b.datePublished,
+	},
 ];
 
 export interface BookProps extends BaseMediaProps, SeriesMediaProps {
-  status: "Completed" | "Want to Read" | "Dropped";
-  key: string;
-  author?: string;
-  datePublished?: number;
+	status: "Completed" | "Want to Read" | "Dropped";
+	key: string;
+	author: string;
+	datePublished: number;
+	//
+	cover: BookCoverProps;
+	numPages: number;
+	rating: number;
 }
 
-// export interface AllBooksProps {
-//   OpenLibBooks: OpenLibraryProps[];
-//   GoogleBooksProps: GoogleBooksProps[];
+export interface BookSeriesAPIProps {
+	series_title: string | null;
+	position: string | null;
+	prequel: string | null;
+	sequel: string | null;
+	total: number | null;
+	//
+	details: string | null;
+}
+
+export interface BookAPIProps {
+	key: string;
+	title: string;
+	subtitle: string | null;
+	author_name: string[];
+	first_publish_year: number | null;
+	num_pages: number | null;
+	rating: number | null;
+	covers: BookCoverProps[];
+	series: BookSeriesAPIProps[];
+}
+
+export interface BookCoverProps {
+	url: string;
+	color: string;
+}
+
+// export interface GoogleBooksProps {
+// 	id: string; // check dup
+// 	title: string;
+// 	author_name?: string[];
+// 	first_publish_year?: number;
+// 	cover_url?: string;
 // }
-
-export interface OpenLibraryProps {
-  key: string; // call to WikidataProps || check dup
-  // details
-  title: string;
-  author_name?: string[];
-  first_publish_year?: number;
-  // covers
-  cover_urls?: string[];
-}
-
-export interface GoogleBooksProps {
-  id: string; // check dup
-  title: string;
-  author_name?: string[];
-  first_publish_year?: number;
-  cover_url?: string;
-}
-
-export interface WikidataProps {
-  wiki_title?: string; // another title
-  series_title?: string;
-  place_in_series?: string;
-  prequel?: string;
-  sequel?: string;
-}

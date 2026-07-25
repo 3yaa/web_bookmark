@@ -14,6 +14,12 @@ import { AddButton } from "../components/ui/AddButton";
 import { ScoreBattlerHub } from "../views/mediaDetails/shared/scoreBattler/ScoreBattlerHub";
 import { AnimatePresence } from "framer-motion";
 
+const normalizeTitle = (title: string) =>
+  title
+    .toLowerCase()
+    .trim()
+    .replace(/^(the|a|an)\s+/, "");
+
 export default function BookHub() {
   // GET DATA FROM DB
   const { items, add, update, remove, isProcessing } = useMediaData<BookProps>({
@@ -65,7 +71,7 @@ export default function BookHub() {
     (targetTitle: string) => {
       if (!targetTitle) return;
       const targetBook = items.find(
-        (book) => book.title.toLowerCase() === targetTitle.toLowerCase(),
+        (book) => normalizeTitle(book.title) === normalizeTitle(targetTitle),
       );
       if (targetBook) {
         setSelectedItem(targetBook);

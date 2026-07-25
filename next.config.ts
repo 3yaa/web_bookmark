@@ -1,71 +1,85 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: "https://mouthful-server.tailffb772.ts.net/:path*",
-      },
-    ];
-  },
-  async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
-          },
-        ],
-      },
-    ];
-  },
-  images: {
-    remotePatterns: [
-      // OPEN LIBRARY
-      {
-        protocol: "https",
-        hostname: "covers.openlibrary.org",
-        port: "",
-        pathname: "/b/olid/**",
-      },
-      {
-        protocol: "https",
-        hostname: "ia600505.us.archive.org",
-        port: "",
-        pathname: "/view_archive.php?archive=/**",
-      },
-      // GOOGLE BOOKS
-      {
-        protocol: "http",
-        hostname: "books.google.com",
-        port: "",
-        pathname: "/books/content**",
-      },
-      {
-        protocol: "https",
-        hostname: "books.google.com",
-        port: "",
-        pathname: "/books/content**",
-      },
-      // TMDB
-      {
-        protocol: "https",
-        hostname: "image.tmdb.org",
-        port: "",
-        pathname: "/t/p/**",
-      },
-      // IGDB
-      {
-        protocol: "https",
-        hostname: "images.igdb.com",
-        port: "",
-        pathname: "/igdb/image/upload/**",
-      },
-    ],
-  },
+	async rewrites() {
+		return [
+			{
+				source: "/api/:path*",
+				destination: "https://mouthful-server.tailffb772.ts.net/:path*",
+			},
+		];
+	},
+	async headers() {
+		return [
+			{
+				source: "/:path*",
+				headers: [
+					{
+						key: "Permissions-Policy",
+						value: "camera=(), microphone=(), geolocation=()",
+					},
+				],
+			},
+		];
+	},
+	images: {
+		remotePatterns: [
+			// // OPEN LIBRARY
+			// {
+			// 	protocol: "https",
+			// 	hostname: "covers.openlibrary.org",
+			// 	port: "",
+			// 	pathname: "/b/olid/**",
+			// },
+			// {
+			// 	protocol: "https",
+			// 	hostname: "ia600505.us.archive.org",
+			// 	port: "",
+			// 	pathname: "/view_archive.php?archive=/**",
+			// },
+			// // APPLE ITUNES
+			// {
+			// 	protocol: "https",
+			// 	hostname: "*.mzstatic.com",
+			// 	port: "",
+			// 	pathname: "/image/thumb/**",
+			// },
+			// // GOOGLE BOOKS
+			// {
+			// 	protocol: "http",
+			// 	hostname: "books.google.com",
+			// 	port: "",
+			// 	pathname: "/books/content**",
+			// },
+			// book -- hardcover covers
+			{
+				protocol: "https",
+				hostname: "assets.hardcover.app",
+				port: "",
+				pathname: "/**",
+			},
+			{
+				protocol: "https",
+				hostname: "books.google.com",
+				port: "",
+				pathname: "/books/content**",
+			},
+			// TMDB
+			{
+				protocol: "https",
+				hostname: "image.tmdb.org",
+				port: "",
+				pathname: "/t/p/**",
+			},
+			// IGDB
+			{
+				protocol: "https",
+				hostname: "images.igdb.com",
+				port: "",
+				pathname: "/igdb/image/upload/**",
+			},
+		],
+	},
 };
 
 export default nextConfig;

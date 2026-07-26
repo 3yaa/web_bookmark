@@ -11,6 +11,7 @@ import {
 } from "@/utils/formattingUtils";
 import { getDisplayScore } from "@/lib/tierConfig";
 import { BackdropDesktop } from "../../components/ui/BackdropDesktop";
+import { BookBackdropDesktop } from "../../components/ui/BookBackdrop";
 import { ScoreBadge } from "../../components/ui/ScoreBadge";
 import { ShowProgressBarDesktop } from "@/app/shows/components/showProgressListing";
 import { ShowProps } from "@/types/show";
@@ -238,8 +239,11 @@ export const DesktopItem = React.memo(function DesktopItem<
 			{/* ISLAND - BACKDROP */}
 			{item.backdropUrl ? (
 				<BackdropDesktop src={item.backdropUrl} />
-			) : mediaType === "book" && bookItem.cover?.url ? (
-				<BackdropDesktop src={bookItem.cover.url} is_book={true} />
+			) : mediaType === "book" && bookItem.cover ? (
+				<BookBackdropDesktop
+					color={bookItem.cover.color}
+					title={item.title}
+				/>
 			) : (
 				<div />
 			)}

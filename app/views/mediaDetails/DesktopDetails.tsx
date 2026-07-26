@@ -26,7 +26,7 @@ import { Dropdown, Option } from "@/app/components/ui/Dropdown";
 import { tierOptions } from "@/utils/dropDownDetails";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { BookCoverConfig } from "@/app/books/components/BookCoverConfigDetails";
-import { BackdropImageBook } from "@/app/components/ui/BackdropBook";
+import { BookBackdropDetails } from "@/app/components/ui/BookBackdrop";
 import { SeriesNav } from "./shared/SeriesNav";
 import { EditProgress } from "@/app/shows/components/EditProgressDetail";
 import { getDisplayScore, getTierFromMu, Tier } from "@/lib/tierConfig";
@@ -292,11 +292,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 							<div className="flex flex-col flex-1 min-h-93 min-w-62 relative">
 								{/* BACKDROP */}
 								{mediaType === "book"
-									? item.backdropUrl && (
-											<BackdropImageBook
-												src={item.backdropUrl}
-												width={1280}
-												height={720}
+									? bookItem.cover && (
+											<BookBackdropDetails
+												color={bookItem.cover.color}
 											/>
 										)
 									: (() => {
@@ -345,7 +343,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 											: series.seriesTitle ||
 												  gameItem.mainTitle
 												? "justify-center mt-3"
-												: "justify-center mt-11.5"
+												: mediaType === "book"
+													? "justify-end"
+													: "justify-center mt-11.5"
 									}`}
 								>
 									{/* SERIES TITLE */}
@@ -624,6 +624,11 @@ export function DesktopDetails<T extends BaseMediaProps>({
 										mediaType={mediaType}
 										isAdding={isAdding}
 										onAction={onAction}
+										accentColor={
+											mediaType === "book"
+												? bookItem.cover?.color
+												: undefined
+										}
 									/>
 								)}
 							</div>

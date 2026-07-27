@@ -83,6 +83,13 @@ export function updateRatings(
   ];
 }
 
+export function sharpenConfidence(phi: number): number {
+  const reliability = getReliabilityProb(phi);
+  const expectedOut = 0.5;
+  const infoWeight = getInformationWeightProb(expectedOut, reliability);
+  return newConfidence(phi, infoWeight);
+}
+
 export function updateRatingsDraw(
   a: { mu: number; phi: number },
   b: { mu: number; phi: number },

@@ -5,6 +5,7 @@ import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { showStatusOptions } from "@/utils/dropDownDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
 import { TIER_PHI_THRESHOLD, getSeedMu, Tier } from "@/lib/tierConfig";
+import { useScoreNudge } from "@/hooks/useScoreNudge";
 import {
 	ActorWork,
 	CastMember,
@@ -32,6 +33,7 @@ export type ShowAction =
 			payload: "Completed" | "Want to Watch" | "Dropped" | "Watching";
 	  }
 	| { type: "resetScore" }
+	| { type: "nudgeScore"; payload: "up" | "down" }
 	| { type: "setInitialTier"; payload: Tier }
 	| { type: "changeNote"; payload: string }
 	| { type: "saveNote" }
@@ -167,6 +169,12 @@ export function ShowDetails({
 		[existingMovies, existingShows],
 	);
 
+	// manual +/- 0.1 score tweaks -- phi tightens once, on close
+	const { nudge: nudgeScore, commit: commitScoreNudge } = useScoreNudge(
+		show,
+		onUpdate,
+	);
+
 	const handleAction = (action: ShowAction) => {
 		switch (action.type) {
 			// =========modal actions=============
@@ -193,6 +201,9 @@ export function ShowDetails({
 				break;
 			case "resetScore":
 				onUpdate(show.id, { score: null });
+				break;
+			case "nudgeScore":
+				nudgeScore(action.payload);
 				break;
 			case "changeNote":
 				setLocalNote(action.payload);
@@ -342,6 +353,8 @@ export function ShowDetails({
 	};
 
 	const handleModalClose = () => {
+		// fold the deferred phi drop into the update this close flushes
+		commitScoreNudge();
 		// if (addShow) return;
 		onClose();
 	};
@@ -560,7 +573,7 @@ export function ShowDetails({
 					isLoading={displayLoading}
 					isAdding={!!addShow}
 					onAdd={handleAddShow}
-					onClose={onClose}
+					onClose={handleModalClose}
 					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {
@@ -582,7 +595,7 @@ export function ShowDetails({
 					isLoading={displayLoading}
 					isAdding={!!addShow}
 					onAdd={handleAddShow}
-					onClose={onClose}
+					onClose={handleModalClose}
 					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {

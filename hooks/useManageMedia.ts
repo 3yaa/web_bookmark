@@ -1,11 +1,11 @@
 import { BaseMediaProps, MediaStatus, SortState } from "@/types/media";
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	useTransition,
 } from "react";
 import { useScrollVisibility } from "./useScrollVisibility";
 import { debounce } from "@/utils/debounce";
@@ -13,254 +13,281 @@ import { Score } from "@/lib/tierConfig";
 import { createSession } from "@/lib/battleSession";
 
 interface ManageMediaConfig<T extends BaseMediaProps> {
-  items: T[];
-  onAdd: (item: T) => Promise<T>;
-  onRemove: (itemId: number) => Promise<void>;
-  onUpdate: (
-    itemId: number,
-    updates: Partial<T>,
-    indirectUpdate?: boolean,
-  ) => Promise<void>;
-  onRefresh?: (itemId: number, metadata: Partial<T>) => Promise<T | undefined>;
+	items: T[];
+	onAdd: (item: T) => Promise<T>;
+	onRemove: (itemId: number) => Promise<void>;
+	onUpdate: (
+		itemId: number,
+		updates: Partial<T>,
+		indirectUpdate?: boolean,
+	) => Promise<void>;
+	onRefresh?: (
+		itemId: number,
+		metadata: Partial<T>,
+	) => Promise<T | undefined>;
 }
 
 export function useManageMedia<T extends BaseMediaProps>({
-  items,
-  onAdd,
-  onRemove,
-  onUpdate,
-  onRefresh,
+	items,
+	onAdd,
+	onRemove,
+	onUpdate,
+	onRefresh,
 }: ManageMediaConfig<T>) {
-  const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
-  const [sortConfig, setSortConfig] = useState<SortState<string> | null>(null);
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [selectedItem, setSelectedItem] = useState<T | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [titleToUse, setTitleToUse] = useState<string>("");
-  const [activeModal, setActiveModal] = useState<
-    "detailsModal" | "addModal" | "scoreBattlerModal" | null
-  >(null);
-  const [tempScore, setTempScore] = useState<Score | null>(null);
-  const pendingUpdates = useRef<Partial<T>>({});
-  // used for mobile only
-  const isMenuButtonsVisible = useScrollVisibility(30);
+	const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
+	const [sortConfig, setSortConfig] = useState<SortState<string> | null>(
+		null,
+	);
+	const [debouncedQuery, setDebouncedQuery] = useState("");
+	const [selectedItem, setSelectedItem] = useState<T | null>(null);
+	const [searchQuery, setSearchQuery] = useState("");
+	const [titleToUse, setTitleToUse] = useState<string>("");
+	const [activeModal, setActiveModal] = useState<
+		"detailsModal" | "addModal" | "scoreBattlerModal" | null
+	>(null);
+	const [tempScore, setTempScore] = useState<Score | null>(null);
+	const pendingUpdates = useRef<Partial<T>>({});
+	// which item the pending batch belongs to -- the details modal can swap items
+	// in place (sequel/prequel nav), and those edits are not the new item's
+	const pendingFor = useRef<number | null>(null);
+	// used for mobile only
+	const isMenuButtonsVisible = useScrollVisibility(30);
 
-  //
-  const debouncedSetQuery = useRef(
-    debounce((value: string) => {
-      setDebouncedQuery(value);
-    }, 300),
-  ).current;
-  // SEARCH
-  const searchedItems = useMemo(() => {
-    if (!debouncedQuery) return items;
+	//
+	const debouncedSetQuery = useRef(
+		debounce((value: string) => {
+			setDebouncedQuery(value);
+		}, 300),
+	).current;
+	// SEARCH
+	const searchedItems = useMemo(() => {
+		if (!debouncedQuery) return items;
 
-    return items.filter((item) =>
-      item.title.toLowerCase().trim().includes(debouncedQuery),
-    );
-  }, [items, debouncedQuery]);
-  // FILTER
-  const [isFilterPending, startTransition] = useTransition();
-  const filteredItems = useMemo(() => {
-    if (!statusFilter) return searchedItems;
-    //
-    return searchedItems.filter((item) => item.status === statusFilter);
-  }, [searchedItems, statusFilter]);
+		return items.filter((item) =>
+			item.title.toLowerCase().trim().includes(debouncedQuery),
+		);
+	}, [items, debouncedQuery]);
+	// FILTER
+	const [isFilterPending, startTransition] = useTransition();
+	const filteredItems = useMemo(() => {
+		if (!statusFilter) return searchedItems;
+		//
+		return searchedItems.filter((item) => item.status === statusFilter);
+	}, [searchedItems, statusFilter]);
 
-  //
-  const DATE_SORT_KEYS = ["dateCompleted", "dateReleased", "datePublished"];
+	//
+	const DATE_SORT_KEYS = ["dateCompleted", "dateReleased", "datePublished"];
 
-  const handleSortConfig = (sortType: string) => {
-    const isDateSort = DATE_SORT_KEYS.includes(sortType);
-    setSortConfig((prev) => {
-      if (!prev || prev.type !== sortType) {
-        return { type: sortType, order: isDateSort ? "asc" : "desc" };
-      } else if (prev.order === (isDateSort ? "asc" : "desc")) {
-        return { type: sortType, order: isDateSort ? "desc" : "asc" };
-      } else {
-        return null;
-      }
-    });
-  };
+	const handleSortConfig = (sortType: string) => {
+		const isDateSort = DATE_SORT_KEYS.includes(sortType);
+		setSortConfig((prev) => {
+			if (!prev || prev.type !== sortType) {
+				return { type: sortType, order: isDateSort ? "asc" : "desc" };
+			} else if (prev.order === (isDateSort ? "asc" : "desc")) {
+				return { type: sortType, order: isDateSort ? "desc" : "asc" };
+			} else {
+				return null;
+			}
+		});
+	};
 
-  const handleStatusFilterConfig = (status: MediaStatus) => {
-    startTransition(() => {
-      if (statusFilter === status) {
-        setStatusFilter(null);
-      } else {
-        setStatusFilter(status);
-      }
-    });
-  };
+	const handleStatusFilterConfig = (status: MediaStatus) => {
+		startTransition(() => {
+			if (statusFilter === status) {
+				setStatusFilter(null);
+			} else {
+				setStatusFilter(status);
+			}
+		});
+	};
 
-  const handleSearchQueryChange = (value: string) => {
-    setSearchQuery(value);
-    debouncedSetQuery(value.toLowerCase().trim());
-  };
+	const handleSearchQueryChange = (value: string) => {
+		setSearchQuery(value);
+		debouncedSetQuery(value.toLowerCase().trim());
+	};
 
-  const handleItemClicked = useCallback((item: T) => {
-    setActiveModal("detailsModal");
-    setSelectedItem(item);
-  }, []);
+	// push the batch to the db and start a fresh one
+	const flushPending = useCallback(() => {
+		const itemId = pendingFor.current;
+		if (itemId !== null && Object.keys(pendingUpdates.current).length > 0) {
+			onUpdate(itemId, pendingUpdates.current);
+		}
+		pendingUpdates.current = {};
+		pendingFor.current = null;
+	}, [onUpdate]);
 
-  const handleScoreFinal = useCallback(
-    (finalScore: Score) => {
-      if (!selectedItem?.id) return;
-      setSelectedItem({ ...selectedItem, score: finalScore });
-      // onUpdate(selectedItem.id, { score: finalScore } as Partial<T>);
-      pendingUpdates.current = {
-        ...pendingUpdates.current,
-        ...({ score: finalScore } as Partial<T>),
-      };
-      setTempScore(null);
-      setActiveModal("detailsModal");
-    },
-    [selectedItem],
-  );
+	// batch an update, flushing first if it belongs to a different item
+	const queueUpdate = useCallback(
+		(itemId: number, updates: Partial<T>) => {
+			if (pendingFor.current !== null && pendingFor.current !== itemId) {
+				flushPending();
+			}
+			pendingFor.current = itemId;
+			pendingUpdates.current = { ...pendingUpdates.current, ...updates };
+		},
+		[flushPending],
+	);
 
-  const handleItemAdd = useCallback(
-    async (item: T) => {
-      const newItem = await onAdd(item);
-      if (!newItem.score) return;
-      setActiveModal("scoreBattlerModal");
-      setSelectedItem(newItem);
-      setTempScore(newItem.score);
-    },
-    [onAdd],
-  );
+	const handleItemClicked = useCallback((item: T) => {
+		setActiveModal("detailsModal");
+		setSelectedItem(item);
+	}, []);
 
-  const handleItemUpdates = useCallback(
-    async (itemId: number, updates?: Partial<T>, shouldDelete?: boolean) => {
-      if (shouldDelete) return await onRemove(itemId);
-      if (!updates) return;
+	const handleScoreFinal = useCallback(
+		(finalScore: Score) => {
+			if (!selectedItem?.id) return;
+			setSelectedItem({ ...selectedItem, score: finalScore });
+			queueUpdate(selectedItem.id, { score: finalScore } as Partial<T>);
+			setTempScore(null);
+			setActiveModal("detailsModal");
+		},
+		[selectedItem, queueUpdate],
+	);
 
-      const isSelectedItem = itemId === selectedItem?.id;
+	const handleItemAdd = useCallback(
+		async (item: T) => {
+			const newItem = await onAdd(item);
+			if (!newItem.score) return;
+			setActiveModal("scoreBattlerModal");
+			setSelectedItem(newItem);
+			setTempScore(newItem.score);
+		},
+		[onAdd],
+	);
 
-      // for opponent updates
-      if (!isSelectedItem) {
-        const indirectUpdate = true;
-        onUpdate(itemId, updates, indirectUpdate);
-        return;
-      }
+	const handleItemUpdates = useCallback(
+		async (
+			itemId: number,
+			updates?: Partial<T>,
+			shouldDelete?: boolean,
+		) => {
+			if (shouldDelete) return await onRemove(itemId);
+			if (!updates) return;
 
-      // check if first time score
-      const isNewScore = updates.score && !selectedItem?.score;
+			const isSelectedItem = itemId === selectedItem?.id;
 
-      if (isNewScore && updates.score) {
-        const skipScoreBattle =
-          updates.score.mu >= 2000 ||
-          createSession(
-            items
-              .filter((i) => i.score !== null && i.id !== itemId)
-              .map((i) => ({ id: i.id, score: i.score! })),
-            { id: itemId, score: updates.score },
-          ).done;
-        //
-        if (skipScoreBattle) {
-          setSelectedItem({ ...selectedItem, ...updates });
-          pendingUpdates.current = { ...pendingUpdates.current, ...updates };
-          return;
-        }
-        //
-        setTempScore(updates.score);
-        setActiveModal("scoreBattlerModal");
-        return;
-      }
-      // normal update
-      setSelectedItem({ ...selectedItem, ...updates });
-      pendingUpdates.current = { ...pendingUpdates.current, ...updates };
-    },
-    [onRemove, onUpdate, selectedItem, items],
-  );
+			// for opponent updates
+			if (!isSelectedItem) {
+				const indirectUpdate = true;
+				onUpdate(itemId, updates, indirectUpdate);
+				return;
+			}
 
-  const handleItemRefresh = useCallback(
-    async (metadata: Partial<T>) => {
-      if (!selectedItem?.id || !onRefresh) return;
-      // drop undefined values
-      const clean = Object.fromEntries(
-        Object.entries(metadata).filter(([, v]) => v !== undefined),
-      ) as Partial<T>;
-      if (Object.keys(clean).length === 0) return;
-      // reflect refreshed metadata in the open modal immediately
-      setSelectedItem({ ...selectedItem, ...clean });
-      await onRefresh(selectedItem.id, clean);
-    },
-    [selectedItem, onRefresh],
-  );
+			// check if first time score
+			const isNewScore = updates.score && !selectedItem?.score;
 
-  const handleModalClose = useCallback(() => {
-    // push any pending update to db -- have only one update
-    if (selectedItem?.id && Object.keys(pendingUpdates.current).length > 0) {
-      onUpdate(selectedItem.id, pendingUpdates.current);
-    }
-    pendingUpdates.current = {};
-    // normal
-    setActiveModal(null);
-    // wait a frame before clearing state
-    requestAnimationFrame(() => {
-      setTitleToUse("");
-      setSelectedItem(null);
-    });
-  }, [onUpdate, selectedItem]);
+			if (isNewScore && updates.score) {
+				const skipScoreBattle =
+					updates.score.mu >= 2000 ||
+					createSession(
+						items
+							.filter((i) => i.score !== null && i.id !== itemId)
+							.map((i) => ({ id: i.id, score: i.score! })),
+						{ id: itemId, score: updates.score },
+					).done;
+				//
+				if (skipScoreBattle) {
+					setSelectedItem({ ...selectedItem, ...updates });
+					queueUpdate(itemId, updates);
+					return;
+				}
+				//
+				setTempScore(updates.score);
+				setActiveModal("scoreBattlerModal");
+				return;
+			}
+			// normal update
+			setSelectedItem({ ...selectedItem, ...updates });
+			queueUpdate(itemId, updates);
+		},
+		[onRemove, onUpdate, selectedItem, items, queueUpdate],
+	);
 
-  useEffect(() => {
-    const handleEnter = (e: KeyboardEvent) => {
-      const isDesktop = window.matchMedia("(min-width: 900px)").matches;
-      if (!isDesktop) return;
-      // if no modal is open and not typing in an input/textarea
-      if (
-        e.key === "Enter" &&
-        !activeModal &&
-        !(
-          e.target instanceof HTMLInputElement ||
-          e.target instanceof HTMLTextAreaElement
-        )
-      ) {
-        setActiveModal("addModal");
-      }
-    };
-    //
-    window.addEventListener("keydown", handleEnter);
-    return () => window.removeEventListener("keydown", handleEnter);
-  }, [activeModal]);
+	const handleItemRefresh = useCallback(
+		async (metadata: Partial<T>) => {
+			if (!selectedItem?.id || !onRefresh) return;
+			// drop undefined values
+			const clean = Object.fromEntries(
+				Object.entries(metadata).filter(([, v]) => v !== undefined),
+			) as Partial<T>;
+			if (Object.keys(clean).length === 0) return;
+			// reflect refreshed metadata in the open modal immediately
+			setSelectedItem({ ...selectedItem, ...clean });
+			await onRefresh(selectedItem.id, clean);
+		},
+		[selectedItem, onRefresh],
+	);
 
-  useEffect(() => {
-    if (activeModal) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+	const handleModalClose = useCallback(() => {
+		// push any pending update to db -- have only one update
+		flushPending();
+		// normal
+		setActiveModal(null);
+		// wait a frame before clearing state
+		requestAnimationFrame(() => {
+			setTitleToUse("");
+			setSelectedItem(null);
+		});
+	}, [flushPending]);
 
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [activeModal]);
+	useEffect(() => {
+		const handleEnter = (e: KeyboardEvent) => {
+			const isDesktop = window.matchMedia("(min-width: 900px)").matches;
+			if (!isDesktop) return;
+			// if no modal is open and not typing in an input/textarea
+			if (
+				e.key === "Enter" &&
+				!activeModal &&
+				!(
+					e.target instanceof HTMLInputElement ||
+					e.target instanceof HTMLTextAreaElement
+				)
+			) {
+				setActiveModal("addModal");
+			}
+		};
+		//
+		window.addEventListener("keydown", handleEnter);
+		return () => window.removeEventListener("keydown", handleEnter);
+	}, [activeModal]);
 
-  return {
-    // items
-    filteredItems,
-    // states
-    tempScore,
-    sortConfig,
-    titleToUse,
-    activeModal,
-    searchQuery,
-    statusFilter,
-    selectedItem,
-    setTitleToUse,
-    setActiveModal,
-    isFilterPending,
-    setSelectedItem,
-    isMenuButtonsVisible,
-    // handlers
-    handleItemAdd,
-    handleScoreFinal,
-    handleSortConfig,
-    handleModalClose,
-    handleItemUpdates,
-    handleItemRefresh,
-    handleItemClicked,
-    handleSearchQueryChange,
-    handleStatusFilterConfig,
-  };
+	useEffect(() => {
+		if (activeModal) {
+			document.body.style.overflow = "hidden";
+		} else {
+			document.body.style.overflow = "unset";
+		}
+
+		return () => {
+			document.body.style.overflow = "unset";
+		};
+	}, [activeModal]);
+
+	return {
+		// items
+		filteredItems,
+		// states
+		tempScore,
+		sortConfig,
+		titleToUse,
+		activeModal,
+		searchQuery,
+		statusFilter,
+		selectedItem,
+		setTitleToUse,
+		setActiveModal,
+		isFilterPending,
+		setSelectedItem,
+		isMenuButtonsVisible,
+		// handlers
+		handleItemAdd,
+		handleScoreFinal,
+		handleSortConfig,
+		handleModalClose,
+		handleItemUpdates,
+		handleItemRefresh,
+		handleItemClicked,
+		handleSearchQueryChange,
+		handleStatusFilterConfig,
+	};
 }

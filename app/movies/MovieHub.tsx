@@ -91,6 +91,16 @@ export default function MoviesHub() {
 		DIFF_COLUMNS_MOVIE,
 	);
 
+	const isInList = useCallback(
+		(title: string) =>
+			items.some(
+				(movie) =>
+					movie.title.toLowerCase().trim() ===
+					title.toLowerCase().trim(),
+			),
+		[items],
+	);
+
 	// sequel/prequel navigation
 	const showSequelPrequel = useCallback(
 		(targetTitle: string) => {
@@ -176,6 +186,7 @@ export default function MoviesHub() {
 						onUpdate={handleItemUpdates}
 						onRefresh={handleItemRefresh}
 						showSequelPrequel={showSequelPrequel}
+						isInList={isInList}
 						existingMovies={items}
 						onAddWork={add}
 						//
@@ -192,6 +203,7 @@ export default function MoviesHub() {
 					tempScore && (
 						<ScoreBattlerHub
 							key="battler"
+							mediaType="movie"
 							items={items}
 							initialScore={tempScore}
 							onClose={() => {

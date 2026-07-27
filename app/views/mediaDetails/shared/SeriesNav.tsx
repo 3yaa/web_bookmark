@@ -10,6 +10,18 @@ interface SeriesNavProps {
 	isAdding: boolean;
 	onAction: (action: { type: string; payload?: unknown }) => void;
 	accentColor?: string;
+	isInList?: (title: string) => boolean;
+}
+
+export function NotInListBadge() {
+	return (
+		<span
+			title="Not in your list — opens the add flow"
+			className="shrink-0 rounded-full border border-zinc-700/70 px-1 text-[0.6rem] leading-[1.15] font-semibold text-zinc-500/90"
+		>
+			+
+		</span>
+	);
 }
 
 export function SeriesNav({
@@ -18,6 +30,7 @@ export function SeriesNav({
 	isAdding,
 	onAction,
 	accentColor,
+	isInList,
 }: SeriesNavProps) {
 	const uid = useId().replace(/:/g, "");
 	const nav =
@@ -108,7 +121,24 @@ export function SeriesNav({
 						};
 					})();
 
-	// show art if no series 
+	const isMissing = (
+		entry: { name?: string | null; action: { type: string } } | null,
+	) =>
+		!!entry?.name &&
+		!!isInList &&
+		entry.action.type === "seriesNav" &&
+		!isInList(entry.name);
+	const prevMissing = isMissing(nav.prev);
+	const nextMissing = isMissing(nav.next);
+
+	const nameStyle = (missing: boolean) =>
+		`text-sm font-medium transition-colors duration-200 ${
+			missing
+				? "text-zinc-300/45 underline decoration-dotted decoration-zinc-600/80 underline-offset-4 group-hover:text-zinc-300/70 group-hover:decoration-zinc-500"
+				: "text-zinc-300/70 group-hover:text-zinc-300/85 group-hover:underline"
+		}`;
+
+	// show art if no series
 	if (!nav.prev && !nav.center && !nav.next) {
 		const acc = accentColor
 			? `color-mix(in srgb, ${accentColor} 55%, #52525b)`
@@ -315,9 +345,10 @@ export function SeriesNav({
 								<span className="inline-flex items-center gap-1">
 									<span>←</span>
 									<span>{nav.prev.label}</span>
+									{prevMissing && <NotInListBadge />}
 								</span>
 							</label>
-							<span className="text-sm text-zinc-300/70 font-medium group-hover:text-zinc-300/85 group-hover:underline transition-colors duration-200">
+							<span className={nameStyle(prevMissing)}>
 								{nav.prev.name}
 							</span>
 						</div>
@@ -342,11 +373,12 @@ export function SeriesNav({
 						>
 							<label className="text-xs font-medium text-zinc-500 block pointer-events-none">
 								<span className="inline-flex items-center gap-1">
+									{nextMissing && <NotInListBadge />}
 									<span>{nav.next.label}</span>
 									<span>→</span>
 								</span>
 							</label>
-							<span className="text-sm text-zinc-300/70 font-medium group-hover:text-zinc-300/85 group-hover:underline transition-colors duration-200">
+							<span className={nameStyle(nextMissing)}>
 								{nav.next.name}
 							</span>
 						</div>

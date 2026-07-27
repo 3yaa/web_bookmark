@@ -38,8 +38,9 @@ interface MobileDetailsProps<T extends BaseMediaProps> {
 	onAction: (action: { type: string; payload?: unknown }) => void;
 	differentColumns: [ColumnConfig<T>, ColumnConfig<T>];
 	onSeriesNav?: (dir: "left" | "right") => void; // book + movie
-	canRefresh?: boolean; 
-	isSelecting?: boolean; 
+	isInList?: (title: string) => boolean;
+	canRefresh?: boolean;
+	isSelecting?: boolean;
 	coverUrls?: BookCoverProps[]; // book only
 	coverIndex?: number; // book only
 }
@@ -56,6 +57,7 @@ export function MobileDetails<T extends BaseMediaProps>({
 	onAction,
 	differentColumns,
 	onSeriesNav,
+	isInList,
 	canRefresh,
 	isSelecting,
 	coverUrls,
@@ -249,7 +251,9 @@ export function MobileDetails<T extends BaseMediaProps>({
 							{!isAdding && !isSelecting && canRefresh && (
 								<button
 									className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
-									onClick={() => onAction({ type: "refresh" })}
+									onClick={() =>
+										onAction({ type: "refresh" })
+									}
 									title="Reload cover / series info"
 								>
 									<RefreshCw className="w-5 h-5 text-slate-400" />
@@ -396,7 +400,9 @@ export function MobileDetails<T extends BaseMediaProps>({
 					>
 						{mediaType === "book" ? (
 							<BookCoverConfig
-								coverUrl={(item as unknown as BookProps).cover?.url}
+								coverUrl={
+									(item as unknown as BookProps).cover?.url
+								}
 								title={item.title}
 								coverUrls={coverUrls}
 								coverIndex={coverIndex}
@@ -555,6 +561,7 @@ export function MobileDetails<T extends BaseMediaProps>({
 								mediaType={mediaType}
 								isAdding={isAdding}
 								onAction={onAction}
+								isInList={isInList}
 							/>
 						)}
 						{/* NOTE */}

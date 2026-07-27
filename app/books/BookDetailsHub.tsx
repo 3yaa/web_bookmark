@@ -11,6 +11,7 @@ import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { bookStatusOptions } from "@/utils/dropDownDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
 import { TIER_PHI_THRESHOLD, getSeedMu, Tier } from "@/lib/tierConfig";
+import { useScoreNudge } from "@/hooks/useScoreNudge";
 import { useBookSearch } from "@/hooks/external/useBookSearch";
 import {
 	mapBookAPIDatatoBook,
@@ -27,6 +28,7 @@ export type BookAction =
 			payload: "Completed" | "Want to Read" | "Dropped";
 	  }
 	| { type: "resetScore" }
+	| { type: "nudgeScore"; payload: "up" | "down" }
 	| { type: "setInitialTier"; payload: Tier }
 	| { type: "changeNote"; payload: string }
 	| { type: "saveNote" }
@@ -50,6 +52,7 @@ interface BookDetailsProps {
 	) => void;
 	addBook?: () => void;
 	showSequelPrequel?: (sequelTitle: string) => void;
+	isInList?: (title: string) => boolean;
 	showBookInSeries?: (seriesDir: "left" | "right") => void;
 	onShowMore?: () => void;
 	onRefresh?: (metadata: Partial<BookProps>) => Promise<void>;
@@ -68,6 +71,7 @@ export function BookDetails({
 	isLoading,
 	showBookInSeries, //when wiki gives more then 1 option
 	showSequelPrequel,
+	isInList,
 	onShowMore,
 	onRefresh,
 	coverUrls,
@@ -95,6 +99,12 @@ export function BookDetails({
 	);
 	const [refreshSeriesIndex, setRefreshSeriesIndex] = useState(0);
 
+	// manual +/- 0.1 score tweaks -- phi tightens once, on close
+	const { nudge: nudgeScore, commit: commitScoreNudge } = useScoreNudge(
+		book,
+		onUpdate,
+	);
+
 	const handleAction = (action: BookAction) => {
 		switch (action.type) {
 			// =========modal actions=============
@@ -118,6 +128,9 @@ export function BookDetails({
 				break;
 			case "resetScore":
 				onUpdate(book.id, { score: null });
+				break;
+			case "nudgeScore":
+				nudgeScore(action.payload);
 				break;
 			case "changeNote":
 				setLocalNote(action.payload);
@@ -347,6 +360,8 @@ export function BookDetails({
 	};
 
 	const handleModalClose = () => {
+		// fold the deferred phi drop into the update this close flushes
+		commitScoreNudge();
 		// if (addBook) return;
 		onClose();
 	};
@@ -408,7 +423,7 @@ export function BookDetails({
 					isLoading={displayLoading}
 					isAdding={!!addBook}
 					onAdd={handleAddBook}
-					onClose={onClose}
+					onClose={handleModalClose}
 					onSeriesNav={
 						isSelecting
 							? refreshSeries.length > 1
@@ -417,6 +432,7 @@ export function BookDetails({
 							: showBookInSeries
 					}
 					canRefresh={!!onRefresh}
+					isInList={isInList}
 					isSelecting={isSelecting}
 					onAction={
 						handleAction as (action: {
@@ -438,7 +454,7 @@ export function BookDetails({
 					isLoading={displayLoading}
 					isAdding={!!addBook}
 					onAdd={handleAddBook}
-					onClose={onClose}
+					onClose={handleModalClose}
 					onSeriesNav={
 						isSelecting
 							? refreshSeries.length > 1
@@ -447,6 +463,7 @@ export function BookDetails({
 							: showBookInSeries
 					}
 					canRefresh={!!onRefresh}
+					isInList={isInList}
 					isSelecting={isSelecting}
 					onAction={
 						handleAction as (action: {

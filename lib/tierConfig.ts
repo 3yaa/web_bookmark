@@ -88,6 +88,25 @@ export const getDisplayScore = (mu: number): number => {
 	return Math.min(10, Math.max(0, Math.floor((mu / 200) * 10) / 10));
 };
 
+// display score moves in 0.1 steps, and 0.1 == 20 mu
+const MU_PER_DISPLAY_STEP = 20;
+const MU_MIN = 200;
+const MU_MAX = 2000;
+
+// one manual 0.1 step up/down on the displayed score
+export const nudgeMu = (mu: number, dir: "up" | "down"): number => {
+	// Goosebumps seeds above the display ceiling, where the number has nowhere
+	// left to go up -- and a step down has to start from the ceiling, or the
+	// first few clicks would move mu without moving what's on screen
+	if (dir === "up" && mu >= MU_MAX) return mu;
+	const base = Math.min(MU_MAX, Math.max(MU_MIN, mu));
+	const step = dir === "up" ? MU_PER_DISPLAY_STEP : -MU_PER_DISPLAY_STEP;
+	return Math.min(MU_MAX, Math.max(MU_MIN, base + step));
+};
+
+export const canNudgeMu = (mu: number, dir: "up" | "down"): boolean =>
+	nudgeMu(mu, dir) !== mu;
+
 export const getRatingNormal = (
 	rating: { mu: number; phi: number },
 	k: number = 1,

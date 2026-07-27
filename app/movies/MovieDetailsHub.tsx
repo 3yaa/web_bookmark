@@ -5,6 +5,7 @@ import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
 import { TIER_PHI_THRESHOLD, getSeedMu, Tier } from "@/lib/tierConfig";
+import { useScoreNudge } from "@/hooks/useScoreNudge";
 import {
 	ActorWork,
 	CastMember,
@@ -30,6 +31,7 @@ export type MovieAction =
 			payload: "Completed" | "Want to Watch" | "Dropped";
 	  }
 	| { type: "resetScore" }
+	| { type: "nudgeScore"; payload: "up" | "down" }
 	| { type: "setInitialTier"; payload: Tier }
 	| { type: "changeNote"; payload: string }
 	| { type: "saveNote" }
@@ -50,6 +52,7 @@ interface MovieDetailsProps {
 	) => void;
 	addMovie?: () => void;
 	showSequelPrequel?: (sequelTitle: string) => void;
+	isInList?: (title: string) => boolean;
 	showAnotherSeries?: (seriesDir: "left" | "right") => void;
 	existingMovies?: MovieProps[];
 	onAddWork?: (movie: MovieProps) => Promise<unknown>;
@@ -72,6 +75,7 @@ export function MovieDetails({
 	addMovie,
 	isLoading,
 	showSequelPrequel,
+	isInList,
 	showAnotherSeries,
 	existingMovies = [],
 	existingShows = [],
@@ -145,6 +149,12 @@ export function MovieDetails({
 		[existingMovies, existingShows],
 	);
 
+	// manual +/- 0.1 score tweaks -- phi tightens once, on close
+	const { nudge: nudgeScore, commit: commitScoreNudge } = useScoreNudge(
+		movie,
+		onUpdate,
+	);
+
 	const handleAction = (action: MovieAction) => {
 		switch (action.type) {
 			// =========modal actions=============
@@ -171,6 +181,9 @@ export function MovieDetails({
 				break;
 			case "resetScore":
 				onUpdate(movie.id, { score: null });
+				break;
+			case "nudgeScore":
+				nudgeScore(action.payload);
 				break;
 			case "changeNote":
 				setLocalNote(action.payload);
@@ -302,6 +315,8 @@ export function MovieDetails({
 	};
 
 	const handleModalClose = () => {
+		// fold the deferred phi drop into the update this close flushes
+		commitScoreNudge();
 		// if (addMovie) return;
 		onClose();
 	};
@@ -360,8 +375,9 @@ export function MovieDetails({
 					isLoading={displayLoading}
 					isAdding={!!addMovie}
 					onAdd={handleAddMovie}
-					onClose={onClose}
+					onClose={handleModalClose}
 					onSeriesNav={showAnotherSeries}
+					isInList={isInList}
 					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {
@@ -381,8 +397,9 @@ export function MovieDetails({
 					isLoading={displayLoading}
 					isAdding={!!addMovie}
 					onAdd={handleAddMovie}
-					onClose={onClose}
+					onClose={handleModalClose}
 					onSeriesNav={showAnotherSeries}
+					isInList={isInList}
 					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {

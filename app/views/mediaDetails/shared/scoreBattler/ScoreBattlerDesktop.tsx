@@ -2,8 +2,7 @@ import Image from "next/image";
 import { BaseMediaProps } from "@/types/media";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
 import { ModalBackdrop, ModalPanel } from "@/app/components/ui/ModalMotion";
-import { actions, ScoreBattlerUIProps } from "./shared";
-import { BookProps } from "@/types/book";
+import { actions, coverFor, ScoreBattlerUIProps } from "./shared";
 
 export function ScoreBattlerDesktop<T extends BaseMediaProps>({
 	selectedItem,
@@ -11,13 +10,13 @@ export function ScoreBattlerDesktop<T extends BaseMediaProps>({
 	mediaType,
 	onPick,
 }: ScoreBattlerUIProps<T>) {
-	let coverFor = (item: T | null) => item?.posterUrl ?? "";
-	if (mediaType === "book") {
-		coverFor = (item: T | null) =>
-			(item as unknown as BookProps)?.cover?.url ?? "";
-	}
+	const coverSelectedItem = coverFor(selectedItem);
+	const coverItemFacing = coverFor(itemFacing);
 
-	const imgFit = mediaType === "game" ? "object-cover" : "object-fill";
+	const imgFit =
+		mediaType === "game" || mediaType === "book"
+			? "object-cover"
+			: "object-fill";
 
 	return (
 		<ModalBackdrop className="fixed inset-0 bg-linear-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20">
@@ -40,13 +39,17 @@ export function ScoreBattlerDesktop<T extends BaseMediaProps>({
 								`}
 						>
 							<div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg select-none">
-								<Image
-									src={coverFor(selectedItem)}
-									alt={selectedItem.title || "Untitled"}
-									width={1280}
-									height={720}
-									className={`min-w-62 min-h-93 ${imgFit}`}
-								/>
+								{coverSelectedItem ? (
+									<Image
+										src={coverSelectedItem}
+										alt={selectedItem.title || "Untitled"}
+										width={1280}
+										height={720}
+										className={`min-w-62 min-h-93 ${imgFit}`}
+									/>
+								) : (
+									<div className="min-w-62 min-h-93 bg-linear-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30" />
+								)}
 							</div>
 							{/* Inner vignette */}
 							<div className="absolute -inset-1 pointer-events-none rounded-xl shadow-[inset_0_0_12px_rgba(0,0,0,0.4)]" />
@@ -97,13 +100,17 @@ export function ScoreBattlerDesktop<T extends BaseMediaProps>({
 								`}
 						>
 							<div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg select-none">
-								<Image
-									src={coverFor(itemFacing)}
-									alt={itemFacing?.title || "Untitled"}
-									width={1280}
-									height={720}
-									className={`min-w-62 min-h-93 ${imgFit}`}
-								/>
+								{coverItemFacing ? (
+									<Image
+										src={coverItemFacing}
+										alt={itemFacing?.title || "Untitled"}
+										width={1280}
+										height={720}
+										className={`min-w-62 min-h-93 ${imgFit}`}
+									/>
+								) : (
+									<div className="min-w-62 min-h-93 bg-linear-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30" />
+								)}
 							</div>
 							{/* Inner vignette */}
 							<div className="absolute -inset-1 pointer-events-none rounded-xl shadow-[inset_0_0_12px_rgba(0,0,0,0.4)]" />

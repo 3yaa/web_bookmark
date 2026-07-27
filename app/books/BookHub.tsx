@@ -69,6 +69,14 @@ export default function BookHub() {
     DIFF_COLUMNS_BOOK,
   );
 
+  const isInList = useCallback(
+    (title: string) =>
+      items.some(
+        (book) => normalizeTitle(book.title) === normalizeTitle(title),
+      ),
+    [items],
+  );
+
   // sequel/prequel navigation
   const showSequelPrequel = useCallback(
     (targetTitle: string) => {
@@ -148,6 +156,7 @@ export default function BookHub() {
             onUpdate={handleItemUpdates}
             onRefresh={handleItemRefresh}
             showSequelPrequel={showSequelPrequel}
+            isInList={isInList}
           />
         )}
       </AnimatePresence>
@@ -156,6 +165,7 @@ export default function BookHub() {
         {activeModal === "scoreBattlerModal" && selectedItem && tempScore && (
           <ScoreBattlerHub
             key="battler"
+            mediaType="book"
             items={items}
             initialScore={tempScore}
             onClose={() => {

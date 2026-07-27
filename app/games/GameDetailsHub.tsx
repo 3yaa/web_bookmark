@@ -5,6 +5,7 @@ import { gameStatusOptions } from "@/utils/dropDownDetails";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
 import { TIER_PHI_THRESHOLD, getSeedMu, Tier } from "@/lib/tierConfig";
+import { useScoreNudge } from "@/hooks/useScoreNudge";
 import { useGameSearch } from "@/hooks/external/useGameSearch";
 import { mapIGDBDataToGame, mapIGDBDlcsDataToGame } from "./utils/gameMapping";
 
@@ -13,6 +14,7 @@ export type GameAction =
 	| { type: "delete" }
 	| { type: "changeStatus"; payload: "Playing" | "Completed" | "Dropped" }
 	| { type: "resetScore" }
+	| { type: "nudgeScore"; payload: "up" | "down" }
 	| { type: "setInitialTier"; payload: Tier }
 	| { type: "changeNote"; payload: string }
 	| { type: "saveNote" }
@@ -63,6 +65,12 @@ export function GameDetails({
 	const [refreshBackdropIndex, setRefreshBackdropIndex] = useState(0);
 	const [refreshMeta, setRefreshMeta] = useState<Partial<GameProps>>({});
 
+	// manual +/- 0.1 score tweaks -- phi tightens once, on close
+	const { nudge: nudgeScore, commit: commitScoreNudge } = useScoreNudge(
+		game,
+		onUpdate,
+	);
+
 	const handleAction = (action: GameAction) => {
 		switch (action.type) {
 			// =========modal actions=============
@@ -89,6 +97,9 @@ export function GameDetails({
 				break;
 			case "resetScore":
 				onUpdate(game.id, { score: null });
+				break;
+			case "nudgeScore":
+				nudgeScore(action.payload);
 				break;
 			case "changeNote":
 				setLocalNote(action.payload);
@@ -239,6 +250,8 @@ export function GameDetails({
 	};
 
 	const handleModalClose = () => {
+		// fold the deferred phi drop into the update this close flushes
+		commitScoreNudge();
 		// if (addGame) return;
 		onClose();
 	};
@@ -320,7 +333,7 @@ export function GameDetails({
 					isLoading={displayLoading}
 					isAdding={!!addGame}
 					onAdd={handleAddGame}
-					onClose={onClose}
+					onClose={handleModalClose}
 					canRefresh={!!onRefresh}
 					isSelecting={isSelecting}
 					onAction={
@@ -345,7 +358,7 @@ export function GameDetails({
 					isLoading={displayLoading}
 					isAdding={!!addGame}
 					onAdd={handleAddGame}
-					onClose={onClose}
+					onClose={handleModalClose}
 					canRefresh={!!onRefresh}
 					isSelecting={isSelecting}
 					onAction={

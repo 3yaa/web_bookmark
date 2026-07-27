@@ -169,6 +169,7 @@ export default function ShowHub() {
 					tempScore && (
 						<ScoreBattlerHub
 							key="battler"
+							mediaType="show"
 							items={items}
 							initialScore={tempScore}
 							onClose={() => {

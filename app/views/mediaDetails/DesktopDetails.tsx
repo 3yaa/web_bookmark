@@ -15,6 +15,8 @@ import {
 	ChevronsUp,
 	ChevronLeft,
 	ChevronRight,
+	ChevronUp,
+	ChevronDown,
 	RotateCcw,
 	RefreshCw,
 	Check,
@@ -33,10 +35,19 @@ import { CoverColorPicker } from "@/app/books/components/CoverColorPicker";
 import { BookBackdropDetails } from "@/app/components/ui/BookBackdrop";
 import { SeriesNav } from "./shared/SeriesNav";
 import { EditProgress } from "@/app/shows/components/EditProgressDetail";
-import { getDisplayScore, getTierFromMu, Tier } from "@/lib/tierConfig";
+import {
+	canNudgeMu,
+	getDisplayScore,
+	getTierFromMu,
+	Tier,
+} from "@/lib/tierConfig";
 import { ShowProps } from "@/types/show";
 import { MovieProps } from "@/types/movie";
 import { BookCoverProps, BookProps } from "@/types/book";
+
+// hover-revealed +/- controls on the score row
+const SCORE_NUDGE_BTN =
+	"flex justify-center items-center w-6.5 h-6.5 rounded-md bg-zinc-800/80 border border-zinc-700/25 hover:bg-zinc-700/35 hover:border-zinc-700/40 active:bg-zinc-700/40 active:scale-95 transition-all duration-150 hover:cursor-pointer disabled:hover:bg-zinc-800/80 disabled:border-zinc-600/25 disabled:opacity-40 disabled:cursor-default";
 
 const HEADER_WASH_MASK = [
 	"linear-gradient(to right, transparent 0px, black 20px, black calc(100% - 44px), transparent 100%)",
@@ -53,6 +64,7 @@ interface DesktopDetailsProps<T extends BaseMediaProps> {
 	onAdd: () => void;
 	onClose: () => void;
 	onSeriesNav?: (dir: "left" | "right") => void;
+	isInList?: (title: string) => boolean;
 	differentColumns: [ColumnConfig<T>, ColumnConfig<T>];
 	onAction: (action: { type: string; payload?: unknown }) => void;
 	canRefresh?: boolean;
@@ -78,6 +90,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 	onAdd,
 	onClose,
 	onSeriesNav,
+	isInList,
 	onAction,
 	canRefresh,
 	isSelecting,
@@ -477,11 +490,14 @@ export function DesktopDetails<T extends BaseMediaProps>({
 											<div
 												className="absolute -left-5 -right-10 -top-5 -bottom-2 -z-1 pointer-events-none backdrop-blur-[3px]"
 												style={{
-													backgroundColor: "rgba(9,9,11,0.16)",
+													backgroundColor:
+														"rgba(9,9,11,0.16)",
 													maskImage: HEADER_WASH_MASK,
-													WebkitMaskImage: HEADER_WASH_MASK,
+													WebkitMaskImage:
+														HEADER_WASH_MASK,
 													maskComposite: "intersect",
-													WebkitMaskComposite: "source-in",
+													WebkitMaskComposite:
+														"source-in",
 												}}
 											/>
 										)}
@@ -534,7 +550,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 												mediaType === "movie") && (
 												<button
 													onClick={() =>
-														onAction({ type: "cast" })
+														onAction({
+															type: "cast",
+														})
 													}
 													title="View cast"
 													className="cursor-pointer text-zinc-400 hover:text-zinc-200 hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] transition-all duration-200 shrink-0 mr-0.5 hover:scale-105"
@@ -566,7 +584,8 @@ export function DesktopDetails<T extends BaseMediaProps>({
 													item,
 												) ||
 													"Unknown " +
-														differentColumns[0].label}
+														differentColumns[0]
+															.label}
 											</span>
 											<div className="font-medium text-zinc-200/70 text-md leading-6">
 												•
@@ -663,7 +682,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 													)}
 											</div>
 											{item.score ? (
-												<div className="w-full rounded-lg border backdrop-blur-md flex items-center justify-between gap-3 px-4 py-3 transition-all duration-300 ease-out bg-linear-to-b shadow-md border-zinc-800/50 from-transparent via-zinc-800/30 to-zinc-800/50 shadow-black/20">
+												<div className="group w-full rounded-lg border backdrop-blur-md flex items-center justify-between gap-3 px-4 py-3 transition-all duration-300 ease-out bg-linear-to-b shadow-md border-zinc-800/50 from-transparent via-zinc-800/30 to-zinc-800/50 shadow-black/20">
 													<span className="text-sm text-zinc-300/85 font-bold tracking-wide">
 														{!isAdding &&
 															`${getDisplayScore(item.score.mu)} - `}
@@ -671,6 +690,66 @@ export function DesktopDetails<T extends BaseMediaProps>({
 															item.score!.mu,
 														)}
 													</span>
+													{/* NUDGE SCORE BY 0.1 */}
+													{!isAdding &&
+														!isSelecting && (
+															<div className="flex gap-1 -my-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
+																<button
+																	className={
+																		SCORE_NUDGE_BTN
+																	}
+																	disabled={
+																		!canNudgeMu(
+																			item
+																				.score
+																				.mu,
+																			"down",
+																		)
+																	}
+																	onClick={() =>
+																		onAction(
+																			{
+																				type: "nudgeScore",
+																				payload:
+																					"down",
+																			},
+																		)
+																	}
+																	title={
+																		"Lower by 0.1"
+																	}
+																>
+																	<ChevronDown className="w-4 h-4 text-zinc-300/80" />
+																</button>
+																<button
+																	className={
+																		SCORE_NUDGE_BTN
+																	}
+																	disabled={
+																		!canNudgeMu(
+																			item
+																				.score
+																				.mu,
+																			"up",
+																		)
+																	}
+																	onClick={() =>
+																		onAction(
+																			{
+																				type: "nudgeScore",
+																				payload:
+																					"up",
+																			},
+																		)
+																	}
+																	title={
+																		"Raise by 0.1"
+																	}
+																>
+																	<ChevronUp className="w-4 h-4 text-zinc-300/80" />
+																</button>
+															</div>
+														)}
 												</div>
 											) : (
 												<Dropdown
@@ -761,6 +840,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 										mediaType={mediaType}
 										isAdding={isAdding}
 										onAction={onAction}
+										isInList={isInList}
 										accentColor={
 											mediaType === "book"
 												? bookItem.cover?.color

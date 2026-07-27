@@ -151,6 +151,50 @@ export function useMediaData<T extends { id: number; status: string }>({
     [authFetch, endpoint, extraFieldsToUpdate, statusOrder],
   );
 
+  // REFRESH -- reload source metadata (cover/poster, series, etc.) while the
+  // server keeps every personal field (status/score/dateCompleted/note).
+  // bypasses the `update` allowlist on purpose: metadata is exactly what it writes.
+  // by default this bumps last_updated (a refresh counts as touching the item);
+  // pass indirect=true for background syncs that shouldn't reorder the listing.
+  const refresh = useCallback(
+    async (itemId: number, metadata: Partial<T>, indirect = false) => {
+      try {
+        // update locally first so the modal reflects the new metadata instantly
+        setItems((prevItems) =>
+          prevItems.map((item) =>
+            item.id === itemId ? { ...item, ...metadata } : item,
+          ),
+        );
+        const url = `/api/${endpoint}/${itemId}/refresh`;
+        const options = {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(
+            indirect ? { ...metadata, indirectUpdate: true } : metadata,
+          ),
+        };
+        const response = await authFetch(url, options);
+        if (!response.ok) {
+          throw new Error(`HTTP error--status: ${response.status}`);
+        }
+        // reconcile with the row the server returns
+        const resJson = await response.json();
+        const savedItem = resJson.data as T | undefined;
+        if (savedItem) {
+          setItems((prevItems) =>
+            prevItems.map((item) => (item.id === itemId ? savedItem : item)),
+          );
+        }
+        return savedItem;
+      } catch (e) {
+        console.error("Error refreshing " + endpoint, e);
+      }
+    },
+    [authFetch, endpoint],
+  );
+
   // DELETE
   const remove = useCallback(
     async (itemId: number) => {
@@ -183,5 +227,5 @@ export function useMediaData<T extends { id: number; status: string }>({
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  return { items, add, update, remove, isProcessing };
+  return { items, add, update, refresh, remove, isProcessing };
 }

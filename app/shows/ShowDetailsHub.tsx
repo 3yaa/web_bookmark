@@ -20,6 +20,8 @@ import { EpisodeRatingsModal } from "./components/EpisodeRatingsModal";
 import { MovieProps } from "@/types/movie";
 import { MovieDetails } from "@/app/movies/MovieDetailsHub";
 import { MediaStatus } from "@/types/media";
+import { useShowSearch } from "@/hooks/external/useShowSearch";
+import { mapTMDBTVToShow } from "./utils/showMapping";
 
 export type ShowAction =
 	| { type: "closeModal" }
@@ -44,6 +46,7 @@ export type ShowAction =
 	| { type: "changeSeasonNum"; payload: number }
 	| { type: "changeEpisodeNum"; payload: number }
 	| { type: "cast" }
+	| { type: "refresh" }
 	| { type: "openRatings" };
 
 interface ShowDetailsProps {
@@ -66,6 +69,8 @@ interface ShowDetailsProps {
 		takeAction?: boolean,
 	) => void;
 	onAddMovie?: (movie: MovieProps) => Promise<unknown>;
+	// reload metadata from source (poster/backdrop, seasons, studio)
+	onRefresh?: (metadata: Partial<ShowProps>) => Promise<void>;
 }
 
 export function ShowDetails({
@@ -79,8 +84,11 @@ export function ShowDetails({
 	onAddWork,
 	onMovieUpdate,
 	onAddMovie,
+	onRefresh,
 }: ShowDetailsProps) {
 	const [localNote, setLocalNote] = useState(show.note || "");
+	const [isRefreshing, setIsRefreshing] = useState(false);
+	const { searchForShowSeasonInfo } = useShowSearch();
 	const [editingMode, setEditingMode] = useState({
 		season: false,
 		episode: false,
@@ -231,9 +239,40 @@ export function ShowDetails({
 			case "cast":
 				handleCast();
 				break;
+			case "refresh":
+				handleRefresh();
+				break;
 			case "openRatings":
 				setRatingsOpen(true);
 				break;
+		}
+	};
+
+	const handleRefresh = async () => {
+		if (!onRefresh || !show.tmdbId || isRefreshing) return;
+		setIsRefreshing(true);
+		try {
+			const tv = await searchForShowSeasonInfo(show.tmdbId);
+			if (!tv) return;
+			const meta: Partial<ShowProps> = mapTMDBTVToShow(tv);
+			// imdbId is identity (used for episode ratings) -- leave untouched
+			delete meta.imdbId;
+			const seasons = meta.seasons;
+			if (seasons && seasons.length) {
+				let si = show.curSeasonIndex;
+				let ep = show.curEpisode;
+				if (si > seasons.length - 1) {
+					si = seasons.length - 1;
+					ep = 0;
+				}
+				const maxEp = seasons[si]?.episode_count ?? 0;
+				if (ep > maxEp) ep = maxEp;
+				if (si !== show.curSeasonIndex) meta.curSeasonIndex = si;
+				if (ep !== show.curEpisode) meta.curEpisode = ep;
+			}
+			if (Object.keys(meta).length) await onRefresh(meta);
+		} finally {
+			setIsRefreshing(false);
 		}
 	};
 
@@ -502,6 +541,14 @@ export function ShowDetails({
 
 	if (!show) return null;
 
+	const displayLoading = isRefreshing
+		? {
+				isTrue: true,
+				style: "h-8 w-8 border-emerald-400",
+				text: "Reloading...",
+			}
+		: isLoading;
+
 	return (
 		<>
 			<div className="lg:block hidden">
@@ -510,10 +557,11 @@ export function ShowDetails({
 					localNote={localNote}
 					statusOptions={showStatusOptions}
 					mediaType="show"
-					isLoading={isLoading}
+					isLoading={displayLoading}
 					isAdding={!!addShow}
 					onAdd={handleAddShow}
 					onClose={onClose}
+					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {
 							type: string;
@@ -531,10 +579,11 @@ export function ShowDetails({
 					localNote={localNote}
 					statusOptions={showStatusOptions}
 					mediaType="show"
-					isLoading={isLoading}
+					isLoading={displayLoading}
 					isAdding={!!addShow}
 					onAdd={handleAddShow}
 					onClose={onClose}
+					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {
 							type: string;

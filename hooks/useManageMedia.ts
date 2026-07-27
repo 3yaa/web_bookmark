@@ -21,6 +21,7 @@ interface ManageMediaConfig<T extends BaseMediaProps> {
     updates: Partial<T>,
     indirectUpdate?: boolean,
   ) => Promise<void>;
+  onRefresh?: (itemId: number, metadata: Partial<T>) => Promise<T | undefined>;
 }
 
 export function useManageMedia<T extends BaseMediaProps>({
@@ -28,6 +29,7 @@ export function useManageMedia<T extends BaseMediaProps>({
   onAdd,
   onRemove,
   onUpdate,
+  onRefresh,
 }: ManageMediaConfig<T>) {
   const [statusFilter, setStatusFilter] = useState<MediaStatus | null>(null);
   const [sortConfig, setSortConfig] = useState<SortState<string> | null>(null);
@@ -171,6 +173,21 @@ export function useManageMedia<T extends BaseMediaProps>({
     [onRemove, onUpdate, selectedItem, items],
   );
 
+  const handleItemRefresh = useCallback(
+    async (metadata: Partial<T>) => {
+      if (!selectedItem?.id || !onRefresh) return;
+      // drop undefined values
+      const clean = Object.fromEntries(
+        Object.entries(metadata).filter(([, v]) => v !== undefined),
+      ) as Partial<T>;
+      if (Object.keys(clean).length === 0) return;
+      // reflect refreshed metadata in the open modal immediately
+      setSelectedItem({ ...selectedItem, ...clean });
+      await onRefresh(selectedItem.id, clean);
+    },
+    [selectedItem, onRefresh],
+  );
+
   const handleModalClose = useCallback(() => {
     // push any pending update to db -- have only one update
     if (selectedItem?.id && Object.keys(pendingUpdates.current).length > 0) {
@@ -241,6 +258,7 @@ export function useManageMedia<T extends BaseMediaProps>({
     handleSortConfig,
     handleModalClose,
     handleItemUpdates,
+    handleItemRefresh,
     handleItemClicked,
     handleSearchQueryChange,
     handleStatusFilterConfig,

@@ -14,11 +14,12 @@ import { ScoreBattlerHub } from "../views/mediaDetails/shared/scoreBattler/Score
 import { AnimatePresence } from "framer-motion";
 
 export default function GameList() {
-  const { items, add, update, remove, isProcessing } = useMediaData<GameProps>({
-    endpoint: "games",
-    requiredFieldsToPost: ["title", "status", "igdbId"],
-    statusOrder: { Playing: 0, Completed: 1, Dropped: 2 },
-  });
+  const { items, add, update, refresh, remove, isProcessing } =
+    useMediaData<GameProps>({
+      endpoint: "games",
+      requiredFieldsToPost: ["title", "status", "igdbId"],
+      statusOrder: { Playing: 0, Completed: 1, Dropped: 2 },
+    });
 
   const {
     filteredItems,
@@ -37,6 +38,7 @@ export default function GameList() {
     handleItemClicked,
     handleSearchQueryChange,
     handleItemUpdates,
+    handleItemRefresh,
     tempScore,
     handleScoreFinal,
     handleItemAdd,
@@ -45,12 +47,38 @@ export default function GameList() {
     items: items,
     onRemove: remove,
     onUpdate: update,
+    onRefresh: refresh,
   });
 
   const sortedGames = useSortMedia(
     filteredItems,
     sortConfig,
     DIFF_COLUMNS_GAME,
+  );
+
+  const handleGameRefresh = useCallback(
+    async (metadata: Partial<GameProps>) => {
+      if (!selectedItem) return;
+      await handleItemRefresh(metadata);
+      if (selectedItem.dlcIndex === 0 && metadata.dlcs) {
+        const mainId = selectedItem.igdbId;
+        const newDlcs = metadata.dlcs;
+        const siblings = items.filter(
+          (g) => g.id !== selectedItem.id && g.dlcs?.[0]?.id === mainId,
+        );
+        await Promise.all(
+          siblings.map((sib) => {
+            // re-point each sibling's index in case the source reordered dlcs
+            const idx = newDlcs.findIndex((d) => d.id === sib.igdbId);
+            const payload: Partial<GameProps> =
+              idx >= 0 ? { dlcs: newDlcs, dlcIndex: idx } : { dlcs: newDlcs };
+            // indirect -- a background ordering sync shouldn't reorder the list
+            return refresh(sib.id, payload, true);
+          }),
+        );
+      }
+    },
+    [selectedItem, items, handleItemRefresh, refresh],
   );
 
   // for when searching for dlcs within details
@@ -146,6 +174,7 @@ export default function GameList() {
             game={selectedItem}
             onClose={handleGameModalClose}
             onUpdate={handleItemUpdates}
+            onRefresh={handleGameRefresh}
             showDlc={showDlc}
           />
         )}

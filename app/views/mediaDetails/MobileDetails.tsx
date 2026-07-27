@@ -5,11 +5,21 @@ import { GameProps } from "@/types/game";
 import { ShowProps } from "@/types/show";
 import { useEffect, useRef, useState } from "react";
 import { MobileScorePicker } from "@/app/components/ui/MobileScorePicker";
-import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
+import {
+	Plus,
+	ChevronLeft,
+	ChevronRight,
+	ChevronsUp,
+	RefreshCw,
+	Check,
+	X,
+	List,
+} from "lucide-react";
 import { Loading } from "@/app/components/ui/Loading";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
 import { BookCoverConfig } from "@/app/books/components/BookCoverConfigDetails";
+import { CoverColorPicker } from "@/app/books/components/CoverColorPicker";
 import { MobileProgressPicker } from "@/app/components/ui/MobileSeasonEpPicker";
 import { MobileSeriesNav } from "./shared/MobileSeriesNav";
 import { calcCurProgress } from "@/app/shows/utils/progressCalc";
@@ -28,6 +38,8 @@ interface MobileDetailsProps<T extends BaseMediaProps> {
 	onAction: (action: { type: string; payload?: unknown }) => void;
 	differentColumns: [ColumnConfig<T>, ColumnConfig<T>];
 	onSeriesNav?: (dir: "left" | "right") => void; // book + movie
+	canRefresh?: boolean; 
+	isSelecting?: boolean; 
 	coverUrls?: BookCoverProps[]; // book only
 	coverIndex?: number; // book only
 }
@@ -44,6 +56,8 @@ export function MobileDetails<T extends BaseMediaProps>({
 	onAction,
 	differentColumns,
 	onSeriesNav,
+	canRefresh,
+	isSelecting,
 	coverUrls,
 	coverIndex,
 }: MobileDetailsProps<T>) {
@@ -76,6 +90,18 @@ export function MobileDetails<T extends BaseMediaProps>({
 			payload: isRightSide ? "next" : "prev",
 		});
 	};
+
+	const colorPicker =
+		mediaType === "book" && coverUrls && coverUrls.length > 0 ? (
+			<CoverColorPicker
+				key={coverUrls[coverIndex ?? 0]?.url}
+				coverUrl={coverUrls[coverIndex ?? 0]?.url}
+				currentColor={coverUrls[coverIndex ?? 0]?.color}
+				onPick={(color) =>
+					onAction({ type: "pickCoverColor", payload: color })
+				}
+			/>
+		) : null;
 
 	const handleTouchStart = (e: React.TouchEvent) => {
 		if (isScorePickerOpen || isProgressPickerOpen) return;
@@ -216,9 +242,75 @@ export function MobileDetails<T extends BaseMediaProps>({
 					/>
 				)}
 				{/* ACTION BAR */}
-				{(posterLoaded || isAdding) && (
+				{(posterLoaded || isAdding || isSelecting) && (
 					<div className="sticky top-0 z-30">
 						<div className="absolute top-0 left-0 right-0 mt-1.5 mx-0.5 flex items-center justify-between">
+							{/* RELOAD METADATA FROM SOURCE */}
+							{!isAdding && !isSelecting && canRefresh && (
+								<button
+									className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+									onClick={() => onAction({ type: "refresh" })}
+									title="Reload cover / series info"
+								>
+									<RefreshCw className="w-5 h-5 text-slate-400" />
+								</button>
+							)}
+							{/* CONFIRM / CANCEL REFRESH PREVIEW */}
+							{isSelecting && (
+								<div className="flex items-center gap-2">
+									{/* CHANGE SERIES */}
+									{onSeriesNav && (
+										<div className="flex gap-1 bg-zinc-800/60 rounded-lg p-0.5">
+											<button
+												className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
+												onClick={() =>
+													onSeriesNav("left")
+												}
+											>
+												<ChevronLeft className="w-5 h-5 text-gray-400" />
+											</button>
+											<button
+												className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
+												onClick={() =>
+													onSeriesNav("right")
+												}
+											>
+												<ChevronRight className="w-5 h-5 text-gray-400" />
+											</button>
+										</div>
+									)}
+									{mediaType === "book" && (
+										<button
+											className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
+											onClick={() =>
+												onAction({ type: "moreBooks" })
+											}
+											title="Other results"
+										>
+											<List className="w-5 h-5 text-slate-400" />
+										</button>
+									)}
+									{colorPicker}
+									<button
+										className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
+										onClick={() =>
+											onAction({ type: "confirmRefresh" })
+										}
+										title="Apply"
+									>
+										<Check className="w-5 h-5 text-green-400" />
+									</button>
+									<button
+										className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
+										onClick={() =>
+											onAction({ type: "cancelRefresh" })
+										}
+										title="Cancel"
+									>
+										<X className="w-5 h-5 text-red-300" />
+									</button>
+								</div>
+							)}
 							{isAdding && (
 								<>
 									{/* ADD BUTTON */}
@@ -228,6 +320,8 @@ export function MobileDetails<T extends BaseMediaProps>({
 									>
 										<Plus className="w-5 h-5 text-slate-400" />
 									</button>
+									{/* COVER COLORS */}
+									{colorPicker}
 									{/* COVER INDICATOR */}
 									{mediaType === "book" &&
 										coverUrls &&
@@ -309,6 +403,8 @@ export function MobileDetails<T extends BaseMediaProps>({
 								onLoad={() => setPosterLoaded(true)}
 								height={900}
 								width={1280}
+								sizes="100vw"
+								quality={90}
 								className="object-cover w-full"
 							/>
 						) : item.posterUrl ? (

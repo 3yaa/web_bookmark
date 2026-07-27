@@ -39,6 +39,8 @@ export interface TMDBTvProps {
   seasons?: TMDBSeasonProps[];
   studio?: string;
   imdbId?: string | null;
+  poster_url?: string | null;
+  backdrop_url?: string | null;
 }
 
 export interface TMDBSeasonProps {

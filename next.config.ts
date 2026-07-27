@@ -24,19 +24,6 @@ const nextConfig: NextConfig = {
 	},
 	images: {
 		remotePatterns: [
-			// // OPEN LIBRARY
-			// {
-			// 	protocol: "https",
-			// 	hostname: "covers.openlibrary.org",
-			// 	port: "",
-			// 	pathname: "/b/olid/**",
-			// },
-			// {
-			// 	protocol: "https",
-			// 	hostname: "ia600505.us.archive.org",
-			// 	port: "",
-			// 	pathname: "/view_archive.php?archive=/**",
-			// },
 			// // APPLE ITUNES
 			// {
 			// 	protocol: "https",

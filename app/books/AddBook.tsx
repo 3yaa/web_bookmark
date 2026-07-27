@@ -3,7 +3,12 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { ModalBackdrop } from "@/app/components/ui/ModalMotion";
 import { Book } from "lucide-react";
 //
-import { BookProps, BookSeriesAPIProps, BookCoverProps } from "@/types/book";
+import {
+	BookProps,
+	BookSeriesAPIProps,
+	BookCoverProps,
+	BookSearchResult,
+} from "@/types/book";
 //
 import {
 	mapBookAPIDatatoBook,
@@ -12,10 +17,10 @@ import {
 import { cleanName } from "@/utils/cleanName";
 //
 import { BookDetails } from "./BookDetailsHub";
-// import { ShowMultBooks } from "./components/ShowMultBooks";
+import { ShowMultBooks } from "./components/ShowMultBooks";
+import { AnimatePresence } from "framer-motion";
 //
 import { useBookSearch } from "@/hooks/external/useBookSearch";
-// import { filterCovers } from "@/app/games/utils/filterCovers";
 
 interface AddBookProps {
 	isOpen: boolean;
@@ -47,8 +52,11 @@ export function AddBook({
 	//
 	const [covers, setCovers] = useState<BookCoverProps[]>([]);
 	const [coverIndex, setCoverIndex] = useState(0);
+	// multi-result picker
+	const [allNewBooks, setAllNewBooks] = useState<BookSearchResult[]>([]);
 	//
-	const { searchForBooks, isBookSearching } = useBookSearch();
+	const { searchForBooks, searchForBooksMulti, searchForBookByKey, isBookSearching } =
+		useBookSearch();
 
 	const reset = useCallback(() => {
 		setFailedReason("");
@@ -58,6 +66,7 @@ export function AddBook({
 		setNewBook({});
 		setCovers([]);
 		setCoverIndex(0);
+		setAllNewBooks([]);
 		if (titleToSearch.current) {
 			titleToSearch.current.value = "";
 			titleToSearch.current.focus();
@@ -95,6 +104,37 @@ export function AddBook({
 		setSeries(response.series);
 		setCovers(response.covers);
 	}, [searchForBooks]);
+
+	const handleShowMore = useCallback(async () => {
+		const q = titleToSearch.current?.value.trim();
+		if (!q) return;
+		setActiveModal("multOptions");
+		const results = await searchForBooksMulti(q);
+		setAllNewBooks(results || []);
+	}, [searchForBooksMulti]);
+
+	// picked a specific result -- fetch its full record and show it
+	const handlePickFromMultBooks = useCallback(
+		async (candidate: BookSearchResult) => {
+			setActiveModal("bookDetails");
+			const full = await searchForBookByKey(candidate.key);
+			if (!full) {
+				setFailedReason("Could Not Load Book.");
+				setActiveModal(null);
+				return;
+			}
+			setSeries(full.series || []);
+			setSeriesIndex(0);
+			setCovers(full.covers || []);
+			setCoverIndex(0);
+			setNewBook({
+				...mapBookAPIDatatoBook(full),
+				status: "Want to Read",
+				...mapBookAPISeriesData(full.series),
+			});
+		},
+		[searchForBookByKey],
+	);
 
 	const handleBookDetailsUpdates = useCallback(
 		async (_bookId: number, updates?: Partial<BookProps>) => {
@@ -255,14 +295,22 @@ export function AddBook({
 					showBookInSeries={
 						series.length > 1 ? handleSeriesChange : undefined
 					}
+					onShowMore={handleShowMore}
 					coverUrls={covers}
 					coverIndex={coverIndex}
 					updateCoverIndex={(newIndex: number) =>
 						setCoverIndex(newIndex)
 					}
+					updateCoverColor={(color: string) =>
+						setCovers((prev) =>
+							prev.map((c, i) =>
+								i === coverIndex ? { ...c, color } : c,
+							),
+						)
+					}
 				/>
 			)}
-			{/* <AnimatePresence>
+			<AnimatePresence>
 				{activeModal === "multOptions" && (
 					<ShowMultBooks
 						key="mult"
@@ -273,7 +321,7 @@ export function AddBook({
 						isLoading={isBookSearching}
 					/>
 				)}
-			</AnimatePresence> */}
+			</AnimatePresence>
 		</ModalBackdrop>
 	);
 }

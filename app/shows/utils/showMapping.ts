@@ -33,5 +33,9 @@ export function mapTMDBTVToShow(dataTMDBTV: TMDBTvProps): Partial<ShowProps> {
     seasons: dataTMDBTV.seasons,
     studio: dataTMDBTV.studio,
     ...(dataTMDBTV.imdbId ? { imdbId: dataTMDBTV.imdbId } : {}),
+    ...(dataTMDBTV.poster_url ? { posterUrl: dataTMDBTV.poster_url } : {}),
+    ...(dataTMDBTV.backdrop_url
+      ? { backdropUrl: dataTMDBTV.backdrop_url }
+      : {}),
   };
 }

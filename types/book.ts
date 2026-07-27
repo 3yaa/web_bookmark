@@ -59,10 +59,12 @@ export interface BookCoverProps {
 	color: string;
 }
 
-// export interface GoogleBooksProps {
-// 	id: string; // check dup
-// 	title: string;
-// 	author_name?: string[];
-// 	first_publish_year?: number;
-// 	cover_url?: string;
-// }
+// lightweight candidate shape for the multi-result picker
+export interface BookSearchResult {
+	key: string;
+	title: string;
+	author_name: string[];
+	first_publish_year: number | null;
+	cover_url: string | null;
+	isDuplicate: boolean;
+}

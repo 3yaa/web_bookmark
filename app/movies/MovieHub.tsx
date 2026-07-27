@@ -16,7 +16,7 @@ import { AnimatePresence } from "framer-motion";
 import { ShowProps } from "@/types/show";
 
 export default function MoviesHub() {
-	const { items, add, update, remove, isProcessing } =
+	const { items, add, update, refresh, remove, isProcessing } =
 		useMediaData<MovieProps>({
 			endpoint: "movies",
 			requiredFieldsToPost: ["title", "status", "imdbId"],
@@ -73,6 +73,7 @@ export default function MoviesHub() {
 		handleItemClicked,
 		handleSearchQueryChange,
 		handleItemUpdates,
+		handleItemRefresh,
 		tempScore,
 		handleScoreFinal,
 		handleItemAdd,
@@ -81,6 +82,7 @@ export default function MoviesHub() {
 		items: items,
 		onRemove: remove,
 		onUpdate: update,
+		onRefresh: refresh,
 	});
 
 	const sortedMovies = useSortMedia(
@@ -172,6 +174,7 @@ export default function MoviesHub() {
 						movie={selectedItem}
 						onClose={handleModalClose}
 						onUpdate={handleItemUpdates}
+						onRefresh={handleItemRefresh}
 						showSequelPrequel={showSequelPrequel}
 						existingMovies={items}
 						onAddWork={add}

@@ -41,6 +41,34 @@ export function useGameSearch() {
     }
   };
 
+  // fetch a single game/dlc directly by IGDB id (no duplicate filtering) --
+  // used to reload metadata for a game already in the library
+  const searchForGameById = async (
+    igdbId: number,
+  ): Promise<IGDBProps | null> => {
+    try {
+      setIsSearching(true);
+      setError(null);
+      //
+      const url = `/api/games-api/igdb-by-id?igdbId=${igdbId}`;
+      const response = await authFetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error--status: ${response.status}`);
+      }
+      //
+      const resJson = await response.json();
+      const game = resJson.data || null;
+      //
+      return game;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "An error occurred");
+      console.error("Getting IGDB-by-id failed:", e);
+      return null;
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   const searchForGameDlc = async (
     igdbId: number,
   ): Promise<
@@ -78,6 +106,7 @@ export function useGameSearch() {
     error,
     isGameSearching,
     searchForGame,
+    searchForGameById,
     searchForGameDlc,
   };
 }

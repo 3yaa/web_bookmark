@@ -10,6 +10,8 @@ interface BookCoverConfigProps {
   onLoad?: () => void;
   height?: number;
   width?: number;
+  sizes?: string;
+  quality?: number;
 }
 
 export function BookCoverConfig({
@@ -21,6 +23,8 @@ export function BookCoverConfig({
   className,
   width,
   height,
+  sizes,
+  quality,
 }: BookCoverConfigProps) {
   return (
     <>
@@ -32,6 +36,8 @@ export function BookCoverConfig({
           alt={title || "Untitled"}
           width={width}
           height={height}
+          sizes={sizes}
+          quality={quality}
           className={className}
           onLoad={onLoad}
         />
@@ -41,6 +47,8 @@ export function BookCoverConfig({
           alt={title || "Untitled"}
           width={width}
           height={height}
+          sizes={sizes}
+          quality={quality}
           className={className}
           onLoad={onLoad}
         />

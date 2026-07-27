@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { BookAPIProps } from "@/types/book";
+import { BookAPIProps, BookSearchResult } from "@/types/book";
 import { useAuthFetch } from "@/app/auth/hooks/useAuthFetch";
-// import { extractTitle } from "../utils/extractTitle";
 
 export function useBookSearch() {
 	const { authFetch, isAuthLoading } = useAuthFetch();
@@ -10,7 +9,7 @@ export function useBookSearch() {
 
 	const isBookSearching = isSearching || isAuthLoading;
 
-	// APPLE ITUNES API -- BOOK PRIMINARY
+	// HARDCOVER API -- BOOK PRIMARY
 	const searchForBooks = async (
 		title: string,
 	): Promise<
@@ -46,64 +45,65 @@ export function useBookSearch() {
 		}
 	};
 
-	// WikidataProps API -- SERIES INFO
-	// const searchForSeriesInfo = async (
-	// 	olid: string,
-	// ): Promise<WikidataProps[] | null> => {
-	// 	try {
-	// 		setIsSearching(true);
-	// 		setError(null);
-	// 		//
-	// 		const url = `/api/books-api/wikidata?openLibraryID=${olid}`;
-	// 		const response = await authFetch(url);
-	// 		if (!response.ok) {
-	// 			throw new Error(`HTTP error--status: ${response.status}`);
-	// 		}
-	// 		//
-	// 		const resJson = await response.json();
-	// 		const seriesInfo = resJson.data || null;
-	// 		//
-	// 		return seriesInfo;
-	// 	} catch (e) {
-	// 		setError(e instanceof Error ? e.message : "An error occurred");
-	// 		console.error("Getting wikidata failed:", e);
-	// 		return null;
-	// 	} finally {
-	// 		setIsSearching(false);
-	// 	}
-	// };
+	// HARDCOVER MULTI -- top N candidates
+	const searchForBooksMulti = async (
+		title: string,
+	): Promise<BookSearchResult[] | null> => {
+		try {
+			setIsSearching(true);
+			setError(null);
+			//
+			const url = `/api/books-api/hardcover-multi?title=${title}`;
+			const response = await authFetch(url);
+			if (!response.ok) {
+				throw new Error(`HTTP error--status: ${response.status}`);
+			}
+			//
+			const resJson = await response.json();
+			const books = resJson.data || null;
+			//
+			return books;
+		} catch (e) {
+			setError(e instanceof Error ? e.message : "An error occurred");
+			console.error("Getting book results failed: ", e);
+			return null;
+		} finally {
+			setIsSearching(false);
+		}
+	};
 
-	// GOOGLE BOOKS API -- BOOK BACKUP
-	// const searchForBackupBooks = async (
-	//   query: string,
-	//   limit: number
-	// ): Promise<GoogleBooksProps[] | null> => {
-	//   try {
-	//     setIsSearching(true);
-	//     setError(null);
-	//     //
-	//     const url = `/api/books-api/google-books?query=${query}&limit=${limit}`;
-	//     const response = await authFetch(url);
-	//     if (!response.ok) {
-	//       throw new Error(`HTTP error--status: ${response.status}`);
-	//     }
-	//     //
-	//     const resJson = await response.json();
-	//     const books = resJson.data || null;
-	//     //
-	//     return books;
-	//   } catch (e) {
-	//     setError(e instanceof Error ? e.message : "An error occurred");
-	//     console.error("Getting google books failed: ", e);
-	//     return null;
-	//   } finally {
-	//     setIsSearching(false);
-	//   }
-	// };
+	// HARDCOVER BY KEY -- reload an existing book's metadata (no dup check)
+	const searchForBookByKey = async (
+		key: string,
+	): Promise<BookAPIProps | null> => {
+		try {
+			setIsSearching(true);
+			setError(null);
+			// make call
+			const url = `/api/books-api/hardcover-by-key?key=${key}`;
+			const response = await authFetch(url);
+			if (!response.ok) {
+				throw new Error(`HTTP error--status: ${response.status}`);
+			}
+			// format data
+			const resJson = await response.json();
+			const book = resJson.data || null;
+			//
+			return book;
+		} catch (e) {
+			setError(e instanceof Error ? e.message : "An error occurred");
+			console.error("Getting book by key failed: ", e);
+			return null;
+		} finally {
+			setIsSearching(false);
+		}
+	};
 
 	return {
 		error,
 		isBookSearching,
 		searchForBooks,
+		searchForBooksMulti,
+		searchForBookByKey,
 	};
 }

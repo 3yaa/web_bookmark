@@ -44,6 +44,9 @@ export const DesktopItem = React.memo(function DesktopItem<
 	const gameItem = item as unknown as GameProps;
 	const bookItem = item as unknown as BookProps;
 	const movieItem = item as unknown as MovieProps;
+	const coverSrc =
+		item.posterUrl ??
+		(mediaType === "book" ? bookItem.cover?.url : undefined);
 
 	function pseudoRand(seed: string | number, salt = 0): number {
 		const str = String(seed) + salt;
@@ -74,22 +77,28 @@ export const DesktopItem = React.memo(function DesktopItem<
 			onClick={() => onClick(item)}
 		>
 			{/* ISLAND - COVER */}
-			{(item.posterUrl ??
-			(mediaType === "book" ? bookItem.cover?.url : undefined)) ? (
+			{coverSrc ? (
 				<div className="w-20 aspect-2/3 relative shrink-0 overflow-hidden rounded-l-lg rounded-r-sm">
-					<Image
-						src={
-							(item.posterUrl ??
-								(mediaType === "book"
-									? bookItem.cover?.url
-									: undefined))!
-						}
-						alt={item.title || "Untitled"}
-						width={1280}
-						height={720}
-						priority
-						className={`relative h-auto self-stretch aspect-2/3 transition-transform duration-450 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.04] ${mediaType === "game" ? "object-cover" : "object-fill"} `}
-					/>
+					{mediaType === "game" || mediaType === "book" ? (
+						<Image
+							src={coverSrc}
+							alt={item.title || "Untitled"}
+							fill
+							sizes="(min-width: 2200px) 160px, 80px"
+							quality={90}
+							priority
+							className="object-cover transition-transform duration-450 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.04]"
+						/>
+					) : (
+						<Image
+							src={coverSrc}
+							alt={item.title || "Untitled"}
+							width={1280}
+							height={720}
+							priority
+							className="relative h-auto self-stretch aspect-2/3 object-fill transition-transform duration-450 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.04]"
+						/>
+					)}
 				</div>
 			) : (
 				<div className="w-20 relative self-stretch aspect-2/3 bg-linear-to-br from-zinc-700 to-zinc-800 rounded-sm border border-zinc-600/30" />

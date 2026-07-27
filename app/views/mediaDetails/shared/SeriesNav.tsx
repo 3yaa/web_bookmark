@@ -108,13 +108,71 @@ export function SeriesNav({
 						};
 					})();
 
-	// no series/dlc to navigate — a hanging garland instead: strands pinned high
-	// at the outer edges droop down into a centre festoon + drop pendant. Same
-	// ~min-h-9 section height the series block takes, so the layout stays put.
+	// show art if no series 
 	if (!nav.prev && !nav.center && !nav.next) {
 		const acc = accentColor
 			? `color-mix(in srgb, ${accentColor} 55%, #52525b)`
 			: "#52525b";
+		const half = (
+			<>
+				{/* swag + the shorter inner strand pinned just inside it */}
+				<path
+					d="M0 13 C 30 21.5, 60 25.6, 90 25.6"
+					stroke="currentColor"
+					strokeWidth="1.1"
+					strokeLinecap="round"
+					vectorEffect="non-scaling-stroke"
+				/>
+				<path
+					d="M13 14.6 C 38 20.8, 64 23.4, 90 23.4"
+					stroke="currentColor"
+					strokeWidth="1.1"
+					strokeOpacity="0.45"
+					strokeLinecap="round"
+					vectorEffect="non-scaling-stroke"
+				/>
+				{/* bead high on the descent */}
+				<path
+					d="M30 19.6 L30 21.4"
+					stroke="currentColor"
+					strokeWidth="0.9"
+					strokeLinecap="round"
+					vectorEffect="non-scaling-stroke"
+				/>
+				{/* leaf hanging off the swag, with a hairline rib */}
+				<path
+					d="M52 23.1 C 48 24.3, 44.6 27.4, 43 30.8 C 46.6 30.1, 50.4 28.1, 52 23.1 Z"
+					stroke="currentColor"
+					strokeWidth="0.9"
+					fill="currentColor"
+					fillOpacity="0.18"
+					strokeLinejoin="round"
+					vectorEffect="non-scaling-stroke"
+				/>
+				<path
+					d="M51.4 24.1 C 48.6 25.8, 45.8 28.2, 43.4 30.4"
+					stroke="currentColor"
+					strokeWidth="0.9"
+					strokeOpacity="0.5"
+					strokeLinecap="round"
+					vectorEffect="non-scaling-stroke"
+				/>
+				{/* heavier bead where the swag flattens out */}
+				<path
+					d="M74 25.1 L74 27.8"
+					stroke="currentColor"
+					strokeWidth="0.9"
+					strokeLinecap="round"
+					vectorEffect="non-scaling-stroke"
+				/>
+				<g fill="currentColor">
+					<circle cx="30" cy="22.4" r="0.9" />
+					<circle cx="74" cy="28.9" r="1.1" />
+					{/* pin where the strand meets the swag */}
+					<circle cx="0.8" cy="13" r="1.5" />
+				</g>
+			</>
+		);
 		return (
 			<div className="pt-2.5 pr-2">
 				<div
@@ -155,7 +213,7 @@ export function SeriesNav({
 								</linearGradient>
 							</defs>
 							<path
-								d="M0 5 C 34 7, 62 15, 92 16 C 102 16.3, 111 16.2, 120 16"
+								d="M0 5 C 34 7, 62 11.4, 92 12.8 C 102 13.2, 111 13.1, 120 13"
 								stroke={`url(#${uid}-l)`}
 								strokeWidth="1.1"
 								strokeLinecap="round"
@@ -163,41 +221,36 @@ export function SeriesNav({
 							/>
 						</svg>
 					</div>
-					{/* centre festoon + drop pendant */}
+					{/* centre festoon + lozenge pendant */}
 					<svg
 						className="h-9 shrink-0"
-						width="64"
-						viewBox="0 0 64 36"
+						width={180}
+						viewBox="0 0 180 36"
 						fill="none"
 						style={{ overflow: "visible" }}
 					>
+						{half}
+						<g transform="translate(180,0) scale(-1,1)">{half}</g>
+						{/* lozenge medallion hung from the swag */}
 						<path
-							d="M2 16 C 16 21, 24 23, 32 23 C 40 23, 48 21, 62 16"
-							stroke="currentColor"
-							strokeWidth="1.1"
-							strokeLinecap="round"
-							vectorEffect="non-scaling-stroke"
-						/>
-						<path
-							d="M9 16 C 19 20, 26 21.5, 32 21.5 C 38 21.5, 45 20, 55 16"
-							stroke="currentColor"
-							strokeWidth="1.1"
-							strokeOpacity="0.5"
-							strokeLinecap="round"
-							vectorEffect="non-scaling-stroke"
-						/>
-						<path
-							d="M32 22 C 28.5 25, 28.5 29, 32 32 C 35.5 29, 35.5 25, 32 22 Z"
+							d="M90 25.6 L94 29.6 L90 33.6 L86 29.6 Z"
 							stroke="currentColor"
 							strokeWidth="1.1"
 							fill="currentColor"
 							fillOpacity="0.16"
+							strokeLinejoin="round"
+							vectorEffect="non-scaling-stroke"
+						/>
+						<path
+							d="M90 33.6 L90 34.3"
+							stroke="currentColor"
+							strokeWidth="1"
+							strokeLinecap="round"
 							vectorEffect="non-scaling-stroke"
 						/>
 						<g fill="currentColor">
-							<circle cx="2" cy="16" r="1.6" />
-							<circle cx="62" cy="16" r="1.6" />
-							<path d="M32 31 L34.2 33.4 L32 35.8 L29.8 33.4 Z" />
+							<path d="M90 27.9 L91.6 29.6 L90 31.3 L88.4 29.6 Z" />
+							<circle cx="90" cy="35.1" r="0.85" />
 						</g>
 					</svg>
 					{/* right strand — mirror */}
@@ -234,7 +287,7 @@ export function SeriesNav({
 								</linearGradient>
 							</defs>
 							<path
-								d="M0 16 C 9 16.2, 18 16.3, 28 16 C 58 15, 86 7, 120 5"
+								d="M0 13 C 9 13.1, 18 13.2, 28 12.8 C 58 11.4, 86 7, 120 5"
 								stroke={`url(#${uid}-r)`}
 								strokeWidth="1.1"
 								strokeLinecap="round"

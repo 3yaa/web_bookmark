@@ -16,6 +16,9 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	RotateCcw,
+	RefreshCw,
+	Check,
+	List,
 	Unlink,
 	Users,
 	BarChart2,
@@ -26,6 +29,7 @@ import { Dropdown, Option } from "@/app/components/ui/Dropdown";
 import { tierOptions } from "@/utils/dropDownDetails";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { BookCoverConfig } from "@/app/books/components/BookCoverConfigDetails";
+import { CoverColorPicker } from "@/app/books/components/CoverColorPicker";
 import { BookBackdropDetails } from "@/app/components/ui/BookBackdrop";
 import { SeriesNav } from "./shared/SeriesNav";
 import { EditProgress } from "@/app/shows/components/EditProgressDetail";
@@ -33,6 +37,11 @@ import { getDisplayScore, getTierFromMu, Tier } from "@/lib/tierConfig";
 import { ShowProps } from "@/types/show";
 import { MovieProps } from "@/types/movie";
 import { BookCoverProps, BookProps } from "@/types/book";
+
+const HEADER_WASH_MASK = [
+	"linear-gradient(to right, transparent 0px, black 20px, black calc(100% - 44px), transparent 100%)",
+	"linear-gradient(to bottom, transparent 0px, black 22px, black calc(100% - 22px), transparent 100%)",
+].join(", ");
 
 interface DesktopDetailsProps<T extends BaseMediaProps> {
 	item: T;
@@ -46,6 +55,8 @@ interface DesktopDetailsProps<T extends BaseMediaProps> {
 	onSeriesNav?: (dir: "left" | "right") => void;
 	differentColumns: [ColumnConfig<T>, ColumnConfig<T>];
 	onAction: (action: { type: string; payload?: unknown }) => void;
+	canRefresh?: boolean;
+	isSelecting?: boolean;
 	// only for book
 	coverUrls?: BookCoverProps[];
 	coverIndex?: number;
@@ -68,6 +79,8 @@ export function DesktopDetails<T extends BaseMediaProps>({
 	onClose,
 	onSeriesNav,
 	onAction,
+	canRefresh,
+	isSelecting,
 	coverUrls,
 	coverIndex,
 	backdropUrls,
@@ -102,6 +115,35 @@ export function DesktopDetails<T extends BaseMediaProps>({
 		});
 	};
 
+	// cover colour picker -- shown in the action cluster for books being added
+	// or previewed (refresh), sitting next to the confirm/add controls
+	const colorPicker =
+		mediaType === "book" && coverUrls && coverUrls.length > 0 ? (
+			<CoverColorPicker
+				key={coverUrls[coverIndex ?? 0]?.url}
+				coverUrl={coverUrls[coverIndex ?? 0]?.url}
+				currentColor={coverUrls[coverIndex ?? 0]?.color}
+				onPick={(color) =>
+					onAction({ type: "pickCoverColor", payload: color })
+				}
+			/>
+		) : null;
+
+	// what actually sits behind the header. while adding/previewing, tint/frame
+	// from the active cover so a pick shows live
+	const bookBackdropColor =
+		(isAdding || isSelecting) && coverUrls?.[coverIndex ?? 0]
+			? coverUrls[coverIndex ?? 0].color
+			: bookItem.cover?.color;
+	const imageBackdropUrl =
+		mediaType === "game" &&
+		(isAdding || isSelecting) &&
+		backdropIndex !== undefined
+			? backdropUrls?.[backdropIndex]
+			: item.backdropUrl;
+	const hasBackdrop =
+		mediaType === "book" ? !!bookBackdropColor : !!imageBackdropUrl;
+
 	return (
 		<ModalBackdrop className="fixed inset-0 bg-linear-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20">
 			<div
@@ -128,8 +170,66 @@ export function DesktopDetails<T extends BaseMediaProps>({
 						className={`px-5 py-3.5 border-0 rounded-2xl overflow-hidden`}
 					>
 						{/* ACTION BUTTONS */}
-						{isAdding ? (
+						{isSelecting ? (
 							<div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
+								{/* CHANGE SERIES */}
+								{onSeriesNav && (
+									<div className="flex gap-1 bg-zinc-800/50 rounded-lg">
+										<button
+											className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60 hover:cursor-pointer transition-all group"
+											onClick={() => onSeriesNav("left")}
+											title={"Previous series"}
+										>
+											<ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+										</button>
+										<button
+											className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60 hover:cursor-pointer transition-all group"
+											onClick={() => onSeriesNav("right")}
+											title={"Next series"}
+										>
+											<ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+										</button>
+									</div>
+								)}
+								{/* COVER COLORS */}
+								{colorPicker}
+								{/* MORE RESULTS (book) */}
+								{mediaType === "book" && (
+									<button
+										className="py-1.5 px-2 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer transition-all group"
+										onClick={() =>
+											onAction({ type: "moreBooks" })
+										}
+										title={"Other results"}
+									>
+										<List className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
+									</button>
+								)}
+								{/* CONFIRM REFRESH */}
+								<button
+									className="py-1.5 px-5 rounded-lg bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer transition-all group"
+									onClick={() =>
+										onAction({ type: "confirmRefresh" })
+									}
+									title={"Apply"}
+								>
+									<Check className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors duration-0" />
+								</button>
+								{/* CANCEL REFRESH */}
+								<button
+									className="py-1.5 px-2 rounded-lg bg-zinc-800/50 hover:bg-red-600/50 hover:cursor-pointer transition-all group"
+									onClick={() =>
+										onAction({ type: "cancelRefresh" })
+									}
+									title={"Cancel"}
+								>
+									<X className="w-5 h-5 text-gray-400 group-hover:text-red-300 transition-colors" />
+								</button>
+							</div>
+						) : isAdding ? (
+							<div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
+								{/* COVER COLORS */}
+								{colorPicker}
 								{/* NAV DIFFERENT SERIES */}
 								{onSeriesNav && (
 									<div className="flex gap-1 bg-zinc-800/50 rounded-lg">
@@ -173,6 +273,18 @@ export function DesktopDetails<T extends BaseMediaProps>({
 										<ChevronsUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
 									</button>
 								)}
+								{/* MORE RESULTS (book) */}
+								{mediaType === "book" && (
+									<button
+										className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer transition-all group"
+										onClick={() => {
+											onAction({ type: "moreBooks" });
+										}}
+										title={"Other results"}
+									>
+										<List className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
+									</button>
+								)}
 								{/* CLOSE BUTTON */}
 								<button
 									className="py-1.5 px-2 rounded-lg bg-zinc-800/50 hover:bg-red-600/50 
@@ -185,6 +297,18 @@ export function DesktopDetails<T extends BaseMediaProps>({
 							</div>
 						) : (
 							<div className="absolute right-3 top-3 flex items-center gap-1 z-10">
+								{/* RELOAD METADATA FROM SOURCE */}
+								{canRefresh && (
+									<button
+										className="p-1.5 rounded-lg bg-zinc-800/0 hover:bg-emerald-800/20 hover:cursor-pointer transition-all duration-200 group"
+										onClick={() => {
+											onAction({ type: "refresh" });
+										}}
+										title={"Reload cover / series info"}
+									>
+										<RefreshCw className="w-4 h-4 text-black/0 group-hover:text-emerald-400 transition-colors duration-200" />
+									</button>
+								)}
 								{/* RESET SCORE */}
 								{item.score && (
 									<button
@@ -257,6 +381,16 @@ export function DesktopDetails<T extends BaseMediaProps>({
 												alt={item.title || "Untitled"}
 												width={1280}
 												height={720}
+												sizes={
+													mediaType === "game"
+														? "(min-width: 2200px) 500px, 250px"
+														: undefined
+												}
+												quality={
+													mediaType === "game"
+														? 90
+														: undefined
+												}
 												className={`min-w-62 min-h-93 ${mediaType === "game" ? "object-cover" : "object-fill"}`}
 											/>
 										) : (
@@ -269,10 +403,12 @@ export function DesktopDetails<T extends BaseMediaProps>({
 											coverUrls={coverUrls}
 											coverIndex={coverIndex}
 											className={
-												"min-w-62 min-h-93 object-fill"
+												"min-w-62 min-h-93 object-cover"
 											}
 											height={1280}
 											width={720}
+											sizes="(min-width: 2200px) 500px, 250px"
+											quality={90}
 										/>
 									)}
 								</div>
@@ -292,41 +428,29 @@ export function DesktopDetails<T extends BaseMediaProps>({
 							<div className="flex flex-col flex-1 min-h-93 min-w-62 relative">
 								{/* BACKDROP */}
 								{mediaType === "book"
-									? bookItem.cover && (
+									? bookBackdropColor && (
 											<BookBackdropDetails
-												color={bookItem.cover.color}
+												color={bookBackdropColor}
 											/>
 										)
-									: (() => {
-											const backdropUrl =
-												mediaType === "game" &&
-												isAdding &&
-												backdropIndex !== undefined
-													? backdropUrls?.[
-															backdropIndex
-														]
-													: item.backdropUrl;
-											return (
-												backdropUrl && (
-													<BackdropImage
-														src={backdropUrl}
-														width={
-															mediaType === "game"
-																? 1920
-																: 1280
-														}
-														height={
-															mediaType === "game"
-																? 1080
-																: 720
-														}
-													/>
-												)
-											);
-										})()}
+									: imageBackdropUrl && (
+											<BackdropImage
+												src={imageBackdropUrl}
+												width={
+													mediaType === "game"
+														? 1920
+														: 1280
+												}
+												height={
+													mediaType === "game"
+														? 1080
+														: 720
+												}
+											/>
+										)}
 								{/* game backdrop cycling overlay */}
 								{mediaType === "game" &&
-									isAdding &&
+									(isAdding || isSelecting) &&
 									backdropUrls &&
 									backdropUrls.length > 1 && (
 										<div
@@ -342,121 +466,135 @@ export function DesktopDetails<T extends BaseMediaProps>({
 											? "justify-end"
 											: series.seriesTitle ||
 												  gameItem.mainTitle
-												? "justify-center mt-3"
-												: mediaType === "book"
-													? "justify-end"
-													: "justify-center mt-11.5"
+												? "justify-end mb-4"
+												: "justify-end mb-3"
 									}`}
 								>
-									{/* SERIES TITLE */}
-									{(() => {
-										const seriesLabel =
-											mediaType === "game"
-												? gameItem.dlcIndex !== 0
-													? gameItem.mainTitle
-													: null
-												: series.seriesTitle;
-
-										return (
-											seriesLabel && (
-												<span className="font-semibold text-zinc-100/80 text-xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-0">
-													{seriesLabel}
-												</span>
-											)
-										);
-									})()}
-									{/* TITLE */}
-									<div className="w-fit mb-1.5 max-w-full">
-										<div className="font-bold text-zinc-100/90 text-3xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-1.5">
-											{item.title || "Untitled"}
-										</div>
-										{/* STATUS WAVE */}
-										<div className="w-full bg-zinc-800 rounded-full h-0.75 overflow-hidden">
+									{/* HEADER -- sat over backdrop */}
+									<div className="relative flex flex-col w-fit max-w-full">
+										{/* washblur */}
+										{hasBackdrop && (
 											<div
-												className={`bg-zinc-900 h-0.75 transition-all duration-500 ease-out rounded-full relative overflow-hidden`}
-												style={{ width: "100%" }}
-											>
+												className="absolute -left-5 -right-10 -top-5 -bottom-2 -z-1 pointer-events-none backdrop-blur-[3px]"
+												style={{
+													backgroundColor: "rgba(9,9,11,0.16)",
+													maskImage: HEADER_WASH_MASK,
+													WebkitMaskImage: HEADER_WASH_MASK,
+													maskComposite: "intersect",
+													WebkitMaskComposite: "source-in",
+												}}
+											/>
+										)}
+										{/* SERIES TITLE */}
+										{(() => {
+											const seriesLabel =
+												mediaType === "game"
+													? gameItem.dlcIndex !== 0
+														? gameItem.mainTitle
+														: null
+													: series.seriesTitle;
+
+											return (
+												seriesLabel && (
+													<span className="font-semibold text-zinc-100/80 text-xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-0">
+														{seriesLabel}
+													</span>
+												)
+											);
+										})()}
+										{/* TITLE */}
+										<div className="w-fit mb-1.5 max-w-full">
+											<div className="font-bold text-zinc-100/90 text-3xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-1.5">
+												{item.title || "Untitled"}
+											</div>
+											{/* STATUS WAVE */}
+											<div className="w-full bg-zinc-800 rounded-full h-0.75 overflow-hidden">
 												<div
-													className="absolute inset-0"
-													style={{
-														background:
-															getStatusDetailWaveColor(
-																item.status,
-															),
-														animation:
-															"wave 6s ease-in-out infinite",
-														width: "200%",
-													}}
-												/>
-											</div>
-										</div>
-									</div>
-									{/* AUTHOR/STUDIO/DIRECTOR AND DATES */}
-									<div className="flex justify-start items-center gap-2 w-full mb-3">
-										{(mediaType === "show" ||
-											mediaType === "movie") && (
-											<button
-												onClick={() =>
-													onAction({ type: "cast" })
-												}
-												title="View cast"
-												className="cursor-pointer text-zinc-400 hover:text-zinc-200 hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] transition-all duration-200 shrink-0 mr-0.5 hover:scale-105"
-											>
-												<Users
-													className="w-4 h-3.75 -mt-0.5 ml-0.5"
-													strokeWidth={2}
-												/>
-											</button>
-										)}
-										{mediaType === "show" && (
-											<button
-												onClick={() =>
-													onAction({
-														type: "openRatings",
-													})
-												}
-												title="Episode ratings"
-												className="cursor-pointer text-zinc-400 hover:text-zinc-200 hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] transition-all duration-200 shrink-0 mr-0.5 hover:scale-105"
-											>
-												<BarChart2
-													className="w-4 h-3.75 -mt-0.5"
-													strokeWidth={2}
-												/>
-											</button>
-										)}
-										<span className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 leading-6 truncate max-w-60">
-											{differentColumns[0].getValue(
-												item,
-											) ||
-												"Unknown " +
-													differentColumns[0].label}
-										</span>
-										<div className="font-medium text-zinc-200/70 text-md leading-6">
-											•
-										</div>
-										<span
-											className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
-											title="Date Published"
-										>
-											{differentColumns[1].getValue(
-												item,
-											) || "Unknown"}
-										</span>
-										{item.status === "Completed" && (
-											<div className="flex items-center gap-2">
-												<div className="font-medium text-zinc-200/70 text-md leading-6">
-													•
-												</div>
-												<span
-													className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
-													title="Date Completed"
+													className={`bg-zinc-900 h-0.75 transition-all duration-500 ease-out rounded-full relative overflow-hidden`}
+													style={{ width: "100%" }}
 												>
-													{formatDateShort(
-														item.dateCompleted,
-													)}
-												</span>
+													<div
+														className="absolute inset-0"
+														style={{
+															background:
+																getStatusDetailWaveColor(
+																	item.status,
+																),
+															animation:
+																"wave 6s ease-in-out infinite",
+															width: "200%",
+														}}
+													/>
+												</div>
 											</div>
-										)}
+										</div>
+										{/* AUTHOR/STUDIO/DIRECTOR AND DATES */}
+										<div className="flex justify-start items-center gap-2 w-full mb-3">
+											{(mediaType === "show" ||
+												mediaType === "movie") && (
+												<button
+													onClick={() =>
+														onAction({ type: "cast" })
+													}
+													title="View cast"
+													className="cursor-pointer text-zinc-400 hover:text-zinc-200 hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] transition-all duration-200 shrink-0 mr-0.5 hover:scale-105"
+												>
+													<Users
+														className="w-4 h-3.75 -mt-0.5 ml-0.5"
+														strokeWidth={2}
+													/>
+												</button>
+											)}
+											{mediaType === "show" && (
+												<button
+													onClick={() =>
+														onAction({
+															type: "openRatings",
+														})
+													}
+													title="Episode ratings"
+													className="cursor-pointer text-zinc-400 hover:text-zinc-200 hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] transition-all duration-200 shrink-0 mr-0.5 hover:scale-105"
+												>
+													<BarChart2
+														className="w-4 h-3.75 -mt-0.5"
+														strokeWidth={2}
+													/>
+												</button>
+											)}
+											<span className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 leading-6 truncate max-w-60">
+												{differentColumns[0].getValue(
+													item,
+												) ||
+													"Unknown " +
+														differentColumns[0].label}
+											</span>
+											<div className="font-medium text-zinc-200/70 text-md leading-6">
+												•
+											</div>
+											<span
+												className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
+												title="Date Published"
+											>
+												{differentColumns[1].getValue(
+													item,
+												) || "Unknown"}
+											</span>
+											{item.status === "Completed" && (
+												<div className="flex items-center gap-2">
+													<div className="font-medium text-zinc-200/70 text-md leading-6">
+														•
+													</div>
+													<span
+														className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
+														title="Date Completed"
+													>
+														{formatDateShort(
+															item.dateCompleted,
+														)}
+													</span>
+												</div>
+											)}
+										</div>
 									</div>
 									<div></div>
 									{/* STATUS AND SCORE */}
@@ -508,8 +646,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 												{mediaType === "book" &&
 													item.status ===
 														"Want to Read" &&
-													bookItem.rating !=
-														null && (
+													bookItem.rating != null && (
 														<div className="flex items-center gap-1 mr-2">
 															<Leaf
 																className="w-3 h-3 text-emerald-300/65 fill-emerald-300/15"

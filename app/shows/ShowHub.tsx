@@ -14,7 +14,7 @@ import { AnimatePresence } from "framer-motion";
 import { MovieProps } from "@/types/movie";
 
 export default function ShowHub() {
-	const { items, add, update, remove, isProcessing } =
+	const { items, add, update, refresh, remove, isProcessing } =
 		useMediaData<ShowProps>({
 			endpoint: "shows",
 			requiredFieldsToPost: ["title", "status", "tmdbId"],
@@ -70,6 +70,7 @@ export default function ShowHub() {
 		handleItemClicked,
 		handleSearchQueryChange,
 		handleItemUpdates,
+		handleItemRefresh,
 		tempScore,
 		handleScoreFinal,
 		handleItemAdd,
@@ -78,6 +79,7 @@ export default function ShowHub() {
 		items: items,
 		onRemove: remove,
 		onUpdate: update,
+		onRefresh: refresh,
 	});
 
 	const sortedShows = useSortMedia(
@@ -150,6 +152,7 @@ export default function ShowHub() {
 						show={selectedItem}
 						onClose={handleModalClose}
 						onUpdate={handleItemUpdates}
+						onRefresh={handleItemRefresh}
 						existingShows={items}
 						onAddWork={add}
 						//

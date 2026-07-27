@@ -19,6 +19,8 @@ import { useAuthFetch } from "@/app/auth/hooks/useAuthFetch";
 import { ShowProps } from "@/types/show";
 import { ShowDetails } from "../shows/ShowDetailsHub";
 import { MediaStatus } from "@/types/media";
+import { useMovieSearch } from "@/hooks/external/useMovieSearch";
+import { mapTMDBToMovie, mapWikidataToMovie } from "./utils/movieMapping";
 
 export type MovieAction =
 	| { type: "closeModal" }
@@ -34,6 +36,7 @@ export type MovieAction =
 	| { type: "seriesNav"; payload: "sequel" | "prequel" }
 	| { type: "clearSeriesMeta" }
 	| { type: "needYearField" }
+	| { type: "refresh" }
 	| { type: "cast" };
 
 interface MovieDetailsProps {
@@ -58,6 +61,8 @@ interface MovieDetailsProps {
 	) => void;
 	existingShows?: ShowProps[];
 	onAddShow?: (movie: ShowProps) => Promise<unknown>;
+	// reload metadata from source (poster/backdrop, series)
+	onRefresh?: (metadata: Partial<MovieProps>) => Promise<void>;
 }
 
 export function MovieDetails({
@@ -73,8 +78,11 @@ export function MovieDetails({
 	onShowUpdate,
 	onAddWork,
 	onAddShow,
+	onRefresh,
 }: MovieDetailsProps) {
 	const [localNote, setLocalNote] = useState(movie.note || "");
+	const [isRefreshing, setIsRefreshing] = useState(false);
+	const { searchForPosters, searchForSeriesInfo } = useMovieSearch();
 	// actor related
 	const [castOpen, setCastOpen] = useState(false);
 	const [cast, setCast] = useState<CastMember[]>([]);
@@ -184,9 +192,35 @@ export function MovieDetails({
 			case "seriesNav":
 				handleSeriesNav(action.payload);
 				break;
+			case "refresh":
+				handleRefresh();
+				break;
 			case "cast":
 				handleCast();
 				break;
+		}
+	};
+
+	const handleRefresh = async () => {
+		if (!onRefresh || !movie.imdbId || isRefreshing) return;
+		setIsRefreshing(true);
+		try {
+			const [tmdb, wiki] = await Promise.all([
+				searchForPosters(movie.imdbId),
+				searchForSeriesInfo(movie.imdbId),
+			]);
+			const meta: Partial<MovieProps> = {};
+			// only imagery refreshes -- tmdbId is identity, left untouched
+			if (tmdb) {
+				const t = mapTMDBToMovie(tmdb);
+				meta.posterUrl = t.posterUrl;
+				meta.backdropUrl = t.backdropUrl;
+			}
+			if (wiki && wiki.length)
+				Object.assign(meta, mapWikidataToMovie(wiki[0]));
+			if (Object.keys(meta).length) await onRefresh(meta);
+		} finally {
+			setIsRefreshing(false);
 		}
 	};
 
@@ -307,6 +341,14 @@ export function MovieDetails({
 
 	if (!movie) return null;
 
+	const displayLoading = isRefreshing
+		? {
+				isTrue: true,
+				style: "h-8 w-8 border-emerald-400",
+				text: "Reloading...",
+			}
+		: isLoading;
+
 	return (
 		<>
 			<div className="lg:block hidden">
@@ -315,11 +357,12 @@ export function MovieDetails({
 					localNote={localNote}
 					statusOptions={movieStatusOptions}
 					mediaType="movie"
-					isLoading={isLoading}
+					isLoading={displayLoading}
 					isAdding={!!addMovie}
 					onAdd={handleAddMovie}
 					onClose={onClose}
 					onSeriesNav={showAnotherSeries}
+					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {
 							type: string;
@@ -335,11 +378,12 @@ export function MovieDetails({
 					localNote={localNote}
 					statusOptions={movieStatusOptions}
 					mediaType="movie"
-					isLoading={isLoading}
+					isLoading={displayLoading}
 					isAdding={!!addMovie}
 					onAdd={handleAddMovie}
 					onClose={onClose}
 					onSeriesNav={showAnotherSeries}
+					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {
 							type: string;

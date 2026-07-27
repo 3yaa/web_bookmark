@@ -22,12 +22,13 @@ const normalizeTitle = (title: string) =>
 
 export default function BookHub() {
   // GET DATA FROM DB
-  const { items, add, update, remove, isProcessing } = useMediaData<BookProps>({
-    endpoint: "books",
-    requiredFieldsToPost: ["title", "status", "key"],
-    statusOrder: { "Want to Read": 0, Completed: 1, Dropped: 2 },
-    extraFieldsToUpdate: ["seriesTitle", "placeInSeries", "prequel", "sequel"],
-  });
+  const { items, add, update, refresh, remove, isProcessing } =
+    useMediaData<BookProps>({
+      endpoint: "books",
+      requiredFieldsToPost: ["title", "status", "key"],
+      statusOrder: { "Want to Read": 0, Completed: 1, Dropped: 2 },
+      extraFieldsToUpdate: ["seriesTitle", "placeInSeries", "prequel", "sequel"],
+    });
 
   // MANAGEMENT OF STATES
   const {
@@ -50,6 +51,7 @@ export default function BookHub() {
     handleItemClicked,
     handleSearchQueryChange,
     handleItemUpdates,
+    handleItemRefresh,
     handleScoreFinal,
     handleItemAdd,
   } = useManageMedia<BookProps>({
@@ -57,6 +59,7 @@ export default function BookHub() {
     items: items,
     onRemove: remove,
     onUpdate: update,
+    onRefresh: refresh,
   });
 
   // MANAGES ANY SORTS
@@ -143,6 +146,7 @@ export default function BookHub() {
             book={selectedItem}
             onClose={handleModalClose}
             onUpdate={handleItemUpdates}
+            onRefresh={handleItemRefresh}
             showSequelPrequel={showSequelPrequel}
           />
         )}

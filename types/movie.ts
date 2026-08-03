@@ -32,10 +32,11 @@ export interface MovieProps extends BaseMediaProps, SeriesMediaProps {
 }
 
 export interface OMDbProps {
-	imdbId: string; // used to call other api
+	imdbId: string;
 	title: string;
 	director?: string;
 	released_date?: number;
+	imdbRating?: number | null;
 }
 
 export interface TMDBProps {

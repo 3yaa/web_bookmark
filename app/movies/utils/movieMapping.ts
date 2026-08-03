@@ -29,6 +29,7 @@ export function mapOMDbToMovie(dataOMDb: OMDbProps): Partial<MovieProps> {
 		title: dataOMDb.title,
 		director: dataOMDb.director,
 		dateReleased: dataOMDb.released_date,
+		imdbRating: dataOMDb.imdbRating,
 	};
 }
 

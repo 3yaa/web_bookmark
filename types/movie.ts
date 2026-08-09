@@ -1,6 +1,7 @@
 import {
 	BaseMediaProps,
 	ColumnConfig,
+	SeriesAPIProps,
 	SeriesMediaProps,
 	SortState,
 } from "./media";
@@ -31,24 +32,14 @@ export interface MovieProps extends BaseMediaProps, SeriesMediaProps {
 	imdbRating?: number | null;
 }
 
-export interface OMDbProps {
-	imdbId: string;
+export interface MovieAPIProps {
+	imdbId: string; // used to call other api
+	tmdb_id?: string;
 	title: string;
 	director?: string;
 	released_date?: number;
 	imdbRating?: number | null;
-}
-
-export interface TMDBProps {
 	poster_url?: string;
 	backdrop_url?: string;
-	tmdb_id?: string;
-}
-
-export interface WikidataProps {
-	wiki_title?: string; // another title
-	series_title?: string;
-	place_in_series?: string;
-	prequel?: string;
-	sequel?: string;
+	series?: SeriesAPIProps | null;
 }

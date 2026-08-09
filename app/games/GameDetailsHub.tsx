@@ -287,6 +287,14 @@ export function GameDetails({
 		updateBackdropIndex(newCoverIndex);
 	};
 
+	// need to reset local note -- since changing game (dlc nav) doesn't remount
+	// same for a staged refresh, which belongs to the game it was fetched for
+	useEffect(() => {
+		setLocalNote(game.note || "");
+		exitSelecting();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [game.id]);
+
 	useEffect(() => {
 		const handleLeave = (e: KeyboardEvent) => {
 			if (e.key === "Enter") {

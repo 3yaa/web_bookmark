@@ -24,6 +24,14 @@ export interface SeriesMediaProps {
 	total?: number | null;
 }
 
+export interface SeriesAPIProps {
+	series_title: string | null;
+	position: string | null;
+	prequel: string | null;
+	sequel: string | null;
+	total?: number | null;
+}
+
 export interface BaseMediaProps {
 	id: number;
 	title: string;

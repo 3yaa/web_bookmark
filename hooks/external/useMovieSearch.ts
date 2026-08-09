@@ -1,106 +1,85 @@
 import { useState } from "react";
-import { OMDbProps, TMDBProps, WikidataProps } from "@/types/movie";
+import { MovieAPIProps } from "@/types/movie";
 import { useAuthFetch } from "@/app/auth/hooks/useAuthFetch";
 
 export function useMovieSearch() {
-  const { authFetch, isAuthLoading } = useAuthFetch();
-  const [isSearching, setIsSearching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+	const { authFetch, isAuthLoading } = useAuthFetch();
+	const [isSearching, setIsSearching] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
-  const isMovieSearching = isSearching || isAuthLoading;
+	const isMovieSearching = isSearching || isAuthLoading;
 
-  // OMDb API -- MOVIE METADATA
-  const searchForMovie = async (
-    title: string,
-    year?: number | undefined,
-  ): Promise<OMDbProps | null | { isDuplicate: boolean; title: string }> => {
-    try {
-      setIsSearching(true);
-      setError(null);
-      // make call
-      const url = `/api/movies-api/omdb?title=${title}&year=${year}`;
-      const response = await authFetch(url);
-      // if duplicate
-      if (response.status === 409) {
-        const data = await response.json();
-        return { isDuplicate: true, title: data.title };
-      }
-      if (!response.ok) {
-        throw new Error(`HTTP error--status: ${response.status}`);
-      }
-      // format data
-      const resJson = await response.json();
-      const movie = resJson.data || null;
-      //
-      return movie;
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "An error occurred");
-      console.error("Getting OMDb failed: ", e);
-      return null;
-    } finally {
-      setIsSearching(false);
-    }
-  };
+	// title/year to full metadata
+	const searchForMovie = async (
+		title: string,
+		year?: number | undefined,
+		// legacy no tmdb id  -- skips the duplicate
+		isReload?: boolean,
+	): Promise<
+		MovieAPIProps | null | { isDuplicate: boolean; title: string }
+	> => {
+		try {
+			setIsSearching(true);
+			setError(null);
+			// make call
+			const params = new URLSearchParams({ title });
+			if (year) params.set("year", String(year));
+			if (isReload) params.set("reload", "1");
+			const url = `/api/movies-api/tmdb?${params}`;
+			const response = await authFetch(url);
+			// if duplicate
+			if (response.status === 409) {
+				const data = await response.json();
+				return { isDuplicate: true, title: data.title };
+			}
+			if (!response.ok) {
+				throw new Error(`HTTP error--status: ${response.status}`);
+			}
+			// format data
+			const resJson = await response.json();
+			const movie = resJson.data || null;
+			//
+			return movie;
+		} catch (e) {
+			setError(e instanceof Error ? e.message : "An error occurred");
+			console.error("Getting movie metadata failed: ", e);
+			return null;
+		} finally {
+			setIsSearching(false);
+		}
+	};
 
-  // TMDB API -- MOVIE POSTERS
-  const searchForPosters = async (
-    imdbId: string,
-  ): Promise<TMDBProps | null> => {
-    try {
-      setIsSearching(true);
-      setError(null);
-      //
-      const url = `/api/movies-api/tmdb?imdbId=${imdbId}`;
-      const response = await authFetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error--status: ${response.status}`);
-      }
-      //
-      const resJson = await response.json();
-      const moviePosters = resJson.data || null;
-      //
-      return moviePosters;
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "An error occurred");
-      console.error("Getting TMDb failed:", e);
-      return null;
-    } finally {
-      setIsSearching(false);
-    }
-  };
+	// movie whose tmdb id is already known.
+	const reloadMovie = async (
+		tmdbId: string,
+	): Promise<MovieAPIProps | null> => {
+		try {
+			setIsSearching(true);
+			setError(null);
+			//
+			const url = `/api/movies-api/tmdb-by-id?tmdbId=${tmdbId}`;
+			const response = await authFetch(url);
+			if (!response.ok) {
+				throw new Error(`HTTP error--status: ${response.status}`);
+			}
+			//
+			const resJson = await response.json();
+			const movieMeta = resJson.data || null;
+			//
+			return movieMeta;
+		} catch (e) {
+			setError(e instanceof Error ? e.message : "An error occurred");
+			console.error("Reloading movie metadata failed:", e);
+			return null;
+		} finally {
+			setIsSearching(false);
+		}
+	};
 
-  // WikidataProps API -- SERIES INFO
-  const searchForSeriesInfo = async (
-    imdbId: string,
-  ): Promise<WikidataProps[] | null> => {
-    try {
-      setIsSearching(true);
-      setError(null);
-      //
-      const url = `/api/movies-api/wikidata?imdbId=${imdbId}`;
-      const response = await authFetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error--status: ${response.status}`);
-      }
-      //
-      const resJson = await response.json();
-      const seriesInfo = resJson.data || null;
-      //
-      return seriesInfo;
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "An error occurred");
-      console.error("Getting WikidataProps failed: ", e);
-      return null;
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  return {
-    error,
-    isMovieSearching,
-    searchForMovie,
-    searchForPosters,
-    searchForSeriesInfo,
-  };
+	return {
+		error,
+		isMovieSearching,
+		searchForMovie,
+		reloadMovie,
+	};
 }

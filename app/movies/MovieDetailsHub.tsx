@@ -1,6 +1,12 @@
 "use client";
 import { DIFF_COLUMNS_MOVIE, MovieProps } from "@/types/movie";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
@@ -21,7 +27,16 @@ import { ShowProps } from "@/types/show";
 import { ShowDetails } from "../shows/ShowDetailsHub";
 import { MediaStatus } from "@/types/media";
 import { useMovieSearch } from "@/hooks/external/useMovieSearch";
-import { mapTMDBToMovie, mapWikidataToMovie } from "./utils/movieMapping";
+import { mapSeriesToMovie } from "./utils/movieMapping";
+
+// check if movie has tmdbID
+const isRealTmdbId = (tmdbId?: string) => !!tmdbId && tmdbId !== "-1";
+
+const normalizeTitle = (title: string) =>
+	title
+		.toLowerCase()
+		.trim()
+		.replace(/^(the|a|an)\s+/, "");
 
 export type MovieAction =
 	| { type: "closeModal" }
@@ -39,6 +54,8 @@ export type MovieAction =
 	| { type: "clearSeriesMeta" }
 	| { type: "needYearField" }
 	| { type: "refresh" }
+	| { type: "confirmRefresh" }
+	| { type: "cancelRefresh" }
 	| { type: "cast" };
 
 interface MovieDetailsProps {
@@ -53,7 +70,6 @@ interface MovieDetailsProps {
 	addMovie?: () => void;
 	showSequelPrequel?: (sequelTitle: string) => void;
 	isInList?: (title: string) => boolean;
-	showAnotherSeries?: (seriesDir: "left" | "right") => void;
 	existingMovies?: MovieProps[];
 	onAddWork?: (movie: MovieProps) => Promise<unknown>;
 	//
@@ -66,6 +82,8 @@ interface MovieDetailsProps {
 	onAddShow?: (movie: ShowProps) => Promise<unknown>;
 	// reload metadata from source (poster/backdrop, series)
 	onRefresh?: (metadata: Partial<MovieProps>) => Promise<void>;
+	// stores legacy movies when an actor's filmography reveals its tmdb id
+	onBackfillTmdbId?: (movieId: number, tmdbId: string) => void;
 }
 
 export function MovieDetails({
@@ -76,17 +94,20 @@ export function MovieDetails({
 	isLoading,
 	showSequelPrequel,
 	isInList,
-	showAnotherSeries,
 	existingMovies = [],
 	existingShows = [],
 	onShowUpdate,
 	onAddWork,
 	onAddShow,
 	onRefresh,
+	onBackfillTmdbId,
 }: MovieDetailsProps) {
 	const [localNote, setLocalNote] = useState(movie.note || "");
 	const [isRefreshing, setIsRefreshing] = useState(false);
-	const { searchForPosters, searchForSeriesInfo } = useMovieSearch();
+	const { reloadMovie, searchForMovie } = useMovieSearch();
+	// refresh preview state -- nothing is written until it is confirmed
+	const [isSelecting, setIsSelecting] = useState(false);
+	const [refreshMeta, setRefreshMeta] = useState<Partial<MovieProps>>({});
 	// actor related
 	const [castOpen, setCastOpen] = useState(false);
 	const [cast, setCast] = useState<CastMember[]>([]);
@@ -106,11 +127,37 @@ export function MovieDetails({
 	const addedStatusById = useMemo(() => {
 		const map = new Map<string, MediaStatus>();
 		for (const m of existingMovies)
-			if (m.tmdbId) map.set(`movie:${m.tmdbId}`, m.status);
+			if (isRealTmdbId(m.tmdbId)) map.set(`movie:${m.tmdbId}`, m.status);
 		for (const s of existingShows)
-			if (s.tmdbId) map.set(`tv:${s.tmdbId}`, s.status);
+			if (isRealTmdbId(s.tmdbId)) map.set(`tv:${s.tmdbId}`, s.status);
 		return map;
 	}, [existingMovies, existingShows]);
+
+	// legacy rows carry no tmdb id, so they never match a work and show as
+	// missing. an actor's filmography is an authoritative title -> tmdbId list,
+	// so anything that matches on title AND year can be healed for free.
+	const backfilled = useRef<Set<number>>(new Set());
+	useEffect(() => {
+		if (!onBackfillTmdbId || actorWorks.length === 0) return;
+		const legacy = existingMovies.filter(
+			(m) => !isRealTmdbId(m.tmdbId) && !backfilled.current.has(m.id),
+		);
+		if (legacy.length === 0) return;
+		//
+		for (const work of actorWorks) {
+			if (work.media_type !== "movie") continue;
+			const workYear = parseInt(work.date?.slice(0, 4) ?? "");
+			if (isNaN(workYear)) continue;
+			const match = legacy.find(
+				(m) =>
+					m.dateReleased === workYear &&
+					normalizeTitle(m.title) === normalizeTitle(work.title),
+			);
+			if (!match) continue;
+			backfilled.current.add(match.id);
+			onBackfillTmdbId(match.id, String(work.id));
+		}
+	}, [actorWorks, existingMovies, onBackfillTmdbId]);
 
 	// change, so an update made inside the nested modal is reflected right away
 	const selectedMovie =
@@ -208,33 +255,68 @@ export function MovieDetails({
 			case "refresh":
 				handleRefresh();
 				break;
+			case "confirmRefresh":
+				handleConfirmRefresh();
+				break;
+			case "cancelRefresh":
+				handleCancelRefresh();
+				break;
 			case "cast":
 				handleCast();
 				break;
 		}
 	};
 
+	// stages the reload -- writes nothing until confirmRefresh
 	const handleRefresh = async () => {
-		if (!onRefresh || !movie.imdbId || isRefreshing) return;
+		if (!onRefresh || isRefreshing || isSelecting) return;
+		// legacy movies that doesn't have tmdbid
+		const hasTmdbId = !!movie.tmdbId && movie.tmdbId !== "-1";
+		if (!hasTmdbId && !movie.title) return;
 		setIsRefreshing(true);
 		try {
-			const [tmdb, wiki] = await Promise.all([
-				searchForPosters(movie.imdbId),
-				searchForSeriesInfo(movie.imdbId),
-			]);
-			const meta: Partial<MovieProps> = {};
+			// no tmdb id to look up -- resolve one by title first
+			const reloaded = hasTmdbId
+				? await reloadMovie(movie.tmdbId as string)
+				: await searchForMovie(movie.title, movie.dateReleased, true);
+			if (!reloaded || "isDuplicate" in reloaded) return;
 			// only imagery refreshes -- tmdbId is identity, left untouched
-			if (tmdb) {
-				const t = mapTMDBToMovie(tmdb);
-				meta.posterUrl = t.posterUrl;
-				meta.backdropUrl = t.backdropUrl;
+			const meta: Partial<MovieProps> = {
+				posterUrl: reloaded.poster_url,
+				backdropUrl: reloaded.backdrop_url,
+			};
+			// a legacy row is being migrated onto tmdb, so it also takes the id
+			// and the metadata the old pipeline got wrong
+			if (!hasTmdbId) {
+				meta.tmdbId = reloaded.tmdb_id;
+				meta.director = reloaded.director;
+				meta.dateReleased = reloaded.released_date;
 			}
-			if (wiki && wiki.length)
-				Object.assign(meta, mapWikidataToMovie(wiki[0]));
-			if (Object.keys(meta).length) await onRefresh(meta);
+			// guard stays -- a failed collection lookup comes back as null, and
+			// writing those blanks would wipe series data the movie really has
+			if (reloaded.series)
+				Object.assign(meta, mapSeriesToMovie(reloaded.series));
+			setRefreshMeta(meta);
+			setIsSelecting(true);
 		} finally {
 			setIsRefreshing(false);
 		}
+	};
+
+	const handleConfirmRefresh = async () => {
+		if (!onRefresh) return;
+		const meta = { ...refreshMeta };
+		exitSelecting();
+		if (Object.keys(meta).length) await onRefresh(meta);
+	};
+
+	const handleCancelRefresh = () => {
+		exitSelecting();
+	};
+
+	const exitSelecting = () => {
+		setIsSelecting(false);
+		setRefreshMeta({});
 	};
 
 	const handleCast = async () => {
@@ -333,8 +415,11 @@ export function MovieDetails({
 	}, [addMovie]);
 
 	// need to reset local note -- since changing movie (sequel/prequel) doesn't remount
+	// same for a staged reload, which belongs to the movie it was fetched for
 	useEffect(() => {
 		setLocalNote(movie.note || "");
+		setIsSelecting(false);
+		setRefreshMeta({});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [movie.id]);
 
@@ -356,6 +441,9 @@ export function MovieDetails({
 
 	if (!movie) return null;
 
+	// while previewing render new
+	const previewMovie = isSelecting ? { ...movie, ...refreshMeta } : movie;
+
 	const displayLoading = isRefreshing
 		? {
 				isTrue: true,
@@ -368,7 +456,8 @@ export function MovieDetails({
 		<>
 			<div className="lg:block hidden">
 				<DesktopDetails
-					item={movie}
+					item={previewMovie}
+					isSelecting={isSelecting}
 					localNote={localNote}
 					statusOptions={movieStatusOptions}
 					mediaType="movie"
@@ -376,7 +465,6 @@ export function MovieDetails({
 					isAdding={!!addMovie}
 					onAdd={handleAddMovie}
 					onClose={handleModalClose}
-					onSeriesNav={showAnotherSeries}
 					isInList={isInList}
 					canRefresh={!!onRefresh}
 					onAction={
@@ -390,7 +478,8 @@ export function MovieDetails({
 			</div>
 			<div className="block lg:hidden">
 				<MobileDetails
-					item={movie}
+					item={previewMovie}
+					isSelecting={isSelecting}
 					localNote={localNote}
 					statusOptions={movieStatusOptions}
 					mediaType="movie"
@@ -398,7 +487,6 @@ export function MovieDetails({
 					isAdding={!!addMovie}
 					onAdd={handleAddMovie}
 					onClose={handleModalClose}
-					onSeriesNav={showAnotherSeries}
 					isInList={isInList}
 					canRefresh={!!onRefresh}
 					onAction={

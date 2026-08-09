@@ -1,6 +1,7 @@
 import {
 	BaseMediaProps,
 	ColumnConfig,
+	SeriesAPIProps,
 	SeriesMediaProps,
 	SortState,
 } from "./media";
@@ -21,25 +22,19 @@ export const DIFF_COLUMNS_BOOK: [
 	},
 ];
 
+export interface BookCoverProps {
+	url: string;
+	color: string;
+}
+
 export interface BookProps extends BaseMediaProps, SeriesMediaProps {
 	status: "Completed" | "Want to Read" | "Dropped";
 	key: string;
 	author: string;
 	datePublished: number;
-	//
 	cover: BookCoverProps;
 	numPages: number;
 	rating: number;
-}
-
-export interface BookSeriesAPIProps {
-	series_title: string | null;
-	position: string | null;
-	prequel: string | null;
-	sequel: string | null;
-	total: number | null;
-	//
-	details: string | null;
 }
 
 export interface BookAPIProps {
@@ -51,12 +46,7 @@ export interface BookAPIProps {
 	num_pages: number | null;
 	rating: number | null;
 	covers: BookCoverProps[];
-	series: BookSeriesAPIProps[];
-}
-
-export interface BookCoverProps {
-	url: string;
-	color: string;
+	series: SeriesAPIProps[];
 }
 
 // lightweight candidate shape for the multi-result picker

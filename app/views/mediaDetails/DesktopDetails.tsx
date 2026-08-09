@@ -486,21 +486,24 @@ export function DesktopDetails<T extends BaseMediaProps>({
 									{/* HEADER -- sat over backdrop */}
 									<div className="relative flex flex-col w-fit max-w-full">
 										{/* washblur */}
-										{hasBackdrop && (
-											<div
-												className="absolute -left-5 -right-10 -top-5 -bottom-2 -z-1 pointer-events-none backdrop-blur-[3px]"
-												style={{
-													backgroundColor:
-														"rgba(9,9,11,0.16)",
-													maskImage: HEADER_WASH_MASK,
-													WebkitMaskImage:
-														HEADER_WASH_MASK,
-													maskComposite: "intersect",
-													WebkitMaskComposite:
-														"source-in",
-												}}
-											/>
-										)}
+										{hasBackdrop &&
+											mediaType !== "book" && (
+												<div
+													className="absolute -left-5 -right-10 -top-5 -bottom-2 -z-1 pointer-events-none backdrop-blur-[3px]"
+													style={{
+														backgroundColor:
+															"rgba(9,9,11,0.16)",
+														maskImage:
+															HEADER_WASH_MASK,
+														WebkitMaskImage:
+															HEADER_WASH_MASK,
+														maskComposite:
+															"intersect",
+														WebkitMaskComposite:
+															"source-in",
+													}}
+												/>
+											)}
 										{/* SERIES TITLE */}
 										{(() => {
 											const seriesLabel =

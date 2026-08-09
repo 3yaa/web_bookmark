@@ -3,9 +3,9 @@ import {
 	BookCoverProps,
 	BookProps,
 	BookSearchResult,
-	BookSeriesAPIProps,
 	DIFF_COLUMNS_BOOK,
 } from "@/types/book";
+import { SeriesAPIProps } from "@/types/media";
 import { useCallback, useEffect, useState } from "react";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { bookStatusOptions } from "@/utils/dropDownDetails";
@@ -94,7 +94,7 @@ export function BookDetails({
 		[],
 	);
 	// cycle between the series a refreshed book belongs to
-	const [refreshSeries, setRefreshSeries] = useState<BookSeriesAPIProps[]>(
+	const [refreshSeries, setRefreshSeries] = useState<SeriesAPIProps[]>(
 		[],
 	);
 	const [refreshSeriesIndex, setRefreshSeriesIndex] = useState(0);
@@ -182,7 +182,7 @@ export function BookDetails({
 		setRefreshResults(results || []);
 	};
 
-	const handlePickRefreshResult = async (candidate: BookSearchResult) => {
+	const handlePickAnotherResult = async (candidate: BookSearchResult) => {
 		setMultResultsOpen(false);
 		setIsRefreshing(true);
 		try {
@@ -372,8 +372,10 @@ export function BookDetails({
 	}, [addBook]);
 
 	// need to reset local note -- since changing book (seuqel/prequel) doesn't remount
+	// same for a staged refresh, which belongs to the book it was fetched for
 	useEffect(() => {
 		setLocalNote(book.note || "");
+		exitSelecting();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [book.id]);
 
@@ -484,7 +486,7 @@ export function BookDetails({
 						onClose={() => setMultResultsOpen(false)}
 						books={refreshResults}
 						prompt={book.title}
-						onClickedBook={handlePickRefreshResult}
+						onClickedBook={handlePickAnotherResult}
 						isLoading={isBookSearching}
 					/>
 				)}

@@ -132,10 +132,10 @@ export function SeriesNav({
 	const nextMissing = isMissing(nav.next);
 
 	const nameStyle = (missing: boolean) =>
-		`text-sm font-medium transition-colors duration-200 ${
+		`text-sm font-medium transition-colors duration-200 group-hover:underline group-hover:underline-offset-4 ${
 			missing
-				? "text-zinc-300/45 underline decoration-dotted decoration-zinc-600/80 underline-offset-4 group-hover:text-zinc-300/70 group-hover:decoration-zinc-500"
-				: "text-zinc-300/70 group-hover:text-zinc-300/85 group-hover:underline"
+				? "text-zinc-300/45 group-hover:text-zinc-300/70 group-hover:decoration-dotted group-hover:decoration-zinc-400/80"
+				: "text-zinc-300/70 group-hover:text-zinc-300/85"
 		}`;
 
 	// show art if no series

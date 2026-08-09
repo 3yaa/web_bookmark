@@ -12,18 +12,17 @@ export function cleanName(
   }
 
   // Special cases where we want to keep the full title
-  // Part/Chapter indicators (like "Dune: Part One")
+  // Part/Chapter/Episode indicators ("Dune: Part One", "Star Wars: Episode I")
   if (
-    /:\s*(Part|Chapter|Volume)\s+(One|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|\d+)/i.test(
+    /:\s*(Part|Chapter|Volume|Episode)\s+(One|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|\d+|[IVXLC]+)/i.test(
       title,
     )
   ) {
     return title;
   }
 
-  // Numbered sequels with roman numerals or numbers (like "Rocky II", "Matrix: Reloaded")
+  // Named sequels (like "Matrix: Reloaded")
   if (
-    /(II|III|IV|V|VI|VII|VIII|IX|X|\d+)$/i.test(title) ||
     /:\s*(Reloaded|Revolutions|Returns|Rises|Begins|Forever|Beyond|Resurrection)/i.test(
       title,
     )
@@ -43,24 +42,34 @@ export function cleanName(
     }
   }
 
-  // If none of the special cases apply, clean the name
-  return (
-    title
-      .replace(
-        new RegExp(
-          `^${seriesTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
-          "i",
-        ),
-        "",
-      )
-      // Remove common separators at start
-      .replace(/^[\s\-\–\—:;,\.\|#]*/, "")
-      // Remove movie-specific indicators
-      .replace(/^(Movie|Film|Episode|Chapter|Part)[\s\d\.\-:#]*/i, "")
-      // Remove leading numbers with separators (but be careful with roman numerals)
-      .replace(/^\d+[\s\-\.\):]*/, "")
-      // Remove connecting words
-      .replace(/^(and the|and|&|the)\s+/i, "")
-      .trim()
+  const seriesPrefix = new RegExp(
+    `^${seriesTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
+    "i",
   );
+
+  // the series name isn't a prefix -- there is nothing to strip, so leave the
+  // title exactly as it is rather than running the tidy-up rules on it
+  if (!seriesPrefix.test(title)) {
+    return title;
+  }
+
+  // If none of the special cases apply, clean the name
+  const cleaned = title
+    .replace(seriesPrefix, "")
+    // Remove common separators at start
+    .replace(/^[\s\-\–\—:;,\.\|#]*/, "")
+    // Remove movie-specific indicators
+    .replace(/^(Movie|Film|Episode|Chapter|Part)[\s\d\.\-:#]*/i, "")
+    // Remove leading numbers with separators (but be careful with roman numerals)
+    .replace(/^\d+[\s\-\.\):]*/, "")
+    // Remove connecting words
+    .replace(/^(and the|and|&|the)\s+/i, "")
+    .trim();
+
+  // stripping left nothing meaningful ("Iron Man 2" -> "2" -> "", "Rocky II" -> "II")
+  if (!cleaned || /^[IVXLC]+$/i.test(cleaned)) {
+    return title;
+  }
+
+  return cleaned;
 }

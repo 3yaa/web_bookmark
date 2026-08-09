@@ -91,6 +91,13 @@ export default function MoviesHub() {
 		DIFF_COLUMNS_MOVIE,
 	);
 
+	const handleBackfillTmdbId = useCallback(
+		(movieId: number, tmdbId: string) => {
+			refresh(movieId, { tmdbId } as Partial<MovieProps>, true);
+		},
+		[refresh],
+	);
+
 	const isInList = useCallback(
 		(title: string) =>
 			items.some(
@@ -185,6 +192,7 @@ export default function MoviesHub() {
 						onClose={handleModalClose}
 						onUpdate={handleItemUpdates}
 						onRefresh={handleItemRefresh}
+						onBackfillTmdbId={handleBackfillTmdbId}
 						showSequelPrequel={showSequelPrequel}
 						isInList={isInList}
 						existingMovies={items}

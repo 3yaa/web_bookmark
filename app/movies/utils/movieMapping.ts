@@ -1,4 +1,5 @@
-import { MovieProps, OMDbProps, TMDBProps, WikidataProps } from "@/types/movie";
+import { MovieProps, MovieAPIProps } from "@/types/movie";
+import { SeriesAPIProps } from "@/types/media";
 
 export function resetMovieValues(
 	movie: Partial<MovieProps>,
@@ -23,32 +24,27 @@ export function resetMovieValues(
 	};
 }
 
-export function mapOMDbToMovie(dataOMDb: OMDbProps): Partial<MovieProps> {
+export function mapMetaToMovie(dataMeta: MovieAPIProps): Partial<MovieProps> {
 	return {
-		imdbId: dataOMDb.imdbId,
-		title: dataOMDb.title,
-		director: dataOMDb.director,
-		dateReleased: dataOMDb.released_date,
-		imdbRating: dataOMDb.imdbRating,
+		imdbId: dataMeta.imdbId,
+		tmdbId: dataMeta.tmdb_id,
+		title: dataMeta.title,
+		director: dataMeta.director,
+		status: "Want to Watch",
+		dateReleased: dataMeta.released_date,
+		imdbRating: dataMeta.imdbRating,
+		posterUrl: dataMeta.poster_url,
+		backdropUrl: dataMeta.backdrop_url,
 	};
 }
 
-export function mapTMDBToMovie(dataTMDB: TMDBProps): Partial<MovieProps> {
-	return {
-		posterUrl: dataTMDB.poster_url,
-		backdropUrl: dataTMDB.backdrop_url,
-		tmdbId: dataTMDB.tmdb_id,
-	};
-}
-
-export function mapWikidataToMovie(
-	dataWiki: WikidataProps,
+export function mapSeriesToMovie(
+	dataSeries?: SeriesAPIProps | null,
 ): Partial<MovieProps> {
 	return {
-		// title: cleanName(dataWiki.wikiTitle, sTitle),
-		seriesTitle: dataWiki.series_title ?? undefined,
-		placeInSeries: dataWiki.place_in_series ?? undefined,
-		prequel: dataWiki.prequel ?? undefined,
-		sequel: dataWiki.sequel ?? undefined,
+		seriesTitle: dataSeries?.series_title ?? undefined,
+		placeInSeries: dataSeries?.position ?? undefined,
+		prequel: dataSeries?.prequel ?? undefined,
+		sequel: dataSeries?.sequel ?? undefined,
 	};
 }

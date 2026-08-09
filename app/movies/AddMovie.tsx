@@ -3,12 +3,11 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { ModalBackdrop } from "@/app/components/ui/ModalMotion";
 import { Clapperboard } from "lucide-react";
 //
-import { MovieProps, WikidataProps } from "@/types/movie";
+import { MovieProps } from "@/types/movie";
 //
 import {
-	mapOMDbToMovie,
-	mapTMDBToMovie,
-	mapWikidataToMovie,
+	mapMetaToMovie,
+	mapSeriesToMovie,
 } from "@/app/movies/utils/movieMapping";
 import { cleanName } from "@/utils/cleanName";
 //
@@ -41,15 +40,8 @@ export function AddMovie({
 	const [isDupTitle, setIsDupTitle] = useState(false);
 	//
 	const [newMovie, setNewMovie] = useState<Partial<MovieProps>>({});
-	const [allSeries, setAllSeries] = useState<WikidataProps[]>([]);
-	const [curSeries, setCurSeries] = useState<number>(0);
 	//
-	const {
-		searchForMovie,
-		searchForPosters,
-		searchForSeriesInfo,
-		isMovieSearching,
-	} = useMovieSearch();
+	const { searchForMovie, isMovieSearching } = useMovieSearch();
 
 	const reset = useCallback(() => {
 		setFailedReason("");
@@ -67,80 +59,48 @@ export function AddMovie({
 		}
 	}, []);
 
-	const handleTitleSearch = useCallback(async () => {
+	const handleMovieSearch = useCallback(async () => {
+		setActiveModal("movieDetails");
+		//
 		const titleSearching = titleToSearch.current?.value.trim();
-		if (!titleSearching) return null;
+		if (!titleSearching) return;
 		const yearSearchingStr = yearToSearch.current?.value.trim();
 		const yearSearching = yearSearchingStr
 			? parseInt(yearSearchingStr, 10)
 			: undefined;
 		//
 		const movieData = await searchForMovie(titleSearching, yearSearching);
-		if (movieData && "isDuplicate" in movieData) {
-			return {
-				isDuplicate: true,
-				title: movieData.title,
-			};
-		}
-		if (!movieData) return null;
-		//format movie
-		setNewMovie(mapOMDbToMovie(movieData));
-		return {
-			title: movieData.title,
-			imdbId: movieData.imdbId,
-		};
-	}, [searchForMovie]);
-
-	const handlePosterSearch = useCallback(
-		async (imdbId: string) => {
-			const posters = await searchForPosters(imdbId);
-			if (!posters) return null;
-			setNewMovie((prev) => ({ ...prev, ...mapTMDBToMovie(posters) }));
-		},
-		[searchForPosters],
-	);
-
-	const handleSeriesSearch = useCallback(
-		async (imdbId: string) => {
-			// make call
-			const seriesData = await searchForSeriesInfo(imdbId);
-			if (!seriesData || seriesData.length === 0) return null;
-			//
-			setAllSeries(seriesData);
-			const mappedData = mapWikidataToMovie(seriesData[0]);
-			setNewMovie((prev) => ({
-				...prev,
-				title: cleanName(prev.title, mappedData.seriesTitle),
-				...mapWikidataToMovie(seriesData[0]),
-				status: "Want to Watch",
-			}));
-		},
-		[searchForSeriesInfo],
-	);
-
-	const handleMovieSearch = useCallback(async () => {
-		setActiveModal("movieDetails");
-		// make call to open lib
-		const response = await handleTitleSearch();
 		// dup logic --- NEEDS TO BE ABOVE EMPTY LOGIC CAUSE REPSONSE IS EMPTY
-		if (response && "isDuplicate" in response) {
-			setFailedReason(`Already Have Movie: ${response.title}`);
+		if (movieData && "isDuplicate" in movieData) {
+			setFailedReason(`Already Have Movie: ${movieData.title}`);
 			setIsDupTitle(true);
+			// dups open up need year pipe
+			setNeedYear(true);
 			setActiveModal(null);
+			setTimeout(() => {
+				yearToSearch.current?.focus();
+			}, 0);
 			return;
 		}
 		// empty
-		if (!response?.imdbId || !response.title) {
+		if (!movieData?.imdbId || !movieData.title) {
 			setFailedReason("Could Not Find Movie.");
 			setNeedYear(true);
 			setActiveModal(null);
+			setTimeout(() => {
+				yearToSearch.current?.focus();
+			}, 0);
 			return;
 		}
-		// seearch for poster
-		if (response.imdbId) await handlePosterSearch(response.imdbId);
-		// do series search for main movie
-		if (response.imdbId) await handleSeriesSearch(response.imdbId);
-	}, [handleTitleSearch, handlePosterSearch, handleSeriesSearch]);
+		//format movie
+		const mappedMovie = mapMetaToMovie(movieData);
+		const mappedSeries = mapSeriesToMovie(movieData.series);
+		setNewMovie({
+			...mappedMovie,
+			title: cleanName(mappedMovie.title, mappedSeries.seriesTitle),
+			...mappedSeries,
+		});
+	}, [searchForMovie]);
 
 	const handleMovieDetailsUpdates = useCallback(
 		async (
@@ -178,27 +138,6 @@ export function AddMovie({
 		onAddMovie(finalMovie as MovieProps);
 		onClose();
 	};
-
-	const handleSeriesChange = useCallback(
-		(option: "left" | "right") => {
-			let newSeries = curSeries;
-			if (option === "left") {
-				newSeries =
-					curSeries === 0 ? allSeries.length - 1 : curSeries - 1;
-			} else if (option === "right") {
-				newSeries =
-					curSeries === allSeries.length - 1 ? 0 : curSeries + 1;
-			}
-			setCurSeries(newSeries);
-			const mappedData = mapWikidataToMovie(allSeries[newSeries]);
-			setNewMovie((prev) => ({
-				...prev,
-				title: cleanName(prev.title, mappedData.seriesTitle),
-				...mappedData,
-			}));
-		},
-		[allSeries, curSeries],
-	);
 
 	const handleMovieDetailsClose = () => {
 		reset();
@@ -318,9 +257,6 @@ export function AddMovie({
 						style: "h-8 w-8 border-emerald-400",
 						text: "Searching...",
 					}}
-					showAnotherSeries={
-						allSeries.length > 1 ? handleSeriesChange : undefined
-					}
 				/>
 			)}
 		</ModalBackdrop>

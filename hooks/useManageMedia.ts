@@ -144,13 +144,18 @@ export function useManageMedia<T extends BaseMediaProps>({
 		[selectedItem, queueUpdate],
 	);
 
+	// returns whether the battler took over -- the add modal must then skip its
+	// close handler, which would otherwise clear the item being scored
 	const handleItemAdd = useCallback(
 		async (item: T) => {
 			const newItem = await onAdd(item);
-			if (!newItem.score) return;
+			// TEMP DIAGNOSTIC -- remove once the add-with-score path is settled
+			console.log("[add] sent score:", item.score, "| got back:", newItem?.score);
+			if (!newItem?.score) return false;
 			setActiveModal("scoreBattlerModal");
 			setSelectedItem(newItem);
 			setTempScore(newItem.score);
+			return true;
 		},
 		[onAdd],
 	);
@@ -165,18 +170,14 @@ export function useManageMedia<T extends BaseMediaProps>({
 			if (!updates) return;
 
 			const isSelectedItem = itemId === selectedItem?.id;
+			// on actor modal open different item
+			const targetItem = isSelectedItem
+				? selectedItem
+				: items.find((i) => i.id === itemId);
 
-			// for opponent updates
-			if (!isSelectedItem) {
-				const indirectUpdate = true;
-				onUpdate(itemId, updates, indirectUpdate);
-				return;
-			}
+			const isNewScore = updates.score && !targetItem?.score;
 
-			// check if first time score
-			const isNewScore = updates.score && !selectedItem?.score;
-
-			if (isNewScore && updates.score) {
+			if (isNewScore && updates.score && targetItem) {
 				const skipScoreBattle =
 					updates.score.mu >= 2000 ||
 					createSession(
@@ -187,13 +188,20 @@ export function useManageMedia<T extends BaseMediaProps>({
 					).done;
 				//
 				if (skipScoreBattle) {
-					setSelectedItem({ ...selectedItem, ...updates });
+					setSelectedItem({ ...targetItem, ...updates });
 					queueUpdate(itemId, updates);
 					return;
 				}
-				//
+				setSelectedItem(targetItem);
 				setTempScore(updates.score);
 				setActiveModal("scoreBattlerModal");
+				return;
+			}
+
+			// for opponent updates
+			if (!isSelectedItem) {
+				const indirectUpdate = true;
+				onUpdate(itemId, updates, indirectUpdate);
 				return;
 			}
 			// normal update

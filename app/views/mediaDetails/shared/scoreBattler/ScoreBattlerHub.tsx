@@ -70,6 +70,12 @@ export function ScoreBattlerHub<T extends BaseMediaProps>({
 
 	useEffect(() => {
 		if (!currentOpponent || !session || session.done) {
+			// TEMP DIAGNOSTIC -- remove once the add-with-score path is settled
+			console.log(
+				"[battler] self-closing |",
+				"opponent:", currentOpponent?.id,
+				"| done:", session?.done,
+			);
 			if (session?.selectedItem.score)
 				onScoreFinal(session?.selectedItem.score);
 			onClose();

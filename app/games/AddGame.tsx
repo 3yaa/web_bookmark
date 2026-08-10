@@ -20,7 +20,8 @@ interface AddGameProps {
 	isOpen: boolean;
 	onClose: () => void;
 	existingGames: GameProps[];
-	onAddGame: (game: GameProps) => void;
+	// resolves true when the score battler took over the flow
+	onAddGame: (item: GameProps) => void | Promise<boolean | void>;
 	titleFromAbove?: {
 		dlcIndex: number;
 		mainTitle: string;
@@ -213,8 +214,10 @@ export function AddGame({
 			backdropUrl: backdropUrls[backdropIndex],
 			status: isStatus,
 		};
-		onAddGame(finalGame as GameProps);
-		onClose();
+		// only close when the battler did not take over -- closing
+		// would clear the very item it is scoring
+		const isBattling = await onAddGame(finalGame as GameProps);
+		if (!isBattling) onClose();
 	};
 
 	const handleGameDetailsClose = () => {

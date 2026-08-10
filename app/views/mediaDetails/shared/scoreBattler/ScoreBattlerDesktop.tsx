@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { BattlerCover } from "./BattlerCover";
 import { BaseMediaProps } from "@/types/media";
 import { getStatusBorderGradient } from "@/utils/formattingUtils";
 import { ModalBackdrop, ModalPanel } from "@/app/components/ui/ModalMotion";
@@ -39,17 +40,12 @@ export function ScoreBattlerDesktop<T extends BaseMediaProps>({
 								`}
 						>
 							<div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg select-none">
-								{coverSelectedItem ? (
-									<Image
-										src={coverSelectedItem}
-										alt={selectedItem.title || "Untitled"}
-										width={1280}
-										height={720}
-										className={`min-w-62 min-h-93 ${imgFit}`}
-									/>
-								) : (
-									<div className="min-w-62 min-h-93 bg-linear-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30" />
-								)}
+								<BattlerCover
+									src={coverSelectedItem}
+									alt={selectedItem.title || "Untitled"}
+									sizeClass="min-w-62 min-h-93"
+									imgFit={imgFit}
+								/>
 							</div>
 							{/* Inner vignette */}
 							<div className="absolute -inset-1 pointer-events-none rounded-xl shadow-[inset_0_0_12px_rgba(0,0,0,0.4)]" />
@@ -100,17 +96,12 @@ export function ScoreBattlerDesktop<T extends BaseMediaProps>({
 								`}
 						>
 							<div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg select-none">
-								{coverItemFacing ? (
-									<Image
-										src={coverItemFacing}
-										alt={itemFacing?.title || "Untitled"}
-										width={1280}
-										height={720}
-										className={`min-w-62 min-h-93 ${imgFit}`}
-									/>
-								) : (
-									<div className="min-w-62 min-h-93 bg-linear-to-br from-zinc-700 to-zinc-800 border border-zinc-600/30" />
-								)}
+								<BattlerCover
+									src={coverItemFacing}
+									alt={itemFacing?.title || "Untitled"}
+									sizeClass="min-w-62 min-h-93"
+									imgFit={imgFit}
+								/>
 							</div>
 							{/* Inner vignette */}
 							<div className="absolute -inset-1 pointer-events-none rounded-xl shadow-[inset_0_0_12px_rgba(0,0,0,0.4)]" />

@@ -22,7 +22,8 @@ interface AddBookProps {
 	isOpen: boolean;
 	onClose: () => void;
 	existingBooks: BookProps[];
-	onAddBook: (book: BookProps) => void;
+	// resolves true when the score battler took over the flow
+	onAddBook: (item: BookProps) => void | Promise<boolean | void>;
 	titleFromAbove?: string;
 }
 
@@ -151,8 +152,10 @@ export function AddBook({
 			...mapBookAPISeriesData(series, seriesIndex),
 		};
 		console.log(finalBook);
-		onAddBook(finalBook as BookProps);
-		onClose();
+		// only close when the battler did not take over -- closing
+		// would clear the very item it is scoring
+		const isBattling = await onAddBook(finalBook as BookProps);
+		if (!isBattling) onClose();
 	};
 
 	const handleSeriesChange = useCallback(

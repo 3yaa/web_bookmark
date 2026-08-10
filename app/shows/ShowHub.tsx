@@ -1,5 +1,7 @@
 "use client";
 import { ShowProps, DIFF_COLUMNS_SHOW } from "@/types/show";
+import { useCallback, useState } from "react";
+import { Score } from "@/lib/tierConfig";
 import { useMediaData } from "@/hooks/useMediaData";
 import { useManageMedia } from "@/hooks/useManageMedia";
 import { useSortMedia } from "@/hooks/useSortMedia";
@@ -45,13 +47,33 @@ export default function ShowHub() {
 		],
 	});
 
-	const { handleItemUpdates: handleMovieUpdates } =
-		useManageMedia<MovieProps>({
-			onAdd: movieAdd,
-			items: movieItems,
-			onRemove: movieRemove,
-			onUpdate: movieUpdate,
-		});
+	// MOVIE SCORE BATTLER
+	const [movieBattle, setMovieBattle] = useState<{
+		item: MovieProps;
+		score: Score;
+	} | null>(null);
+
+	const handleMovieUpdates = useCallback(
+		(
+			movieId: number,
+			updates?: Partial<MovieProps>,
+			shouldDelete?: boolean,
+		) => {
+			if (shouldDelete) {
+				movieRemove(movieId);
+				return;
+			}
+			if (!updates) return;
+			const target = movieItems.find((m) => m.id === movieId);
+			// go through the ringer
+			if (updates.score && target && !target.score) {
+				setMovieBattle({ item: target, score: updates.score });
+				return;
+			}
+			movieUpdate(movieId, updates, true);
+		},
+		[movieItems, movieUpdate, movieRemove],
+	);
 
 	const {
 		filteredItems,
@@ -81,6 +103,25 @@ export default function ShowHub() {
 		onUpdate: update,
 		onRefresh: refresh,
 	});
+
+	// adding a movie from a show's actor modal -- routes through the cross
+	// media battler instead of the raw data hook, which skips scoring entirely
+	const handleMovieAdd = useCallback(
+		async (movie: MovieProps) => {
+			const newItem = await movieAdd(movie);
+			// TEMP DIAGNOSTIC -- remove once the add-with-score path is settled
+			console.log(
+				"[cross-add] sent score:",
+				movie.score,
+				"| got back:",
+				newItem?.score,
+			);
+			if (!newItem?.score) return false;
+			setMovieBattle({ item: newItem, score: newItem.score });
+			return true;
+		},
+		[movieAdd],
+	);
 
 	const sortedShows = useSortMedia(
 		filteredItems,
@@ -154,11 +195,11 @@ export default function ShowHub() {
 						onUpdate={handleItemUpdates}
 						onRefresh={handleItemRefresh}
 						existingShows={items}
-						onAddWork={add}
+						onAddWork={handleItemAdd}
 						//
 						existingMovies={movieItems}
 						onMovieUpdate={handleMovieUpdates}
-						onAddMovie={movieAdd}
+						onAddMovie={handleMovieAdd}
 					/>
 				)}
 			</AnimatePresence>
@@ -182,6 +223,26 @@ export default function ShowHub() {
 							}
 						/>
 					)}
+			</AnimatePresence>
+			{/* SCORE BATTLER -- cross media (a movie opened from an actor) */}
+			<AnimatePresence>
+				{movieBattle && (
+					<ScoreBattlerHub
+						key="movie-battler"
+						mediaType="movie"
+						items={movieItems}
+						initialScore={movieBattle.score}
+						selectedItem={movieBattle.item}
+						onClose={() => setMovieBattle(null)}
+						onScoreFinal={(score) => {
+							movieUpdate(movieBattle.item.id, { score }, true);
+							setMovieBattle(null);
+						}}
+						onOpponentUpdate={(id, score) =>
+							movieUpdate(id, { score }, true)
+						}
+					/>
+				)}
 			</AnimatePresence>
 		</div>
 	);

@@ -1,5 +1,5 @@
 "use client";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { MovieProps } from "@/types/movie";
 import { DIFF_COLUMNS_MOVIE } from "@/types/movie";
 import { useMediaData } from "@/hooks/useMediaData";
@@ -13,6 +13,7 @@ import { MobileListing } from "@/app/views/mediaListing/MobileListing";
 import { AddButton } from "../components/ui/AddButton";
 import { ScoreBattlerHub } from "../views/mediaDetails/shared/scoreBattler/ScoreBattlerHub";
 import { AnimatePresence } from "framer-motion";
+import { Score } from "@/lib/tierConfig";
 import { ShowProps } from "@/types/show";
 
 export default function MoviesHub() {
@@ -47,12 +48,33 @@ export default function MoviesHub() {
 		extraFieldsToUpdate: ["curSeasonIndex", "curEpisode"],
 	});
 
-	const { handleItemUpdates: handleShowUpdates } = useManageMedia<ShowProps>({
-		onAdd: showAdd,
-		items: showItems,
-		onRemove: showRemove,
-		onUpdate: showUpdate,
-	});
+	// SHOW BATTLER
+	const [showBattle, setShowBattle] = useState<{
+		item: ShowProps;
+		score: Score;
+	} | null>(null);
+
+	const handleShowUpdates = useCallback(
+		(
+			showId: number,
+			updates?: Partial<ShowProps>,
+			shouldDelete?: boolean,
+		) => {
+			if (shouldDelete) {
+				showRemove(showId);
+				return;
+			}
+			if (!updates) return;
+			const target = showItems.find((s) => s.id === showId);
+			// go through the ringer
+			if (updates.score && target && !target.score) {
+				setShowBattle({ item: target, score: updates.score });
+				return;
+			}
+			showUpdate(showId, updates, true);
+		},
+		[showItems, showUpdate, showRemove],
+	);
 
 	const {
 		filteredItems,
@@ -96,6 +118,25 @@ export default function MoviesHub() {
 			refresh(movieId, { tmdbId } as Partial<MovieProps>, true);
 		},
 		[refresh],
+	);
+
+	// adding a show from a movie's actor modal -- routes through the cross
+	// media battler instead of the raw data hook, which skips scoring entirely
+	const handleShowAdd = useCallback(
+		async (show: ShowProps) => {
+			const newItem = await showAdd(show);
+			// TEMP DIAGNOSTIC -- remove once the add-with-score path is settled
+			console.log(
+				"[cross-add] sent score:",
+				show.score,
+				"| got back:",
+				newItem?.score,
+			);
+			if (!newItem?.score) return false;
+			setShowBattle({ item: newItem, score: newItem.score });
+			return true;
+		},
+		[showAdd],
 	);
 
 	const isInList = useCallback(
@@ -196,11 +237,11 @@ export default function MoviesHub() {
 						showSequelPrequel={showSequelPrequel}
 						isInList={isInList}
 						existingMovies={items}
-						onAddWork={add}
+						onAddWork={handleItemAdd}
 						//
 						existingShows={showItems}
 						onShowUpdate={handleShowUpdates}
-						onAddShow={showAdd}
+						onAddShow={handleShowAdd}
 					/>
 				)}
 			</AnimatePresence>
@@ -224,6 +265,26 @@ export default function MoviesHub() {
 							}
 						/>
 					)}
+			</AnimatePresence>
+			{/* SCORE BATTLER -- cross media (a show opened from an actor) */}
+			<AnimatePresence>
+				{showBattle && (
+					<ScoreBattlerHub
+						key="show-battler"
+						mediaType="show"
+						items={showItems}
+						initialScore={showBattle.score}
+						selectedItem={showBattle.item}
+						onClose={() => setShowBattle(null)}
+						onScoreFinal={(score) => {
+							showUpdate(showBattle.item.id, { score }, true);
+							setShowBattle(null);
+						}}
+						onOpponentUpdate={(id, score) =>
+							showUpdate(id, { score }, true)
+						}
+					/>
+				)}
 			</AnimatePresence>
 		</div>
 	);

@@ -18,7 +18,8 @@ interface AddMovieProps {
 	isOpen: boolean;
 	onClose: () => void;
 	existingMovies: MovieProps[];
-	onAddMovie: (movie: MovieProps) => void;
+	// resolves true when the score battler took over the flow
+	onAddMovie: (item: MovieProps) => void | Promise<boolean | void>;
 	titleFromAbove?: string;
 }
 
@@ -135,8 +136,8 @@ export function AddMovie({
 			...newMovie,
 			status: isStatus,
 		};
-		onAddMovie(finalMovie as MovieProps);
-		onClose();
+		const isBattling = await onAddMovie(finalMovie as MovieProps);
+		if (!isBattling) onClose();
 	};
 
 	const handleMovieDetailsClose = () => {

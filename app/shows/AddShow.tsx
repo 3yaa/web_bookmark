@@ -14,7 +14,8 @@ interface AddShowProps {
 	isOpen: boolean;
 	onClose: () => void;
 	existingShows: ShowProps[];
-	onAddShow: (show: ShowProps) => void;
+	// resolves true when the score battler took over the flow
+	onAddShow: (item: ShowProps) => void | Promise<boolean | void>;
 	titleFromAbove?: string;
 }
 
@@ -147,8 +148,8 @@ export function AddShow({
 			...newShow,
 			status: isStatus,
 		};
-		onAddShow(finalShow as ShowProps);
-		onClose();
+		const isBattling = await onAddShow(finalShow as ShowProps);
+		if (!isBattling) onClose();
 	};
 
 	const handleShowDetailsClose = () => {

@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { BattlerCover } from "./BattlerCover";
 import { BaseMediaProps } from "@/types/media";
 import { actions, coverFor, ScoreBattlerUIProps } from "./shared";
 import { useEffect } from "react";
@@ -37,17 +37,11 @@ export function ScoreBattlerMobile<T extends BaseMediaProps>({
 		<div className="fixed inset-0 z-30 bg-zinc-950 flex flex-col justify-between overflow-y-auto">
 			<div className="pb-10">
 				<div className="relative w-full overflow-hidden bg-zinc-900/40">
-					{coverItemFacing ? (
-						<Image
-							src={coverItemFacing}
-							alt={itemFacing.title || "Untitled"}
-							width={1280}
-							height={900}
-							className="object-cover w-full"
-						/>
-					) : (
-						<div className="w-full aspect-2/3 bg-linear-to-br from-zinc-700 to-zinc-800" />
-					)}
+					<BattlerCover
+						src={coverItemFacing}
+						alt={itemFacing.title || "Untitled"}
+						sizeClass="w-full aspect-2/3"
+					/>
 					<div className="absolute bottom-0 left-0 w-full h-20 bg-linear-to-t from-zinc-950 to-transparent pointer-events-none" />
 				</div>
 			</div>

@@ -122,10 +122,12 @@ export default function BookHub() {
           curStatusFilter={statusFilter}
           mediaType="book"
           differentColumns={DIFF_COLUMNS_BOOK}
+          searchQuery={searchQuery}
           emptyListText="No books yet — add one!"
           onItemClicked={handleItemClicked}
           onSortConfig={handleSortConfig}
           onStatusFilter={handleStatusFilterConfig}
+          onSearchChange={handleSearchQueryChange}
         />
       </div>
       {/* ADD BUTTON */}

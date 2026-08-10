@@ -287,6 +287,9 @@ export function ShowDetails({
 	};
 
 	const handleCast = async () => {
+		// reset on open instead of on close, so the exit animation keeps
+		// whatever was on screen
+		setSelectedActor(null);
 		setCastOpen(true);
 		setCastLoading(true);
 		try {
@@ -626,10 +629,10 @@ export function ShowDetails({
 						sortedWorks={sortedWorks}
 						actorLoading={actorLoading}
 						filmSort={filmSort}
-						onClose={() => {
-							setCastOpen(false);
-							setSelectedActor(null);
-						}}
+						// only close -- clearing the actor here would swap the
+						// filmography for the cast grid mid-exit, changing the
+						// panel's height and shifting the centred modal
+						onClose={() => setCastOpen(false)}
 						onActorClick={handleActorClick}
 						onActorBack={() => setSelectedActor(null)}
 						onFilmSortChange={setFilmSort}

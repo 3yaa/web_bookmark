@@ -200,10 +200,12 @@ export default function MoviesHub() {
 					curStatusFilter={statusFilter}
 					mediaType="movie"
 					differentColumns={DIFF_COLUMNS_MOVIE}
+					searchQuery={searchQuery}
 					emptyListText="No movies yet — add one!"
 					onItemClicked={handleItemClicked}
 					onSortConfig={handleSortConfig}
 					onStatusFilter={handleStatusFilterConfig}
+					onSearchChange={handleSearchQueryChange}
 				/>
 			</div>
 			{/* ADD BUTTON */}

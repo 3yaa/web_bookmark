@@ -7,7 +7,7 @@ const backdropVariants: Variants = {
 	// slightly ahead of the panel so the dim lands first and the panel glides
 	// in against an already-settled background
 	visible: { opacity: 1, transition: { duration: 0.32, ease: "easeOut" } },
-	exit: { opacity: 0, transition: { duration: 0.24, ease: "easeIn" } },
+	exit: { opacity: 0, transition: { duration: 0.18, ease: "easeIn" } },
 };
 
 // no scale, and a tween rather than a spring -- scaling a panel re-rasterises
@@ -27,11 +27,11 @@ const panelVariants: Variants = {
 			opacity: { duration: 0.28, ease: "easeOut" },
 		},
 	},
-	exit: {
-		opacity: 0,
-		y: 10,
-		transition: { duration: 0.24, ease: [0.4, 0, 1, 1] },
-	},
+	// nothing of its own on exit. the backdrop fades its whole subtree, so a
+	// panel opacity here compounded with it -- the panel left on backdrop x
+	// panel while siblings anchored beside it (the portrait island) left on
+	// backdrop alone. same duration, different curve, permanently out of step
+	exit: {},
 };
 
 export function ModalBackdrop(props: HTMLMotionProps<"div">) {

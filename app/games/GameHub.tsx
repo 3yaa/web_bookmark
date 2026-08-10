@@ -142,10 +142,12 @@ export default function GameList() {
           curStatusFilter={statusFilter}
           mediaType="game"
           differentColumns={DIFF_COLUMNS_GAME}
+          searchQuery={searchQuery}
           emptyListText="No games yet — add one!"
           onItemClicked={handleItemClicked}
           onSortConfig={handleSortConfig}
           onStatusFilter={handleStatusFilterConfig}
+          onSearchChange={handleSearchQueryChange}
         />
       </div>
       {/* ADD BUTTON */}

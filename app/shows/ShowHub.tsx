@@ -161,10 +161,12 @@ export default function ShowHub() {
 					curStatusFilter={statusFilter}
 					mediaType="show"
 					differentColumns={DIFF_COLUMNS_SHOW}
+					searchQuery={searchQuery}
 					emptyListText="No shows yet — add one!"
 					onItemClicked={handleItemClicked}
 					onSortConfig={handleSortConfig}
 					onStatusFilter={handleStatusFilterConfig}
+					onSearchChange={handleSearchQueryChange}
 				/>
 			</div>
 			{/* ADD BUTTON */}

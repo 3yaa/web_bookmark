@@ -29,6 +29,7 @@ import { ShowDetails } from "../shows/ShowDetailsHub";
 import { MediaStatus } from "@/types/media";
 import { useMovieSearch } from "@/hooks/external/useMovieSearch";
 import { mapSeriesToMovie } from "./utils/movieMapping";
+import { cleanName } from "@/utils/cleanName";
 
 // check if movie has tmdbID
 const isRealTmdbId = (tmdbId?: string) => !!tmdbId && tmdbId !== "-1";
@@ -292,7 +293,7 @@ export function MovieDetails({
 				? await reloadMovie(movie.tmdbId as string)
 				: await searchForMovie(movie.title, movie.dateReleased, true);
 			if (!reloaded || "isDuplicate" in reloaded) return;
-			// only imagery refreshes -- tmdbId is identity, left untouched
+			// tmdbId is identity, left untouched
 			const meta: Partial<MovieProps> = {
 				posterUrl: reloaded.poster_url,
 				backdropUrl: reloaded.backdrop_url,
@@ -303,8 +304,12 @@ export function MovieDetails({
 				meta.director = reloaded.director;
 				meta.dateReleased = reloaded.released_date;
 			}
-			if (reloaded.series)
-				Object.assign(meta, mapSeriesToMovie(reloaded.series));
+			const series = reloaded.series
+				? mapSeriesToMovie(reloaded.series)
+				: undefined;
+			if (series) Object.assign(meta, series);
+			const title = cleanName(reloaded.title, series?.seriesTitle);
+			if (title) meta.title = title;
 			setRefreshMeta(meta);
 			setIsSelecting(true);
 		} finally {
@@ -329,6 +334,10 @@ export function MovieDetails({
 	};
 
 	const handleCast = async () => {
+		// reset on open instead of on close, so the exit animation keeps
+		// whatever was on screen
+		setSelectedActor(null);
+		setIsDirectorView(false);
 		setCastOpen(true);
 		setCastLoading(true);
 		try {
@@ -566,11 +575,10 @@ export function MovieDetails({
 						sortedWorks={sortedWorks}
 						actorLoading={actorLoading}
 						filmSort={filmSort}
-						onClose={() => {
-							setCastOpen(false);
-							setSelectedActor(null);
-							setIsDirectorView(false);
-						}}
+						// only close -- clearing the actor here would swap the
+						// filmography for the cast grid mid-exit, changing the
+						// panel's height and shifting the centred modal
+						onClose={() => setCastOpen(false)}
 						onActorClick={handleActorClick}
 						onActorBack={() => {
 							setSelectedActor(null);

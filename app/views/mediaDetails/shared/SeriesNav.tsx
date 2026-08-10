@@ -10,7 +10,30 @@ interface SeriesNavProps {
 	isAdding: boolean;
 	onAction: (action: { type: string; payload?: unknown }) => void;
 	isInList?: (title: string) => boolean;
+	// tints the no-series art -- picked off the poster, nothing is stored
+	accentColor?: string;
 }
+
+const ART_SRC = "/non-series-placeholder.png";
+
+// optimizer's url instead of pulling the full-size png a second time.
+const ART_MASK_SRC = `/_next/image?url=${encodeURIComponent(ART_SRC)}&w=1080&q=75`;
+
+const ART_MASK = {
+	maskImage: `url(${ART_MASK_SRC})`,
+	WebkitMaskImage: `url(${ART_MASK_SRC})`,
+	maskSize: "cover",
+	WebkitMaskSize: "cover",
+	maskPosition: "center 37%",
+	WebkitMaskPosition: "center 37%",
+	maskRepeat: "no-repeat",
+	WebkitMaskRepeat: "no-repeat",
+} as React.CSSProperties;
+
+const TOP_FADE = "linear-gradient(to bottom, transparent 0%, #000 10%)";
+
+const tint = (pct: number, into = "transparent") =>
+	`color-mix(in srgb, var(--c) ${pct}%, ${into})`;
 
 export function NotInListBadge() {
 	return (
@@ -29,6 +52,7 @@ export function SeriesNav({
 	isAdding,
 	onAction,
 	isInList,
+	accentColor,
 }: SeriesNavProps) {
 	const nav =
 		mediaType === "game"
@@ -137,6 +161,7 @@ export function SeriesNav({
 
 	// show art if no series
 	if (!nav.prev && !nav.center && !nav.next) {
+		const tinted = !!accentColor;
 		return (
 			<div className="-mt-2">
 				<div
@@ -147,25 +172,77 @@ export function SeriesNav({
 						<div
 							className="absolute inset-x-0 -top-2.5 -bottom-4 pointer-events-none"
 							style={{
-								WebkitMaskImage:
-									"linear-gradient(to bottom, transparent 0%, #000 10%)",
-								maskImage:
-									"linear-gradient(to bottom, transparent 0%, #000 10%)",
+								WebkitMaskImage: TOP_FADE,
+								maskImage: TOP_FADE,
 							}}
 						>
-							<Image
-								src="/non-series-placeholder.png"
-								alt=""
-								fill
-								sizes="(min-width: 1024px) 860px, 100vw"
-								className="object-cover"
-								style={{
-									opacity: 0.7,
-									objectPosition: "center 37%",
-									filter: "grayscale(0.7)",
-									transform: "scaleY(-1)",
-								}}
-							/>
+							<div
+								className="absolute inset-0"
+								style={
+									{
+										transform: "scaleY(-1)",
+										// keeps the blend layers off the modal
+										isolation: "isolate",
+										opacity: tinted ? 0.92 : 0.7,
+										"--c": accentColor,
+									} as React.CSSProperties
+								}
+							>
+								{/* AURA -- light spilling off the cloud */}
+								{tinted && (
+									<div
+										className="absolute inset-0"
+										style={{
+											backgroundImage: `radial-gradient(58% 78% at 50% 62%, ${tint(
+												34,
+											)} 0%, ${tint(
+												12,
+											)} 45%, transparent 74%)`,
+										}}
+									/>
+								)}
+								{/* SHAPE + SHADING */}
+								<Image
+									src={ART_SRC}
+									alt=""
+									fill
+									sizes="(min-width: 1024px) 860px, 100vw"
+									className="object-cover"
+									style={{
+										objectPosition: "center 37%",
+										filter: tinted
+											? "grayscale(1) brightness(1.08) contrast(1.06)"
+											: "grayscale(0.7)",
+									}}
+								/>
+								{/* PAINT */}
+								{tinted && (
+									<div
+										className="absolute inset-0"
+										style={{
+											backgroundImage: `linear-gradient(to bottom, ${tint(
+												100,
+											)} 0%, ${tint(
+												92,
+											)} 45%, ${tint(78)} 100%)`,
+											mixBlendMode: "multiply",
+											...ART_MASK,
+										}}
+									/>
+								)}
+								{/* SHEEN */}
+								{tinted && (
+									<div
+										className="absolute inset-0"
+										style={{
+											backgroundImage:
+												"linear-gradient(to bottom, rgba(255,255,255,0.11) 0%, rgba(255,255,255,0.03) 45%, transparent 78%)",
+											mixBlendMode: "plus-lighter",
+											...ART_MASK,
+										}}
+									/>
+								)}
+							</div>
 						</div>
 					</div>
 				</div>

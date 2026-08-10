@@ -877,6 +877,11 @@ export function DesktopDetails<T extends BaseMediaProps>({
 										isAdding={isAdding}
 										onAction={onAction}
 										isInList={isInList}
+										accentColor={
+											mediaType === "book"
+												? bookBackdropColor
+												: undefined
+										}
 									/>
 								)}
 							</div>

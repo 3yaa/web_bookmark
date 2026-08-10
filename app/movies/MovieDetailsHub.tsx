@@ -16,9 +16,10 @@ import {
 	ActorWork,
 	CastMember,
 	fetchActorWorks,
-	fetchMovieCast,
+	fetchMovieCredits,
 } from "../../utils/getActorInfo";
 import { ActorItemsModal } from "../components/ActorModal";
+import { DirectorPicker } from "@/app/movies/components/DirectorPicker";
 import { AnimatePresence } from "framer-motion";
 import { AddShow } from "@/app/shows/AddShow";
 import { AddMovie } from "@/app/movies/AddMovie";
@@ -56,7 +57,9 @@ export type MovieAction =
 	| { type: "refresh" }
 	| { type: "confirmRefresh" }
 	| { type: "cancelRefresh" }
-	| { type: "cast" };
+	| { type: "cast" }
+	| { type: "directorClick"; payload: string }
+	| { type: "directorPicker" };
 
 interface MovieDetailsProps {
 	movie: MovieProps;
@@ -115,6 +118,11 @@ export function MovieDetails({
 	const [selectedActor, setSelectedActor] = useState<CastMember | null>(null);
 	const [actorWorks, setActorWorks] = useState<ActorWork[]>([]);
 	const [actorLoading, setActorLoading] = useState(false);
+	// director related
+	const [isDirectorView, setIsDirectorView] = useState(false);
+	const [clickedDirector, setClickedDirector] = useState<string | null>(null);
+	const [directorPickerOpen, setDirectorPickerOpen] = useState(false);
+	//
 	const [filmSort, setFilmSort] = useState<"popularity" | "recent">(
 		"popularity",
 	);
@@ -133,9 +141,7 @@ export function MovieDetails({
 		return map;
 	}, [existingMovies, existingShows]);
 
-	// legacy rows carry no tmdb id, so they never match a work and show as
-	// missing. an actor's filmography is an authoritative title -> tmdbId list,
-	// so anything that matches on title AND year can be healed for free.
+	// for legacy
 	const backfilled = useRef<Set<number>>(new Set());
 	useEffect(() => {
 		if (!onBackfillTmdbId || actorWorks.length === 0) return;
@@ -159,7 +165,7 @@ export function MovieDetails({
 		}
 	}, [actorWorks, existingMovies, onBackfillTmdbId]);
 
-	// change, so an update made inside the nested modal is reflected right away
+	// for cross media
 	const selectedMovie =
 		selectedWorkItem?.type === "movie"
 			? existingMovies.find((m) => m.id === selectedWorkItem.id)
@@ -264,6 +270,12 @@ export function MovieDetails({
 			case "cast":
 				handleCast();
 				break;
+			case "directorClick":
+				handleDirectorClick(action.payload);
+				break;
+			case "directorPicker":
+				setDirectorPickerOpen(true);
+				break;
 		}
 	};
 
@@ -285,15 +297,12 @@ export function MovieDetails({
 				posterUrl: reloaded.poster_url,
 				backdropUrl: reloaded.backdrop_url,
 			};
-			// a legacy row is being migrated onto tmdb, so it also takes the id
-			// and the metadata the old pipeline got wrong
+			// legacy
 			if (!hasTmdbId) {
 				meta.tmdbId = reloaded.tmdb_id;
 				meta.director = reloaded.director;
 				meta.dateReleased = reloaded.released_date;
 			}
-			// guard stays -- a failed collection lookup comes back as null, and
-			// writing those blanks would wipe series data the movie really has
 			if (reloaded.series)
 				Object.assign(meta, mapSeriesToMovie(reloaded.series));
 			setRefreshMeta(meta);
@@ -323,14 +332,13 @@ export function MovieDetails({
 		setCastOpen(true);
 		setCastLoading(true);
 		try {
-			setCast(
-				await fetchMovieCast(
-					movie.tmdbId ?? "-1",
-					movie.imdbId,
-					movie.id,
-					authFetch,
-				),
+			const { cast: castList } = await fetchMovieCredits(
+				movie.tmdbId ?? "-1",
+				movie.imdbId,
+				movie.id,
+				authFetch,
 			);
+			setCast(castList);
 		} catch {
 			setCast([]);
 		} finally {
@@ -338,7 +346,41 @@ export function MovieDetails({
 		}
 	};
 
+	const handleDirectorClick = async (name: string) => {
+		if (!name) return;
+		setClickedDirector(name);
+		setIsDirectorView(true);
+		setCastOpen(true);
+		setSelectedActor(null);
+		setActorWorks([]);
+		setActorLoading(true);
+		try {
+			const { cast: castList, directors } = await fetchMovieCredits(
+				movie.tmdbId ?? "-1",
+				movie.imdbId,
+				movie.id,
+				authFetch,
+			);
+			setCast(castList);
+			// match the name that was clicked -- a film can have several
+			const wanted = name.toLowerCase().trim();
+			const director =
+				directors.find((d) => d.name.toLowerCase().trim() === wanted) ??
+				directors[0];
+			if (!director) return;
+			setSelectedActor(director);
+			setActorWorks(
+				await fetchActorWorks(director.id, authFetch, "director"),
+			);
+		} catch {
+			setActorWorks([]);
+		} finally {
+			setActorLoading(false);
+		}
+	};
+
 	const handleActorClick = async (member: CastMember) => {
+		setIsDirectorView(false);
 		setSelectedActor(member);
 		setActorWorks([]);
 		setActorLoading(true);
@@ -414,8 +456,7 @@ export function MovieDetails({
 		addMovie();
 	}, [addMovie]);
 
-	// need to reset local note -- since changing movie (sequel/prequel) doesn't remount
-	// same for a staged reload, which belongs to the movie it was fetched for
+	// need to reset local note 
 	useEffect(() => {
 		setLocalNote(movie.note || "");
 		setIsSelecting(false);
@@ -499,6 +540,22 @@ export function MovieDetails({
 				/>
 			</div>
 			<AnimatePresence>
+				{directorPickerOpen && (
+					<DirectorPicker
+						key="director-picker"
+						names={(movie.director ?? "")
+							.split(",")
+							.map((n) => n.trim())
+							.filter(Boolean)}
+						onClose={() => setDirectorPickerOpen(false)}
+						onPick={(name) => {
+							setDirectorPickerOpen(false);
+							handleDirectorClick(name);
+						}}
+					/>
+				)}
+			</AnimatePresence>
+			<AnimatePresence>
 				{castOpen && (
 					<ActorItemsModal
 						key="cast"
@@ -512,12 +569,18 @@ export function MovieDetails({
 						onClose={() => {
 							setCastOpen(false);
 							setSelectedActor(null);
+							setIsDirectorView(false);
 						}}
 						onActorClick={handleActorClick}
-						onActorBack={() => setSelectedActor(null)}
+						onActorBack={() => {
+							setSelectedActor(null);
+							setIsDirectorView(false);
+						}}
 						onFilmSortChange={setFilmSort}
 						onWorkClick={handleWorkClick}
 						addedStatusById={addedStatusById}
+						isDirectorView={isDirectorView}
+						directorName={clickedDirector ?? movie.director}
 					/>
 				)}
 			</AnimatePresence>
@@ -528,8 +591,7 @@ export function MovieDetails({
 					onClose={() => setPendingWork(null)}
 					existingMovies={existingMovies}
 					onAddMovie={async (m) => {
-						// route through the parent's data hook so the listing
-						// updates without a refresh; fall back to a raw POST
+						// route through the parent's data hook
 						if (onAddWork) {
 							await onAddWork(m);
 						} else {

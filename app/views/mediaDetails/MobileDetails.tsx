@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Option } from "@/app/components/ui/Dropdown";
+import { DirectorNames } from "../../movies/components/DirectorNames";
 import { BaseMediaProps, ColumnConfig, SeriesMediaProps } from "@/types/media";
 import { GameProps } from "@/types/game";
 import { ShowProps } from "@/types/show";
@@ -63,6 +64,21 @@ export function MobileDetails<T extends BaseMediaProps>({
 	coverUrls,
 	coverIndex,
 }: MobileDetailsProps<T>) {
+	// for movies only
+	const canOpenDirector =
+		mediaType === "movie" &&
+		!isAdding &&
+		!isSelecting &&
+		!!differentColumns[0].getValue(item);
+
+	// split director names
+	const directorNames = canOpenDirector
+		? String(differentColumns[0].getValue(item) ?? "")
+				.split(",")
+				.map((n) => n.trim())
+				.filter(Boolean)
+		: [];
+
 	const [isProgressPickerOpen, setIsProgressPickerOpen] = useState(false);
 	const [isScorePickerOpen, setIsScorePickerOpen] = useState(false);
 	const [posterLoaded, setPosterLoaded] = useState(false);
@@ -471,9 +487,27 @@ export function MobileDetails<T extends BaseMediaProps>({
 							</div>
 							{/* AUTHOR/STUDIO/DIRECTOR AND DATES */}
 							<div className="text-zinc-400 text-sm font-medium flex items-center gap-2">
-								<span>
-									{differentColumns[0].getValue(item) ||
-										"Unknown " + differentColumns[0].label}
+								<span className="min-w-0">
+									{canOpenDirector ? (
+										<DirectorNames
+											names={directorNames}
+											width="max-w-40"
+											onPick={(name) =>
+												onAction({
+													type: "directorClick",
+													payload: name,
+												})
+											}
+											onMore={() =>
+												onAction({
+													type: "directorPicker",
+												})
+											}
+										/>
+									) : (
+										differentColumns[0].getValue(item) ||
+										"Unknown " + differentColumns[0].label
+									)}
 								</span>
 								•
 								<span>

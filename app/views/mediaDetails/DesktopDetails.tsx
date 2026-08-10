@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Loading } from "@/app/components/ui/Loading";
+import { DirectorNames } from "../../movies/components/DirectorNames";
 import { ModalBackdrop, ModalPanel } from "@/app/components/ui/ModalMotion";
 import { BaseMediaProps, ColumnConfig, SeriesMediaProps } from "@/types/media";
 import { GameProps } from "@/types/game";
@@ -128,8 +129,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 		});
 	};
 
-	// cover colour picker -- shown in the action cluster for books being added
-	// or previewed (refresh), sitting next to the confirm/add controls
+	// cover colour picker
 	const colorPicker =
 		mediaType === "book" && coverUrls && coverUrls.length > 0 ? (
 			<CoverColorPicker
@@ -142,8 +142,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 			/>
 		) : null;
 
-	// what actually sits behind the header. while adding/previewing, tint/frame
-	// from the active cover so a pick shows live
+	//images
 	const bookBackdropColor =
 		(isAdding || isSelecting) && coverUrls?.[coverIndex ?? 0]
 			? coverUrls[coverIndex ?? 0].color
@@ -154,6 +153,21 @@ export function DesktopDetails<T extends BaseMediaProps>({
 		backdropIndex !== undefined
 			? backdropUrls?.[backdropIndex]
 			: item.backdropUrl;
+	// moives only
+	const canOpenDirector =
+		mediaType === "movie" &&
+		!isAdding &&
+		!isSelecting &&
+		!!differentColumns[0].getValue(item);
+
+	// split director names
+	const directorNames = canOpenDirector
+		? String(differentColumns[0].getValue(item) ?? "")
+				.split(",")
+				.map((n) => n.trim())
+				.filter(Boolean)
+		: [];
+
 	const hasBackdrop =
 		mediaType === "book" ? !!bookBackdropColor : !!imageBackdropUrl;
 
@@ -582,13 +596,32 @@ export function DesktopDetails<T extends BaseMediaProps>({
 													/>
 												</button>
 											)}
-											<span className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 leading-6 truncate max-w-60">
-												{differentColumns[0].getValue(
-													item,
-												) ||
-													"Unknown " +
-														differentColumns[0]
-															.label}
+											<span className="font-medium text-zinc-200/70 text-md max-h-6 leading-6 min-w-0">
+												{canOpenDirector ? (
+													<DirectorNames
+														names={directorNames}
+														onPick={(name) =>
+															onAction({
+																type: "directorClick",
+																payload: name,
+															})
+														}
+														onMore={() =>
+															onAction({
+																type: "directorPicker",
+															})
+														}
+													/>
+												) : (
+													<span className="truncate max-w-60 inline-block align-bottom">
+														{differentColumns[0].getValue(
+															item,
+														) ||
+															"Unknown " +
+																differentColumns[0]
+																	.label}
+													</span>
+												)}
 											</span>
 											<div className="font-medium text-zinc-200/70 text-md leading-6">
 												•

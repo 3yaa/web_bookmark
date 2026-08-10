@@ -131,8 +131,7 @@ export function ShowDetails({
 		return map;
 	}, [existingMovies, existingShows]);
 
-	// live lookups -- these re-resolve whenever existingMovies/existingShows
-	// change, so an update made inside the nested modal is reflected right away
+	// cross media movie
 	const selectedMovie =
 		selectedWorkItem?.type === "movie"
 			? existingMovies.find((m) => m.id === selectedWorkItem.id)
@@ -647,8 +646,7 @@ export function ShowDetails({
 					onClose={() => setPendingWork(null)}
 					existingShows={existingShows}
 					onAddShow={async (s) => {
-						// route through the parent's data hook so the listing
-						// updates without a refresh; fall back to a raw POST
+						// route through the parent's data hook
 						if (onAddWork) {
 							await onAddWork(s);
 						} else {
@@ -695,8 +693,7 @@ export function ShowDetails({
 					onClose={() => setPendingWork(null)}
 					existingMovies={existingMovies}
 					onAddMovie={async (m) => {
-						// route through the parent's data hook so the listing
-						// updates without a refresh; fall back to a raw POST
+						// route through the parent's data hook
 						if (onAddMovie) {
 							await onAddMovie(m);
 						} else {

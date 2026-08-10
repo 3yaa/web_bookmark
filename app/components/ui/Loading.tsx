@@ -19,9 +19,9 @@ export function Loading({
     >
       <div className="flex flex-col items-center gap-3">
         <div
-          className={`animate-spin rounded-full border-b-2 ${customStyle}`}
+          className={`animate-spin rounded-full border-b-2 shrink-0 ${customStyle}`}
         ></div>
-        <span className="text-zinc-300 text-sm">{text}</span>
+        {text && <span className="text-zinc-300 text-sm">{text}</span>}
       </div>
     </div>
   );

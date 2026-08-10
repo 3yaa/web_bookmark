@@ -25,24 +25,28 @@ export async function fetchShowCast(
   return data.cast;
 }
 
-export async function fetchMovieCast(
+// get both actor and director
+export async function fetchMovieCredits(
   tmdbId: string,
   imdbId: string,
   movieId: number,
   authFetch: AuthFetch,
-): Promise<CastMember[]> {
+): Promise<{ cast: CastMember[]; directors: CastMember[] }> {
   const res = await authFetch(
     `/api/movie-cast?tmdbId=${tmdbId}&imdbId=${imdbId}&movieId=${movieId}`,
   );
   const data = await res.json();
-  return data.cast;
+  return { cast: data.cast ?? [], directors: data.directors ?? [] };
 }
 
 export async function fetchActorWorks(
   actorId: number,
   authFetch: AuthFetch,
+  role?: "director",
 ): Promise<ActorWork[]> {
-  const res = await authFetch(`/api/actor-works?actorId=${actorId}`);
+  const res = await authFetch(
+    `/api/actor-works?actorId=${actorId}${role ? `&role=${role}` : ""}`,
+  );
   const data = await res.json();
   return data.works;
 }

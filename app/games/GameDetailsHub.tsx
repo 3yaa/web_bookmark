@@ -287,8 +287,7 @@ export function GameDetails({
 		updateBackdropIndex(newCoverIndex);
 	};
 
-	// need to reset local note -- since changing game (dlc nav) doesn't remount
-	// same for a staged refresh, which belongs to the game it was fetched for
+	// need to reset local note
 	useEffect(() => {
 		setLocalNote(game.note || "");
 		exitSelecting();

@@ -371,8 +371,7 @@ export function BookDetails({
 		addBook();
 	}, [addBook]);
 
-	// need to reset local note -- since changing book (seuqel/prequel) doesn't remount
-	// same for a staged refresh, which belongs to the book it was fetched for
+	// need to reset local note
 	useEffect(() => {
 		setLocalNote(book.note || "");
 		exitSelecting();

@@ -493,7 +493,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 											? "justify-end"
 											: series.seriesTitle ||
 												  gameItem.mainTitle
-												? "justify-end mb-4"
+												? "justify-end mb-3"
 												: "justify-end mb-3"
 									}`}
 								>

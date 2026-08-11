@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(node -e ' *)",
-      "Bash(curl -s -o /dev/null -w \"art asset: %{http_code} %{size_download} bytes\\\\n\" \"http://localhost:3000/_next/image?url=%2Fnon-series-placeholder.png&w=1920&q=75\" --max-time 10)"
+      "Bash(curl -s -o /dev/null -w \"art asset: %{http_code} %{size_download} bytes\\\\n\" \"http://localhost:3000/_next/image?url=%2Fnon-series-placeholder.png&w=1920&q=75\" --max-time 10)",
+      "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\('prettier key:',JSON.stringify\\(p.prettier\\)\\)\")",
+      "Bash(perl -0pi -e 's/text-xs font-medium text-zinc-500 block pointer-events-none/text-xs font-medium text-zinc-300\\\\/75 block pointer-events-none/g; s/text-xs font-semibold text-zinc-400\\\\/90 block/text-xs font-semibold text-zinc-100\\\\/90 block/g' app/views/mediaDetails/shared/SeriesNav.tsx)",
+      "Bash(perl -0pi -e 's/text-xs font-medium text-zinc-300\\\\/75 block pointer-events-none/text-xs font-medium text-zinc-500 block pointer-events-none/g; s/text-xs font-semibold text-zinc-100\\\\/90 block/text-xs font-semibold text-zinc-400\\\\/90 block/g' app/views/mediaDetails/shared/SeriesNav.tsx)"
     ]
   }
 }

@@ -23,7 +23,9 @@ export function mapIGDBDataToGame(dataGame: IGDBProps): Partial<GameProps> {
     igdbId: dataGame.igdbId,
     title: dataGame.title,
     dateReleased: dataGame.released_year,
-    posterUrl: dataGame.cover_url,
+    cover: dataGame.cover_url
+      ? { url: dataGame.cover_url, color: "" }
+      : undefined,
     studio: dataGame.developer?.[0]?.name,
     dlcs: [
       { id: dataGame.igdbId, name: dataGame.title },
@@ -44,7 +46,9 @@ export function mapIGDBDlcsDataToGame(
     igdbId: dataDlc.igdbId,
     title: cleanName(dataDlc.title, mainTitle),
     dateReleased: dataDlc.released_year,
-    posterUrl: dataDlc.cover_url,
+    cover: dataDlc.cover_url
+      ? { url: dataDlc.cover_url, color: "" }
+      : undefined,
     studio: dataDlc.developer?.[0]?.name,
   };
 }

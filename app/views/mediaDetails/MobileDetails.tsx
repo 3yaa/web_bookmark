@@ -20,7 +20,7 @@ import { Loading } from "@/app/components/ui/Loading";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
 import { BookCoverConfig } from "@/app/books/components/BookCoverConfigDetails";
-import { CoverColorPicker } from "@/app/books/components/CoverColorPicker";
+import { CoverColorPicker } from "@/app/components/ui/CoverColorPicker";
 import { MobileProgressPicker } from "@/app/components/ui/MobileSeasonEpPicker";
 import { MobileSeriesNav } from "./shared/MobileSeriesNav";
 import { calcCurProgress } from "@/app/shows/utils/progressCalc";
@@ -109,17 +109,24 @@ export function MobileDetails<T extends BaseMediaProps>({
 		});
 	};
 
-	const colorPicker =
-		mediaType === "book" && coverUrls && coverUrls.length > 0 ? (
-			<CoverColorPicker
-				key={coverUrls[coverIndex ?? 0]?.url}
-				coverUrl={coverUrls[coverIndex ?? 0]?.url}
-				currentColor={coverUrls[coverIndex ?? 0]?.color}
-				onPick={(color) =>
-					onAction({ type: "pickCoverColor", payload: color })
-				}
-			/>
-		) : null;
+	// the cover being shown right now
+	const activeCover =
+		mediaType === "book"
+			? coverUrls?.[coverIndex ?? 0]
+			: (item.cover ?? undefined);
+
+			const coverSrc = item.cover?.url ?? item.posterUrl;
+
+	const colorPicker = activeCover ? (
+		<CoverColorPicker
+			key={activeCover.url}
+			coverUrl={activeCover.url}
+			currentColor={activeCover.color}
+			onPick={(color) =>
+				onAction({ type: "pickCoverColor", payload: color })
+			}
+		/>
+	) : null;
 
 	const handleTouchStart = (e: React.TouchEvent) => {
 		if (isScorePickerOpen || isProgressPickerOpen) return;
@@ -429,9 +436,9 @@ export function MobileDetails<T extends BaseMediaProps>({
 								quality={90}
 								className="object-cover w-full"
 							/>
-						) : item.posterUrl ? (
+						) : coverSrc ? (
 							<Image
-								src={item.posterUrl}
+								src={coverSrc}
 								alt={item.title || "Poster"}
 								width={1280}
 								height={900}

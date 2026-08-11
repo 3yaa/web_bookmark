@@ -5,11 +5,13 @@ export async function extractCoverPalette(
 	max = 6,
 ): Promise<string[]> {
 	if (!url) return [];
-	const cached = cache.get(url);
+	// keyed by max too -- a small request must not satisfy a later larger one
+	const key = `${url}|${max}`;
+	const cached = cache.get(key);
 	if (cached) return cached;
 	try {
 		const colors = await run(url, max);
-		cache.set(url, colors);
+		cache.set(key, colors);
 		return colors;
 	} catch {
 		return [];

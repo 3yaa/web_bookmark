@@ -8,6 +8,7 @@ import { TIER_PHI_THRESHOLD, getSeedMu, Tier } from "@/lib/tierConfig";
 import { useScoreNudge } from "@/hooks/useScoreNudge";
 import { useGameSearch } from "@/hooks/external/useGameSearch";
 import { mapIGDBDataToGame, mapIGDBDlcsDataToGame } from "./utils/gameMapping";
+import { buildCover } from "@/utils/coverColor";
 
 export type GameAction =
 	| { type: "closeModal" }
@@ -23,6 +24,7 @@ export type GameAction =
 	| { type: "refresh" }
 	| { type: "confirmRefresh" }
 	| { type: "cancelRefresh" }
+	| { type: "pickCoverColor"; payload: string }
 	| { type: "changeCover"; payload: "next" | "prev" };
 
 interface GameDetailsProps {
@@ -121,6 +123,9 @@ export function GameDetails({
 			case "confirmRefresh":
 				handleConfirmRefresh();
 				break;
+			case "pickCoverColor":
+				handlePickCoverColor(action.payload);
+				break;
 			case "cancelRefresh":
 				handleCancelRefresh();
 				break;
@@ -149,14 +154,14 @@ export function GameDetails({
 			const meta: Partial<GameProps> = {};
 			if (game.dlcIndex === 0) {
 				const mapped = mapIGDBDataToGame(data);
-				meta.posterUrl = mapped.posterUrl;
+				meta.cover = await buildCover(mapped.cover?.url);
 				meta.dlcs = mapped.dlcs;
 			} else {
 				const mapped = mapIGDBDlcsDataToGame(
 					data,
 					game.mainTitle || "",
 				);
-				meta.posterUrl = mapped.posterUrl;
+				meta.cover = await buildCover(mapped.cover?.url);
 				// reorder dlc based on reload
 				const mainIgdbId = game.dlcs?.[0]?.id;
 				if (mainIgdbId) {
@@ -196,6 +201,17 @@ export function GameDetails({
 
 	const handleCancelRefresh = () => {
 		exitSelecting();
+	};
+
+	// the picker only shows while adding or previewing a reload
+	const handlePickCoverColor = (color: string) => {
+		if (isSelecting) {
+			setRefreshMeta((prev) =>
+				prev.cover ? { ...prev, cover: { ...prev.cover, color } } : prev,
+			);
+			return;
+		}
+		if (game.cover) onUpdate(game.id, { cover: { ...game.cover, color } });
 	};
 
 	const exitSelecting = () => {
@@ -325,7 +341,7 @@ export function GameDetails({
 		? {
 				...game,
 				...refreshMeta,
-				posterUrl: refreshMeta.posterUrl ?? game.posterUrl,
+				cover: refreshMeta.cover ?? game.cover,
 			}
 		: game;
 

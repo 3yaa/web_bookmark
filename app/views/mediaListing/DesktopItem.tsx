@@ -44,9 +44,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 	const gameItem = item as unknown as GameProps;
 	const bookItem = item as unknown as BookProps;
 	const movieItem = item as unknown as MovieProps;
-	const coverSrc =
-		item.posterUrl ??
-		(mediaType === "book" ? bookItem.cover?.url : undefined);
+	const coverSrc = item.cover?.url ?? item.posterUrl;
 
 	function pseudoRand(seed: string | number, salt = 0): number {
 		const str = String(seed) + salt;

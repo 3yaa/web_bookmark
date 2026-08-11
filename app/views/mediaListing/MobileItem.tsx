@@ -7,7 +7,6 @@ import { ShowProgressBarMobile } from "../../shows/components/showProgressListin
 import { ShowProps } from "@/types/show";
 import { GameProps } from "@/types/game";
 import { getDisplayScore } from "@/lib/tierConfig";
-import { BookProps } from "@/types/book";
 
 interface MobileItemProps<T extends BaseMediaProps> {
 	item: T;
@@ -48,6 +47,8 @@ export const MobileItem = React.memo(function MobileItem<
 					};
 				})();
 
+	const coverSrc = item.cover?.url ?? item.posterUrl;
+
 	return (
 		<div
 			className={`relative mx-auto flex bg-zinc-950 backdrop-blur-2xl shadow-sm rounded-md border-b border-b-zinc-700/20 ${
@@ -59,17 +60,9 @@ export const MobileItem = React.memo(function MobileItem<
 				className="w-30 overflow-hidden rounded-md shadow-sm shadow-black/40"
 				style={{ aspectRatio: mediaType === "game" ? "3/4" : "0.677" }}
 			>
-				{(item.posterUrl ??
-				(mediaType === "book"
-					? (item as unknown as BookProps).cover?.url
-					: undefined)) ? (
+				{coverSrc ? (
 					<Image
-						src={
-							item.posterUrl ??
-							(mediaType === "book"
-								? (item as unknown as BookProps).cover?.url
-								: undefined)!
-						}
+						src={coverSrc}
 						alt={item.title || "Untitled"}
 						width={300}
 						height={450}

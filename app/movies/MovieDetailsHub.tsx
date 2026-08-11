@@ -29,6 +29,7 @@ import { ShowDetails } from "../shows/ShowDetailsHub";
 import { MediaStatus } from "@/types/media";
 import { useMovieSearch } from "@/hooks/external/useMovieSearch";
 import { mapSeriesToMovie } from "./utils/movieMapping";
+import { buildCover } from "@/utils/coverColor";
 
 // check if movie has tmdbID
 const isRealTmdbId = (tmdbId?: string) => !!tmdbId && tmdbId !== "-1";
@@ -58,6 +59,7 @@ export type MovieAction =
 	| { type: "confirmRefresh" }
 	| { type: "cancelRefresh" }
 	| { type: "cast" }
+	| { type: "pickCoverColor"; payload: string }
 	| { type: "directorClick"; payload: string }
 	| { type: "directorPicker" };
 
@@ -270,6 +272,9 @@ export function MovieDetails({
 			case "cast":
 				handleCast();
 				break;
+			case "pickCoverColor":
+				handlePickCoverColor(action.payload);
+				break;
 			case "directorClick":
 				handleDirectorClick(action.payload);
 				break;
@@ -294,7 +299,7 @@ export function MovieDetails({
 			if (!reloaded || "isDuplicate" in reloaded) return;
 			// tmdbId is identity, left untouched
 			const meta: Partial<MovieProps> = {
-				posterUrl: reloaded.poster_url,
+				cover: await buildCover(reloaded.poster_url),
 				backdropUrl: reloaded.backdrop_url,
 			};
 			// legacy
@@ -324,6 +329,17 @@ export function MovieDetails({
 
 	const handleCancelRefresh = () => {
 		exitSelecting();
+	};
+
+	// the picker only shows while adding or previewing a reload
+	const handlePickCoverColor = (color: string) => {
+		if (isSelecting) {
+			setRefreshMeta((prev) =>
+				prev.cover ? { ...prev, cover: { ...prev.cover, color } } : prev,
+			);
+			return;
+		}
+		if (movie.cover) onUpdate(movie.id, { cover: { ...movie.cover, color } });
 	};
 
 	const exitSelecting = () => {

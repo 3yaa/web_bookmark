@@ -32,7 +32,7 @@ import { Dropdown, Option } from "@/app/components/ui/Dropdown";
 import { tierOptions } from "@/utils/dropDownDetails";
 import { AutoTextarea } from "@/app/components/ui/AutoTextArea";
 import { BookCoverConfig } from "@/app/books/components/BookCoverConfigDetails";
-import { CoverColorPicker } from "@/app/books/components/CoverColorPicker";
+import { CoverColorPicker } from "@/app/components/ui/CoverColorPicker";
 import { BookBackdropDetails } from "@/app/components/ui/BookBackdrop";
 import { SeriesNav } from "./shared/SeriesNav";
 import { EditProgress } from "@/app/shows/components/EditProgressDetail";
@@ -129,24 +129,30 @@ export function DesktopDetails<T extends BaseMediaProps>({
 		});
 	};
 
+	// the cover being shown right now
+	const activeCover =
+		mediaType === "book"
+			? coverUrls?.[coverIndex ?? 0]
+			: (item.cover ?? undefined);
+
 	// cover colour picker
-	const colorPicker =
-		mediaType === "book" && coverUrls && coverUrls.length > 0 ? (
-			<CoverColorPicker
-				key={coverUrls[coverIndex ?? 0]?.url}
-				coverUrl={coverUrls[coverIndex ?? 0]?.url}
-				currentColor={coverUrls[coverIndex ?? 0]?.color}
-				onPick={(color) =>
-					onAction({ type: "pickCoverColor", payload: color })
-				}
-			/>
-		) : null;
+	const colorPicker = activeCover ? (
+		<CoverColorPicker
+			key={activeCover.url}
+			coverUrl={activeCover.url}
+			currentColor={activeCover.color}
+			onPick={(color) =>
+				onAction({ type: "pickCoverColor", payload: color })
+			}
+		/>
+	) : null;
 
 	//images
-	const bookBackdropColor =
+	const coverSrc = item.cover?.url ?? item.posterUrl;
+	const coverColor =
 		(isAdding || isSelecting) && coverUrls?.[coverIndex ?? 0]
 			? coverUrls[coverIndex ?? 0].color
-			: bookItem.cover?.color;
+			: item.cover?.color;
 	const imageBackdropUrl =
 		mediaType === "game" &&
 		(isAdding || isSelecting) &&
@@ -169,7 +175,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 		: [];
 
 	const hasBackdrop =
-		mediaType === "book" ? !!bookBackdropColor : !!imageBackdropUrl;
+		mediaType === "book" ? !!coverColor : !!imageBackdropUrl;
 
 	return (
 		<ModalBackdrop className="fixed inset-0 bg-linear-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20">
@@ -402,9 +408,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 							>
 								<div className="flex items-center justify-center max-w-62 max-h-93 overflow-hidden rounded-lg">
 									{mediaType !== "book" ? (
-										item.posterUrl ? (
+										coverSrc ? (
 											<Image
-												src={item.posterUrl!}
+												src={coverSrc}
 												alt={item.title || "Untitled"}
 												width={1280}
 												height={720}
@@ -455,9 +461,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 							<div className="flex flex-col flex-1 min-h-93 min-w-62 relative">
 								{/* BACKDROP */}
 								{mediaType === "book"
-									? bookBackdropColor && (
+									? coverColor && (
 											<BookBackdropDetails
-												color={bookBackdropColor}
+												color={coverColor}
 											/>
 										)
 									: imageBackdropUrl && (
@@ -877,11 +883,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 										isAdding={isAdding}
 										onAction={onAction}
 										isInList={isInList}
-										accentColor={
-											mediaType === "book"
-												? bookBackdropColor
-												: undefined
-										}
+										accentColor={coverColor}
 									/>
 								)}
 							</div>

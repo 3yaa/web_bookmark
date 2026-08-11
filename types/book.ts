@@ -1,6 +1,7 @@
 import {
 	BaseMediaProps,
 	ColumnConfig,
+	MediaCoverProps,
 	SeriesAPIProps,
 	SeriesMediaProps,
 	SortState,
@@ -22,10 +23,7 @@ export const DIFF_COLUMNS_BOOK: [
 	},
 ];
 
-export interface BookCoverProps {
-	url: string;
-	color: string;
-}
+export type BookCoverProps = MediaCoverProps;
 
 export interface BookProps extends BaseMediaProps, SeriesMediaProps {
 	status: "Completed" | "Want to Read" | "Dropped";

@@ -15,6 +15,7 @@ import { GameDetails } from "./GameDetailsHub";
 import { ShowMultGames } from "./components/ShowMultGames";
 //
 import { useGameSearch } from "@/hooks/external/useGameSearch";
+import { buildCover } from "@/utils/coverColor";
 
 interface AddGameProps {
 	isOpen: boolean;
@@ -71,6 +72,12 @@ export function AddGame({
 		}
 	}, []);
 
+	// igdb gives no cover colour
+	const applyCoverColor = useCallback(async (url?: string) => {
+		const cover = await buildCover(url);
+		if (cover) setNewGame((prev) => ({ ...prev, cover }));
+	}, []);
+
 	const handleTitleSearch = useCallback(async () => {
 		const titleSearching = titleToSearch.current?.value.trim();
 		if (!titleSearching) return null;
@@ -88,11 +95,12 @@ export function AddGame({
 		setBackdropUrls(mainGame.screenshot_urls?.map((ss) => ss.ss_url) || []);
 		setNewGame({ ...mapIGDBDataToGame(mainGame), status: "Playing" });
 		setAllNewGames(response);
+		applyCoverColor(mainGame.cover_url);
 		return {
 			title: mainGame.title,
 			igdbId: mainGame.igdbId,
 		};
-	}, [searchForGame]);
+	}, [searchForGame, applyCoverColor]);
 
 	const handleGameSearch = useCallback(async () => {
 		setActiveModal("gameDetails");
@@ -138,8 +146,9 @@ export function AddGame({
 				...mappedData,
 				status: "Playing",
 			}));
+			applyCoverColor(mainDlc.cover_url);
 		},
-		[searchForGameDlc, titleFromAbove],
+		[searchForGameDlc, titleFromAbove, applyCoverColor],
 	);
 
 	const handleDlcSearch = useCallback(async () => {
@@ -174,15 +183,21 @@ export function AddGame({
 		}));
 	}, [titleFromAbove, handleDlcTitleSearch]);
 
-	const handlePickFromMultGames = useCallback((game: IGDBProps) => {
-		try {
-			setBackdropUrls(game.screenshot_urls?.map((ss) => ss.ss_url) || []);
-			setBackdropIndex(0);
-			setNewGame({ ...mapIGDBDataToGame(game), status: "Playing" });
-		} finally {
-			setActiveModal("gameDetails");
-		}
-	}, []);
+	const handlePickFromMultGames = useCallback(
+		(game: IGDBProps) => {
+			try {
+				setBackdropUrls(
+					game.screenshot_urls?.map((ss) => ss.ss_url) || [],
+				);
+				setBackdropIndex(0);
+				setNewGame({ ...mapIGDBDataToGame(game), status: "Playing" });
+				applyCoverColor(game.cover_url);
+			} finally {
+				setActiveModal("gameDetails");
+			}
+		},
+		[applyCoverColor],
+	);
 
 	const handleGameDetailsUpdates = useCallback(
 		async (

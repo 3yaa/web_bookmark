@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Palette, Loader2 } from "lucide-react";
-import { extractCoverPalette } from "../utils/extractCoverPalette";
+import { extractCoverPalette } from "@/utils/extractCoverPalette";
 
 // original color
 const defaultColorCache = new Map<string, string>();
@@ -88,7 +88,7 @@ export function CoverColorPicker({
 				/>
 			</button>
 			{open && (
-				<div className="absolute right-0 top-full mt-1.5 z-20 flex items-center gap-1.5 rounded-lg bg-zinc-900/95 backdrop-blur-md border border-zinc-800/60 px-2 py-1.5 shadow-xl">
+				<div className="absolute right-full top-1/2 -translate-y-1/2 mr-1.5 z-20 flex items-center gap-1.5 rounded-lg bg-zinc-900/95 backdrop-blur-md border border-zinc-800/60 px-2 py-1.5 shadow-xl">
 					{defaultColor && swatch(defaultColor, true)}
 					{loading ? (
 						<Loader2 className="w-4 h-4 text-zinc-300 animate-spin" />

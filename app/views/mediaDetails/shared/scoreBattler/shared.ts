@@ -1,14 +1,11 @@
 import { BaseMediaProps } from "@/types/media";
-import { BookProps } from "@/types/book";
 
 export const actions = ["better", "worse", "same"] as const;
 
+// shows still carry a bare poster url; everything else stores { url, color }
 export const coverFor = <T extends BaseMediaProps>(
 	item: T | null,
-): string | null =>
-	item?.posterUrl ||
-	(item as unknown as BookProps | null)?.cover?.url ||
-	null;
+): string | null => item?.cover?.url || item?.posterUrl || null;
 
 export interface ScoreBattlerUIProps<T extends BaseMediaProps> {
   selectedItem: T;

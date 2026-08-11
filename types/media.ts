@@ -32,6 +32,13 @@ export interface SeriesAPIProps {
 	total?: number | null;
 }
 
+// jsonb { url, color } -- books, movies and games all store their cover this
+// way so the dominant colour travels with the artwork
+export interface MediaCoverProps {
+	url: string;
+	color: string;
+}
+
 export interface BaseMediaProps {
 	id: number;
 	title: string;
@@ -42,8 +49,9 @@ export interface BaseMediaProps {
 	score: Score | null;
 	// the author and dateReleased and cover i need to fix sometimes T_T
 	imageUrl?: string;
+	cover?: MediaCoverProps | null;
+	// shows still carry a bare poster url
 	posterUrl?: string;
-	// coverUrl?: string;
 	//
 	backdropUrl?: string;
 }

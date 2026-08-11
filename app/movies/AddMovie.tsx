@@ -13,6 +13,7 @@ import {
 import { MovieDetails } from "./MovieDetailsHub";
 //
 import { useMovieSearch } from "@/hooks/external/useMovieSearch";
+import { buildCover } from "@/utils/coverColor";
 interface AddMovieProps {
 	isOpen: boolean;
 	onClose: () => void;
@@ -99,6 +100,9 @@ export function AddMovie({
 			...mappedMovie,
 			...mappedSeries,
 		});
+		//
+		const cover = await buildCover(mappedMovie.cover?.url);
+		if (cover) setNewMovie((prev) => ({ ...prev, cover }));
 	}, [searchForMovie]);
 
 	const handleMovieDetailsUpdates = useCallback(

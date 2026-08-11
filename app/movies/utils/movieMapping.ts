@@ -12,7 +12,7 @@ export function resetMovieValues(
 		dateCompleted: undefined,
 		note: undefined,
 		director: undefined,
-		posterUrl: undefined,
+		cover: undefined,
 		dateReleased: undefined,
 		seriesTitle: undefined,
 		placeInSeries: undefined,
@@ -33,7 +33,9 @@ export function mapMetaToMovie(dataMeta: MovieAPIProps): Partial<MovieProps> {
 		status: "Want to Watch",
 		dateReleased: dataMeta.released_date,
 		imdbRating: dataMeta.imdbRating,
-		posterUrl: dataMeta.poster_url,
+		cover: dataMeta.poster_url
+			? { url: dataMeta.poster_url, color: "" }
+			: undefined,
 		backdropUrl: dataMeta.backdrop_url,
 	};
 }

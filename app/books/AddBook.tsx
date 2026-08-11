@@ -10,7 +10,6 @@ import {
 	mapBookAPIDatatoBook,
 	mapBookAPISeriesData,
 } from "@/app/books/utils/bookMapping";
-import { cleanName } from "@/utils/cleanName";
 //
 import { BookDetails } from "./BookDetailsHub";
 import { ShowMultBooks } from "./components/ShowMultBooks";
@@ -177,7 +176,6 @@ export function AddBook({
 			setNewBook((prev) => {
 				const updated = {
 					...prev,
-					title: cleanName(prev.title, mappedSeriesData.seriesTitle),
 					...mappedSeriesData,
 				};
 				return updated;

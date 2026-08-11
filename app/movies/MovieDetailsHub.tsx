@@ -29,7 +29,6 @@ import { ShowDetails } from "../shows/ShowDetailsHub";
 import { MediaStatus } from "@/types/media";
 import { useMovieSearch } from "@/hooks/external/useMovieSearch";
 import { mapSeriesToMovie } from "./utils/movieMapping";
-import { cleanName } from "@/utils/cleanName";
 
 // check if movie has tmdbID
 const isRealTmdbId = (tmdbId?: string) => !!tmdbId && tmdbId !== "-1";
@@ -308,8 +307,7 @@ export function MovieDetails({
 				? mapSeriesToMovie(reloaded.series)
 				: undefined;
 			if (series) Object.assign(meta, series);
-			const title = cleanName(reloaded.title, series?.seriesTitle);
-			if (title) meta.title = title;
+			if (reloaded.title) meta.title = reloaded.title;
 			setRefreshMeta(meta);
 			setIsSelecting(true);
 		} finally {

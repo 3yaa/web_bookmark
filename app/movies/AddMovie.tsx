@@ -9,7 +9,6 @@ import {
 	mapMetaToMovie,
 	mapSeriesToMovie,
 } from "@/app/movies/utils/movieMapping";
-import { cleanName } from "@/utils/cleanName";
 //
 import { MovieDetails } from "./MovieDetailsHub";
 //
@@ -98,7 +97,6 @@ export function AddMovie({
 		const mappedSeries = mapSeriesToMovie(movieData.series);
 		setNewMovie({
 			...mappedMovie,
-			title: cleanName(mappedMovie.title, mappedSeries.seriesTitle),
 			...mappedSeries,
 		});
 	}, [searchForMovie]);

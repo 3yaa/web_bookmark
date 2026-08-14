@@ -44,12 +44,7 @@ coverage/
 *.lcov
 
 # IDE
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.idea/
+.vscode/
 
 # OS generated files
 .DS_Store

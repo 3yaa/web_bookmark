@@ -6,8 +6,31 @@ interface BackdropImageProps {
 	height: number;
 }
 
+// mirrored edge
+const EDGE_WASH = [
+	"linear-gradient(to right",
+	"rgba(18,18,18,1) 0%",
+	"rgba(18,18,18,0.98) 3%",
+	"rgba(18,18,18,0.88) 6%",
+	"rgba(18,18,18,0.7) 8.5%",
+	"rgba(18,18,18,0.48) 11.5%",
+	"rgba(18,18,18,0.28) 14%",
+	"rgba(18,18,18,0.12) 17.5%",
+	"rgba(18,18,18,0.03) 21%",
+	"transparent 25%",
+	"transparent 75%",
+	"rgba(18,18,18,0.03) 79%",
+	"rgba(18,18,18,0.12) 82.5%",
+	"rgba(18,18,18,0.28) 86%",
+	"rgba(18,18,18,0.48) 88.5%",
+	"rgba(18,18,18,0.7) 91.5%",
+	"rgba(18,18,18,0.88) 94%",
+	"rgba(18,18,18,0.98) 97%",
+	"rgba(18,18,18,1) 100%)",
+].join(", ");
+
 export const BackdropImage = ({ src, width, height }: BackdropImageProps) => (
-	<div className="absolute -top-4 left-0 -right-21 h-[70%] -z-10 overflow-hidden select-none">
+	<div className="absolute -top-4 -left-10.5 -right-10.5 h-[70%] -z-10 overflow-hidden select-none">
 		<div className="relative h-full">
 			<Image
 				src={src}
@@ -23,10 +46,7 @@ export const BackdropImage = ({ src, width, height }: BackdropImageProps) => (
 			{/* HORIZONTAL */}
 			<div
 				className="absolute inset-0"
-				style={{
-					background:
-						"linear-gradient(to right, rgba(18,18,18,1) 0%, rgba(18,18,18,0.98) 10%, rgba(18,18,18,0.88) 20%, rgba(18,18,18,0.7) 30%, rgba(18,18,18,0.48) 40%, rgba(18,18,18,0.28) 50%, rgba(18,18,18,0.12) 62%, rgba(18,18,18,0.03) 75%, transparent 88%)",
-				}}
+				style={{ background: EDGE_WASH }}
 			/>
 			{/* VERTICAL */}
 			<div

@@ -17,8 +17,7 @@ export function DirectorNames({
 	const dotsRef = useRef<HTMLButtonElement>(null);
 	const [shownCount, setShownCount] = useState(names.length);
 
-	// keyed on the joined string so a fresh array identity each render does not
-	// re-run this and flip the result mid-life
+	//
 	const key = names.join("|");
 
 	useLayoutEffect(() => {
@@ -34,10 +33,11 @@ export function DirectorNames({
 				setShownCount(names.length);
 				return;
 			}
-			// make dots room
-			const reserved = (dotsRef.current?.offsetWidth ?? 16) + 4;
+			// the ...
+			const reserved = (dotsRef.current?.offsetWidth ?? 22) + 6;
 			const available = full - reserved;
-			let count = names.length - 1;
+			// floored at one
+			let count = Math.max(1, names.length - 1);
 			while (count > 1) {
 				probe.textContent = names.slice(0, count).join(", ");
 				if (probe.scrollWidth <= available) break;
@@ -50,7 +50,7 @@ export function DirectorNames({
 		const observer = new ResizeObserver(measure);
 		observer.observe(container);
 		return () => observer.disconnect();
-		// `key` stands in for `names` 
+		// `key` stands in for `names`
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [key]);
 
@@ -60,14 +60,14 @@ export function DirectorNames({
 	return (
 		<span
 			ref={containerRef}
-			className={`relative inline-flex items-center gap-1 ${width}`}
+			className={`relative inline-flex items-center gap-1 min-w-0 ${width}`}
 		>
 			<span
 				ref={probeRef}
 				aria-hidden
 				className="absolute left-0 top-0 invisible whitespace-nowrap pointer-events-none"
 			/>
-			<span className="min-w-0 overflow-hidden whitespace-nowrap">
+			<span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
 				{shown.map((name, i) => (
 					<span key={name}>
 						{i > 0 && ", "}
@@ -86,15 +86,10 @@ export function DirectorNames({
 					ref={dotsRef}
 					type="button"
 					onClick={onMore}
-					title="All directors"
-					aria-hidden={!hasMore}
-					className={`shrink-0 leading-none transition-colors duration-200 ${
-						hasMore
-							? "text-zinc-500 hover:text-zinc-200 cursor-pointer"
-							: "invisible pointer-events-none"
-					}`}
+					title={`${names.length - shownCount} more — see all directors`}
+					className="shrink-0 leading-none text-[0.8em] font-semibold tabular-nums text-zinc-500 hover:text-zinc-200 cursor-pointer transition-colors duration-200"
 				>
-					…
+					+{names.length - shownCount}
 				</button>
 			)}
 		</span>

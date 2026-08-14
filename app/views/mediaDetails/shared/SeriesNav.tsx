@@ -10,22 +10,24 @@ interface SeriesNavProps {
 	isAdding: boolean;
 	onAction: (action: { type: string; payload?: unknown }) => void;
 	isInList?: (title: string) => boolean;
-	// tints the no-series art -- picked off the poster, nothing is stored
 	accentColor?: string;
 }
 
 const ART_SRC = "/non-series-placeholder.png";
 
-// optimizer's url instead of pulling the full-size png a second time.
+// instead of pulling the full-size png a second time
 const ART_MASK_SRC = `/_next/image?url=${encodeURIComponent(ART_SRC)}&w=1080&q=75`;
+
+// vertical framing of the art
+const ART_POSITION = "center 40%";
 
 const ART_MASK = {
 	maskImage: `url(${ART_MASK_SRC})`,
 	WebkitMaskImage: `url(${ART_MASK_SRC})`,
 	maskSize: "cover",
 	WebkitMaskSize: "cover",
-	maskPosition: "center 37%",
-	WebkitMaskPosition: "center 37%",
+	maskPosition: ART_POSITION,
+	WebkitMaskPosition: ART_POSITION,
 	maskRepeat: "no-repeat",
 	WebkitMaskRepeat: "no-repeat",
 } as React.CSSProperties;
@@ -168,9 +170,9 @@ export function SeriesNav({
 					className="flex justify-center select-none"
 					aria-hidden="true"
 				>
-					<div className="relative w-full h-14 -mb-2.5 left-[-2.5%]">
+					<div className="relative w-full h-14 -mb-2.5">
 						<div
-							className="absolute inset-x-0 -top-2.5 -bottom-4 pointer-events-none"
+							className="absolute inset-x-0 -top-1.5 -bottom-4 pointer-events-none"
 							style={{
 								WebkitMaskImage: TOP_FADE,
 								maskImage: TOP_FADE,
@@ -209,7 +211,7 @@ export function SeriesNav({
 									sizes="(min-width: 1024px) 860px, 100vw"
 									className="object-cover"
 									style={{
-										objectPosition: "center 37%",
+										objectPosition: ART_POSITION,
 										filter: tinted
 											? "grayscale(1) brightness(1.08) contrast(1.06)"
 											: "grayscale(0.7)",
@@ -251,7 +253,7 @@ export function SeriesNav({
 	}
 
 	return (
-		<div className="pt-2.5 border-t border-zinc-800/80 pr-2">
+		<div className="pt-2.5 border-t border-black/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)] pr-2">
 			<div className="grid grid-cols-[1fr_3rem_1fr] gap-3 w-full pr-1.5 select-none">
 				<div className="truncate text-left">
 					{nav.prev && (

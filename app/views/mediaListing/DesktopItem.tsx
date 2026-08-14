@@ -42,6 +42,13 @@ export const DesktopItem = React.memo(function DesktopItem<
 }: DesktopItemProps<T>) {
 	const series = item as unknown as SeriesMediaProps;
 	const gameItem = item as unknown as GameProps;
+
+	const seriesLabel =
+		mediaType === "game"
+			? gameItem.dlcIndex !== 0
+				? gameItem.mainTitle
+				: null
+			: series.seriesTitle;
 	const bookItem = item as unknown as BookProps;
 	const movieItem = item as unknown as MovieProps;
 	const coverSrc = item.cover?.url ?? item.posterUrl;
@@ -108,10 +115,10 @@ export const DesktopItem = React.memo(function DesktopItem<
 				<div className="flex-1 flex flex-col justify-center">
 					{/* SERIES TITLE */}
 					<div className="h-5 font-semibold text-zinc-400 text-sm group-hover:text-zinc-300 flex gap-1">
-						{(series.seriesTitle ?? gameItem.mainTitle) && (
+						{seriesLabel && (
 							<>
 								<span className="block max-w-[88%] whitespace-nowrap text-ellipsis overflow-hidden shrink">
-									{series.seriesTitle ?? gameItem.mainTitle} ᭡
+									{seriesLabel} ᭡
 								</span>
 								{series.placeInSeries && (
 									<span>{series.placeInSeries}</span>

@@ -5,6 +5,11 @@ import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { showStatusOptions } from "@/utils/dropDownDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
 import { TIER_PHI_THRESHOLD, getSeedMu, Tier } from "@/lib/tierConfig";
+import {
+	activeLogoIndex,
+	clearedFrom,
+	stepLogoIndex,
+} from "@/app/views/mediaDetails/shared/logoIndex";
 import { useScoreNudge } from "@/hooks/useScoreNudge";
 import {
 	ActorWork,
@@ -49,6 +54,10 @@ export type ShowAction =
 	| { type: "changeEpisodeNum"; payload: number }
 	| { type: "cast" }
 	| { type: "refresh" }
+	| { type: "confirmRefresh" }
+	| { type: "cancelRefresh" }
+	| { type: "changeLogo"; payload: "next" | "prev" }
+	| { type: "clearLogo" }
 	| { type: "openRatings" };
 
 interface ShowDetailsProps {
@@ -73,6 +82,10 @@ interface ShowDetailsProps {
 	onAddMovie?: (movie: MovieProps) => Promise<unknown>;
 	// reload metadata from source (poster/backdrop, seasons, studio)
 	onRefresh?: (metadata: Partial<ShowProps>) => Promise<void>;
+	// title treatments to cycle through while adding (AddShow owns the index)
+	logoUrls?: string[];
+	logoIndex?: number;
+	updateLogoIndex?: (newIndex: number) => void;
 }
 
 export function ShowDetails({
@@ -87,9 +100,17 @@ export function ShowDetails({
 	onMovieUpdate,
 	onAddMovie,
 	onRefresh,
+	logoUrls,
+	logoIndex,
+	updateLogoIndex,
 }: ShowDetailsProps) {
 	const [localNote, setLocalNote] = useState(show.note || "");
 	const [isRefreshing, setIsRefreshing] = useState(false);
+	// refresh preview state -- nothing is written until it is confirmed
+	const [isSelecting, setIsSelecting] = useState(false);
+	const [refreshMeta, setRefreshMeta] = useState<Partial<ShowProps>>({});
+	const [refreshLogos, setRefreshLogos] = useState<string[]>([]);
+	const [refreshLogoIndex, setRefreshLogoIndex] = useState(0);
 	const { searchForShowSeasonInfo } = useShowSearch();
 	const [editingMode, setEditingMode] = useState({
 		season: false,
@@ -252,21 +273,56 @@ export function ShowDetails({
 			case "refresh":
 				handleRefresh();
 				break;
+			case "confirmRefresh":
+				handleConfirmRefresh();
+				break;
+			case "cancelRefresh":
+				exitSelecting();
+				break;
+			case "clearLogo":
+				handleClearLogo();
+				break;
+			case "changeLogo":
+				handleLogoChange(action.payload);
+				break;
 			case "openRatings":
 				setRatingsOpen(true);
 				break;
 		}
 	};
 
+	//
+	const handleLogoChange = (dir: "next" | "prev") => {
+		const total = isSelecting
+			? refreshLogos.length
+			: (logoUrls?.length ?? 0);
+		if (total < 2) return;
+		if (isSelecting)
+			setRefreshLogoIndex((i) => stepLogoIndex(i, dir, total));
+		else updateLogoIndex?.(stepLogoIndex(logoIndex ?? 0, dir, total));
+	};
+
+	//
+	const handleClearLogo = () => {
+		const current = isSelecting ? refreshLogoIndex : (logoIndex ?? 0);
+		const next =
+			current < 0 ? activeLogoIndex(current) : clearedFrom(current);
+		if (isSelecting) setRefreshLogoIndex(next);
+		else updateLogoIndex?.(next);
+	};
+
+	//
 	const handleRefresh = async () => {
-		if (!onRefresh || !show.tmdbId || isRefreshing) return;
+		if (!onRefresh || !show.tmdbId || isRefreshing || isSelecting) return;
 		setIsRefreshing(true);
 		try {
 			const tv = await searchForShowSeasonInfo(show.tmdbId);
 			if (!tv) return;
 			const meta: Partial<ShowProps> = mapTMDBTVToShow(tv);
-			// imdbId is identity (used for episode ratings) -- leave untouched
+			// imdbId (used for episode ratings) -- leave untouched
 			delete meta.imdbId;
+			//
+			delete meta.logoUrl;
 			const seasons = meta.seasons;
 			if (seasons && seasons.length) {
 				let si = show.curSeasonIndex;
@@ -280,15 +336,35 @@ export function ShowDetails({
 				if (si !== show.curSeasonIndex) meta.curSeasonIndex = si;
 				if (ep !== show.curEpisode) meta.curEpisode = ep;
 			}
-			if (Object.keys(meta).length) await onRefresh(meta);
+			setRefreshMeta(meta);
+			setRefreshLogos(tv.logos ?? []);
+			setRefreshLogoIndex(0);
+			setIsSelecting(true);
 		} finally {
 			setIsRefreshing(false);
 		}
 	};
 
+	const handleConfirmRefresh = async () => {
+		if (!onRefresh) return;
+		//
+		const meta = {
+			...refreshMeta,
+			logoUrl: refreshLogos[refreshLogoIndex] ?? null,
+		};
+		exitSelecting();
+		if (Object.keys(meta).length) await onRefresh(meta);
+	};
+
+	const exitSelecting = () => {
+		setIsSelecting(false);
+		setRefreshMeta({});
+		setRefreshLogos([]);
+		setRefreshLogoIndex(0);
+	};
+
 	const handleCast = async () => {
-		// reset on open instead of on close, so the exit animation keeps
-		// whatever was on screen
+		// reset on open instead of on close
 		setSelectedActor(null);
 		setCastOpen(true);
 		setCastLoading(true);
@@ -551,10 +627,14 @@ export function ShowDetails({
 	// need to reset local note -- since changing show doesn't remount
 	useEffect(() => {
 		setLocalNote(show.note || "");
+		exitSelecting();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [show.id]);
 
 	if (!show) return null;
+
+	// while previewing render new
+	const previewShow = isSelecting ? { ...show, ...refreshMeta } : show;
 
 	const displayLoading = isRefreshing
 		? {
@@ -568,15 +648,18 @@ export function ShowDetails({
 		<>
 			<div className="lg:block hidden">
 				<DesktopDetails
-					item={show}
+					item={previewShow}
 					localNote={localNote}
 					statusOptions={showStatusOptions}
 					mediaType="show"
 					isLoading={displayLoading}
 					isAdding={!!addShow}
+					isSelecting={isSelecting}
 					onAdd={handleAddShow}
 					onClose={handleModalClose}
 					canRefresh={!!onRefresh}
+					logoUrls={isSelecting ? refreshLogos : logoUrls}
+					logoIndex={isSelecting ? refreshLogoIndex : logoIndex}
 					onAction={
 						handleAction as (action: {
 							type: string;
@@ -590,15 +673,15 @@ export function ShowDetails({
 			</div>
 			<div className="block lg:hidden">
 				<MobileDetails
-					item={show}
+					item={previewShow}
 					localNote={localNote}
 					statusOptions={showStatusOptions}
 					mediaType="show"
 					isLoading={displayLoading}
 					isAdding={!!addShow}
+					isSelecting={isSelecting}
 					onAdd={handleAddShow}
 					onClose={handleModalClose}
-					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {
 							type: string;
@@ -629,9 +712,6 @@ export function ShowDetails({
 						sortedWorks={sortedWorks}
 						actorLoading={actorLoading}
 						filmSort={filmSort}
-						// only close -- clearing the actor here would swap the
-						// filmography for the cast grid mid-exit, changing the
-						// panel's height and shifting the centred modal
 						onClose={() => setCastOpen(false)}
 						onActorClick={handleActorClick}
 						onActorBack={() => setSelectedActor(null)}
@@ -663,7 +743,7 @@ export function ShowDetails({
 					}}
 				/>
 			)}
-			{/* OPENED SHOW (from actor modal) -- reads the live object by id */}
+			{/* OPENED SHOW (from actor modal) */}
 			{selectedShow && (
 				<ShowDetails
 					show={selectedShow}
@@ -696,7 +776,6 @@ export function ShowDetails({
 					onClose={() => setPendingWork(null)}
 					existingMovies={existingMovies}
 					onAddMovie={async (m) => {
-						// route through the parent's data hook
 						if (onAddMovie) {
 							await onAddMovie(m);
 						} else {

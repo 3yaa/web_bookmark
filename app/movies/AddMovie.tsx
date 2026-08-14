@@ -42,6 +42,9 @@ export function AddMovie({
 	//
 	const [newMovie, setNewMovie] = useState<Partial<MovieProps>>({});
 	//
+	const [logoUrls, setLogoUrls] = useState<string[]>([]);
+	const [logoIndex, setLogoIndex] = useState(0);
+	//
 	const { searchForMovie, isMovieSearching } = useMovieSearch();
 
 	const reset = useCallback(() => {
@@ -51,6 +54,8 @@ export function AddMovie({
 		//
 		setActiveModal(null);
 		setNewMovie({});
+		setLogoUrls([]);
+		setLogoIndex(0);
 		if (titleToSearch.current) {
 			titleToSearch.current.value = "";
 			titleToSearch.current.focus();
@@ -100,6 +105,8 @@ export function AddMovie({
 			...mappedMovie,
 			...mappedSeries,
 		});
+		setLogoUrls(movieData.logos ?? []);
+		setLogoIndex(0);
 		//
 		const cover = await buildCover(mappedMovie.cover?.url);
 		if (cover) setNewMovie((prev) => ({ ...prev, cover }));
@@ -137,6 +144,10 @@ export function AddMovie({
 		const finalMovie = {
 			...newMovie,
 			status: isStatus,
+			// when logo text set to null
+			...(logoUrls.length
+				? { logoUrl: logoUrls[logoIndex] ?? null }
+				: {}),
 		};
 		const isBattling = await onAddMovie(finalMovie as MovieProps);
 		if (!isBattling) onClose();
@@ -260,6 +271,9 @@ export function AddMovie({
 						style: "h-8 w-8 border-emerald-400",
 						text: "Searching...",
 					}}
+					logoUrls={logoUrls}
+					logoIndex={logoIndex}
+					updateLogoIndex={setLogoIndex}
 				/>
 			)}
 		</ModalBackdrop>

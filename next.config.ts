@@ -24,21 +24,7 @@ const nextConfig: NextConfig = {
 	},
 	images: {
 		remotePatterns: [
-			// // APPLE ITUNES
-			// {
-			// 	protocol: "https",
-			// 	hostname: "*.mzstatic.com",
-			// 	port: "",
-			// 	pathname: "/image/thumb/**",
-			// },
-			// // GOOGLE BOOKS
-			// {
-			// 	protocol: "http",
-			// 	hostname: "books.google.com",
-			// 	port: "",
-			// 	pathname: "/books/content**",
-			// },
-			// book -- hardcover covers
+			// HARDCOVER
 			{
 				protocol: "https",
 				hostname: "assets.hardcover.app",
@@ -64,6 +50,13 @@ const nextConfig: NextConfig = {
 				hostname: "images.igdb.com",
 				port: "",
 				pathname: "/igdb/image/upload/**",
+			},
+			// STEAMGRIDDB
+			{
+				protocol: "https",
+				hostname: "*.steamgriddb.com",
+				port: "",
+				pathname: "/**",
 			},
 		],
 	},

@@ -1,11 +1,10 @@
 "use client";
 import {
-	BookCoverProps,
 	BookProps,
 	BookSearchResult,
 	DIFF_COLUMNS_BOOK,
 } from "@/types/book";
-import { SeriesAPIProps } from "@/types/media";
+import { MediaCoverProps, SeriesAPIProps } from "@/types/media";
 import { useCallback, useEffect, useState } from "react";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { bookStatusOptions } from "@/utils/dropDownDetails";
@@ -57,7 +56,7 @@ interface BookDetailsProps {
 	onShowMore?: () => void;
 	onRefresh?: (metadata: Partial<BookProps>) => Promise<void>;
 	//
-	coverUrls?: BookCoverProps[];
+	coverUrls?: MediaCoverProps[];
 	coverIndex?: number;
 	updateCoverIndex?: (newIndex: number) => void;
 	updateCoverColor?: (color: string) => void;
@@ -85,7 +84,7 @@ export function BookDetails({
 		useBookSearch();
 	// refresh preview state -- picks a cover before saving
 	const [isSelecting, setIsSelecting] = useState(false);
-	const [refreshCovers, setRefreshCovers] = useState<BookCoverProps[]>([]);
+	const [refreshCovers, setRefreshCovers] = useState<MediaCoverProps[]>([]);
 	const [refreshCoverIndex, setRefreshCoverIndex] = useState(0);
 	const [refreshMeta, setRefreshMeta] = useState<Partial<BookProps>>({});
 	//
@@ -463,7 +462,6 @@ export function BookDetails({
 								: undefined
 							: showBookInSeries
 					}
-					canRefresh={!!onRefresh}
 					isInList={isInList}
 					isSelecting={isSelecting}
 					onAction={

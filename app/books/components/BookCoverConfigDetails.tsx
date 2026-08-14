@@ -1,10 +1,10 @@
-import { BookCoverProps } from "@/types/book";
+import { MediaCoverProps } from "@/types/media";
 import Image from "next/image";
 
 interface BookCoverConfigProps {
   coverUrl?: string;
   title: string;
-  coverUrls?: BookCoverProps[];
+  coverUrls?: MediaCoverProps[];
   coverIndex?: number;
   className?: string;
   onLoad?: () => void;

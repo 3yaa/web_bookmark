@@ -2,7 +2,12 @@ import Image from "next/image";
 import { Loading } from "@/app/components/ui/Loading";
 import { DirectorNames } from "../../movies/components/DirectorNames";
 import { ModalBackdrop, ModalPanel } from "@/app/components/ui/ModalMotion";
-import { BaseMediaProps, ColumnConfig, SeriesMediaProps } from "@/types/media";
+import {
+	BaseMediaProps,
+	ColumnConfig,
+	MediaCoverProps,
+	SeriesMediaProps,
+} from "@/types/media";
 import { GameProps } from "@/types/game";
 import {
 	formatDateShort,
@@ -22,10 +27,14 @@ import {
 	RefreshCw,
 	Check,
 	List,
-	Unlink,
 	Users,
 	BarChart2,
 	Leaf,
+	Feather,
+	Hourglass,
+	BookCheck,
+	Unlink,
+	Type,
 } from "lucide-react";
 import { BackdropImage } from "@/app/components/ui/Backdrop";
 import { Dropdown, Option } from "@/app/components/ui/Dropdown";
@@ -35,6 +44,16 @@ import { BookCoverConfig } from "@/app/books/components/BookCoverConfigDetails";
 import { CoverColorPicker } from "@/app/components/ui/CoverColorPicker";
 import { BookBackdropDetails } from "@/app/components/ui/BookBackdrop";
 import { SeriesNav } from "./shared/SeriesNav";
+import { activeLogoIndex, isLogoCleared } from "./shared/logoIndex";
+import {
+	ActionBtn,
+	coverWave,
+	FIELD_LABEL,
+	FIELD_PLATE,
+	HEADER_WASH_MASK,
+	SCORE_SUB_BTN,
+} from "../../components/ui/DesktopDetailsUtils";
+import { MediaTitle, SERIES_TEXT, TITLE_TEXT } from "./shared/MediaTitle";
 import { EditProgress } from "@/app/shows/components/EditProgressDetail";
 import {
 	canNudgeMu,
@@ -44,16 +63,7 @@ import {
 } from "@/lib/tierConfig";
 import { ShowProps } from "@/types/show";
 import { MovieProps } from "@/types/movie";
-import { BookCoverProps, BookProps } from "@/types/book";
-
-// hover-revealed +/- controls on the score row
-const SCORE_NUDGE_BTN =
-	"flex justify-center items-center w-6.5 h-6.5 rounded-md bg-zinc-800/80 border border-zinc-700/25 hover:bg-zinc-700/35 hover:border-zinc-700/40 active:bg-zinc-700/40 active:scale-95 transition-all duration-150 hover:cursor-pointer disabled:hover:bg-zinc-800/80 disabled:border-zinc-600/25 disabled:opacity-40 disabled:cursor-default";
-
-const HEADER_WASH_MASK = [
-	"linear-gradient(to right, transparent 0px, black 20px, black calc(100% - 44px), transparent 100%)",
-	"linear-gradient(to bottom, transparent 0px, black 22px, black calc(100% - 22px), transparent 100%)",
-].join(", ");
+import { BookProps } from "@/types/book";
 
 interface DesktopDetailsProps<T extends BaseMediaProps> {
 	item: T;
@@ -70,13 +80,16 @@ interface DesktopDetailsProps<T extends BaseMediaProps> {
 	onAction: (action: { type: string; payload?: unknown }) => void;
 	canRefresh?: boolean;
 	isSelecting?: boolean;
-	// only for book
-	coverUrls?: BookCoverProps[];
+	// book
+	coverUrls?: MediaCoverProps[];
 	coverIndex?: number;
-	// only for game
+	// game
 	backdropUrls?: string[];
 	backdropIndex?: number;
-	// only for show
+	// movie/show
+	logoUrls?: string[];
+	logoIndex?: number;
+	// show
 	editingMode?: { season: boolean; episode: boolean };
 	inputValues?: { season: number | ""; episode: number | "" };
 }
@@ -99,6 +112,8 @@ export function DesktopDetails<T extends BaseMediaProps>({
 	coverIndex,
 	backdropUrls,
 	backdropIndex,
+	logoUrls,
+	logoIndex,
 	editingMode,
 	inputValues,
 	differentColumns,
@@ -110,6 +125,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 			e.currentTarget.blur(); // remove focus
 		}
 	};
+	const isBook = mediaType === "book";
 	const series = item as unknown as SeriesMediaProps;
 	const gameItem = item as unknown as GameProps;
 	const movieItem = item as unknown as MovieProps;
@@ -134,6 +150,57 @@ export function DesktopDetails<T extends BaseMediaProps>({
 		mediaType === "book"
 			? coverUrls?.[coverIndex ?? 0]
 			: (item.cover ?? undefined);
+	//
+	const isPicking = isAdding || isSelecting;
+	// title-logo picker
+	const logoNav =
+		isPicking && logoUrls && logoUrls.length > 1 ? (
+			<div className="flex gap-1 bg-zinc-800/50 rounded-lg">
+				<button
+					className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60 hover:cursor-pointer transition-all group"
+					onClick={() =>
+						onAction({ type: "changeLogo", payload: "prev" })
+					}
+					title={`Previous title logo (${activeLogoIndex(logoIndex ?? 0) + 1}/${
+						logoUrls.length
+					})`}
+				>
+					<ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+				</button>
+				<button
+					className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60 hover:cursor-pointer transition-all group"
+					onClick={() =>
+						onAction({ type: "changeLogo", payload: "next" })
+					}
+					title={`Next title logo (${activeLogoIndex(logoIndex ?? 0) + 1}/${logoUrls.length})`}
+				>
+					<ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+				</button>
+			</div>
+		) : null;
+
+	// TEXT TITLE
+	const logoIsCleared = isLogoCleared(logoIndex);
+	const logoClear =
+		isPicking && logoUrls?.length ? (
+			<button
+				className="p-1.5 rounded-lg bg-zinc-800/50 hover:bg-purple-600/25 hover:cursor-pointer transition-all group"
+				onClick={() => onAction({ type: "clearLogo" })}
+				title={
+					logoIsCleared
+						? "Use the title logo"
+						: "Use the text title instead"
+				}
+			>
+				<Type
+					className={`w-5 h-5 transition-colors ${
+						logoIsCleared
+							? "text-purple-400"
+							: "text-gray-400 group-hover:text-purple-400"
+					}`}
+				/>
+			</button>
+		) : null;
 
 	// cover colour picker
 	const colorPicker = activeCover ? (
@@ -147,6 +214,38 @@ export function DesktopDetails<T extends BaseMediaProps>({
 		/>
 	) : null;
 
+	// Prequel/sequel stepper
+	const seriesNav = onSeriesNav ? (
+		<div className="flex gap-1 bg-zinc-800/50 rounded-lg">
+			<button
+				className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60 hover:cursor-pointer transition-all group"
+				onClick={() => onSeriesNav("left")}
+				title={"Previous series"}
+			>
+				<ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+			</button>
+			<button
+				className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60 hover:cursor-pointer transition-all group"
+				onClick={() => onSeriesNav("right")}
+				title={"Next series"}
+			>
+				<ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+			</button>
+		</div>
+	) : null;
+
+	// MORE STUFF -- books only
+	const moreResults =
+		mediaType === "book" ? (
+			<button
+				className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer transition-all group"
+				onClick={() => onAction({ type: "moreBooks" })}
+				title={"Other results"}
+			>
+				<List className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
+			</button>
+		) : null;
+
 	//images
 	const coverSrc = item.cover?.url ?? item.posterUrl;
 	const coverColor =
@@ -159,6 +258,8 @@ export function DesktopDetails<T extends BaseMediaProps>({
 		backdropIndex !== undefined
 			? backdropUrls?.[backdropIndex]
 			: item.backdropUrl;
+	const displayLogoUrl =
+		isPicking && logoUrls?.length ? logoUrls[logoIndex ?? 0] : item.logoUrl;
 	// moives only
 	const canOpenDirector =
 		mediaType === "movie" &&
@@ -173,9 +274,162 @@ export function DesktopDetails<T extends BaseMediaProps>({
 				.map((n) => n.trim())
 				.filter(Boolean)
 		: [];
-
+	//
 	const hasBackdrop =
 		mediaType === "book" ? !!coverColor : !!imageBackdropUrl;
+	//
+	const showsWordmark = !!displayLogoUrl;
+	//
+	const seriesLabel =
+		mediaType === "game"
+			? gameItem.dlcIndex !== 0
+				? gameItem.mainTitle
+				: null
+			: series.seriesTitle;
+
+	//
+	const underlineColor =
+		mediaType === "show"
+			? undefined
+			: coverColor?.trim()
+				? coverWave(coverColor)
+				: getStatusDetailWaveColor(item.status);
+
+	// source rating
+	const externalRating =
+		mediaType === "movie" && item.status === "Want to Watch"
+			? movieItem.imdbRating
+			: mediaType === "book" && item.status === "Want to Read"
+				? bookItem.rating
+				: null;
+
+	// COMPLETED DATE | RATING
+	const trailingMeta =
+		externalRating != null ? (
+			<span
+				className="flex items-center shrink-0 gap-1.5"
+				title="Source rating"
+			>
+				<Leaf
+					className="w-3.5 h-3.5 shrink-0 text-green-400/60"
+					strokeWidth={1.75}
+				/>
+				<span className="font-semibold tabular-nums text-zinc-300/80 tracking-tight">
+					{externalRating.toFixed(1)}
+				</span>
+			</span>
+		) : item.status === "Completed" ? (
+			<span
+				className="shrink-0 flex items-center gap-1.5 tabular-nums"
+				title="Date Completed"
+			>
+				{isBook && (
+					<BookCheck
+						className="w-3.5 h-3.5 shrink-0 text-zinc-400/70"
+						strokeWidth={1.75}
+					/>
+				)}
+				{formatDateShort(item.dateCompleted)}
+			</span>
+		) : null;
+
+	//
+	const authorSectorDivider = (
+		<span aria-hidden className="h-3 w-px shrink-0 bg-zinc-500/35" />
+	);
+
+	// author section
+	const metaRow = (
+		<div
+			className={`select-text flex items-center gap-3 text-[0.92rem] font-medium leading-6 text-zinc-200/70 ${
+				isBook
+					? "justify-center w-[94%] mx-auto -mb-0.5"
+					: "justify-between w-full mb-1.5 mt-2"
+			}`}
+		>
+			{/* LEFT -- AUTHOR */}
+			<span className="flex items-center gap-1.5 min-w-0">
+				{(mediaType === "show" || mediaType === "movie") && (
+					<button
+						onClick={() =>
+							onAction({
+								type: "cast",
+							})
+						}
+						title="View cast"
+						className="cursor-pointer text-zinc-400/70 hover:text-zinc-200 transition-all duration-200 shrink-0 hover:scale-105"
+					>
+						<Users className="w-3.5 h-3.5" strokeWidth={1.75} />
+					</button>
+				)}
+				{mediaType === "show" && (
+					<button
+						onClick={() =>
+							onAction({
+								type: "openRatings",
+							})
+						}
+						title="Episode ratings"
+						className="cursor-pointer text-zinc-400/70 hover:text-zinc-200 transition-all duration-200 shrink-0 hover:scale-105"
+					>
+						<BarChart2 className="w-3.5 h-3.5" strokeWidth={1.75} />
+					</button>
+				)}
+				{canOpenDirector ? (
+					<DirectorNames
+						names={directorNames}
+						width="max-w-32"
+						onPick={(name) =>
+							onAction({
+								type: "directorClick",
+								payload: name,
+							})
+						}
+						onMore={() =>
+							onAction({
+								type: "directorPicker",
+							})
+						}
+					/>
+				) : (
+					<>
+						{isBook && (
+							<Feather
+								className="w-3.5 h-3.5 shrink-0 text-zinc-400/70 rotate-280"
+								strokeWidth={1.75}
+							/>
+						)}
+						<span
+							className="truncate min-w-0"
+							title={String(
+								differentColumns[0].getValue(item) ?? "",
+							)}
+						>
+							{differentColumns[0].getValue(item) ||
+								"Unknown " + differentColumns[0].label}
+						</span>
+					</>
+				)}
+			</span>
+			{isBook && authorSectorDivider}
+			{/* MIDDLE -- RELEASE YEAR */}
+			<span
+				className="shrink-0 flex items-center gap-1.5 tabular-nums"
+				title="Date Published"
+			>
+				{isBook && (
+					<Hourglass
+						className="w-3.5 h-3.5 shrink-0 text-zinc-400/70"
+						strokeWidth={1.75}
+					/>
+				)}
+				{differentColumns[1].getValue(item) || "Unknown"}
+			</span>
+			{/* RIGHT -- RATING/COMPLETE DATE*/}
+			{isBook && trailingMeta && authorSectorDivider}
+			{trailingMeta}
+		</div>
+	);
 
 	return (
 		<ModalBackdrop className="fixed inset-0 bg-linear-to-br from-black/50 via-black/60 to-black/80 backdrop-blur-md flex items-center justify-center z-20">
@@ -189,7 +443,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 			<ModalPanel
 				className={`rounded-2xl bg-linear-to-b ${getStatusBorderGradient(
 					item.status,
-				)} p-1.5 py-2 lg:min-w-215 lg:max-w-215`}
+				)} p-1.5 py-2 ${isBook ? "lg:min-w-225 lg:max-w-225" : "lg:min-w-230 lg:max-w-230"}`}
 			>
 				{/* ACTUAL DETAIL CARD */}
 				<div className="bg-linear-to-br bg-[#121212] backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl w-full max-h-[calc(100vh-3rem)]">
@@ -205,154 +459,99 @@ export function DesktopDetails<T extends BaseMediaProps>({
 						{/* ACTION BUTTONS */}
 						{isSelecting ? (
 							<div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
-								{/* CHANGE SERIES */}
-								{onSeriesNav && (
-									<div className="flex gap-1 bg-zinc-800/50 rounded-lg">
-										<button
-											className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60 hover:cursor-pointer transition-all group"
-											onClick={() => onSeriesNav("left")}
-											title={"Previous series"}
-										>
-											<ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
-										</button>
-										<button
-											className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60 hover:cursor-pointer transition-all group"
-											onClick={() => onSeriesNav("right")}
-											title={"Next series"}
-										>
-											<ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
-										</button>
-									</div>
-								)}
+								{seriesNav}
+								{/* CYCLE LOGOS */}
+								{logoNav}
+								{/* TITLE */}
+								{logoClear}
 								{/* COVER COLORS */}
 								{colorPicker}
-								{/* MORE RESULTS (book) */}
-								{mediaType === "book" && (
-									<button
-										className="py-1.5 px-2 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer transition-all group"
-										onClick={() =>
-											onAction({ type: "moreBooks" })
-										}
-										title={"Other results"}
-									>
-										<List className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
-									</button>
-								)}
+								{moreResults}
 								{/* CONFIRM REFRESH */}
-								<button
-									className="py-1.5 px-5 rounded-lg bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer transition-all group"
+								<ActionBtn
+									icon={Check}
+									tone="green"
+									pad="py-1.5 px-5"
 									onClick={() =>
 										onAction({ type: "confirmRefresh" })
 									}
-									title={"Apply"}
-								>
-									<Check className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors duration-0" />
-								</button>
+									title="Apply"
+								/>
 								{/* CANCEL REFRESH */}
-								<button
-									className="py-1.5 px-2 rounded-lg bg-zinc-800/50 hover:bg-red-600/50 hover:cursor-pointer transition-all group"
+								<ActionBtn
+									icon={X}
+									tone="red"
+									pad="py-1.5 px-2"
 									onClick={() =>
 										onAction({ type: "cancelRefresh" })
 									}
-									title={"Cancel"}
-								>
-									<X className="w-5 h-5 text-gray-400 group-hover:text-red-300 transition-colors" />
-								</button>
+									title="Cancel"
+								/>
 							</div>
 						) : isAdding ? (
 							<div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
+								{/* CYCLE LOGO */}
+								{logoNav}
+								{/* TITLE */}
+								{logoClear}
 								{/* COVER COLORS */}
 								{colorPicker}
-								{/* NAV DIFFERENT SERIES */}
-								{onSeriesNav && (
-									<div className="flex gap-1 bg-zinc-800/50 rounded-lg">
-										{/* LEFT BUTTON */}
-										<button
-											className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
-                      hover:cursor-pointer transition-all group"
-											onClick={() => onSeriesNav("left")}
-										>
-											<ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
-										</button>
-										{/* RIGHT BUTTON */}
-										<button
-											className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60
-                      hover:cursor-pointer transition-all group"
-											onClick={() => onSeriesNav("right")}
-										>
-											<ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
-										</button>
-									</div>
-								)}
+								{seriesNav}
 								{/* ADD */}
-								<button
-									className="py-1.5 px-5 rounded-lg bg-zinc-800/50 hover:bg-green-600/20 hover:cursor-pointer transition-all group"
+								<ActionBtn
+									icon={Plus}
+									tone="green"
+									pad="py-1.5 px-5"
 									onClick={onAdd}
 									title={"Add " + mediaType}
-								>
-									<Plus className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors duration-0" />
-								</button>
+								/>
 								{/* NEED YEAR */}
 								{mediaType !== "book" && (
-									<button
-										className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer transition-all group"
-										onClick={() => {
-											onAction({
-												type: "needYearField",
-											});
-										}}
-										title={"Search with year"}
-									>
-										<ChevronsUp className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
-									</button>
+									<ActionBtn
+										icon={ChevronsUp}
+										tone="blue"
+										pad="p-1.5 px-2.5"
+										onClick={() =>
+											onAction({ type: "needYearField" })
+										}
+										title="Search with year"
+									/>
 								)}
-								{/* MORE RESULTS (book) */}
-								{mediaType === "book" && (
-									<button
-										className="p-1.5 px-2.5 rounded-lg bg-zinc-800/50 hover:bg-blue-600/20 hover:cursor-pointer transition-all group"
-										onClick={() => {
-											onAction({ type: "moreBooks" });
-										}}
-										title={"Other results"}
-									>
-										<List className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
-									</button>
-								)}
+								{moreResults}
 								{/* CLOSE BUTTON */}
-								<button
-									className="py-1.5 px-2 rounded-lg bg-zinc-800/50 hover:bg-red-600/50 
-                    hover:cursor-pointer transition-all group"
+								<ActionBtn
+									icon={X}
+									tone="red"
+									pad="py-1.5 px-2"
 									onClick={onClose}
-									title={"Close"}
-								>
-									<X className="w-5 h-5 text-gray-400 group-hover:text-red-300 transition-colors" />
-								</button>
+									title="Close"
+								/>
 							</div>
 						) : (
 							<div className="absolute right-3 top-3 flex items-center gap-1 z-10">
 								{/* RELOAD METADATA FROM SOURCE */}
 								{canRefresh && (
-									<button
-										className="p-1.5 rounded-lg bg-zinc-800/0 hover:bg-emerald-800/20 hover:cursor-pointer transition-all duration-200 group"
-										onClick={() => {
-											onAction({ type: "refresh" });
-										}}
-										title={"Reload cover / series info"}
-									>
-										<RefreshCw className="w-4 h-4 text-black/0 group-hover:text-emerald-400 transition-colors duration-200" />
-									</button>
+									<ActionBtn
+										variant="ghost"
+										icon={RefreshCw}
+										tone="emerald"
+										onClick={() =>
+											onAction({ type: "refresh" })
+										}
+										title="Reload cover / series info"
+									/>
 								)}
 								{/* RESET SCORE */}
 								{item.score && (
-									<button
-										className="p-1.5 rounded-lg bg-zinc-800/0 hover:bg-blue-800/20 hover:cursor-pointer transition-all duration-200 group"
-										onClick={() => {
-											onAction({ type: "resetScore" });
-										}}
-										title={"Reset score"}
-									>
-										<RotateCcw className="w-4 h-4 text-black/0 group-hover:text-blue-400 transition-colors duration-200" />
-									</button>
+									<ActionBtn
+										variant="ghost"
+										icon={RotateCcw}
+										tone="blue"
+										onClick={() =>
+											onAction({ type: "resetScore" })
+										}
+										title="Reset score"
+									/>
 								)}
 								{/* DELETE SERIES METADATA */}
 								{(series.seriesTitle ||
@@ -360,37 +559,35 @@ export function DesktopDetails<T extends BaseMediaProps>({
 									series.prequel ||
 									series.sequel) &&
 									mediaType !== "game" && (
-										<button
-											className="p-1.5 rounded-lg bg-zinc-800/0 hover:bg-orange-700/20 hover:cursor-pointer transition-all duration-200 group"
-											onClick={() => {
+										<ActionBtn
+											variant="ghost"
+											icon={Unlink}
+											tone="orange"
+											onClick={() =>
 												onAction({
 													type: "clearSeriesMeta",
-												});
-											}}
-											title={"Clear series metadata"}
-										>
-											<Unlink className="w-4 h-4 text-black/0 group-hover:text-orange-400 transition-colors duration-200" />
-										</button>
+												})
+											}
+											title="Clear series metadata"
+										/>
 									)}
 								{/* DELETE ITEM */}
-								<button
-									className="p-1.5 rounded-lg bg-zinc-800/0 hover:bg-red-700/20 hover:cursor-pointer transition-all duration-200 group"
-									onClick={() => {
-										onAction({ type: "delete" });
-									}}
+								<ActionBtn
+									variant="ghost"
+									icon={Trash2}
+									tone="red"
+									onClick={() => onAction({ type: "delete" })}
 									title={"Delete " + mediaType}
-								>
-									<Trash2 className="w-4 h-4 text-black/0 group-hover:text-red-500 transition-colors duration-200" />
-								</button>
+								/>
 							</div>
 						)}
 
 						<div className="flex gap-6">
 							{/* LEFT SIDE -- PIC */}
 							<div
-								className={`relative bg-[#141414] p-3.5 rounded-xl shadow-island select-none ${
-									coverUrls ? "hover:cursor-pointer" : ""
-								}`}
+								className={`relative w-69 shrink-0 bg-[#141414] p-3.5 rounded-xl shadow-island select-none ${
+									isBook ? "" : "pb-0"
+								} ${coverUrls ? "hover:cursor-pointer" : ""}`}
 								onClick={
 									mediaType === "book" &&
 									coverUrls &&
@@ -455,6 +652,8 @@ export function DesktopDetails<T extends BaseMediaProps>({
 								/>
 								{/* Inner vignette */}
 								<div className="absolute -inset-1 pointer-events-none rounded-xl shadow-[inset_0_0_12px_rgba(0,0,0,0.4)]" />
+								{/* AUTHOR/STUDIO/DIRECTOR/DATES */}
+								{!isBook && metaRow}
 							</div>
 
 							{/* RIGHT SIDE -- DETAILS */}
@@ -497,19 +696,20 @@ export function DesktopDetails<T extends BaseMediaProps>({
 									className={`flex flex-col flex-1 ${
 										mediaType === "show"
 											? "justify-end"
-											: series.seriesTitle ||
-												  gameItem.mainTitle
+											: seriesLabel
 												? "justify-end mb-4"
 												: "justify-end mb-3"
 									}`}
 								>
 									{/* HEADER -- sat over backdrop */}
-									<div className="relative flex flex-col w-fit max-w-full">
+									<div
+										className={`relative flex flex-col items-center w-fit max-w-[94%] mx-auto ${isBook ? "-mb-1" : `${showsWordmark ? "mb-0.5" : "-mb-2"}`}`}
+									>
 										{/* washblur */}
 										{hasBackdrop &&
 											mediaType !== "book" && (
 												<div
-													className="absolute -left-5 -right-10 -top-5 -bottom-2 -z-1 pointer-events-none backdrop-blur-[3px]"
+													className="absolute -left-5 -right-10 -top-5 -bottom-2 -z-1 pointer-events-none  backdrop-blur-[3px]"
 													style={{
 														backgroundColor:
 															"rgba(9,9,11,0.16)",
@@ -525,143 +725,40 @@ export function DesktopDetails<T extends BaseMediaProps>({
 												/>
 											)}
 										{/* SERIES TITLE */}
-										{(() => {
-											const seriesLabel =
-												mediaType === "game"
-													? gameItem.dlcIndex !== 0
-														? gameItem.mainTitle
-														: null
-													: series.seriesTitle;
-
-											return (
-												seriesLabel && (
-													<span className="font-semibold text-zinc-100/80 text-xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-0">
-														{seriesLabel}
-													</span>
-												)
-											);
-										})()}
-										{/* TITLE */}
-										<div className="w-fit mb-1.5 max-w-full">
-											<div className="font-bold text-zinc-100/90 text-3xl whitespace-nowrap overflow-x-auto overflow-y-hidden mb-1.5">
-												{item.title || "Untitled"}
-											</div>
-											{/* STATUS WAVE */}
-											<div className="w-full bg-zinc-800 rounded-full h-0.75 overflow-hidden">
-												<div
-													className={`bg-zinc-900 h-0.75 transition-all duration-500 ease-out rounded-full relative overflow-hidden`}
-													style={{ width: "100%" }}
-												>
-													<div
-														className="absolute inset-0"
-														style={{
-															background:
-																getStatusDetailWaveColor(
-																	item.status,
-																),
-															animation:
-																"wave 6s ease-in-out infinite",
-															width: "200%",
-														}}
-													/>
-												</div>
-											</div>
-										</div>
-										{/* AUTHOR/STUDIO/DIRECTOR AND DATES */}
-										<div className="flex justify-start items-center gap-2 w-full mb-3">
-											{(mediaType === "show" ||
-												mediaType === "movie") && (
-												<button
-													onClick={() =>
-														onAction({
-															type: "cast",
-														})
-													}
-													title="View cast"
-													className="cursor-pointer text-zinc-400 hover:text-zinc-200 hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] transition-all duration-200 shrink-0 mr-0.5 hover:scale-105"
-												>
-													<Users
-														className="w-4 h-3.75 -mt-0.5 ml-0.5"
-														strokeWidth={2}
-													/>
-												</button>
-											)}
-											{mediaType === "show" && (
-												<button
-													onClick={() =>
-														onAction({
-															type: "openRatings",
-														})
-													}
-													title="Episode ratings"
-													className="cursor-pointer text-zinc-400 hover:text-zinc-200 hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] transition-all duration-200 shrink-0 mr-0.5 hover:scale-105"
-												>
-													<BarChart2
-														className="w-4 h-3.75 -mt-0.5"
-														strokeWidth={2}
-													/>
-												</button>
-											)}
-											<span className="font-medium text-zinc-200/70 text-md max-h-6 leading-6 min-w-0">
-												{canOpenDirector ? (
-													<DirectorNames
-														names={directorNames}
-														onPick={(name) =>
-															onAction({
-																type: "directorClick",
-																payload: name,
-															})
-														}
-														onMore={() =>
-															onAction({
-																type: "directorPicker",
-															})
-														}
-													/>
-												) : (
-													<span className="truncate max-w-60 inline-block align-bottom">
-														{differentColumns[0].getValue(
-															item,
-														) ||
-															"Unknown " +
-																differentColumns[0]
-																	.label}
-													</span>
-												)}
-											</span>
-											<div className="font-medium text-zinc-200/70 text-md leading-6">
-												•
-											</div>
+										{seriesLabel && (
 											<span
-												className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-11 leading-6"
-												title="Date Published"
+												className={
+													!isBook
+														? SERIES_TEXT.lgScreen
+														: SERIES_TEXT.lg
+												}
 											>
-												{differentColumns[1].getValue(
-													item,
-												) || "Unknown"}
+												{seriesLabel}
 											</span>
-											{item.status === "Completed" && (
-												<div className="flex items-center gap-2">
-													<div className="font-medium text-zinc-200/70 text-md leading-6">
-														•
-													</div>
-													<span
-														className="font-medium text-zinc-200/70 text-md overflow-y-auto max-h-6 min-w-25 leading-6"
-														title="Date Completed"
-													>
-														{formatDateShort(
-															item.dateCompleted,
-														)}
-													</span>
-												</div>
-											)}
-										</div>
+										)}
+										{/* TITLE */}
+										<MediaTitle
+											title={item.title}
+											logoUrl={displayLogoUrl}
+											size="lg"
+											className="mx-auto mb-1.5 max-w-full"
+											textClass={
+												!isBook
+													? TITLE_TEXT.lgScreen
+													: TITLE_TEXT.lg
+											}
+											underlineColor={underlineColor}
+											isBook={isBook}
+										/>
 									</div>
-									<div></div>
+									{isBook && metaRow}
 									{/* STATUS AND SCORE */}
-									<div className="flex justify-start gap-4 mb-2.5 max-w-[94%]">
+									<div className="flex justify-start gap-4 mb-2.5 w-[94%] mx-auto">
+										{/* STAUTS */}
 										<div className="flex-[0.77] lg:min-w-41.25">
-											<label className="text-sm font-medium text-zinc-400 mb-1 block">
+											<label
+												className={`${FIELD_LABEL} mb-1.5`}
+											>
 												Status
 											</label>
 											<Dropdown
@@ -680,65 +777,32 @@ export function DesktopDetails<T extends BaseMediaProps>({
 												dropDuration={0.24}
 											/>
 										</div>
+										{/* SCORE */}
 										<div className="flex-[0.865] lg:min-w-48.75">
-											<div className="flex justify-between">
-												<label className="ml-1 text-sm font-medium text-zinc-400 mb-1 block">
-													Score
-												</label>
-												{mediaType === "movie" &&
-													item.status ===
-														"Want to Watch" &&
-													movieItem.imdbRating !=
-														null && (
-														<div className="flex items-center gap-1 mr-2">
-															<Leaf
-																className="w-3 h-3 text-emerald-300/65 fill-emerald-300/15"
-																strokeWidth={
-																	1.75
-																}
-															/>
-															<span className="text-[0.8125rem] font-semibold tabular-nums text-zinc-300/80 tracking-tight">
-																{movieItem.imdbRating.toFixed(
-																	1,
-																)}
-															</span>
-														</div>
-													)}
-												{mediaType === "book" &&
-													item.status ===
-														"Want to Read" &&
-													bookItem.rating != null && (
-														<div className="flex items-center gap-1 mr-2">
-															<Leaf
-																className="w-3 h-3 text-emerald-300/65 fill-emerald-300/15"
-																strokeWidth={
-																	1.75
-																}
-															/>
-															<span className="text-[0.8125rem] font-semibold tabular-nums text-zinc-300/80 tracking-tight">
-																{bookItem.rating.toFixed(
-																	1,
-																)}
-															</span>
-														</div>
-													)}
-											</div>
+											<label
+												className={`${FIELD_LABEL} mb-1.5 text-right pr-2`}
+											>
+												Score
+											</label>
 											{item.score ? (
-												<div className="group w-full rounded-lg border backdrop-blur-md flex items-center justify-between gap-3 px-4 py-3 transition-all duration-300 ease-out bg-linear-to-b shadow-md border-zinc-800/50 from-transparent via-zinc-800/30 to-zinc-800/50 shadow-black/20">
+												<div
+													// DO flex-row-reverse for flip
+													className={`group w-full ${FIELD_PLATE} flex flex-row items-center justify-between gap-3 px-4 py-3 transition-all duration-300 ease-out`}
+												>
 													<span className="text-sm text-zinc-300/85 font-bold tracking-wide">
-														{!isAdding &&
-															`${getDisplayScore(item.score.mu)} - `}
 														{getTierFromMu(
 															item.score!.mu,
 														)}
+														{!isAdding &&
+															` - ${getDisplayScore(item.score.mu)}`}
 													</span>
-													{/* NUDGE SCORE BY 0.1 */}
+													{/* SCORE SUB BUTTONS */}
 													{!isAdding &&
 														!isSelecting && (
-															<div className="flex gap-1 -my-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
+															<div className="flex gap-1 -my-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
 																<button
 																	className={
-																		SCORE_NUDGE_BTN
+																		SCORE_SUB_BTN
 																	}
 																	disabled={
 																		!canNudgeMu(
@@ -765,7 +829,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 																</button>
 																<button
 																	className={
-																		SCORE_NUDGE_BTN
+																		SCORE_SUB_BTN
 																	}
 																	disabled={
 																		!canNudgeMu(
@@ -807,6 +871,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 													}}
 													options={tierOptions}
 													customStyle="text-zinc-300/85"
+													// flip
 													dropStyle={(() => {
 														const option =
 															statusOptions.find(
@@ -846,11 +911,13 @@ export function DesktopDetails<T extends BaseMediaProps>({
 											/>
 										)}
 									{/* NOTES */}
-									<div className="space-y-1 mb-2 max-w-[94%]">
-										<label className="text-sm font-medium text-zinc-400 block">
+									<div className="space-y-1.5 mb-2 w-[94%] mx-auto">
+										<label className={FIELD_LABEL}>
 											Notes
 										</label>
-										<div className="bg-zinc-800/30 rounded-lg pl-3 pt-3 pr-1 pb-1.5 max-h-21.5 overflow-auto focus-within:ring-1 focus-within:ring-zinc-700/50 transition-all duration-200 shadow-lg shadow-black/20">
+										<div
+											className={`${FIELD_PLATE} focus-within:neu-pressed pl-3 pt-3 pr-1 pb-1.5 max-h-21.5 overflow-auto transition-all duration-200`}
+										>
 											<AutoTextarea
 												value={localNote}
 												onChange={(e) => {

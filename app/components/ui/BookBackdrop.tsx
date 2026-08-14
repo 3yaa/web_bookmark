@@ -10,10 +10,10 @@ const maskH =
 const maskV =
 	"linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, black 18%, black 82%, rgba(0,0,0,0.2) 100%)";
 
-// details header fades: dissolve into the card (left + bottom) so there's no
-// hard seam where the tinted base meets the lighter card background
+// details header fades: dissolve into the card (both sides + bottom) so there's
+// no hard seam where the tinted base meets the lighter card background
 const detailsMaskH =
-	"linear-gradient(to right, transparent 0%, black 40%, black 100%)";
+	"linear-gradient(to right, transparent 0%, black 30%, black 70%, transparent 100%)";
 
 // long multi-stop ease that reaches fully transparent at the very bottom of the
 // band, so the fade lands at the same depth as the movie/show backdrop
@@ -121,7 +121,7 @@ export const BookBackdropDesktop = ({
 // fading into the card (#121212) the same way the movie/show backdrop does
 export const BookBackdropDetails = ({ color }: { color?: string }) => (
 	<div
-		className="absolute -top-4 left-20 -right-21 h-[70%] -z-10 overflow-hidden select-none"
+		className="absolute -top-4 -left-0.5 -right-0.5 h-[70%] -z-10 overflow-hidden select-none"
 		style={
 			{
 				"--c": resolve(color),
@@ -134,7 +134,7 @@ export const BookBackdropDetails = ({ color }: { color?: string }) => (
 	>
 		<div
 			className="absolute inset-0"
-			style={{ backgroundImage: colorFill("68% 24%", "62% 18%") }}
+			style={{ backgroundImage: colorFill("50% 24%", "50% 18%") }}
 		/>
 		<Grain />
 	</div>

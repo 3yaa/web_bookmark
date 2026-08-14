@@ -13,6 +13,7 @@ export function resetMovieValues(
 		note: undefined,
 		director: undefined,
 		cover: undefined,
+		logoUrl: undefined,
 		dateReleased: undefined,
 		seriesTitle: undefined,
 		placeInSeries: undefined,
@@ -37,6 +38,7 @@ export function mapMetaToMovie(dataMeta: MovieAPIProps): Partial<MovieProps> {
 			? { url: dataMeta.poster_url, color: "" }
 			: undefined,
 		backdropUrl: dataMeta.backdrop_url,
+		logoUrl: dataMeta.logo_url,
 	};
 }
 
@@ -44,9 +46,9 @@ export function mapSeriesToMovie(
 	dataSeries?: SeriesAPIProps | null,
 ): Partial<MovieProps> {
 	return {
-		seriesTitle: dataSeries?.series_title ?? undefined,
-		placeInSeries: dataSeries?.position ?? undefined,
-		prequel: dataSeries?.prequel ?? undefined,
-		sequel: dataSeries?.sequel ?? undefined,
+		seriesTitle: dataSeries?.series_title ?? null,
+		placeInSeries: dataSeries?.position ?? null,
+		prequel: dataSeries?.prequel ?? null,
+		sequel: dataSeries?.sequel ?? null,
 	};
 }

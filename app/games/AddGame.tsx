@@ -53,7 +53,10 @@ export function AddGame({
 	const [backdropUrls, setBackdropUrls] = useState<string[]>([]);
 	const [backdropIndex, setBackdropIndex] = useState(0);
 	//
-	const { searchForGame, searchForGameDlc, isGameSearching } =
+	const [logoUrls, setLogoUrls] = useState<string[]>([]);
+	const [logoIndex, setLogoIndex] = useState(0);
+	//
+	const { searchForGame, searchForGameDlc, searchForGameLogos, isGameSearching } =
 		useGameSearch();
 
 	const reset = useCallback(() => {
@@ -62,6 +65,9 @@ export function AddGame({
 		//
 		setBackdropUrls([]);
 		setBackdropIndex(0);
+		//
+		setLogoUrls([]);
+		setLogoIndex(0);
 		//
 		setActiveModal(null);
 		setAllNewGames([]);
@@ -93,6 +99,9 @@ export function AddGame({
 		if (!mainGame) return null;
 		//
 		setBackdropUrls(mainGame.screenshot_urls?.map((ss) => ss.ss_url) || []);
+		// 
+		setLogoUrls(mainGame.logos ?? []);
+		setLogoIndex(0);
 		setNewGame({ ...mapIGDBDataToGame(mainGame), status: "Playing" });
 		setAllNewGames(response);
 		applyCoverColor(mainGame.cover_url);
@@ -192,11 +201,22 @@ export function AddGame({
 				setBackdropIndex(0);
 				setNewGame({ ...mapIGDBDataToGame(game), status: "Playing" });
 				applyCoverColor(game.cover_url);
+				// need to clear first and then set for the new game
+				setLogoUrls([]);
+				setLogoIndex(0);
+				searchForGameLogos(game.title).then((logos) => {
+					setLogoUrls(logos);
+					setNewGame((prev) =>
+						prev.igdbId === game.igdbId
+							? { ...prev, logoUrl: logos[0] ?? undefined }
+							: prev,
+					);
+				});
 			} finally {
 				setActiveModal("gameDetails");
 			}
 		},
-		[applyCoverColor],
+		[applyCoverColor, searchForGameLogos],
 	);
 
 	const handleGameDetailsUpdates = useCallback(
@@ -228,9 +248,12 @@ export function AddGame({
 			...newGame,
 			backdropUrl: backdropUrls[backdropIndex],
 			status: isStatus,
+			// empty on logo dislike
+			...(logoUrls.length
+				? { logoUrl: logoUrls[logoIndex] ?? null }
+				: {}),
 		};
-		// only close when the battler did not take over -- closing
-		// would clear the very item it is scoring
+		// only close when the battler did not take over
 		const isBattling = await onAddGame(finalGame as GameProps);
 		if (!isBattling) onClose();
 	};
@@ -336,6 +359,9 @@ export function AddGame({
 					updateBackdropIndex={(newIndex: number) =>
 						setBackdropIndex(newIndex)
 					}
+					logoUrls={logoUrls}
+					logoIndex={logoIndex}
+					updateLogoIndex={setLogoIndex}
 				/>
 			)}
 			<AnimatePresence>

@@ -3,8 +3,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { ModalBackdrop } from "@/app/components/ui/ModalMotion";
 import { Book } from "lucide-react";
 //
-import { BookProps, BookCoverProps, BookSearchResult } from "@/types/book";
-import { SeriesAPIProps } from "@/types/media";
+import { BookProps, BookSearchResult } from "@/types/book";
+import { MediaCoverProps, SeriesAPIProps } from "@/types/media";
 //
 import {
 	mapBookAPIDatatoBook,
@@ -46,7 +46,7 @@ export function AddBook({
 	const [series, setSeries] = useState<SeriesAPIProps[]>([]);
 	const [seriesIndex, setSeriesIndex] = useState(0);
 	//
-	const [covers, setCovers] = useState<BookCoverProps[]>([]);
+	const [covers, setCovers] = useState<MediaCoverProps[]>([]);
 	const [coverIndex, setCoverIndex] = useState(0);
 	// multi-result picker
 	const [allNewBooks, setAllNewBooks] = useState<BookSearchResult[]>([]);

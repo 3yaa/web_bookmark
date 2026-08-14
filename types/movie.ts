@@ -41,5 +41,7 @@ export interface MovieAPIProps {
 	imdbRating?: number | null;
 	poster_url?: string;
 	backdrop_url?: string;
+	logo_url?: string | null;
+	logos?: string[];
 	series?: SeriesAPIProps | null;
 }

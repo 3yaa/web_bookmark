@@ -23,14 +23,12 @@ export const DIFF_COLUMNS_BOOK: [
 	},
 ];
 
-export type BookCoverProps = MediaCoverProps;
-
 export interface BookProps extends BaseMediaProps, SeriesMediaProps {
 	status: "Completed" | "Want to Read" | "Dropped";
 	key: string;
 	author: string;
 	datePublished: number;
-	cover: BookCoverProps;
+	cover: MediaCoverProps;
 	numPages: number;
 	rating: number;
 }
@@ -43,7 +41,7 @@ export interface BookAPIProps {
 	first_publish_year: number | null;
 	num_pages: number | null;
 	rating: number | null;
-	covers: BookCoverProps[];
+	covers: MediaCoverProps[];
 	series: SeriesAPIProps[];
 }
 

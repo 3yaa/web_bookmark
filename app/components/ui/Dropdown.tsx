@@ -20,6 +20,8 @@ interface DropdownProps {
 	customStyle?: string;
 	dropDuration?: number;
 	trailing?: ReactNode;
+	// for score
+	flip?: boolean;
 }
 
 export function Dropdown({
@@ -31,6 +33,7 @@ export function Dropdown({
 	dropStyle,
 	dropDuration = 0.3,
 	trailing,
+	flip = false,
 }: DropdownProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const selectRef = useRef<HTMLDivElement>(null);
@@ -87,16 +90,15 @@ export function Dropdown({
 				onClick={() => !disabled && setIsOpen(!isOpen)}
 				disabled={disabled}
 				className={`
-          w-full rounded-lg border backdrop-blur-md
+          group/dd w-full rounded-lg
           flex items-center justify-between gap-3 px-4 py-3
+          ${flip ? "flex-row-reverse" : ""}
           transition-all duration-300 ease-out
-          bg-linear-to-b shadow-md
-          hover:scale-[1.02] hover:shadow-xl hover:shadow-black/30
-          focus:outline-none active:scale-[0.98] 
+          focus:outline-none
             ${
 				isOpen
-					? "border-zinc-800/50 from-transparent via-zinc-800/30 to-zinc-800/50 scale-[1.02]"
-					: "border-zinc-800/50 from-transparent via-zinc-800/30 to-zinc-800/50 shadow-black/20"
+					? "neu-menu rounded-b-none"
+					: "neu-raised hover:neu-raised-hi active:scale-[0.99]"
 			}
           ${
 				disabled
@@ -107,13 +109,17 @@ export function Dropdown({
 			>
 				<div className="flex items-center gap-2">
 					<span className="text-sm font-bold tracking-wide">
-						{selectedOption ? selectedOption.label : "Select Option"}
+						{selectedOption
+							? selectedOption.label
+							: "Select Option"}
 					</span>
 					{trailing}
 				</div>
 				<ChevronDown
 					className={`w-4 h-4 text-zinc-400 transition-all duration-300 ease-out ${
-						isOpen ? "rotate-180 text-zinc-300" : "rotate-0"
+						isOpen
+							? "rotate-180 text-zinc-300 opacity-100"
+							: "rotate-0 opacity-0 group-hover/dd:opacity-100 group-focus-visible/dd:opacity-100"
 					}`}
 				/>
 			</button>
@@ -128,7 +134,7 @@ export function Dropdown({
 							duration: dropDuration,
 							ease: [0.25, 1, 0.5, 1],
 						}}
-						className="z-50 rounded-lg rounded-t-md border border-zinc-700/40 bg-zinc-900/70 backdrop-blur-md shadow-lg overflow-hidden min-w-max"
+						className="z-50 rounded-lg rounded-t-none neu-menu overflow-hidden min-w-max"
 						style={{
 							position: "fixed",
 							top:

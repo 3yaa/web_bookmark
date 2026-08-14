@@ -26,6 +26,7 @@ export function mapIGDBDataToGame(dataGame: IGDBProps): Partial<GameProps> {
     cover: dataGame.cover_url
       ? { url: dataGame.cover_url, color: "" }
       : undefined,
+    logoUrl: dataGame.logo_url ?? undefined,
     studio: dataGame.developer?.[0]?.name,
     dlcs: [
       { id: dataGame.igdbId, name: dataGame.title },

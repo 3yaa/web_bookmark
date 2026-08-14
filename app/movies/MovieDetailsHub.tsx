@@ -11,6 +11,11 @@ import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { movieStatusOptions } from "@/utils/dropDownDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
 import { TIER_PHI_THRESHOLD, getSeedMu, Tier } from "@/lib/tierConfig";
+import {
+	activeLogoIndex,
+	clearedFrom,
+	stepLogoIndex,
+} from "@/app/views/mediaDetails/shared/logoIndex";
 import { useScoreNudge } from "@/hooks/useScoreNudge";
 import {
 	ActorWork,
@@ -59,6 +64,8 @@ export type MovieAction =
 	| { type: "confirmRefresh" }
 	| { type: "cancelRefresh" }
 	| { type: "cast" }
+	| { type: "changeLogo"; payload: "next" | "prev" }
+	| { type: "clearLogo" }
 	| { type: "pickCoverColor"; payload: string }
 	| { type: "directorClick"; payload: string }
 	| { type: "directorPicker" };
@@ -85,10 +92,12 @@ interface MovieDetailsProps {
 	) => void;
 	existingShows?: ShowProps[];
 	onAddShow?: (movie: ShowProps) => Promise<unknown>;
-	// reload metadata from source (poster/backdrop, series)
 	onRefresh?: (metadata: Partial<MovieProps>) => Promise<void>;
-	// stores legacy movies when an actor's filmography reveals its tmdb id
+	// legacy
 	onBackfillTmdbId?: (movieId: number, tmdbId: string) => void;
+	logoUrls?: string[];
+	logoIndex?: number;
+	updateLogoIndex?: (newIndex: number) => void;
 }
 
 export function MovieDetails({
@@ -106,6 +115,9 @@ export function MovieDetails({
 	onAddShow,
 	onRefresh,
 	onBackfillTmdbId,
+	logoUrls,
+	logoIndex,
+	updateLogoIndex,
 }: MovieDetailsProps) {
 	const [localNote, setLocalNote] = useState(movie.note || "");
 	const [isRefreshing, setIsRefreshing] = useState(false);
@@ -113,6 +125,8 @@ export function MovieDetails({
 	// refresh preview state -- nothing is written until it is confirmed
 	const [isSelecting, setIsSelecting] = useState(false);
 	const [refreshMeta, setRefreshMeta] = useState<Partial<MovieProps>>({});
+	const [refreshLogos, setRefreshLogos] = useState<string[]>([]);
+	const [refreshLogoIndex, setRefreshLogoIndex] = useState(0);
 	// actor related
 	const [castOpen, setCastOpen] = useState(false);
 	const [cast, setCast] = useState<CastMember[]>([]);
@@ -272,6 +286,12 @@ export function MovieDetails({
 			case "cast":
 				handleCast();
 				break;
+			case "changeLogo":
+				handleLogoChange(action.payload);
+				break;
+			case "clearLogo":
+				handleClearLogo();
+				break;
 			case "pickCoverColor":
 				handlePickCoverColor(action.payload);
 				break;
@@ -284,7 +304,27 @@ export function MovieDetails({
 		}
 	};
 
-	// stages the reload -- writes nothing until confirmRefresh
+	//
+	const handleLogoChange = (dir: "next" | "prev") => {
+		const total = isSelecting
+			? refreshLogos.length
+			: (logoUrls?.length ?? 0);
+		if (total < 2) return;
+		if (isSelecting)
+			setRefreshLogoIndex((i) => stepLogoIndex(i, dir, total));
+		else updateLogoIndex?.(stepLogoIndex(logoIndex ?? 0, dir, total));
+	};
+
+	//
+	const handleClearLogo = () => {
+		const current = isSelecting ? refreshLogoIndex : (logoIndex ?? 0);
+		const next =
+			current < 0 ? activeLogoIndex(current) : clearedFrom(current);
+		if (isSelecting) setRefreshLogoIndex(next);
+		else updateLogoIndex?.(next);
+	};
+
+	// writes nothing until confirmRefresh
 	const handleRefresh = async () => {
 		if (!onRefresh || isRefreshing || isSelecting) return;
 		// legacy movies that doesn't have tmdbid
@@ -302,16 +342,17 @@ export function MovieDetails({
 				cover: await buildCover(reloaded.poster_url),
 				backdropUrl: reloaded.backdrop_url,
 			};
+			//
+			setRefreshLogos(reloaded.logos ?? []);
+			setRefreshLogoIndex(0);
 			// legacy
 			if (!hasTmdbId) {
 				meta.tmdbId = reloaded.tmdb_id;
 				meta.director = reloaded.director;
 				meta.dateReleased = reloaded.released_date;
 			}
-			const series = reloaded.series
-				? mapSeriesToMovie(reloaded.series)
-				: undefined;
-			if (series) Object.assign(meta, series);
+			// reload can clear series
+			Object.assign(meta, mapSeriesToMovie(reloaded.series));
 			if (reloaded.title) meta.title = reloaded.title;
 			setRefreshMeta(meta);
 			setIsSelecting(true);
@@ -322,7 +363,11 @@ export function MovieDetails({
 
 	const handleConfirmRefresh = async () => {
 		if (!onRefresh) return;
-		const meta = { ...refreshMeta };
+		//
+		const meta = {
+			...refreshMeta,
+			logoUrl: refreshLogos[refreshLogoIndex] ?? null,
+		};
 		exitSelecting();
 		if (Object.keys(meta).length) await onRefresh(meta);
 	};
@@ -335,21 +380,25 @@ export function MovieDetails({
 	const handlePickCoverColor = (color: string) => {
 		if (isSelecting) {
 			setRefreshMeta((prev) =>
-				prev.cover ? { ...prev, cover: { ...prev.cover, color } } : prev,
+				prev.cover
+					? { ...prev, cover: { ...prev.cover, color } }
+					: prev,
 			);
 			return;
 		}
-		if (movie.cover) onUpdate(movie.id, { cover: { ...movie.cover, color } });
+		if (movie.cover)
+			onUpdate(movie.id, { cover: { ...movie.cover, color } });
 	};
 
 	const exitSelecting = () => {
 		setIsSelecting(false);
 		setRefreshMeta({});
+		setRefreshLogos([]);
+		setRefreshLogoIndex(0);
 	};
 
 	const handleCast = async () => {
-		// reset on open instead of on close, so the exit animation keeps
-		// whatever was on screen
+		// reset on open instead of on close
 		setSelectedActor(null);
 		setIsDirectorView(false);
 		setCastOpen(true);
@@ -479,11 +528,10 @@ export function MovieDetails({
 		addMovie();
 	}, [addMovie]);
 
-	// need to reset local note 
+	// need to reset local note
 	useEffect(() => {
 		setLocalNote(movie.note || "");
-		setIsSelecting(false);
-		setRefreshMeta({});
+		exitSelecting();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [movie.id]);
 
@@ -531,6 +579,8 @@ export function MovieDetails({
 					onClose={handleModalClose}
 					isInList={isInList}
 					canRefresh={!!onRefresh}
+					logoUrls={isSelecting ? refreshLogos : logoUrls}
+					logoIndex={isSelecting ? refreshLogoIndex : logoIndex}
 					onAction={
 						handleAction as (action: {
 							type: string;
@@ -552,7 +602,6 @@ export function MovieDetails({
 					onAdd={handleAddMovie}
 					onClose={handleModalClose}
 					isInList={isInList}
-					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {
 							type: string;
@@ -589,9 +638,6 @@ export function MovieDetails({
 						sortedWorks={sortedWorks}
 						actorLoading={actorLoading}
 						filmSort={filmSort}
-						// only close -- clearing the actor here would swap the
-						// filmography for the cast grid mid-exit, changing the
-						// panel's height and shifting the centred modal
 						onClose={() => setCastOpen(false)}
 						onActorClick={handleActorClick}
 						onActorBack={() => {
@@ -613,7 +659,6 @@ export function MovieDetails({
 					onClose={() => setPendingWork(null)}
 					existingMovies={existingMovies}
 					onAddMovie={async (m) => {
-						// route through the parent's data hook
 						if (onAddWork) {
 							await onAddWork(m);
 						} else {

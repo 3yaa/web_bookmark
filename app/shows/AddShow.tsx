@@ -38,6 +38,9 @@ export function AddShow({
 	//
 	const [newShow, setNewShow] = useState<Partial<ShowProps>>({});
 	//
+	const [logoUrls, setLogoUrls] = useState<string[]>([]);
+	const [logoIndex, setLogoIndex] = useState(0);
+	//
 	const { searchForShow, searchForShowSeasonInfo, isShowSearching } =
 		useShowSearch();
 
@@ -48,6 +51,8 @@ export function AddShow({
 		//
 		setActiveModal(null);
 		setNewShow({});
+		setLogoUrls([]);
+		setLogoIndex(0);
 		if (titleToSearch.current) {
 			titleToSearch.current.value = "";
 			titleToSearch.current.focus();
@@ -90,6 +95,8 @@ export function AddShow({
 				...mapTMDBTVToShow(seasonInfo),
 				status: "Want to Watch",
 			}));
+			setLogoUrls(seasonInfo.logos ?? []);
+			setLogoIndex(0);
 		},
 		[searchForShowSeasonInfo],
 	);
@@ -147,6 +154,10 @@ export function AddShow({
 		const finalShow = {
 			...newShow,
 			status: isStatus,
+			// text title then null not undefined
+			...(logoUrls.length
+				? { logoUrl: logoUrls[logoIndex] ?? null }
+				: {}),
 		};
 		const isBattling = await onAddShow(finalShow as ShowProps);
 		if (!isBattling) onClose();
@@ -264,6 +275,9 @@ export function AddShow({
 						style: "h-8 w-8 border-emerald-400",
 						text: "Searching...",
 					}}
+					logoUrls={logoUrls}
+					logoIndex={logoIndex}
+					updateLogoIndex={setLogoIndex}
 				/>
 			)}
 		</ModalBackdrop>

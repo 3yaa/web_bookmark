@@ -1,21 +1,17 @@
 import Image from "next/image";
 import { Option } from "@/app/components/ui/Dropdown";
 import { DirectorNames } from "../../movies/components/DirectorNames";
-import { BaseMediaProps, ColumnConfig, SeriesMediaProps } from "@/types/media";
+import {
+	BaseMediaProps,
+	ColumnConfig,
+	MediaCoverProps,
+	SeriesMediaProps,
+} from "@/types/media";
 import { GameProps } from "@/types/game";
 import { ShowProps } from "@/types/show";
 import { useEffect, useRef, useState } from "react";
 import { MobileScorePicker } from "@/app/components/ui/MobileScorePicker";
-import {
-	Plus,
-	ChevronLeft,
-	ChevronRight,
-	ChevronsUp,
-	RefreshCw,
-	Check,
-	X,
-	List,
-} from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
 import { Loading } from "@/app/components/ui/Loading";
 import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
 import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
@@ -23,9 +19,10 @@ import { BookCoverConfig } from "@/app/books/components/BookCoverConfigDetails";
 import { CoverColorPicker } from "@/app/components/ui/CoverColorPicker";
 import { MobileProgressPicker } from "@/app/components/ui/MobileSeasonEpPicker";
 import { MobileSeriesNav } from "./shared/MobileSeriesNav";
+import { MediaTitle, SERIES_TEXT, TITLE_TEXT } from "./shared/MediaTitle";
 import { calcCurProgress } from "@/app/shows/utils/progressCalc";
 import { getDisplayScore } from "@/lib/tierConfig";
-import { BookCoverProps, BookProps } from "@/types/book";
+import { BookProps } from "@/types/book";
 
 interface MobileDetailsProps<T extends BaseMediaProps> {
 	item: T;
@@ -40,9 +37,8 @@ interface MobileDetailsProps<T extends BaseMediaProps> {
 	differentColumns: [ColumnConfig<T>, ColumnConfig<T>];
 	onSeriesNav?: (dir: "left" | "right") => void; // book + movie
 	isInList?: (title: string) => boolean;
-	canRefresh?: boolean;
 	isSelecting?: boolean;
-	coverUrls?: BookCoverProps[]; // book only
+	coverUrls?: MediaCoverProps[]; // book only
 	coverIndex?: number; // book only
 }
 
@@ -59,7 +55,6 @@ export function MobileDetails<T extends BaseMediaProps>({
 	differentColumns,
 	onSeriesNav,
 	isInList,
-	canRefresh,
 	isSelecting,
 	coverUrls,
 	coverIndex,
@@ -81,7 +76,6 @@ export function MobileDetails<T extends BaseMediaProps>({
 
 	const [isProgressPickerOpen, setIsProgressPickerOpen] = useState(false);
 	const [isScorePickerOpen, setIsScorePickerOpen] = useState(false);
-	const [posterLoaded, setPosterLoaded] = useState(false);
 	const [translateY, setTranslateY] = useState(0);
 	const [isDragging, setIsDragging] = useState(false);
 	const [isVisible, setIsVisible] = useState(false);
@@ -115,7 +109,7 @@ export function MobileDetails<T extends BaseMediaProps>({
 			? coverUrls?.[coverIndex ?? 0]
 			: (item.cover ?? undefined);
 
-			const coverSrc = item.cover?.url ?? item.posterUrl;
+	const coverSrc = item.cover?.url ?? item.posterUrl;
 
 	const colorPicker = activeCover ? (
 		<CoverColorPicker
@@ -267,144 +261,67 @@ export function MobileDetails<T extends BaseMediaProps>({
 					/>
 				)}
 				{/* ACTION BAR */}
-				{(posterLoaded || isAdding || isSelecting) && (
+				{isAdding && (
 					<div className="sticky top-0 z-30">
 						<div className="absolute top-0 left-0 right-0 mt-1.5 mx-0.5 flex items-center justify-between">
-							{/* RELOAD METADATA FROM SOURCE */}
-							{!isAdding && !isSelecting && canRefresh && (
-								<button
-									className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
-									onClick={() =>
-										onAction({ type: "refresh" })
-									}
-									title="Reload cover / series info"
-								>
-									<RefreshCw className="w-5 h-5 text-slate-400" />
-								</button>
-							)}
-							{/* CONFIRM / CANCEL REFRESH PREVIEW */}
-							{isSelecting && (
-								<div className="flex items-center gap-2">
-									{/* CHANGE SERIES */}
-									{onSeriesNav && (
-										<div className="flex gap-1 bg-zinc-800/60 rounded-lg p-0.5">
-											<button
-												className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
-												onClick={() =>
-													onSeriesNav("left")
-												}
-											>
-												<ChevronLeft className="w-5 h-5 text-gray-400" />
-											</button>
-											<button
-												className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
-												onClick={() =>
-													onSeriesNav("right")
-												}
-											>
-												<ChevronRight className="w-5 h-5 text-gray-400" />
-											</button>
-										</div>
-									)}
-									{mediaType === "book" && (
+							{/* ADD BUTTON */}
+							<button
+								className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
+								onClick={onAdd}
+							>
+								<Plus className="w-5 h-5 text-slate-400" />
+							</button>
+							{/* COVER COLORS */}
+							{colorPicker}
+							{/* COVER INDICATOR */}
+							{mediaType === "book" &&
+								coverUrls &&
+								coverUrls.length > 1 &&
+								coverIndex !== undefined && (
+									<div className="p-1.5 px-2.5 bg-zinc-800/50 backdrop-blur-sm rounded-md">
+										<span className="text-xs text-slate-400 font-medium">
+											{coverIndex + 1}/{coverUrls.length}
+										</span>
+									</div>
+								)}
+							<div className="flex items-center gap-2">
+								{/* DIFFERENT SERIES OPTIONS */}
+								{onSeriesNav && (
+									<div className="flex gap-1 bg-zinc-800/60 rounded-lg p-0.5">
+										<button
+											className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
+											onClick={() => onSeriesNav("left")}
+										>
+											<ChevronLeft className="w-5 h-5 text-gray-400 transition-colors" />
+										</button>
 										<button
 											className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
-											onClick={() =>
-												onAction({ type: "moreBooks" })
-											}
-											title="Other results"
+											onClick={() => onSeriesNav("right")}
 										>
-											<List className="w-5 h-5 text-slate-400" />
-										</button>
-									)}
-									{colorPicker}
-									<button
-										className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
-										onClick={() =>
-											onAction({ type: "confirmRefresh" })
-										}
-										title="Apply"
-									>
-										<Check className="w-5 h-5 text-green-400" />
-									</button>
-									<button
-										className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
-										onClick={() =>
-											onAction({ type: "cancelRefresh" })
-										}
-										title="Cancel"
-									>
-										<X className="w-5 h-5 text-red-300" />
-									</button>
-								</div>
-							)}
-							{isAdding && (
-								<>
-									{/* ADD BUTTON */}
-									<button
-										className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
-										onClick={onAdd}
-									>
-										<Plus className="w-5 h-5 text-slate-400" />
-									</button>
-									{/* COVER COLORS */}
-									{colorPicker}
-									{/* COVER INDICATOR */}
-									{mediaType === "book" &&
-										coverUrls &&
-										coverUrls.length > 1 &&
-										coverIndex !== undefined && (
-											<div className="p-1.5 px-2.5 bg-zinc-800/50 backdrop-blur-sm rounded-md">
-												<span className="text-xs text-slate-400 font-medium">
-													{coverIndex + 1}/
-													{coverUrls.length}
-												</span>
-											</div>
-										)}
-									<div className="flex items-center gap-2">
-										{/* DIFFERENT SERIES OPTIONS */}
-										{onSeriesNav && (
-											<div className="flex gap-1 bg-zinc-800/60 rounded-lg p-0.5">
-												<button
-													className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
-													onClick={() =>
-														onSeriesNav("left")
-													}
-												>
-													<ChevronLeft className="w-5 h-5 text-gray-400 transition-colors" />
-												</button>
-												<button
-													className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
-													onClick={() =>
-														onSeriesNav("right")
-													}
-												>
-													<ChevronRight className="w-5 h-5 text-gray-400 transition-colors" />
-												</button>
-											</div>
-										)}
-										{/* NEED YEAR */}
-										<button
-											className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
-											onClick={() => {
-												onAction({
-													type:
-														mediaType === "book"
-															? "moreBooks"
-															: "needYearField",
-												});
-											}}
-											title={
-												mediaType === "book"
-													? "See More Options"
-													: "Search with year"
-											}
-										>
-											<ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
+											<ChevronRight className="w-5 h-5 text-gray-400 transition-colors" />
 										</button>
 									</div>
-								</>
-							)}
+								)}
+								{/* NEED YEAR */}
+								<button
+									className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
+									onClick={() => {
+										onAction({
+											type:
+												mediaType === "book"
+													? "moreBooks"
+													: "needYearField",
+										});
+									}}
+									title={
+										mediaType === "book"
+											? "See More Options"
+											: "Search with year"
+									}
+								>
+									<ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
+								</button>
+							</div>
 						</div>
 					</div>
 				)}
@@ -429,7 +346,6 @@ export function MobileDetails<T extends BaseMediaProps>({
 								title={item.title}
 								coverUrls={coverUrls}
 								coverIndex={coverIndex}
-								onLoad={() => setPosterLoaded(true)}
 								height={900}
 								width={1280}
 								sizes="100vw"
@@ -443,7 +359,6 @@ export function MobileDetails<T extends BaseMediaProps>({
 								width={1280}
 								height={900}
 								className="object-cover w-full"
-								onLoad={() => setPosterLoaded(true)}
 							/>
 						) : (
 							<div className="h-64 bg-linear-to-br from-zinc-700 to-zinc-800" />
@@ -463,18 +378,68 @@ export function MobileDetails<T extends BaseMediaProps>({
 										: s.seriesTitle;
 
 								return seriesLabel ? (
-									<div className="text-zinc-400 text-sm font-semibold -mt-2.5">
+									<div className={SERIES_TEXT.sm}>
 										{seriesLabel}
 									</div>
 								) : (
 									<div></div>
 								);
 							})()}
-							<div className="flex justify-between">
-								{/* TITLE */}
-								<h1 className="text-zinc-100 text-2xl font-bold -mt-0.5">
-									{item.title}
-								</h1>
+							<div className="flex justify-between items-start gap-3">
+								{/* TITLE + AUTHOR  */}
+								<div className="min-w-0 flex-1">
+									<MediaTitle
+										title={item.title}
+										size="sm"
+										className="-mt-0.5 min-w-0"
+										textClass={TITLE_TEXT.sm}
+										isBook={mediaType === "book"}
+									/>
+									{/* AUTHOR/STUDIO/DIRECTOR AND DATES */}
+									<div className="mt-1 text-zinc-400 text-sm font-medium flex items-center gap-2">
+										<span className="min-w-0">
+											{canOpenDirector ? (
+												<DirectorNames
+													names={directorNames}
+													width="max-w-40"
+													onPick={(name) =>
+														onAction({
+															type: "directorClick",
+															payload: name,
+														})
+													}
+													onMore={() =>
+														onAction({
+															type: "directorPicker",
+														})
+													}
+												/>
+											) : (
+												differentColumns[0].getValue(
+													item,
+												) ||
+												"Unknown " +
+													differentColumns[0].label
+											)}
+										</span>
+										•
+										<span>
+											{differentColumns[1].getValue(
+												item,
+											) || "Unknown"}
+										</span>
+										{item.dateCompleted && (
+											<>
+												•
+												<span>
+													{formatDateShort(
+														item.dateCompleted,
+													)}
+												</span>
+											</>
+										)}
+									</div>
+								</div>
 								{/* SCORE */}
 								<div data-no-drag>
 									<button
@@ -491,46 +456,6 @@ export function MobileDetails<T extends BaseMediaProps>({
 										</span>
 									</button>
 								</div>
-							</div>
-							{/* AUTHOR/STUDIO/DIRECTOR AND DATES */}
-							<div className="text-zinc-400 text-sm font-medium flex items-center gap-2">
-								<span className="min-w-0">
-									{canOpenDirector ? (
-										<DirectorNames
-											names={directorNames}
-											width="max-w-40"
-											onPick={(name) =>
-												onAction({
-													type: "directorClick",
-													payload: name,
-												})
-											}
-											onMore={() =>
-												onAction({
-													type: "directorPicker",
-												})
-											}
-										/>
-									) : (
-										differentColumns[0].getValue(item) ||
-										"Unknown " + differentColumns[0].label
-									)}
-								</span>
-								•
-								<span>
-									{differentColumns[1].getValue(item) ||
-										"Unknown"}
-								</span>
-								{item.dateCompleted && (
-									<>
-										•
-										<span>
-											{formatDateShort(
-												item.dateCompleted,
-											)}
-										</span>
-									</>
-								)}
 							</div>
 						</div>
 						{/* PROGRESS BAR — show only */}

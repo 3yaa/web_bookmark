@@ -32,8 +32,7 @@ export interface SeriesAPIProps {
 	total?: number | null;
 }
 
-// jsonb { url, color } -- books, movies and games all store their cover this
-// way so the dominant colour travels with the artwork
+// jsonb { url, color } -- books, movies and games
 export interface MediaCoverProps {
 	url: string;
 	color: string;
@@ -54,4 +53,6 @@ export interface BaseMediaProps {
 	posterUrl?: string;
 	//
 	backdropUrl?: string;
+	// movie/show/game
+	logoUrl?: string | null;
 }

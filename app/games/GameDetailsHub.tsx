@@ -5,6 +5,11 @@ import { gameStatusOptions } from "@/utils/dropDownDetails";
 import { DesktopDetails } from "@/app/views/mediaDetails/DesktopDetails";
 import { MobileDetails } from "@/app/views/mediaDetails/MobileDetails";
 import { TIER_PHI_THRESHOLD, getSeedMu, Tier } from "@/lib/tierConfig";
+import {
+	activeLogoIndex,
+	clearedFrom,
+	stepLogoIndex,
+} from "@/app/views/mediaDetails/shared/logoIndex";
 import { useScoreNudge } from "@/hooks/useScoreNudge";
 import { useGameSearch } from "@/hooks/external/useGameSearch";
 import { mapIGDBDataToGame, mapIGDBDlcsDataToGame } from "./utils/gameMapping";
@@ -25,7 +30,9 @@ export type GameAction =
 	| { type: "confirmRefresh" }
 	| { type: "cancelRefresh" }
 	| { type: "pickCoverColor"; payload: string }
-	| { type: "changeCover"; payload: "next" | "prev" };
+	| { type: "changeCover"; payload: "next" | "prev" }
+	| { type: "changeLogo"; payload: "next" | "prev" }
+	| { type: "clearLogo" };
 
 interface GameDetailsProps {
 	game: GameProps;
@@ -44,6 +51,9 @@ interface GameDetailsProps {
 	backdropUrls?: string[];
 	backdropIndex?: number;
 	updateBackdropIndex?: (newIndex: number) => void;
+	logoUrls?: string[];
+	logoIndex?: number;
+	updateLogoIndex?: (newIndex: number) => void;
 }
 
 export function GameDetails({
@@ -57,6 +67,9 @@ export function GameDetails({
 	backdropUrls,
 	backdropIndex,
 	updateBackdropIndex,
+	logoUrls,
+	logoIndex,
+	updateLogoIndex,
 }: GameDetailsProps) {
 	const [localNote, setLocalNote] = useState(game.note || "");
 	const [isRefreshing, setIsRefreshing] = useState(false);
@@ -64,6 +77,8 @@ export function GameDetails({
 	// refresh preview state -- user picks a backdrop before saving
 	const [isSelecting, setIsSelecting] = useState(false);
 	const [refreshBackdrops, setRefreshBackdrops] = useState<string[]>([]);
+	const [refreshLogos, setRefreshLogos] = useState<string[]>([]);
+	const [refreshLogoIndex, setRefreshLogoIndex] = useState(0);
 	const [refreshBackdropIndex, setRefreshBackdropIndex] = useState(0);
 	const [refreshMeta, setRefreshMeta] = useState<Partial<GameProps>>({});
 
@@ -123,6 +138,12 @@ export function GameDetails({
 			case "confirmRefresh":
 				handleConfirmRefresh();
 				break;
+			case "changeLogo":
+				handleLogoChange(action.payload);
+				break;
+			case "clearLogo":
+				handleClearLogo();
+				break;
 			case "pickCoverColor":
 				handlePickCoverColor(action.payload);
 				break;
@@ -149,7 +170,7 @@ export function GameDetails({
 		if (!onRefresh || !game.igdbId || isRefreshing || isSelecting) return;
 		setIsRefreshing(true);
 		try {
-			const data = await searchForGameById(game.igdbId);
+			const data = await searchForGameById(game.igdbId, game.title);
 			if (!data) return;
 			const meta: Partial<GameProps> = {};
 			if (game.dlcIndex === 0) {
@@ -181,11 +202,33 @@ export function GameDetails({
 				[];
 			setRefreshMeta(meta);
 			setRefreshBackdrops(backdrops);
+			setRefreshLogos(data.logos ?? []);
+			setRefreshLogoIndex(0);
 			setRefreshBackdropIndex(0);
 			setIsSelecting(true);
 		} finally {
 			setIsRefreshing(false);
 		}
+	};
+
+	//
+	const handleLogoChange = (dir: "next" | "prev") => {
+		const total = isSelecting
+			? refreshLogos.length
+			: (logoUrls?.length ?? 0);
+		if (total < 2) return;
+		if (isSelecting)
+			setRefreshLogoIndex((i) => stepLogoIndex(i, dir, total));
+		else updateLogoIndex?.(stepLogoIndex(logoIndex ?? 0, dir, total));
+	};
+
+	//
+	const handleClearLogo = () => {
+		const current = isSelecting ? refreshLogoIndex : (logoIndex ?? 0);
+		const next =
+			current < 0 ? activeLogoIndex(current) : clearedFrom(current);
+		if (isSelecting) setRefreshLogoIndex(next);
+		else updateLogoIndex?.(next);
 	};
 
 	// apply the previewed backdrop + metadata
@@ -194,6 +237,10 @@ export function GameDetails({
 		const meta: Partial<GameProps> = { ...refreshMeta };
 		if (refreshBackdrops.length) {
 			meta.backdropUrl = refreshBackdrops[refreshBackdropIndex];
+		}
+		// null when want text title
+		if (refreshLogos.length) {
+			meta.logoUrl = refreshLogos[refreshLogoIndex] ?? null;
 		}
 		exitSelecting();
 		await onRefresh(meta);
@@ -207,7 +254,9 @@ export function GameDetails({
 	const handlePickCoverColor = (color: string) => {
 		if (isSelecting) {
 			setRefreshMeta((prev) =>
-				prev.cover ? { ...prev, cover: { ...prev.cover, color } } : prev,
+				prev.cover
+					? { ...prev, cover: { ...prev.cover, color } }
+					: prev,
 			);
 			return;
 		}
@@ -218,6 +267,8 @@ export function GameDetails({
 		setIsSelecting(false);
 		setRefreshBackdrops([]);
 		setRefreshBackdropIndex(0);
+		setRefreshLogos([]);
+		setRefreshLogoIndex(0);
 		setRefreshMeta({});
 	};
 
@@ -370,6 +421,8 @@ export function GameDetails({
 					backdropIndex={
 						isSelecting ? refreshBackdropIndex : backdropIndex
 					}
+					logoUrls={isSelecting ? refreshLogos : logoUrls}
+					logoIndex={isSelecting ? refreshLogoIndex : logoIndex}
 				/>
 			</div>
 			<div className="block lg:hidden">
@@ -382,7 +435,6 @@ export function GameDetails({
 					isAdding={!!addGame}
 					onAdd={handleAddGame}
 					onClose={handleModalClose}
-					canRefresh={!!onRefresh}
 					isSelecting={isSelecting}
 					onAction={
 						handleAction as (action: {

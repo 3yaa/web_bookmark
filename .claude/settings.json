@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(node -e ' *)",
-      "Bash(curl -s -o /dev/null -w \"art asset: %{http_code} %{size_download} bytes\\\\n\" \"http://localhost:3000/_next/image?url=%2Fnon-series-placeholder.png&w=1920&q=75\" --max-time 10)"
-    ]
-  }
-}

@@ -278,7 +278,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 	const hasBackdrop =
 		mediaType === "book" ? !!coverColor : !!imageBackdropUrl;
 	//
-	const showsWordmark = !!displayLogoUrl;
+	const showLogoTitle = !!displayLogoUrl;
 	//
 	const seriesLabel =
 		mediaType === "game"
@@ -341,7 +341,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 	// author section
 	const metaRow = (
 		<div
-			className={`select-text flex items-center gap-3 text-[0.92rem] font-medium leading-6 text-zinc-200/70 ${
+			className={`select-none flex items-center gap-3 text-[0.92rem] font-medium leading-6 text-zinc-200/70 ${
 				isBook
 					? "justify-center w-[94%] mx-auto -mb-0.5"
 					: "justify-between w-full mb-1.5 mt-2"
@@ -703,7 +703,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 								>
 									{/* HEADER -- sat over backdrop */}
 									<div
-										className={`relative flex flex-col items-center w-fit max-w-[94%] mx-auto ${isBook ? "-mb-1" : `${showsWordmark ? "mb-0.5" : "-mb-2"}`}`}
+										className={`relative flex flex-col items-center w-fit max-w-[94%] mx-auto ${isBook ? "-mb-1" : `${showLogoTitle ? "mb-0.5" : "-mb-1"}`}`}
 									>
 										{/* washblur */}
 										{hasBackdrop &&
@@ -773,7 +773,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 													});
 												}}
 												options={statusOptions}
-												customStyle="text-zinc-300/85"
+												customStyle="text-zinc-300/85 select-none"
 												dropDuration={0.24}
 											/>
 										</div>
@@ -787,7 +787,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 											{item.score ? (
 												<div
 													// DO flex-row-reverse for flip
-													className={`group w-full ${FIELD_PLATE} flex flex-row items-center justify-between gap-3 px-4 py-3 transition-all duration-300 ease-out`}
+													className={`group w-full ${FIELD_PLATE} flex flex-row items-center justify-between gap-3 px-4 py-3 select-none transition-all duration-300 ease-out`}
 												>
 													<span className="text-sm text-zinc-300/85 font-bold tracking-wide">
 														{getTierFromMu(
@@ -870,7 +870,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 														});
 													}}
 													options={tierOptions}
-													customStyle="text-zinc-300/85"
+													customStyle="text-zinc-300/85 select-none"
 													// flip
 													dropStyle={(() => {
 														const option =
@@ -937,7 +937,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 													mediaType +
 													"..."
 												}
-												className="text-gray-300/90 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500 font-medium"
+												className="text-gray-300/90 text-sm leading-relaxed whitespace-pre-line w-full bg-transparent border-none resize-none outline-none placeholder-zinc-500 font-medium select-none focus:select-text"
 											/>
 										</div>
 									</div>

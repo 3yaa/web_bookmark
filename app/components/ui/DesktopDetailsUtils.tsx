@@ -2,7 +2,7 @@ import { LucideIcon } from "lucide-react";
 
 // STATUS / SCORE / NOTES / PROGRESS captions
 export const FIELD_LABEL =
-	"block text-[0.7rem] uppercase tracking-widest font-medium text-zinc-500";
+	"block select-none text-[0.7rem] uppercase tracking-widest font-medium text-zinc-500";
 
 // the scored button (once a score exists) and the notes panel
 export const FIELD_PLATE = "rounded-lg neu-raised";

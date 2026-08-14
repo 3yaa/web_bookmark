@@ -16,8 +16,7 @@ type Metric = { ratio: number; coverage: number; lines: number };
 //
 const TITLE_FILL =
 	"bg-linear-to-b from-zinc-100 via-zinc-100/90 to-zinc-400/90 bg-clip-text text-transparent [background-repeat:repeat-y]";
-const TITLE_RELIEF =
-	"[filter:drop-shadow(0_1px_1px_rgba(0,0,0,0.5))_drop-shadow(0_2px_8px_rgba(0,0,0,0.45))]";
+const TITLE_RELIEF = "drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)]";
 const TITLE_BASE = `font-display uppercase ${TITLE_FILL} ${TITLE_RELIEF} text-balance break-words font-bold`;
 //
 
@@ -299,7 +298,7 @@ export function MediaTitle({
 				onError={() => setBrokenUrl(logoUrl)}
 				// height auto -- the ratio is the artwork's, never imposed
 				style={sizing}
-				className="block max-w-full object-contain cursor-pointer drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)]"
+				className="block max-w-full object-contain cursor-pointer select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)]"
 			/>
 			{underlineColor && (
 				<StatusWave color={underlineColor} isBook={isBook} isLogo />

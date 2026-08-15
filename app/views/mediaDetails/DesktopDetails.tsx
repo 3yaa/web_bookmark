@@ -609,18 +609,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 											<Image
 												src={coverSrc}
 												alt={item.title || "Untitled"}
-												width={1280}
-												height={720}
-												sizes={
-													mediaType === "game"
-														? "(min-width: 2200px) 500px, 250px"
-														: undefined
-												}
-												quality={
-													mediaType === "game"
-														? 90
-														: undefined
-												}
+												width={248}
+												height={372}
+												sizes="(min-width: 2200px) 500px, 250px"
 												className={`min-w-62 min-h-93 ${mediaType === "game" ? "object-cover" : "object-fill"}`}
 											/>
 										) : (
@@ -635,10 +626,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 											className={
 												"min-w-62 min-h-93 object-cover"
 											}
-											height={1280}
-											width={720}
+											height={372}
+											width={248}
 											sizes="(min-width: 2200px) 500px, 250px"
-											quality={90}
 										/>
 									)}
 								</div>
@@ -668,16 +658,8 @@ export function DesktopDetails<T extends BaseMediaProps>({
 									: imageBackdropUrl && (
 											<BackdropImage
 												src={imageBackdropUrl}
-												width={
-													mediaType === "game"
-														? 1920
-														: 1280
-												}
-												height={
-													mediaType === "game"
-														? 1080
-														: 720
-												}
+												width={780}
+												height={439}
 											/>
 										)}
 								{/* game backdrop cycling overlay */}

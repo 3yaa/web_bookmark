@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 import { Book, Film, Tv, Gamepad2, ChevronRight } from "lucide-react";
-import LightRays from "@/app/components/ui/LightRays";
+import dynamic from "next/dynamic";
 import { BaseMediaProps } from "@/types/media";
 import { useEffect, useState } from "react";
 import { useAuthFetch } from "../auth/hooks/useAuthFetch";
 import { StatsBar } from "../components/StatsBar";
 import { RecentItems } from "../components/RecentMedias";
+// don't wait for light ray to render
+const LightRays = dynamic(() => import("@/app/components/ui/LightRays"), {
+	ssr: false,
+});
 
 const sections = [
 	{ name: "Movies", key: "movies", href: "/movies", icon: Film },

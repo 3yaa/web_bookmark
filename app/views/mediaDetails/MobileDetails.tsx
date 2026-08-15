@@ -346,18 +346,18 @@ export function MobileDetails<T extends BaseMediaProps>({
 								title={item.title}
 								coverUrls={coverUrls}
 								coverIndex={coverIndex}
-								height={900}
-								width={1280}
+								height={585}
+								width={390}
 								sizes="100vw"
-								quality={90}
 								className="object-cover w-full"
 							/>
 						) : coverSrc ? (
 							<Image
 								src={coverSrc}
 								alt={item.title || "Poster"}
-								width={1280}
-								height={900}
+								width={390}
+								height={585}
+								sizes="100vw"
 								className="object-cover w-full"
 							/>
 						) : (

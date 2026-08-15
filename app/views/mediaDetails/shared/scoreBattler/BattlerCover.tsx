@@ -30,8 +30,9 @@ export function BattlerCover({
 				<Image
 					src={src}
 					alt={alt}
-					width={1280}
-					height={900}
+					width={248}
+					height={372}
+					sizes="(min-width: 768px) 248px, 400px"
 					onLoad={() => setLoadedSrc(src)}
 					className={`relative ${sizeClass} ${imgFit} transition-opacity duration-300 ${
 						isLoaded ? "opacity-100" : "opacity-0"

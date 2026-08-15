@@ -11,8 +11,16 @@ import { ShowDetails } from "./ShowDetailsHub";
 import { DesktopListing } from "@/app/views/mediaListing/DesktopListing";
 import { MobileListing } from "@/app/views/mediaListing/MobileListing";
 import { AddButton } from "../components/ui/AddButton";
-import { ScoreBattlerHub } from "../views/mediaDetails/shared/scoreBattler/ScoreBattlerHub";
 import { AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
+// load score dynamically
+const ScoreBattlerHub = dynamic(
+	() =>
+		import("../views/mediaDetails/shared/scoreBattler/ScoreBattlerHub").then(
+			(m) => m.ScoreBattlerHub,
+		),
+	{ ssr: false },
+);
 import { MovieProps } from "@/types/movie";
 
 export default function ShowHub() {

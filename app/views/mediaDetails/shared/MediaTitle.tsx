@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { Fragment, useEffect, useRef, useState } from "react";
+import { corsMode } from "@/utils/image-loader";
 
 // sizing for logo
 const SIZES = {
@@ -43,7 +44,7 @@ const metrics = new Map<string, Metric>();
 
 // how much of the image is painted, and over how many lines of type
 function inkStatsOf(img: HTMLImageElement): Omit<Metric, "ratio"> | null {
-	// downscale first 
+	// downscale first
 	const w = 128;
 	const h = Math.max(
 		1,
@@ -276,12 +277,15 @@ export function MediaTitle({
 				height={200}
 				// next/image refuses to optimise svg without dangerouslyAllowSVG
 				unoptimized={logoUrl.toLowerCase().endsWith(".svg")}
+				// tmdb logos can be read back off the canvas; steamgriddb sends
+				// no cors header -- inkStatsOf falls back on taint
+				crossOrigin={corsMode(logoUrl)}
 				onLoad={(e) => {
 					if (metrics.has(logoUrl)) return;
 					const img = e.currentTarget;
 					if (!img.naturalWidth || !img.naturalHeight) return;
 					// same element, already decoded -- no second fetch, and the
-					// optimiser keeps it same-origin so the canvas reads back
+					// cors request above keeps the canvas readable
 					metrics.set(logoUrl, {
 						ratio: img.naturalWidth / img.naturalHeight,
 						...(inkStatsOf(img) ?? {

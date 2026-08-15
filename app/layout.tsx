@@ -31,6 +31,10 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" className={`${geist.className} ${cinzel.variable}`}>
+			{/* so we don't play a cold dns + tcp + tls handshake on first image load */}
+			<link rel="preconnect" href="https://image.tmdb.org" />
+			<link rel="preconnect" href="https://images.igdb.com" />
+			<link rel="dns-prefetch" href="https://assets.hardcover.app" />
 			<body className="antialiased bg-zinc-950 text-zinc-100">
 				<AuthProvider>
 					<NavProvider>

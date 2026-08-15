@@ -15,15 +15,12 @@ interface SeriesNavProps {
 
 const ART_SRC = "/non-series-placeholder.png";
 
-// instead of pulling the full-size png a second time
-const ART_MASK_SRC = `/_next/image?url=${encodeURIComponent(ART_SRC)}&w=1080&q=75`;
-
 // vertical framing of the art
 const ART_POSITION = "center 40%";
 
 const ART_MASK = {
-	maskImage: `url(${ART_MASK_SRC})`,
-	WebkitMaskImage: `url(${ART_MASK_SRC})`,
+	maskImage: `url(${ART_SRC})`,
+	WebkitMaskImage: `url(${ART_SRC})`,
 	maskSize: "cover",
 	WebkitMaskSize: "cover",
 	maskPosition: ART_POSITION,

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Palette, Loader2 } from "lucide-react";
 import { extractCoverPalette } from "@/utils/extractCoverPalette";
 
@@ -30,18 +30,45 @@ export function CoverColorPicker({
 		return (coverUrl && defaultColorCache.get(coverUrl)) || currentColor;
 	});
 
-	const toggle = async (e: React.MouseEvent) => {
+	// Pull the palette before the click
+	const started = useRef(false);
+	const warm = useCallback(() => {
+		if (!coverUrl || started.current) return;
+		started.current = true;
+		setLoading(true);
+		extractCoverPalette(coverUrl)
+			.then(setColors)
+			.finally(() => setLoading(false));
+	}, [coverUrl]);
+
+	useEffect(() => {
+		// a new cover invalidates the warm-up, not just the result
+		started.current = false;
+		setColors([]);
+
+		type IdleWindow = typeof window & {
+			requestIdleCallback?: (cb: () => void) => number;
+			cancelIdleCallback?: (handle: number) => void;
+		};
+		const w = window as IdleWindow;
+		if (w.requestIdleCallback) {
+			const handle = w.requestIdleCallback(warm);
+			return () => w.cancelIdleCallback?.(handle);
+		}
+		// safari has no requestIdleCallback -- yield past first paint instead
+		const timer = setTimeout(warm, 200);
+		return () => clearTimeout(timer);
+	}, [coverUrl, warm]);
+
+	const toggle = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (open) {
 			setOpen(false);
 			return;
 		}
 		setOpen(true);
-		if (colors.length === 0) {
-			setLoading(true);
-			setColors(await extractCoverPalette(coverUrl));
-			setLoading(false);
-		}
+		// already warm in the common case; this only matters if the idle callback has not fired yet
+		warm();
 	};
 
 	if (!coverUrl) return null;
@@ -57,7 +84,9 @@ export function CoverColorPicker({
 				onClick={() => onPick(c)}
 				title={isDefault ? `${c} (default)` : c}
 				className={`h-5 w-5 rounded-full transition-transform hover:scale-110 hover:cursor-pointer ${
-					isActive ? "ring-2 ring-white ring-offset-1 ring-offset-zinc-900 " : ""
+					isActive
+						? "ring-2 ring-white ring-offset-1 ring-offset-zinc-900 "
+						: ""
 				}${
 					isDefault
 						? "border border-white/40"
@@ -74,6 +103,9 @@ export function CoverColorPicker({
 		<div className="relative" onClick={(e) => e.stopPropagation()}>
 			<button
 				onClick={toggle}
+				// intent signal: covers the case where a busy page has delayed
+				// the idle callback past the click
+				onPointerEnter={warm}
 				title="Cover colors"
 				className={`py-1.5 px-2 rounded-lg bg-zinc-800/50 hover:bg-emerald-600/20 hover:cursor-pointer transition-all group ${
 					open ? "bg-emerald-600/20" : ""

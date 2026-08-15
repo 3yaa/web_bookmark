@@ -17,18 +17,29 @@ import {
 	fetchActorWorks,
 	fetchShowCast,
 } from "../../utils/getActorInfo";
-import { ActorItemsModal } from "../components/ActorModal";
+import dynamic from "next/dynamic";
 import { AnimatePresence } from "framer-motion";
 import { AddShow } from "./AddShow";
 import { AddMovie } from "@/app/movies/AddMovie";
 import { useAuthFetch } from "@/app/auth/hooks/useAuthFetch";
-import { EpisodeRatingsModal } from "./components/EpisodeRatingsModal";
 import { MovieProps } from "@/types/movie";
 import { MovieDetails } from "@/app/movies/MovieDetailsHub";
 import { MediaStatus } from "@/types/media";
 import { useShowSearch } from "@/hooks/external/useShowSearch";
 import { mapTMDBTVToShow } from "./utils/showMapping";
-
+// load actor modal dynamically
+const ActorItemsModal = dynamic(
+	() => import("../components/ActorModal").then((m) => m.ActorItemsModal),
+	{ ssr: false },
+);
+// load episode rating dynamically
+const EpisodeRatingsModal = dynamic(
+	() =>
+		import("./components/EpisodeRatingsModal").then(
+			(m) => m.EpisodeRatingsModal,
+		),
+	{ ssr: false },
+);
 export type ShowAction =
 	| { type: "closeModal" }
 	| { type: "delete" }

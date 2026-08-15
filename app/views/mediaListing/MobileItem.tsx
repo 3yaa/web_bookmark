@@ -64,9 +64,9 @@ export const MobileItem = React.memo(function MobileItem<
 					<Image
 						src={coverSrc}
 						alt={item.title || "Untitled"}
-						width={300}
-						height={450}
-						priority
+						width={240}
+						height={360}
+						sizes="120px"
 						className="object-fill w-full h-full rounded-md border border-zinc-700/40"
 					/>
 				) : (
@@ -83,8 +83,8 @@ export const MobileItem = React.memo(function MobileItem<
 				{item.backdropUrl && (
 					<BackdropImageMobile
 						src={item.backdropUrl}
-						width={1280}
-						height={720}
+						width={640}
+						height={360}
 					/>
 				)}
 				{/* TITLE/SCORE */}

@@ -1,3 +1,5 @@
+import imageLoader, { corsMode } from "@/utils/image-loader";
+
 const cache = new Map<string, string[]>();
 
 export async function extractCoverPalette(
@@ -21,8 +23,15 @@ export async function extractCoverPalette(
 function run(url: string, max: number): Promise<string[]> {
 	return new Promise((resolve, reject) => {
 		const img = new Image();
-		// same-origin optimized copy -> canvas stays readable
-		img.src = `/_next/image?url=${encodeURIComponent(url)}&w=96&q=75`;
+		const cors = corsMode(url);
+		if (cors) {
+			// tmdb and igdb serve cors
+			img.crossOrigin = cors;
+			img.src = imageLoader({ src: url, width: 96 });
+		} else {
+			// hardcover and google books send no cors header
+			img.src = `/cover-proxy?url=${encodeURIComponent(url)}`;
+		}
 		img.onload = () => {
 			try {
 				const w = 64;
@@ -95,8 +104,5 @@ function dist(a: RGB, b: RGB): number {
 }
 
 function toHex({ r, g, b }: RGB): string {
-	return (
-		"#" +
-		[r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("")
-	);
+	return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
 }

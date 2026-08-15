@@ -38,8 +38,9 @@ export function RecentItems({ items }: { items: BaseMediaProps[] }) {
                   src={item.imageUrl}
                   alt={item.title}
                   className="object-cover"
-                  width={1920}
-                  height={1080}
+                  width={112}
+                  height={168}
+                  sizes="56px"
                 />
               ) : (
                 <div className="w-full h-full bg-zinc-800/50" />

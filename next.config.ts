@@ -23,6 +23,12 @@ const nextConfig: NextConfig = {
 		];
 	},
 	images: {
+		// every image resolves to an upstream CDN variant -- image-loader.ts
+		loader: "custom",
+		loaderFile: "./utils/image-loader.ts",
+		// aligned with TMDB's own tokens
+		deviceSizes: [640, 780, 1080, 1280],
+		imageSizes: [92, 154, 185, 300, 342, 500],
 		remotePatterns: [
 			// HARDCOVER
 			{

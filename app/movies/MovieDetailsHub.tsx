@@ -23,7 +23,7 @@ import {
 	fetchActorWorks,
 	fetchMovieCredits,
 } from "../../utils/getActorInfo";
-import { ActorItemsModal } from "../components/ActorModal";
+import dynamic from "next/dynamic";
 import { DirectorPicker } from "@/app/movies/components/DirectorPicker";
 import { AnimatePresence } from "framer-motion";
 import { AddShow } from "@/app/shows/AddShow";
@@ -35,6 +35,11 @@ import { MediaStatus } from "@/types/media";
 import { useMovieSearch } from "@/hooks/external/useMovieSearch";
 import { mapSeriesToMovie } from "./utils/movieMapping";
 import { buildCover } from "@/utils/coverColor";
+// load actor modal dynamically
+const ActorItemsModal = dynamic(
+	() => import("../components/ActorModal").then((m) => m.ActorItemsModal),
+	{ ssr: false },
+);
 
 // check if movie has tmdbID
 const isRealTmdbId = (tmdbId?: string) => !!tmdbId && tmdbId !== "-1";

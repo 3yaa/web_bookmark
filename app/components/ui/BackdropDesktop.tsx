@@ -24,8 +24,9 @@ export const BackdropDesktop = ({ src, is_book }: BackdropDesktopProps) => (
 		<Image
 			src={src}
 			alt="Backdrop"
-			width={1280}
-			height={720}
+			width={500}
+			height={281}
+			sizes="(min-width: 2200px) 640px, 460px"
 			className="absolute"
 			style={{
 				objectPosition: is_book ? "center -40px" : "center -16px",

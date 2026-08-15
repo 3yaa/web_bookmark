@@ -4,12 +4,15 @@ interface BackdropImagePropsMobile {
 	src: string;
 	width: number;
 	height: number;
+	// only the first rows of the list want this
+	priority?: boolean;
 }
 
 export const BackdropImageMobile = ({
 	src,
 	width,
 	height,
+	priority = false,
 }: BackdropImagePropsMobile) => (
 	<div className="absolute top-0 left-50 -z-10 overflow-hidden select-none md:h-30">
 		<div className="relative w-full h-full">
@@ -24,7 +27,8 @@ export const BackdropImageMobile = ({
 					objectPosition: "center -7px",
 					filter: "brightness(0.40)",
 				}}
-				priority
+				// lazy past the first rows
+				priority={priority}
 			/>
 
 			{/* HORIZONTAL GRADIENT */}

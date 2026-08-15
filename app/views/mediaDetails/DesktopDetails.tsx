@@ -658,8 +658,16 @@ export function DesktopDetails<T extends BaseMediaProps>({
 									: imageBackdropUrl && (
 											<BackdropImage
 												src={imageBackdropUrl}
-												width={780}
-												height={439}
+												width={
+													mediaType === "game"
+														? 1920
+														: 1280
+												}
+												height={
+													mediaType === "game"
+														? 1080
+														: 720
+												}
 											/>
 										)}
 								{/* game backdrop cycling overlay */}

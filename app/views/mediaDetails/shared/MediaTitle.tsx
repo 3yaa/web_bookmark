@@ -280,6 +280,7 @@ export function MediaTitle({
 				// tmdb logos can be read back off the canvas; steamgriddb sends
 				// no cors header -- inkStatsOf falls back on taint
 				crossOrigin={corsMode(logoUrl)}
+				priority
 				onLoad={(e) => {
 					if (metrics.has(logoUrl)) return;
 					const img = e.currentTarget;

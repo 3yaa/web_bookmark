@@ -8,8 +8,12 @@ import { ShowProps } from "@/types/show";
 import { GameProps } from "@/types/game";
 import { getDisplayScore } from "@/lib/tierConfig";
 
+// the first mounted item that needs priority loading (cover/backdrop)
+const EAGER_ROWS = 6;
+
 interface MobileItemProps<T extends BaseMediaProps> {
 	item: T;
+	index: number;
 	isNavOpen: boolean;
 	mediaType: string;
 	differentColumns: [ColumnConfig<T>, ColumnConfig<T>];
@@ -20,6 +24,7 @@ export const MobileItem = React.memo(function MobileItem<
 	T extends BaseMediaProps,
 >({
 	item,
+	index,
 	isNavOpen,
 	mediaType,
 	differentColumns,
@@ -67,6 +72,7 @@ export const MobileItem = React.memo(function MobileItem<
 						width={240}
 						height={360}
 						sizes="120px"
+						priority={index < EAGER_ROWS}
 						className="object-fill w-full h-full rounded-md border border-zinc-700/40"
 					/>
 				) : (
@@ -83,8 +89,9 @@ export const MobileItem = React.memo(function MobileItem<
 				{item.backdropUrl && (
 					<BackdropImageMobile
 						src={item.backdropUrl}
-						width={640}
-						height={360}
+						width={1280}
+						height={720}
+						priority={index < EAGER_ROWS}
 					/>
 				)}
 				{/* TITLE/SCORE */}

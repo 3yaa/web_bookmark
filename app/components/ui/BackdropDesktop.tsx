@@ -3,6 +3,8 @@ import Image from "next/image";
 interface BackdropDesktopProps {
 	src: string;
 	is_book?: boolean;
+	// only the first rows of the list want this
+	priority?: boolean;
 }
 
 const maskH =
@@ -11,7 +13,11 @@ const maskH =
 const maskV =
 	"linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, black 18%, black 82%, rgba(0,0,0,0.2) 100%)";
 
-export const BackdropDesktop = ({ src, is_book }: BackdropDesktopProps) => (
+export const BackdropDesktop = ({
+	src,
+	is_book,
+	priority = false,
+}: BackdropDesktopProps) => (
 	<div
 		className="relative overflow-hidden select-none h-full"
 		style={{
@@ -24,15 +30,15 @@ export const BackdropDesktop = ({ src, is_book }: BackdropDesktopProps) => (
 		<Image
 			src={src}
 			alt="Backdrop"
-			width={500}
-			height={281}
-			sizes="(min-width: 2200px) 640px, 460px"
+			width={1280}
+			height={720}
 			className="absolute"
 			style={{
 				objectPosition: is_book ? "center -40px" : "center -16px",
 				filter: "brightness(0.40)",
 			}}
-			priority
+			// lazy for the rest
+			priority={priority}
 		/>
 	</div>
 );

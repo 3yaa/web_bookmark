@@ -19,6 +19,9 @@ import { BookProps } from "@/types/book";
 import { MovieProps } from "@/types/movie";
 import { Leaf } from "lucide-react";
 
+// the first mounted item that needs priority loading (cover/backdrop)
+const EAGER_ROWS = 9;
+
 interface DesktopItemProps<T extends BaseMediaProps> {
 	item: T;
 	index: number;
@@ -90,7 +93,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 							alt={item.title || "Untitled"}
 							fill
 							sizes="(min-width: 2200px) 160px, 80px"
-							priority={index < 6}
+							priority={index < EAGER_ROWS}
 							className="object-cover transition-transform duration-450 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.04]"
 						/>
 					) : (
@@ -100,8 +103,8 @@ export const DesktopItem = React.memo(function DesktopItem<
 							width={160}
 							height={240}
 							sizes="(min-width: 2200px) 160px, 80px"
-							priority={index < 6}
-							className="relative h-auto self-stretch aspect-2/3 object-fill transition-transform duration-450 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.04]"
+							priority={index < EAGER_ROWS}
+							className="relative w-full h-full aspect-2/3 object-fill transition-transform duration-450 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.04]"
 						/>
 					)}
 				</div>
@@ -252,7 +255,10 @@ export const DesktopItem = React.memo(function DesktopItem<
 
 			{/* ISLAND - BACKDROP */}
 			{item.backdropUrl ? (
-				<BackdropDesktop src={item.backdropUrl} />
+				<BackdropDesktop
+					src={item.backdropUrl}
+					priority={index < EAGER_ROWS}
+				/>
 			) : mediaType === "book" && bookItem.cover ? (
 				<BookBackdropDesktop
 					color={bookItem.cover.color}

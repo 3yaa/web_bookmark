@@ -37,7 +37,7 @@ export function RecentItems({ items }: { items: BaseMediaProps[] }) {
                 <Image
                   src={item.imageUrl}
                   alt={item.title}
-                  className="object-cover"
+                  className="object-cover w-full h-full"
                   width={112}
                   height={168}
                   sizes="56px"

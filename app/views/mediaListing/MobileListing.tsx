@@ -386,6 +386,7 @@ export function MobileListing<T extends BaseMediaProps>({
 								>
 									<MobileItem
 										item={item}
+										index={virtualItem.index}
 										isNavOpen={isNavOpen}
 										mediaType={mediaType}
 										differentColumns={differentColumns}

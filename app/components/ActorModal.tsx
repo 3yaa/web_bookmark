@@ -2,7 +2,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Loader2, Tv } from "lucide-react";
+import { ArrowLeft, Loader2, Tv, X } from "lucide-react";
 import type { CastMember, ActorWork } from "../../utils/getActorInfo";
 import { Loading } from "@/app/components/ui/Loading";
 import { ModalBackdrop, ModalPanel } from "@/app/components/ui/ModalMotion";
@@ -136,18 +136,20 @@ export function ActorItemsModal({
 		6: "max-w-5xl",
 	};
 
+	// a phone gets three across whatever the desktop count is -- six 100px
+	// posters in 350px was the old behaviour
 	const colGrid: Record<number, string> = {
 		1: "grid-cols-1",
 		2: "grid-cols-2",
-		3: "grid-cols-3",
-		4: "grid-cols-4",
-		5: "grid-cols-5",
-		6: "grid-cols-6",
+		3: "grid-cols-2 sm:grid-cols-3",
+		4: "grid-cols-2 sm:grid-cols-4",
+		5: "grid-cols-3 sm:grid-cols-5",
+		6: "grid-cols-3 sm:grid-cols-4 lg:grid-cols-6",
 	};
 
 	return (
 		<ModalBackdrop
-			className="fixed inset-0 bg-black/80 backdrop-blur-lg flex items-center justify-center z-20 p-4"
+			className="fixed inset-0 bg-black/80 backdrop-blur-lg flex items-center justify-center z-20 p-2 sm:p-4"
 			onClick={selectedActor && !isDirectorView ? onActorBack : onClose}
 		>
 			<div className={`relative w-full ${colMaxWidth[cols]}`}>
@@ -203,9 +205,30 @@ export function ActorItemsModal({
 					{/* HEADER */}
 					<div
 						ref={headerRef}
-						className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-zinc-800/50 bg-linear-to-b from-zinc-900/50 to-transparent"
+						className="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3 sm:px-6 sm:py-4 border-b border-zinc-800/50 bg-linear-to-b from-zinc-900/50 to-transparent"
 					>
 						<div className="flex items-center gap-3 min-w-0">
+							{/* the backdrop closes this, but on a phone the panel
+							    leaves barely any of it to tap */}
+							<button
+								onClick={
+									selectedActor && !isDirectorView
+										? onActorBack
+										: onClose
+								}
+								title={
+									selectedActor && !isDirectorView
+										? "Back to cast"
+										: "Close"
+								}
+								className="sm:hidden shrink-0 p-1.5 -ml-1.5 rounded-lg text-zinc-400 active:text-zinc-100 active:scale-95 transition-all"
+							>
+								{selectedActor && !isDirectorView ? (
+									<ArrowLeft className="w-5 h-5" />
+								) : (
+									<X className="w-5 h-5" />
+								)}
+							</button>
 							<div className="min-w-0">
 								<p className="text-[0.625rem] text-zinc-400/60 font-semibold uppercase tracking-[0.18em] mb-0.5">
 									{selectedActor || isDirectorView
@@ -221,7 +244,7 @@ export function ActorItemsModal({
 								</h2>
 							</div>
 						</div>
-						<div className="flex items-center gap-2 shrink-0">
+						<div className="flex items-center flex-wrap gap-2 shrink-0">
 							{(selectedActor || isDirectorView) && (
 								<div
 									className={`flex items-center gap-2 transition-opacity duration-200 ${
@@ -280,7 +303,7 @@ export function ActorItemsModal({
 					</div>
 
 					{/* cast view */}
-					<div className="relative flex-1 overflow-y-auto px-6 py-6">
+					<div className="relative flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
 						<motion.div
 							key={
 								selectedActor
@@ -363,7 +386,7 @@ export function ActorItemsModal({
 									{!actorLoading &&
 										sortedWorks.length > 0 && (
 											<>
-												<div className="grid grid-cols-5 gap-x-4 gap-y-5">
+												<div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-x-3 gap-y-4 sm:gap-x-4 sm:gap-y-5">
 													{sortedWorks
 														.filter(
 															(w) =>

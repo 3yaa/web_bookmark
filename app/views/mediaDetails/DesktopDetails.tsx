@@ -152,54 +152,54 @@ export function DesktopDetails<T extends BaseMediaProps>({
 			: (item.cover ?? undefined);
 	//
 	const isPicking = isAdding || isSelecting;
-	// title-logo picker
-	const logoNav =
-		isPicking && logoUrls && logoUrls.length > 1 ? (
-			<div className="flex gap-1 bg-zinc-800/50 rounded-lg">
-				<button
-					className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60 hover:cursor-pointer transition-all group"
-					onClick={() =>
-						onAction({ type: "changeLogo", payload: "prev" })
-					}
-					title={`Previous title logo (${activeLogoIndex(logoIndex ?? 0) + 1}/${
-						logoUrls.length
-					})`}
-				>
-					<ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
-				</button>
-				<button
-					className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60 hover:cursor-pointer transition-all group"
-					onClick={() =>
-						onAction({ type: "changeLogo", payload: "next" })
-					}
-					title={`Next title logo (${activeLogoIndex(logoIndex ?? 0) + 1}/${logoUrls.length})`}
-				>
-					<ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
-				</button>
-			</div>
-		) : null;
-
-	// TEXT TITLE
+	//
 	const logoIsCleared = isLogoCleared(logoIndex);
-	const logoClear =
+	const logoPicker =
 		isPicking && logoUrls?.length ? (
-			<button
-				className="p-1.5 rounded-lg bg-zinc-800/50 hover:bg-purple-600/25 hover:cursor-pointer transition-all group"
-				onClick={() => onAction({ type: "clearLogo" })}
-				title={
-					logoIsCleared
-						? "Use the title logo"
-						: "Use the text title instead"
-				}
-			>
-				<Type
-					className={`w-5 h-5 transition-colors ${
+			<div className="flex gap-1 bg-zinc-800/50 rounded-lg">
+				{logoUrls.length > 1 && (
+					<button
+						className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60 hover:cursor-pointer transition-all group"
+						onClick={() =>
+							onAction({ type: "changeLogo", payload: "prev" })
+						}
+						title={`Previous title logo (${activeLogoIndex(logoIndex ?? 0) + 1}/${
+							logoUrls.length
+						})`}
+					>
+						<ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+					</button>
+				)}
+				{/* TEXT TITLE */}
+				<button
+					className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-purple-600/25 hover:cursor-pointer transition-all group"
+					onClick={() => onAction({ type: "clearLogo" })}
+					title={
 						logoIsCleared
-							? "text-purple-400"
-							: "text-gray-400 group-hover:text-purple-400"
-					}`}
-				/>
-			</button>
+							? "Use the title logo"
+							: "Use the text title instead"
+					}
+				>
+					<Type
+						className={`w-5 h-5 transition-colors ${
+							logoIsCleared
+								? "text-purple-400"
+								: "text-gray-400 group-hover:text-purple-400"
+						}`}
+					/>
+				</button>
+				{logoUrls.length > 1 && (
+					<button
+						className="p-1.5 rounded-lg bg-zinc-800/60 hover:bg-yellow-600/60 hover:cursor-pointer transition-all group"
+						onClick={() =>
+							onAction({ type: "changeLogo", payload: "next" })
+						}
+						title={`Next title logo (${activeLogoIndex(logoIndex ?? 0) + 1}/${logoUrls.length})`}
+					>
+						<ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+					</button>
+				)}
+			</div>
 		) : null;
 
 	// cover colour picker
@@ -460,10 +460,8 @@ export function DesktopDetails<T extends BaseMediaProps>({
 						{isSelecting ? (
 							<div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
 								{seriesNav}
-								{/* CYCLE LOGOS */}
-								{logoNav}
-								{/* TITLE */}
-								{logoClear}
+								{/* CYCLE LOGOS | TEXT TITLE */}
+								{logoPicker}
 								{/* COVER COLORS */}
 								{colorPicker}
 								{moreResults}
@@ -490,10 +488,8 @@ export function DesktopDetails<T extends BaseMediaProps>({
 							</div>
 						) : isAdding ? (
 							<div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
-								{/* CYCLE LOGO */}
-								{logoNav}
-								{/* TITLE */}
-								{logoClear}
+								{/* CYCLE LOGOS | TEXT TITLE */}
+								{logoPicker}
 								{/* COVER COLORS */}
 								{colorPicker}
 								{seriesNav}

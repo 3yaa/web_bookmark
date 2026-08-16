@@ -27,7 +27,8 @@ function run(url: string, max: number): Promise<string[]> {
 		if (cors) {
 			// tmdb and igdb serve cors
 			img.crossOrigin = cors;
-			img.src = imageLoader({ src: url, width: 96 });
+			const sized = imageLoader({ src: url, width: 96 });
+			img.src = `${sized}${sized.includes("?") ? "&" : "?"}cors=1`;
 		} else {
 			// hardcover and google books send no cors header
 			img.src = `/cover-proxy?url=${encodeURIComponent(url)}`;

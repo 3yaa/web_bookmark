@@ -607,6 +607,9 @@ export function MovieDetails({
 					onAdd={handleAddMovie}
 					onClose={handleModalClose}
 					isInList={isInList}
+					logoUrls={isSelecting ? refreshLogos : logoUrls}
+					logoIndex={isSelecting ? refreshLogoIndex : logoIndex}
+					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {
 							type: string;

@@ -425,6 +425,9 @@ export function GameDetails({
 					onAdd={handleAddGame}
 					onClose={handleModalClose}
 					isSelecting={isSelecting}
+					logoUrls={isSelecting ? refreshLogos : logoUrls}
+					logoIndex={isSelecting ? refreshLogoIndex : logoIndex}
+					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {
 							type: string;

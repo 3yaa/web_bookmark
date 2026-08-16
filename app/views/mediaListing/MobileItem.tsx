@@ -200,7 +200,7 @@ export const MobileItem = React.memo(function MobileItem<
 				)}
 				{/* NOTES */}
 				<p
-					className={`text-zinc-500 text-sm line-clamp-2 overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-8 w-full wrap-break-word ${mediaType === "show" && "mt-1.5"}`}
+					className={`text-zinc-500 text-sm overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-8 w-full wrap-break-word ${mediaType === "show" && "mt-1.5"}`}
 				>
 					<span className="line-clamp-2">
 						{item.note || "No notes"}

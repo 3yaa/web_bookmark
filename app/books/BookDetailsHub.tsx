@@ -464,6 +464,7 @@ export function BookDetails({
 					}
 					isInList={isInList}
 					isSelecting={isSelecting}
+					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {
 							type: string;

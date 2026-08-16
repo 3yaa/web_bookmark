@@ -693,6 +693,9 @@ export function ShowDetails({
 					isSelecting={isSelecting}
 					onAdd={handleAddShow}
 					onClose={handleModalClose}
+					logoUrls={isSelecting ? refreshLogos : logoUrls}
+					logoIndex={isSelecting ? refreshLogoIndex : logoIndex}
+					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {
 							type: string;

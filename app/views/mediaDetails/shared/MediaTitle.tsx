@@ -24,7 +24,7 @@ const TITLE_BASE = `font-display uppercase ${TITLE_FILL} ${TITLE_RELIEF} text-ba
 export const TITLE_TEXT = {
 	lg: `${TITLE_BASE} text-center max-w-full text-[2.4rem] leading-[1.1] [background-size:100%_1.1em] tracking-[0.03em]`,
 	lgScreen: `${TITLE_BASE} text-center max-w-full text-[2rem] leading-[1.2] [background-size:100%_1.2em] tracking-[0.08em] [text-indent:0.16em]`,
-	sm: `${TITLE_BASE} text-[1.7rem] leading-[1.12] [background-size:100%_1.12em] font-medium tracking-[0.06em] min-w-0`,
+	sm: `${TITLE_BASE} text-center max-w-full text-[1.7rem] leading-[1.12] [background-size:100%_1.12em] font-medium tracking-[0.06em] [text-indent:0.06em] min-w-0`,
 };
 
 //
@@ -36,7 +36,7 @@ const SERIES_BASE = `font-display uppercase font-normal ${SERIES_HALO} text-bala
 export const SERIES_TEXT = {
 	lg: `${SERIES_BASE} text-center max-w-full mb-0.5 text-[0.95rem] leading-[1.5] tracking-[0.25em] text-zinc-200/80`,
 	lgScreen: `${SERIES_BASE} text-center max-w-full mb-0.5 text-[0.85rem] leading-[1.5] tracking-[0.28em] text-zinc-200/80`,
-	sm: `${SERIES_BASE} -mt-2.5 text-[0.7rem] leading-[1.4] tracking-[0.26em] text-zinc-400/75`,
+	sm: `${SERIES_BASE} text-center max-w-full -mt-2.5 text-[0.7rem] leading-[1.4] tracking-[0.26em] text-zinc-400/75`,
 };
 
 // measured once per url and reused -- cache for relook

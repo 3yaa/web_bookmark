@@ -11,9 +11,37 @@ import { GameProps } from "@/types/game";
 import { ShowProps } from "@/types/show";
 import { useEffect, useRef, useState } from "react";
 import { MobileScorePicker } from "@/app/components/ui/MobileScorePicker";
-import { Plus, ChevronLeft, ChevronRight, ChevronsUp } from "lucide-react";
+import {
+	Plus,
+	ChevronLeft,
+	ChevronRight,
+	ChevronsUp,
+	ChevronUp,
+	ChevronDown,
+	Type,
+	Feather,
+	Hourglass,
+	Leaf,
+	BookCheck,
+	Users,
+	BarChart2,
+	RefreshCw,
+	RotateCcw,
+	Unlink,
+	Trash2,
+	Check,
+	X,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Loading } from "@/app/components/ui/Loading";
-import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
+import {
+	formatDateShort,
+	getStatusBg,
+	getStatusDetailWaveColor,
+} from "@/utils/formattingUtils";
+import { coverWave } from "@/app/components/ui/DesktopDetailsUtils";
+import { isLogoCleared } from "./shared/logoIndex";
+import { MovieProps } from "@/types/movie";
 import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
 import { BookCoverConfig } from "@/app/books/components/BookCoverConfigDetails";
 import { CoverColorPicker } from "@/app/components/ui/CoverColorPicker";
@@ -21,9 +49,51 @@ import { MobileProgressPicker } from "@/app/components/ui/MobileSeasonEpPicker";
 import { MobileSeriesNav } from "./shared/MobileSeriesNav";
 import { MediaTitle, SERIES_TEXT, TITLE_TEXT } from "./shared/MediaTitle";
 import { calcCurProgress } from "@/app/shows/utils/progressCalc";
-import { getDisplayScore } from "@/lib/tierConfig";
+import { canNudgeMu, getDisplayScore, getTierFromMu } from "@/lib/tierConfig";
 import { BookProps } from "@/types/book";
 import { useScrollLock } from "@/hooks/useScrollLock";
+
+//
+const MOBILE_ACTION_TONE = {
+	emerald: "text-emerald-400/90 bg-emerald-800/30",
+	blue: "text-blue-400/90 bg-blue-800/30",
+	orange: "text-orange-400/90 bg-orange-700/30",
+	red: "text-red-400/90 bg-red-700/30",
+} as const;
+
+function MobileActionBtn({
+	icon: Icon,
+	tone,
+	label,
+	armed,
+	onPress,
+}: {
+	icon: LucideIcon;
+	tone: keyof typeof MOBILE_ACTION_TONE;
+	label: string;
+	armed: boolean;
+	onPress: () => void;
+}) {
+	return (
+		<button
+			type="button"
+			onClick={onPress}
+			title={label}
+			className={`flex items-center gap-1.5 h-7 shrink-0 rounded-lg transition-all duration-200 active:scale-95 ${
+				armed
+					? `px-2 ${MOBILE_ACTION_TONE[tone]}`
+					: "w-7 justify-center neu-carved text-zinc-400/50"
+			}`}
+		>
+			<Icon className="w-4 h-4 shrink-0" />
+			{armed && (
+				<span className="text-[0.7rem] font-semibold uppercase tracking-wide whitespace-nowrap">
+					{label}
+				</span>
+			)}
+		</button>
+	);
+}
 
 interface MobileDetailsProps<T extends BaseMediaProps> {
 	item: T;
@@ -39,8 +109,12 @@ interface MobileDetailsProps<T extends BaseMediaProps> {
 	onSeriesNav?: (dir: "left" | "right") => void; // book + movie
 	isInList?: (title: string) => boolean;
 	isSelecting?: boolean;
+	canRefresh?: boolean;
 	coverUrls?: MediaCoverProps[]; // book only
 	coverIndex?: number; // book only
+	// movie/show/game
+	logoUrls?: string[];
+	logoIndex?: number;
 }
 
 export function MobileDetails<T extends BaseMediaProps>({
@@ -57,9 +131,13 @@ export function MobileDetails<T extends BaseMediaProps>({
 	onSeriesNav,
 	isInList,
 	isSelecting,
+	canRefresh,
 	coverUrls,
 	coverIndex,
+	logoUrls,
+	logoIndex,
 }: MobileDetailsProps<T>) {
+	const isBook = mediaType === "book";
 	// for movies only
 	const canOpenDirector =
 		mediaType === "movie" &&
@@ -77,16 +155,54 @@ export function MobileDetails<T extends BaseMediaProps>({
 
 	const [isProgressPickerOpen, setIsProgressPickerOpen] = useState(false);
 	const [isScorePickerOpen, setIsScorePickerOpen] = useState(false);
-	const [translateY, setTranslateY] = useState(0);
+	// which destructive control is waiting on its confirming tap
+	const [armed, setArmed] = useState<string | null>(null);
+	const disarmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const [isDragging, setIsDragging] = useState(false);
 	const [isVisible, setIsVisible] = useState(false);
-	const [isExiting, setIsExiting] = useState(false);
 	const startY = useRef(0);
 	const startScrollY = useRef(0);
 	const modalRef = useRef<HTMLDivElement>(null);
 	const dragVelocity = useRef(0);
 	const lastY = useRef(0);
 	const lastTime = useRef(0);
+	// where the sheet sits. a ref, not state -- see handleTouchMove
+	const dragY = useRef(0);
+
+	const SNAP = "transform 0.34s cubic-bezier(0.16, 1, 0.3, 1)";
+	const FLING = "transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)";
+
+	// "drag" follows the finger with no easing, "snap" springs back
+	const setSheetY = (y: number, how: "drag" | "snap" | "fling" = "drag") => {
+		const el = modalRef.current;
+		if (!el) return;
+		dragY.current = y;
+		el.style.transition =
+			how === "drag" ? "none" : how === "snap" ? SNAP : FLING;
+		el.style.transform = `translate3d(0, ${y}px, 0)`;
+	};
+
+	// throw the sheet out, then hand back once the motion has actually finished
+	const dismiss = () => {
+		const el = modalRef.current;
+		if (!el) return onClose();
+		setSheetY(window.innerHeight, "fling");
+		let closed = false;
+		const finish = () => {
+			if (closed) return;
+			closed = true;
+			el.removeEventListener("transitionend", onEnd);
+			onClose();
+		};
+		// transitionend bubbles
+		const onEnd = (e: TransitionEvent) => {
+			if (e.target !== el || e.propertyName !== "transform") return;
+			finish();
+		};
+		el.addEventListener("transitionend", onEnd);
+		// transitionend never arrives if the sheet is interrupted or offscreen
+		setTimeout(finish, 340);
+	};
 
 	const s = item as unknown as SeriesMediaProps;
 	const g = item as unknown as GameProps;
@@ -111,6 +227,184 @@ export function MobileDetails<T extends BaseMediaProps>({
 			: (item.cover ?? undefined);
 
 	const coverSrc = item.cover?.url ?? item.posterUrl;
+
+	// while adding or previewing a reload
+	const isPicking = isAdding || !!isSelecting;
+	const displayLogoUrl =
+		isPicking && logoUrls?.length ? logoUrls[logoIndex ?? 0] : item.logoUrl;
+	const logoIsCleared = isLogoCleared(logoIndex);
+
+	const coverColor = activeCover?.color;
+	const underlineColor =
+		mediaType === "show"
+			? undefined
+			: coverColor?.trim()
+				? coverWave(coverColor)
+				: getStatusDetailWaveColor(item.status);
+
+	// source rating stands in for the completed date until it is watched/read
+	const externalRating =
+		mediaType === "movie" && item.status === "Want to Watch"
+			? (item as unknown as MovieProps).imdbRating
+			: mediaType === "book" && item.status === "Want to Read"
+				? (item as unknown as BookProps).rating
+				: null;
+
+	const metaDivider = (
+		<span aria-hidden className="h-3 w-px shrink-0 bg-zinc-500/35" />
+	);
+
+	//
+	const MOBILE_SCORE_SUB_BTN =
+		"flex justify-center items-center w-7.5 h-7.5 rounded-lg neu-carved text-zinc-400/55 active:scale-95 active:text-zinc-200 transition-all duration-150 disabled:neu-carved-off disabled:opacity-40 disabled:active:scale-100";
+	const canNudgeScore = !!item.score && !isAdding && !isSelecting;
+
+	// first tap arms, second fires. anything else disarms
+	const armOrFire = (key: string, run: () => void) => {
+		if (disarmTimer.current) clearTimeout(disarmTimer.current);
+		if (armed === key) {
+			setArmed(null);
+			run();
+			return;
+		}
+		setArmed(key);
+		disarmTimer.current = setTimeout(() => setArmed(null), 4000);
+	};
+
+	useEffect(
+		() => () => {
+			if (disarmTimer.current) clearTimeout(disarmTimer.current);
+		},
+		[],
+	);
+
+	// the modal swaps items in place on a series jump
+	useEffect(() => {
+		setArmed(null);
+	}, [item.id]);
+
+	const hasSeriesMeta =
+		!!s.seriesTitle || !!s.placeInSeries || !!s.prequel || !!s.sequel;
+
+	//
+	type Control = {
+		key: string;
+		icon: LucideIcon;
+		tone: keyof typeof MOBILE_ACTION_TONE;
+		label: string;
+		action: string;
+		// apply/cancel are themselves the confirmation, so they fire on one tap
+		instant?: boolean;
+	};
+
+	const controls: Control[] = isAdding
+		? []
+		: isSelecting
+			? [
+					{
+						key: "confirmRefresh",
+						icon: Check,
+						tone: "emerald",
+						label: "Apply",
+						action: "confirmRefresh",
+						instant: true,
+					},
+					{
+						key: "cancelRefresh",
+						icon: X,
+						tone: "red",
+						label: "Cancel",
+						action: "cancelRefresh",
+						instant: true,
+					},
+				]
+			: [
+					...(canRefresh
+						? [
+								{
+									key: "refresh",
+									icon: RefreshCw,
+									tone: "emerald",
+									label: "Reload",
+									action: "refresh",
+								} as Control,
+							]
+						: []),
+					...(hasSeriesMeta && mediaType !== "game"
+						? [
+								{
+									key: "clearSeriesMeta",
+									icon: Unlink,
+									tone: "orange",
+									label: "Clear series",
+									action: "clearSeriesMeta",
+								} as Control,
+							]
+						: []),
+					...(item.score
+						? [
+								{
+									key: "resetScore",
+									icon: RotateCcw,
+									tone: "blue",
+									label: "Reset score",
+									action: "resetScore",
+								} as Control,
+							]
+						: []),
+					{
+						key: "delete",
+						icon: Trash2,
+						tone: "red",
+						label: "Delete " + mediaType,
+						action: "delete",
+					},
+				];
+
+	// an armed control needs room for its label, so the others step aside
+	const splitAt = Math.ceil(controls.length / 2);
+	const onRow = (c: Control) => !armed || c.key === armed;
+	const leftControls = controls.slice(0, splitAt).filter(onRow);
+	const rightControls = controls.slice(splitAt).filter(onRow);
+
+	const renderControl = (c: Control) => (
+		<MobileActionBtn
+			key={c.key}
+			icon={c.icon}
+			tone={c.tone}
+			label={c.label}
+			armed={!!c.instant || armed === c.key}
+			onPress={() =>
+				c.instant
+					? onAction({ type: c.action })
+					: armOrFire(c.key, () => onAction({ type: c.action }))
+			}
+		/>
+	);
+
+	// COMPLETED DATE | RATING
+	const trailingMeta =
+		externalRating != null ? (
+			<span className="flex items-center shrink-0 gap-1.5">
+				<Leaf
+					className="w-3.5 h-3.5 shrink-0 text-green-400/60"
+					strokeWidth={1.75}
+				/>
+				<span className="font-semibold tabular-nums text-zinc-300/80 tracking-tight">
+					{externalRating.toFixed(1)}
+				</span>
+			</span>
+		) : item.status === "Completed" && item.dateCompleted ? (
+			<span className="shrink-0 flex items-center gap-1.5 tabular-nums">
+				{isBook && (
+					<BookCheck
+						className="w-3.5 h-3.5 shrink-0 text-zinc-400/70"
+						strokeWidth={1.75}
+					/>
+				)}
+				{formatDateShort(item.dateCompleted)}
+			</span>
+		) : null;
 
 	const colorPicker = activeCover ? (
 		<CoverColorPicker
@@ -168,10 +462,11 @@ export function MobileDetails<T extends BaseMediaProps>({
 
 		if (modal.scrollTop < 3 && deltaY > 0) {
 			const resistance = Math.max(0.3, 1 - deltaY / 800);
-			setTranslateY(deltaY * resistance);
+			// written straight to the node
+			setSheetY(deltaY * resistance);
 		} else if (deltaY < 0) {
 			setIsDragging(false);
-			setTranslateY(0);
+			setSheetY(0, "snap");
 		}
 	};
 
@@ -182,20 +477,12 @@ export function MobileDetails<T extends BaseMediaProps>({
 		const velocityThreshold = 0.5;
 
 		if (
-			translateY > threshold ||
+			dragY.current > threshold ||
 			dragVelocity.current > velocityThreshold
 		) {
-			const finalY = Math.max(
-				translateY + dragVelocity.current * 200,
-				window.innerHeight,
-			);
-			setTranslateY(finalY);
-			setIsExiting(true);
-			setTimeout(() => {
-				onClose();
-			}, 75);
+			dismiss();
 		} else {
-			setTranslateY(0);
+			setSheetY(0, "snap");
 		}
 
 		setIsDragging(false);
@@ -216,20 +503,13 @@ export function MobileDetails<T extends BaseMediaProps>({
 		<>
 			<div
 				ref={modalRef}
-				className={`fixed inset-0 z-30 bg-zinc-950 flex flex-col ${
+				className={`fixed inset-0 z-20 bg-zinc-950 flex flex-col transition-opacity duration-300 ease-out will-change-transform ${
 					isScorePickerOpen || isProgressPickerOpen
 						? "overflow-hidden"
 						: "overflow-y-auto"
 				}`}
-				style={{
-					transform: `translateY(${translateY}px)`,
-					opacity: isVisible ? 1 : 0,
-					transition: isDragging
-						? "none"
-						: isExiting
-							? "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-							: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-				}}
+				// transform is driven imperatively by setSheetY
+				style={{ opacity: isVisible ? 1 : 0 }}
 				onTouchStart={handleTouchStart}
 				onTouchMove={handleTouchMove}
 				onTouchEnd={handleTouchEnd}
@@ -266,6 +546,52 @@ export function MobileDetails<T extends BaseMediaProps>({
 									</div>
 								)}
 							<div className="flex items-center gap-2">
+								{/* CYCLE TITLE LOGOS */}
+								{!!logoUrls?.length && (
+									<div className="flex items-center gap-1 bg-zinc-800/60 rounded-lg p-0.5">
+										{logoUrls.length > 1 && (
+											<button
+												className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
+												onClick={() =>
+													onAction({
+														type: "changeLogo",
+														payload: "prev",
+													})
+												}
+											>
+												<ChevronLeft className="w-5 h-5 text-gray-400" />
+											</button>
+										)}
+										{/* TEXT TITLE INSTEAD */}
+										<button
+											className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
+											onClick={() =>
+												onAction({ type: "clearLogo" })
+											}
+										>
+											<Type
+												className={`w-5 h-5 ${
+													logoIsCleared
+														? "text-purple-400"
+														: "text-gray-400"
+												}`}
+											/>
+										</button>
+										{logoUrls.length > 1 && (
+											<button
+												className="bg-zinc-800/50 p-2 rounded-md active:scale-95 transition-transform duration-150"
+												onClick={() =>
+													onAction({
+														type: "changeLogo",
+														payload: "next",
+													})
+												}
+											>
+												<ChevronRight className="w-5 h-5 text-gray-400" />
+											</button>
+										)}
+									</div>
+								)}
 								{/* DIFFERENT SERIES OPTIONS */}
 								{onSeriesNav && (
 									<div className="flex gap-1 bg-zinc-800/60 rounded-lg p-0.5">
@@ -366,23 +692,69 @@ export function MobileDetails<T extends BaseMediaProps>({
 									<div></div>
 								);
 							})()}
-							<div className="flex justify-between items-start gap-3">
+							<div>
 								{/* TITLE + AUTHOR  */}
-								<div className="min-w-0 flex-1">
+								<div className="min-w-0">
 									<MediaTitle
 										title={item.title}
+										logoUrl={
+											logoIsCleared
+												? null
+												: displayLogoUrl
+										}
 										size="sm"
-										className="-mt-0.5 min-w-0"
+										className="-mt-0.5 mx-auto min-w-0 max-w-full"
 										textClass={TITLE_TEXT.sm}
 										isBook={mediaType === "book"}
+										underlineColor={underlineColor}
 									/>
 									{/* AUTHOR/STUDIO/DIRECTOR AND DATES */}
-									<div className="mt-1 text-zinc-400 text-sm font-medium flex items-center gap-2">
-										<span className="min-w-0">
+									<div className="mt-1.5 text-zinc-200/70 text-[0.8rem] font-medium leading-5 flex items-center justify-center gap-2 min-w-0">
+										{/* AUTHOR / DIRECTOR / STUDIO */}
+										<span className="flex items-center gap-1.5 min-w-0">
+											{(mediaType === "show" ||
+												mediaType === "movie") && (
+												<button
+													onClick={() =>
+														onAction({
+															type: "cast",
+														})
+													}
+													title="View cast"
+													className="shrink-0 text-zinc-400/70 active:text-zinc-200 active:scale-95 transition-all duration-200"
+												>
+													<Users
+														className="w-3.5 h-3.5"
+														strokeWidth={1.75}
+													/>
+												</button>
+											)}
+											{mediaType === "show" && (
+												<button
+													onClick={() =>
+														onAction({
+															type: "openRatings",
+														})
+													}
+													title="Episode ratings"
+													className="shrink-0 text-zinc-400/70 active:text-zinc-200 active:scale-95 transition-all duration-200"
+												>
+													<BarChart2
+														className="w-3.5 h-3.5"
+														strokeWidth={1.75}
+													/>
+												</button>
+											)}
+											{isBook && (
+												<Feather
+													className="w-3.5 h-3.5 shrink-0 text-zinc-400/70 rotate-280"
+													strokeWidth={1.75}
+												/>
+											)}
 											{canOpenDirector ? (
 												<DirectorNames
 													names={directorNames}
-													width="max-w-40"
+													width="max-w-32"
 													onPick={(name) =>
 														onAction({
 															type: "directorClick",
@@ -396,46 +768,99 @@ export function MobileDetails<T extends BaseMediaProps>({
 													}
 												/>
 											) : (
-												differentColumns[0].getValue(
-													item,
-												) ||
-												"Unknown " +
-													differentColumns[0].label
+												<span className="truncate min-w-0">
+													{differentColumns[0].getValue(
+														item,
+													) ||
+														"Unknown " +
+															differentColumns[0]
+																.label}
+												</span>
 											)}
 										</span>
-										•
-										<span>
+										{metaDivider}
+										{/* RELEASE YEAR */}
+										<span className="shrink-0 flex items-center gap-1.5 tabular-nums">
+											{isBook && (
+												<Hourglass
+													className="w-3.5 h-3.5 shrink-0 text-zinc-400/70"
+													strokeWidth={1.75}
+												/>
+											)}
 											{differentColumns[1].getValue(
 												item,
 											) || "Unknown"}
 										</span>
-										{item.dateCompleted && (
-											<>
-												•
-												<span>
-													{formatDateShort(
-														item.dateCompleted,
-													)}
-												</span>
-											</>
-										)}
+										{trailingMeta && metaDivider}
+										{trailingMeta}
 									</div>
 								</div>
-								{/* SCORE */}
-								<div data-no-drag>
-									<button
-										onClick={() => {
-											if (!item.score)
-												setIsScorePickerOpen(true);
-										}}
-										className="relative text-zinc-300/90 font-bold bg-linear-to-br from-zinc-800/90 to-zinc-950 px-3.5 py-1.75 rounded-lg shadow-lg shadow-black"
-									>
-										<span className="relative z-10">
-											{item.score?.mu != null
-												? getDisplayScore(item.score.mu)
-												: "-"}
-										</span>
-									</button>
+								{/* SCORE | ACTION BUTTONS */}
+								<div
+									className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2"
+									data-no-drag
+								>
+									<div className="flex items-center justify-end gap-1.5">
+										{leftControls.map(renderControl)}
+									</div>
+									<div className="inline-flex items-center gap-1.5 rounded-xl neu-raised p-1">
+										{canNudgeScore && (
+											<button
+												className={MOBILE_SCORE_SUB_BTN}
+												disabled={
+													!canNudgeMu(
+														item.score!.mu,
+														"down",
+													)
+												}
+												onClick={() =>
+													onAction({
+														type: "nudgeScore",
+														payload: "down",
+													})
+												}
+											>
+												<ChevronDown className="w-4 h-4" />
+											</button>
+										)}
+										<button
+											onClick={() => {
+												if (!item.score)
+													setIsScorePickerOpen(true);
+											}}
+											className="inline-flex items-center justify-center h-7.5 px-2 min-w-15 text-sm leading-5 text-zinc-300/85 font-semibold tracking-wide tabular-nums"
+										>
+											{item.score?.mu == null
+												? "-"
+												: isAdding
+													? getTierFromMu(
+															item.score.mu,
+														)
+													: `${getDisplayScore(item.score.mu)} - ${getTierFromMu(item.score.mu)}`}
+										</button>
+										{canNudgeScore && (
+											<button
+												className={MOBILE_SCORE_SUB_BTN}
+												disabled={
+													!canNudgeMu(
+														item.score!.mu,
+														"up",
+													)
+												}
+												onClick={() =>
+													onAction({
+														type: "nudgeScore",
+														payload: "up",
+													})
+												}
+											>
+												<ChevronUp className="w-4 h-4" />
+											</button>
+										)}
+									</div>
+									<div className="flex items-center justify-start gap-1.5">
+										{rightControls.map(renderControl)}
+									</div>
 								</div>
 							</div>
 						</div>
@@ -474,7 +899,7 @@ export function MobileDetails<T extends BaseMediaProps>({
 							</div>
 						)}
 						{/* STATUS */}
-						<div className="mt-3" data-no-drag>
+						<div className="-mt-2" data-no-drag>
 							<label className="text-zinc-400 text-xs font-medium">
 								Status
 							</label>

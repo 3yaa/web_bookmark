@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Leaf } from "lucide-react";
+import { Leaf, X } from "lucide-react";
 import { ShowProps } from "@/types/show";
 import type { AuthFetch } from "@/app/auth/hooks/useAuthFetch";
 import Image from "next/image";
@@ -151,12 +151,20 @@ export function EpisodeRatingsModal({
 	return (
 		<ModalBackdrop className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-30">
 			<div className="fixed inset-0" onClick={onClose} />
-			<ModalPanel className="relative bg-zinc-950 rounded-2xl shadow-2xl p-6 max-w-[94vw] max-h-[90vh] overflow-hidden">
-				<div className="flex gap-3 items-center">
+			<ModalPanel className="relative bg-zinc-950 rounded-2xl shadow-2xl p-4 sm:p-6 max-w-[94vw] max-h-[90vh] overflow-hidden">
+				{/* the backdrop closes this, but the panel is 94vw of a phone */}
+				<button
+					onClick={onClose}
+					title="Close"
+					className="sm:hidden absolute right-2 top-2 z-10 p-1.5 rounded-lg text-zinc-400 active:text-zinc-100 active:scale-95 transition-all"
+				>
+					<X className="w-5 h-5" />
+				</button>
+				<div className="flex flex-col sm:flex-row gap-3 sm:items-center">
 					{/* LEFT PANEL */}
-					<div className="flex flex-col gap-3 w-75 shrink-0">
+					<div className="flex flex-col gap-3 w-full sm:w-75 shrink-0">
 						{show.posterUrl && (
-							<div className="relative bg-[#141414] p-3.5 rounded-xl shadow-island select-none">
+							<div className="relative hidden sm:block bg-[#141414] p-3.5 rounded-xl shadow-island select-none">
 								<div className="relative w-full overflow-hidden rounded-lg aspect-2/3">
 									<Image
 										src={show.posterUrl}
@@ -177,7 +185,7 @@ export function EpisodeRatingsModal({
 							</div>
 						)}
 						<div className="flex flex-col gap-1.5">
-							<div className="flex items-center justify-between gap-2 mx-1.5">
+							<div className="flex items-center justify-between gap-2 mx-1.5 pr-7 sm:pr-0">
 								<p className="text-zinc-100 font-bold text-lg leading-snugml-2">
 									{show.title}
 								</p>
@@ -223,7 +231,7 @@ export function EpisodeRatingsModal({
 					</div>
 
 					{/* RIGHT PANEL */}
-					<div className="overflow-auto max-h-123.5 max-w-[calc(94vw-21rem)] grid place-items-center">
+					<div className="overflow-auto max-h-[60vh] sm:max-h-123.5 max-w-full sm:max-w-[calc(94vw-21rem)] grid place-items-start sm:place-items-center">
 						{loading && (
 							<div className="relative h-48 w-64">
 								<Loading
@@ -244,8 +252,17 @@ export function EpisodeRatingsModal({
 								const isSingleSeason = seasons.length === 1;
 								const CHUNK = 11;
 								const numChunks = isSingleSeason
-									? Math.ceil(maxEpisodes / CHUNK)
+									? Math.max(
+											1,
+											Math.ceil(maxEpisodes / CHUNK),
+										)
 									: 1;
+								// spread the episodes evenly down those columns
+								// rather than filling each to CHUNK first -- 12
+								// episodes was a column of 11 beside a stub of 1
+								const perChunk = Math.ceil(
+									maxEpisodes / numChunks,
+								);
 
 								const EpisodeCell = ({
 									epNum,
@@ -316,9 +333,9 @@ export function EpisodeRatingsModal({
 									const chunks = Array.from(
 										{ length: numChunks },
 										(_, ci) => ({
-											start: ci * CHUNK + 1,
+											start: ci * perChunk + 1,
 											end: Math.min(
-												(ci + 1) * CHUNK,
+												(ci + 1) * perChunk,
 												maxEpisodes,
 											),
 											isLast: ci === numChunks - 1,

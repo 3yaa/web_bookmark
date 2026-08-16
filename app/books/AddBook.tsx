@@ -24,6 +24,9 @@ interface AddBookProps {
 	// resolves true when the score battler took over the flow
 	onAddBook: (item: BookProps) => void | Promise<boolean | void>;
 	titleFromAbove?: string;
+	// keeps prequel/sequel jumps alive while previewing an unadded book
+	onSeriesNav?: (targetTitle: string) => void;
+	isInList?: (title: string) => boolean;
 }
 
 export function AddBook({
@@ -31,6 +34,8 @@ export function AddBook({
 	onClose,
 	onAddBook,
 	titleFromAbove,
+	onSeriesNav,
+	isInList,
 }: AddBookProps) {
 	//failure reasons && their fixes -- for user
 	const [failedReason, setFailedReason] = useState("");
@@ -51,8 +56,12 @@ export function AddBook({
 	// multi-result picker
 	const [allNewBooks, setAllNewBooks] = useState<BookSearchResult[]>([]);
 	//
-	const { searchForBooks, searchForBooksMulti, searchForBookByKey, isBookSearching } =
-		useBookSearch();
+	const {
+		searchForBooks,
+		searchForBooksMulti,
+		searchForBookByKey,
+		isBookSearching,
+	} = useBookSearch();
 
 	const reset = useCallback(() => {
 		setFailedReason("");
@@ -98,7 +107,10 @@ export function AddBook({
 			...mapBookAPISeriesData(response.series),
 		}); //main
 		setSeries(response.series);
+		setSeriesIndex(0);
 		setCovers(response.covers);
+		// reset for series jump
+		setCoverIndex(0);
 	}, [searchForBooks]);
 
 	const handleShowMore = useCallback(async () => {
@@ -292,6 +304,8 @@ export function AddBook({
 					showBookInSeries={
 						series.length > 1 ? handleSeriesChange : undefined
 					}
+					showSequelPrequel={onSeriesNav}
+					isInList={isInList}
 					onShowMore={handleShowMore}
 					coverUrls={covers}
 					coverIndex={coverIndex}

@@ -21,6 +21,9 @@ interface AddMovieProps {
 	// resolves true when the score battler took over the flow
 	onAddMovie: (item: MovieProps) => void | Promise<boolean | void>;
 	titleFromAbove?: string;
+	// keeps prequel/sequel jumps alive while previewing an unadded movie
+	onSeriesNav?: (targetTitle: string) => void;
+	isInList?: (title: string) => boolean;
 }
 
 export function AddMovie({
@@ -29,6 +32,8 @@ export function AddMovie({
 	onAddMovie,
 	existingMovies,
 	titleFromAbove,
+	onSeriesNav,
+	isInList,
 }: AddMovieProps) {
 	//failure reasons && their fixes -- for user
 	const [failedReason, setFailedReason] = useState("");
@@ -192,6 +197,10 @@ export function AddMovie({
 			if (titleToSearch.current) {
 				titleToSearch.current.value = titleFromAbove;
 			}
+			// reset for jump
+			if (yearToSearch.current) {
+				yearToSearch.current.value = "";
+			}
 			handleMovieSearch();
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -266,6 +275,8 @@ export function AddMovie({
 					onUpdate={handleMovieDetailsUpdates}
 					addMovie={handleMovieAdd}
 					existingMovies={existingMovies}
+					showSequelPrequel={onSeriesNav}
+					isInList={isInList}
 					isLoading={{
 						isTrue: isMovieSearching,
 						style: "h-8 w-8 border-emerald-400",

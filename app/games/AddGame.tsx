@@ -28,6 +28,8 @@ interface AddGameProps {
 		mainTitle: string;
 		dlcs: IGDBInitProps[];
 	} | null;
+	// keeps dlc jumps alive while previewing an unadded game
+	onDlcNav?: (igdbId: number, dlcIndex: number, source: GameProps) => void;
 }
 
 const GAMELIMIT = 10;
@@ -37,6 +39,7 @@ export function AddGame({
 	onClose,
 	onAddGame,
 	titleFromAbove,
+	onDlcNav,
 }: AddGameProps) {
 	//failure reasons && their fixes -- for user
 	const [failedReason, setFailedReason] = useState("");
@@ -56,8 +59,12 @@ export function AddGame({
 	const [logoUrls, setLogoUrls] = useState<string[]>([]);
 	const [logoIndex, setLogoIndex] = useState(0);
 	//
-	const { searchForGame, searchForGameDlc, searchForGameLogos, isGameSearching } =
-		useGameSearch();
+	const {
+		searchForGame,
+		searchForGameDlc,
+		searchForGameLogos,
+		isGameSearching,
+	} = useGameSearch();
 
 	const reset = useCallback(() => {
 		setFailedReason("");
@@ -99,7 +106,7 @@ export function AddGame({
 		if (!mainGame) return null;
 		//
 		setBackdropUrls(mainGame.screenshot_urls?.map((ss) => ss.ss_url) || []);
-		// 
+		//
 		setLogoUrls(mainGame.logos ?? []);
 		setLogoIndex(0);
 		setNewGame({ ...mapIGDBDataToGame(mainGame), status: "Playing" });
@@ -150,9 +157,14 @@ export function AddGame({
 			setBackdropUrls(
 				mainDlc.screenshot_urls?.map((ss) => ss.ss_url) || [],
 			);
+			// reset for serise jump
+			setBackdropIndex(0);
+			setLogoUrls([]);
+			setLogoIndex(0);
 			setNewGame((prev) => ({
 				...prev,
 				...mappedData,
+				logoUrl: undefined,
 				status: "Playing",
 			}));
 			applyCoverColor(mainDlc.cover_url);
@@ -349,6 +361,7 @@ export function AddGame({
 					onClose={handleGameDetailsClose}
 					onUpdate={handleGameDetailsUpdates}
 					addGame={handleGameAdd}
+					showDlc={onDlcNav}
 					isLoading={{
 						isTrue: isGameSearching,
 						style: "h-8 w-8 border-emerald-400",

@@ -51,7 +51,6 @@ export default function BookHub() {
 		statusFilter,
 		searchQuery,
 		selectedItem,
-		setSelectedItem,
 		titleToUse,
 		setTitleToUse,
 		activeModal,
@@ -99,13 +98,14 @@ export default function BookHub() {
 					normalizeTitle(book.title) === normalizeTitle(targetTitle),
 			);
 			if (targetBook) {
-				setSelectedItem(targetBook);
+				// owned -- hand it to the real details modal
+				handleItemClicked(targetBook);
 			} else {
 				setTitleToUse(targetTitle);
 				setActiveModal("addModal");
 			}
 		},
-		[items, setSelectedItem, setTitleToUse, setActiveModal],
+		[items, handleItemClicked, setTitleToUse, setActiveModal],
 	);
 
 	return (
@@ -163,6 +163,8 @@ export default function BookHub() {
 						existingBooks={items}
 						onAddBook={handleItemAdd}
 						titleFromAbove={titleToUse}
+						onSeriesNav={showSequelPrequel}
+						isInList={isInList}
 					/>
 				)}
 			</AnimatePresence>

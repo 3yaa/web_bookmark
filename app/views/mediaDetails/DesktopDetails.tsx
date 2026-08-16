@@ -937,7 +937,6 @@ export function DesktopDetails<T extends BaseMediaProps>({
 									<SeriesNav
 										item={item}
 										mediaType={mediaType}
-										isAdding={isAdding}
 										onAction={onAction}
 										isInList={isInList}
 										accentColor={coverColor}

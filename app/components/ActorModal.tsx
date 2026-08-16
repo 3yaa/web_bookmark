@@ -9,6 +9,7 @@ import { ModalBackdrop, ModalPanel } from "@/app/components/ui/ModalMotion";
 import { MediaStatus } from "@/types/media";
 import type { ReactNode } from "react";
 import { getStatusBorderColor } from "@/utils/formattingUtils";
+import { useScrollLock } from "@/hooks/useScrollLock";
 
 interface PosterCardProps {
 	src: string | null;
@@ -119,22 +120,8 @@ export function ActorItemsModal({
 		setMediaFilter("all");
 	}, [selectedActor]);
 
-	useEffect(() => {
-		const scrollbarWidth =
-			window.innerWidth - document.documentElement.clientWidth;
-		const originalOverflow = document.body.style.overflow;
-		const originalPaddingRight = document.body.style.paddingRight;
+	useScrollLock();
 
-		document.body.style.overflow = "hidden";
-		if (scrollbarWidth > 0) {
-			document.body.style.paddingRight = `${scrollbarWidth}px`;
-		}
-
-		return () => {
-			document.body.style.overflow = originalOverflow;
-			document.body.style.paddingRight = originalPaddingRight;
-		};
-	}, []);
 	const cols =
 		selectedActor || castLoading || isDirectorView
 			? 6

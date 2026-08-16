@@ -44,7 +44,7 @@ interface GameDetailsProps {
 		takeAction?: boolean,
 	) => void;
 	addGame?: () => void;
-	showDlc?: (igdbId: number, dlcIndex: number) => void;
+	showDlc?: (igdbId: number, dlcIndex: number, source: GameProps) => void;
 	// reload metadata from source (poster/backdrop, studio, dlcs)
 	onRefresh?: (metadata: Partial<GameProps>) => Promise<void>;
 	//
@@ -286,22 +286,11 @@ export function GameDetails({
 	};
 
 	const hanldeDlcOpen = (dir: string) => {
-		if (!showDlc) return;
-		let targetIgdbId;
-		let dlcIndex;
-		if (game.dlcs) {
-			if (dir === "next" && game.dlcIndex < game.dlcs.length) {
-				dlcIndex = game.dlcIndex + 1;
-				targetIgdbId = game.dlcs[dlcIndex].id;
-			} else if (dir === "prev") {
-				dlcIndex = game.dlcIndex - 1;
-				targetIgdbId = game.dlcs[dlcIndex].id;
-			}
-		}
-		//
-		if (targetIgdbId && dlcIndex !== undefined) {
-			showDlc(targetIgdbId, dlcIndex);
-		}
+		if (!showDlc || !game.dlcs) return;
+		const dlcIndex = dir === "next" ? game.dlcIndex + 1 : game.dlcIndex - 1;
+		const targetIgdbId = game.dlcs[dlcIndex]?.id;
+		if (!targetIgdbId) return;
+		showDlc(targetIgdbId, dlcIndex, game);
 	};
 
 	const handleSaveNote = () => {

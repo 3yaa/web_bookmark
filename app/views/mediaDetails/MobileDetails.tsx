@@ -23,6 +23,7 @@ import { MediaTitle, SERIES_TEXT, TITLE_TEXT } from "./shared/MediaTitle";
 import { calcCurProgress } from "@/app/shows/utils/progressCalc";
 import { getDisplayScore } from "@/lib/tierConfig";
 import { BookProps } from "@/types/book";
+import { useScrollLock } from "@/hooks/useScrollLock";
 
 interface MobileDetailsProps<T extends BaseMediaProps> {
 	item: T;
@@ -201,34 +202,14 @@ export function MobileDetails<T extends BaseMediaProps>({
 		dragVelocity.current = 0;
 	};
 
+	// hold the page still behind the sheet
+	useScrollLock();
+
 	useEffect(() => {
 		// trigger mount animation
 		requestAnimationFrame(() => {
 			setIsVisible(true);
 		});
-
-		// NOOP IF IT AIN'T A PHONE
-		if (window.matchMedia("(min-width: 1024px)").matches) return;
-
-		// original values
-		const originalOverflow = document.body.style.overflow;
-		const originalPosition = document.body.style.position;
-		const originalTop = document.body.style.top;
-		const scrollY = window.scrollY;
-
-		// lock body in place
-		document.body.style.overflow = "hidden";
-		document.body.style.position = "fixed";
-		document.body.style.top = `-${scrollY}px`;
-		document.body.style.width = "100%";
-
-		return () => {
-			document.body.style.overflow = originalOverflow;
-			document.body.style.position = originalPosition;
-			document.body.style.top = originalTop;
-			document.body.style.width = "";
-			window.scrollTo(0, scrollY);
-		};
 	}, []);
 
 	return (
@@ -525,7 +506,6 @@ export function MobileDetails<T extends BaseMediaProps>({
 							<MobileSeriesNav
 								item={item}
 								mediaType={mediaType}
-								isAdding={isAdding}
 								onAction={onAction}
 								isInList={isInList}
 							/>

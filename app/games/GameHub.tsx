@@ -35,7 +35,6 @@ export default function GameList() {
 		statusFilter,
 		searchQuery,
 		selectedItem,
-		setSelectedItem,
 		activeModal,
 		setActiveModal,
 		isMenuButtonsVisible,
@@ -101,28 +100,29 @@ export default function GameList() {
 		dlcs: IGDBInitProps[];
 	} | null>(null);
 
+	//
 	const showDlc = useCallback(
-		(targetIgdbId: number, dlcIndex: number) => {
+		(targetIgdbId: number, dlcIndex: number, source: GameProps) => {
 			if (!targetIgdbId) return;
 			const targetGame = items.find(
 				(game) => game.igdbId === targetIgdbId,
 			);
 			if (targetGame) {
-				setSelectedItem(targetGame);
-			} else if (selectedItem?.dlcs) {
+				// owned -- hand it to the real details modal
+				handleItemClicked(targetGame);
+			} else if (source.dlcs) {
+				// the base game
 				const mainTitle =
-					dlcIndex === 1
-						? selectedItem.title
-						: selectedItem.mainTitle;
+					source.dlcs[0]?.name ?? source.mainTitle ?? source.title;
 				setTitleToAdd({
 					dlcIndex,
 					mainTitle: mainTitle || "",
-					dlcs: selectedItem.dlcs,
+					dlcs: source.dlcs,
 				});
 				setActiveModal("addModal");
 			}
 		},
-		[items, selectedItem, setSelectedItem, setActiveModal],
+		[items, handleItemClicked, setActiveModal],
 	);
 
 	// override generic close to also clear titleToAdd
@@ -186,6 +186,7 @@ export default function GameList() {
 						existingGames={items}
 						onAddGame={handleItemAdd}
 						titleFromAbove={titleToAdd}
+						onDlcNav={showDlc}
 					/>
 				)}
 			</AnimatePresence>

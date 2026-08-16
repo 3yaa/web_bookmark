@@ -8,6 +8,7 @@ import {
 	useTransition,
 } from "react";
 import { useScrollVisibility } from "./useScrollVisibility";
+import { useScrollLock } from "./useScrollLock";
 import { debounce } from "@/utils/debounce";
 import { Score } from "@/lib/tierConfig";
 import { createSession } from "@/lib/battleSession";
@@ -259,17 +260,7 @@ export function useManageMedia<T extends BaseMediaProps>({
 		return () => window.removeEventListener("keydown", handleEnter);
 	}, [activeModal]);
 
-	useEffect(() => {
-		if (activeModal) {
-			document.body.style.overflow = "hidden";
-		} else {
-			document.body.style.overflow = "unset";
-		}
-
-		return () => {
-			document.body.style.overflow = "unset";
-		};
-	}, [activeModal]);
+	useScrollLock(!!activeModal);
 
 	return {
 		// items

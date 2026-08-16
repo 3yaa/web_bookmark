@@ -6,7 +6,6 @@ import { NotInListBadge } from "./SeriesNav";
 interface MobileSeriesNavProps {
 	item: BaseMediaProps;
 	mediaType: string;
-	isAdding: boolean;
 	onAction: (action: { type: string; payload?: unknown }) => void;
 	isInList?: (title: string) => boolean;
 }
@@ -14,7 +13,6 @@ interface MobileSeriesNavProps {
 export function MobileSeriesNav({
 	item,
 	mediaType,
-	isAdding,
 	onAction,
 	isInList,
 }: MobileSeriesNavProps) {
@@ -82,11 +80,11 @@ export function MobileSeriesNav({
 	const nextMissing = isMissing(nav.next);
 
 	const nameStyle = (missing: boolean) =>
-		`truncate min-w-0 transition-all duration-200 ${
+		`truncate min-w-0 transition-all duration-200 hover:underline active:scale-95 ${
 			missing
 				? "text-zinc-400/60 underline decoration-dotted decoration-zinc-600/80 underline-offset-4"
 				: ""
-		} ${!isAdding ? "hover:underline active:scale-95" : ""}`;
+		}`;
 
 	if (!nav.center) return null;
 
@@ -100,9 +98,7 @@ export function MobileSeriesNav({
 						{prevMissing && <NotInListBadge />}
 						<span
 							className={nameStyle(prevMissing)}
-							onClick={() => {
-								if (!isAdding) onAction(nav.prev!.action);
-							}}
+							onClick={() => onAction(nav.prev!.action)}
 						>
 							{nav.prev.name}
 						</span>
@@ -121,9 +117,7 @@ export function MobileSeriesNav({
 					<div className="flex gap-1 font-semibold items-center text-sm text-zinc-400/80 min-w-0">
 						<span
 							className={nameStyle(nextMissing)}
-							onClick={() => {
-								if (!isAdding) onAction(nav.next!.action);
-							}}
+							onClick={() => onAction(nav.next!.action)}
 						>
 							{nav.next.name}
 						</span>

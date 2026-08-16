@@ -90,7 +90,6 @@ export default function MoviesHub() {
 		statusFilter,
 		searchQuery,
 		selectedItem,
-		setSelectedItem,
 		titleToUse,
 		setTitleToUse,
 		activeModal,
@@ -167,13 +166,14 @@ export default function MoviesHub() {
 					targetTitle.toLowerCase().trim(),
 			);
 			if (targetMovie) {
-				setSelectedItem(targetMovie);
+				// owned -- hand it to the real details modal
+				handleItemClicked(targetMovie);
 			} else {
 				setTitleToUse(targetTitle);
 				setActiveModal("addModal");
 			}
 		},
-		[items, setSelectedItem, setTitleToUse, setActiveModal],
+		[items, handleItemClicked, setTitleToUse, setActiveModal],
 	);
 
 	return (
@@ -231,6 +231,8 @@ export default function MoviesHub() {
 						existingMovies={items}
 						onAddMovie={handleItemAdd}
 						titleFromAbove={titleToUse}
+						onSeriesNav={showSequelPrequel}
+						isInList={isInList}
 					/>
 				)}
 			</AnimatePresence>

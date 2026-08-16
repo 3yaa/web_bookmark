@@ -7,7 +7,6 @@ import { BookProps } from "@/types/book";
 interface SeriesNavProps {
 	item: BaseMediaProps;
 	mediaType: string;
-	isAdding: boolean;
 	onAction: (action: { type: string; payload?: unknown }) => void;
 	isInList?: (title: string) => boolean;
 	accentColor?: string;
@@ -48,7 +47,6 @@ export function NotInListBadge() {
 export function SeriesNav({
 	item,
 	mediaType,
-	isAdding,
 	onAction,
 	isInList,
 	accentColor,
@@ -255,10 +253,8 @@ export function SeriesNav({
 				<div className="truncate text-left">
 					{nav.prev && (
 						<div
-							className={`group flex flex-col ${!isAdding ? "hover:cursor-pointer" : ""}`}
-							onClick={() => {
-								if (!isAdding) onAction(nav.prev!.action);
-							}}
+							className="group flex flex-col hover:cursor-pointer"
+							onClick={() => onAction(nav.prev!.action)}
 						>
 							<label className="text-xs font-medium text-zinc-500 block pointer-events-none">
 								<span className="inline-flex items-center gap-1">
@@ -285,10 +281,8 @@ export function SeriesNav({
 				<div className="truncate text-right">
 					{nav.next && (
 						<div
-							className={`group flex flex-col ${!isAdding ? "hover:cursor-pointer" : ""}`}
-							onClick={() => {
-								if (!isAdding) onAction(nav.next!.action);
-							}}
+							className="group flex flex-col hover:cursor-pointer"
+							onClick={() => onAction(nav.next!.action)}
 						>
 							<label className="text-xs font-medium text-zinc-500 block pointer-events-none">
 								<span className="inline-flex items-center gap-1">

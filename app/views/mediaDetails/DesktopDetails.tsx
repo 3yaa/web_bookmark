@@ -46,7 +46,7 @@ import { BookCoverConfig } from "@/app/books/components/BookCoverConfigDetails";
 import { CoverColorPicker } from "@/app/components/ui/CoverColorPicker";
 import { BookBackdropDetails } from "@/app/components/ui/BookBackdrop";
 import { SeriesNav } from "./shared/SeriesNav";
-import { activeLogoIndex, isLogoCleared } from "./shared/logoIndex";
+import { activeLogoIndex, isLogoCleared } from "../../../utils/artworkIndex";
 import {
 	ActionBtn,
 	coverWave,
@@ -95,10 +95,13 @@ interface DesktopDetailsProps<T extends BaseMediaProps> {
 	// book
 	coverUrls?: MediaCoverProps[];
 	coverIndex?: number;
-	// game
+	// movie/show -- the parent keeps item.cover/posterUrl on the picked one
+	posterUrls?: string[];
+	posterIndex?: number;
+	// game/movie/show
 	backdropUrls?: string[];
 	backdropIndex?: number;
-	// movie/show
+	// movie/show/game
 	logoUrls?: string[];
 	logoIndex?: number;
 	// show
@@ -122,6 +125,8 @@ export function DesktopDetails<T extends BaseMediaProps>({
 	isSelecting,
 	coverUrls,
 	coverIndex,
+	posterUrls,
+	posterIndex,
 	backdropUrls,
 	backdropIndex,
 	logoUrls,
@@ -146,19 +151,17 @@ export function DesktopDetails<T extends BaseMediaProps>({
 	// the action waiting on its confirmation
 	const [pending, setPending] = useState<PendingConfirm | null>(null);
 
-	// only for game/book
-	const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
-		//detects which side of the div was clicked
+	// which half of the artwork was clicked decides the direction
+	const stepFrom = (type: string) => (e: React.MouseEvent<HTMLElement>) => {
 		const rect = e.currentTarget.getBoundingClientRect();
 		const clickX = e.clientX - rect.left;
 		const elementWidth = rect.width;
 		const isRightSide = clickX > elementWidth / 2;
 
-		onAction({
-			type: "changeCover",
-			payload: isRightSide ? "next" : "prev",
-		});
+		onAction({ type, payload: isRightSide ? "next" : "prev" });
 	};
+	const handleCoverChange = stepFrom("changeCover");
+	const handleBackdropChange = stepFrom("changeBackdrop");
 
 	// the cover being shown right now
 	const activeCover =
@@ -167,6 +170,12 @@ export function DesktopDetails<T extends BaseMediaProps>({
 			: (item.cover ?? undefined);
 	//
 	const isPicking = isAdding || isSelecting;
+	// books cycle their own cover list, everything else keeps item.cover on the
+	// picked poster and just needs the count for the counter/click target
+	const posterCount =
+		(mediaType === "book" ? coverUrls?.length : posterUrls?.length) ?? 0;
+	const posterPos = (mediaType === "book" ? coverIndex : posterIndex) ?? 0;
+	const canCyclePoster = isPicking && posterCount > 1;
 	//
 	const logoIsCleared = isLogoCleared(logoIndex);
 	const logoPicker =
@@ -267,12 +276,10 @@ export function DesktopDetails<T extends BaseMediaProps>({
 		(isAdding || isSelecting) && coverUrls?.[coverIndex ?? 0]
 			? coverUrls[coverIndex ?? 0].color
 			: item.cover?.color;
+	// falls through to the stored backdrop when the source served no candidates
 	const imageBackdropUrl =
-		mediaType === "game" &&
-		(isAdding || isSelecting) &&
-		backdropIndex !== undefined
-			? backdropUrls?.[backdropIndex]
-			: item.backdropUrl;
+		(isPicking ? backdropUrls?.[backdropIndex ?? 0] : undefined) ??
+		item.backdropUrl;
 	const displayLogoUrl =
 		isPicking && logoUrls?.length ? logoUrls[logoIndex ?? 0] : item.logoUrl;
 	// moives only
@@ -616,19 +623,15 @@ export function DesktopDetails<T extends BaseMediaProps>({
 							<div
 								className={`relative w-69 shrink-0 bg-[#141414] p-3.5 rounded-xl shadow-island select-none ${
 									isBook ? "" : "pb-0"
-								} ${coverUrls ? "hover:cursor-pointer" : ""}`}
+								} ${canCyclePoster ? "hover:cursor-pointer" : ""}`}
 								onClick={
-									mediaType === "book" &&
-									coverUrls &&
-									coverUrls.length > 1
+									canCyclePoster
 										? handleCoverChange
 										: undefined
 								}
 								title={
-									mediaType === "book" &&
-									coverUrls &&
-									coverIndex !== undefined
-										? `${coverIndex + 1}/${coverUrls?.length}`
+									canCyclePoster
+										? `${posterPos + 1}/${posterCount}`
 										: ""
 								}
 							>
@@ -689,25 +692,24 @@ export function DesktopDetails<T extends BaseMediaProps>({
 												src={imageBackdropUrl}
 												width={
 													mediaType === "game"
-														? 1920
-														: 1280
+														? 540
+														: 780
 												}
 												height={
 													mediaType === "game"
-														? 1080
-														: 720
+														? 304
+														: 439
 												}
 											/>
 										)}
-								{/* game backdrop cycling overlay */}
-								{mediaType === "game" &&
-									(isAdding || isSelecting) &&
+								{/* backdrop cycling overlay */}
+								{isPicking &&
 									backdropUrls &&
 									backdropUrls.length > 1 && (
 										<div
 											className="absolute top-0 -left-8 -right-8 h-40 hover:cursor-pointer z-5"
-											onClick={handleCoverChange}
-											title={`${backdropIndex}/${backdropUrls.length}`}
+											onClick={handleBackdropChange}
+											title={`${(backdropIndex ?? 0) + 1}/${backdropUrls.length}`}
 										/>
 									)}
 								{/*  */}

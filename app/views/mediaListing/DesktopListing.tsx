@@ -77,6 +77,8 @@ export function DesktopListing<T extends BaseMediaProps>({
 		overscan: 5,
 		measureElement: (element) =>
 			element?.getBoundingClientRect().height ?? rowEstimate,
+		//
+		useFlushSync: false,
 	});
 	//
 	const ranks = useMemo(() => {

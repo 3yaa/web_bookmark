@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { isResizable } from "@/utils/image-loader";
 import { Option } from "@/app/components/ui/Dropdown";
 import { DirectorNames } from "../../movies/components/DirectorNames";
 import {
@@ -40,7 +41,7 @@ import {
 	getStatusDetailWaveColor,
 } from "@/utils/formattingUtils";
 import { coverWave } from "@/app/components/ui/DesktopDetailsUtils";
-import { isLogoCleared } from "./shared/logoIndex";
+import { isLogoCleared } from "../../../utils/artworkIndex";
 import { MovieProps } from "@/types/movie";
 import { MobileAutoTextarea } from "@/app/components/ui/MobileAutoTextArea";
 import { BookCoverConfig } from "@/app/books/components/BookCoverConfigDetails";
@@ -123,6 +124,9 @@ interface MobileDetailsProps<T extends BaseMediaProps> {
 	canRefresh?: boolean;
 	coverUrls?: MediaCoverProps[]; // book only
 	coverIndex?: number; // book only
+	// movie/show -- the parent keeps item.cover/posterUrl on the picked one
+	posterUrls?: string[];
+	posterIndex?: number;
 	// movie/show/game
 	logoUrls?: string[];
 	logoIndex?: number;
@@ -145,6 +149,8 @@ export function MobileDetails<T extends BaseMediaProps>({
 	canRefresh,
 	coverUrls,
 	coverIndex,
+	posterUrls,
+	posterIndex,
 	logoUrls,
 	logoIndex,
 }: MobileDetailsProps<T>) {
@@ -240,6 +246,11 @@ export function MobileDetails<T extends BaseMediaProps>({
 
 	// while adding or previewing a reload
 	const isPicking = isAdding || !!isSelecting;
+	// books cycle their own cover list, everything else keeps item.cover/
+	// posterUrl on the picked poster and just needs the count
+	const posterCount = (isBook ? coverUrls?.length : posterUrls?.length) ?? 0;
+	const posterPos = (isBook ? coverIndex : posterIndex) ?? 0;
+	const canCyclePoster = isPicking && posterCount > 1;
 	const displayLogoUrl =
 		isPicking && logoUrls?.length ? logoUrls[logoIndex ?? 0] : item.logoUrl;
 	const logoIsCleared = isLogoCleared(logoIndex);
@@ -512,30 +523,29 @@ export function MobileDetails<T extends BaseMediaProps>({
 						isMobile={true}
 					/>
 				)}
-				{/* ACTION BAR */}
-				{isAdding && (
+				{/* ACTION BAR -- a reload preview picks artwork the same way */}
+				{isPicking && (
 					<div className="sticky top-0 z-30">
 						<div className="absolute top-0 left-0 right-0 mt-1.5 mx-0.5 flex items-center justify-between">
 							{/* ADD BUTTON */}
-							<button
-								className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
-								onClick={onAdd}
-							>
-								<Plus className="w-5 h-5 text-slate-400" />
-							</button>
+							{isAdding && (
+								<button
+									className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
+									onClick={onAdd}
+								>
+									<Plus className="w-5 h-5 text-slate-400" />
+								</button>
+							)}
 							{/* COVER COLORS */}
 							{colorPicker}
 							{/* COVER INDICATOR */}
-							{mediaType === "book" &&
-								coverUrls &&
-								coverUrls.length > 1 &&
-								coverIndex !== undefined && (
-									<div className="p-1.5 px-2.5 bg-zinc-800/50 backdrop-blur-sm rounded-md">
-										<span className="text-xs text-slate-400 font-medium">
-											{coverIndex + 1}/{coverUrls.length}
-										</span>
-									</div>
-								)}
+							{canCyclePoster && (
+								<div className="p-1.5 px-2.5 bg-zinc-800/50 backdrop-blur-sm rounded-md">
+									<span className="text-xs text-slate-400 font-medium">
+										{posterPos + 1}/{posterCount}
+									</span>
+								</div>
+							)}
 							<div className="flex items-center gap-2">
 								{/* CYCLE TITLE LOGOS */}
 								{!!logoUrls?.length && (
@@ -600,25 +610,27 @@ export function MobileDetails<T extends BaseMediaProps>({
 										</button>
 									</div>
 								)}
-								{/* NEED YEAR */}
-								<button
-									className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
-									onClick={() => {
-										onAction({
-											type:
-												mediaType === "book"
-													? "moreBooks"
-													: "needYearField",
-										});
-									}}
-									title={
-										mediaType === "book"
-											? "See More Options"
-											: "Search with year"
-									}
-								>
-									<ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
-								</button>
+								{/* NEED YEAR -- re-searches, so adding only */}
+								{isAdding && (
+									<button
+										className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
+										onClick={() => {
+											onAction({
+												type:
+													mediaType === "book"
+														? "moreBooks"
+														: "needYearField",
+											});
+										}}
+										title={
+											mediaType === "book"
+												? "See More Options"
+												: "Search with year"
+										}
+									>
+										<ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
+									</button>
+								)}
 							</div>
 						</div>
 					</div>
@@ -629,12 +641,8 @@ export function MobileDetails<T extends BaseMediaProps>({
 					<div
 						className={`relative w-full overflow-hidden bg-zinc-900/40 transition-all duration-300 ${
 							isDragging && "rounded-lg"
-						} ${coverUrls && coverUrls.length > 1 ? "cursor-pointer" : ""}`}
-						onClick={
-							coverUrls && coverUrls.length > 1
-								? handleCoverChange
-								: undefined
-						}
+						} ${canCyclePoster ? "cursor-pointer" : ""}`}
+						onClick={canCyclePoster ? handleCoverChange : undefined}
 					>
 						{mediaType === "book" ? (
 							<BookCoverConfig
@@ -653,9 +661,10 @@ export function MobileDetails<T extends BaseMediaProps>({
 							<Image
 								src={coverSrc}
 								alt={item.title || "Poster"}
-								width={390}
-								height={585}
+								width={342}
+								height={513}
 								sizes="100vw"
+								unoptimized={!isResizable(coverSrc)}
 								className="object-cover w-full"
 							/>
 						) : (

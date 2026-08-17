@@ -41,6 +41,9 @@ export interface TMDBTvProps {
 	imdbId?: string | null;
 	poster_url?: string | null;
 	backdrop_url?: string | null;
+	// every candidate tmdb has, ranked -- poster_url/backdrop_url are just [0]
+	posters?: string[];
+	backdrops?: string[];
 	logo_url?: string | null;
 	logos?: string[];
 }

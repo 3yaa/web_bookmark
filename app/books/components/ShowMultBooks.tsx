@@ -1,6 +1,7 @@
 import { BookSearchResult } from "@/types/book";
 import { X, Check } from "lucide-react";
 import Image from "next/image";
+import { isResizable } from "@/utils/image-loader";
 import { Loading } from "@/app/components/ui/Loading";
 import { ModalBackdrop, ModalPanel } from "@/app/components/ui/ModalMotion";
 
@@ -65,6 +66,9 @@ export function ShowMultBooks({
 											alt={book.title || "Untitled"}
 											width={248}
 											height={372}
+											unoptimized={!isResizable(
+												book.cover_url,
+											)}
 											className="w-full h-full object-fill rounded-sm"
 										/>
 									) : (

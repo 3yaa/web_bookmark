@@ -1,3 +1,12 @@
+// poster/backdrop pickers cycle
+export const stepArtworkIndex = (
+	index: number,
+	dir: "next" | "prev",
+	total: number,
+) => (total < 2 ? index : (index + (dir === "next" ? 1 : total - 1)) % total);
+
+// -- logo
+
 // mean text title
 export const clearedFrom = (index: number) => -index - 1;
 

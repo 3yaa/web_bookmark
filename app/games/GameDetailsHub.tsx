@@ -9,7 +9,7 @@ import {
 	activeLogoIndex,
 	clearedFrom,
 	stepLogoIndex,
-} from "@/app/views/mediaDetails/shared/logoIndex";
+} from "@/utils/artworkIndex";
 import { useScoreNudge } from "@/hooks/useScoreNudge";
 import { useGameSearch } from "@/hooks/external/useGameSearch";
 import { mapIGDBDataToGame, mapIGDBDlcsDataToGame } from "./utils/gameMapping";
@@ -30,7 +30,7 @@ export type GameAction =
 	| { type: "confirmRefresh" }
 	| { type: "cancelRefresh" }
 	| { type: "pickCoverColor"; payload: string }
-	| { type: "changeCover"; payload: "next" | "prev" }
+	| { type: "changeBackdrop"; payload: "next" | "prev" }
 	| { type: "changeLogo"; payload: "next" | "prev" }
 	| { type: "clearLogo" };
 
@@ -124,7 +124,7 @@ export function GameDetails({
 			case "saveNote":
 				handleSaveNote();
 				break;
-			case "changeCover":
+			case "changeBackdrop":
 				if (isSelecting) handleSelectBackdropChange(action.payload);
 				else handleCoverChange(action.payload);
 				break;

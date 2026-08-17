@@ -41,6 +41,9 @@ export interface MovieAPIProps {
 	imdbRating?: number | null;
 	poster_url?: string;
 	backdrop_url?: string;
+	// every candidate tmdb has, ranked -- poster_url/backdrop_url are just [0]
+	posters?: string[];
+	backdrops?: string[];
 	logo_url?: string | null;
 	logos?: string[];
 	series?: SeriesAPIProps | null;

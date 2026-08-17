@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { isResizable } from "@/utils/image-loader";
 import { useState } from "react";
 
 interface BattlerCoverProps {
@@ -33,6 +34,7 @@ export function BattlerCover({
 					width={248}
 					height={372}
 					sizes="(min-width: 768px) 248px, 400px"
+					unoptimized={!isResizable(src)}
 					onLoad={() => setLoadedSrc(src)}
 					className={`relative ${sizeClass} ${imgFit} transition-opacity duration-300 ${
 						isLoaded ? "opacity-100" : "opacity-0"

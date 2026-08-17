@@ -50,6 +50,11 @@ export function AddMovie({
 	const [logoUrls, setLogoUrls] = useState<string[]>([]);
 	const [logoIndex, setLogoIndex] = useState(0);
 	//
+	const [posterUrls, setPosterUrls] = useState<string[]>([]);
+	const [posterIndex, setPosterIndex] = useState(0);
+	const [backdropUrls, setBackdropUrls] = useState<string[]>([]);
+	const [backdropIndex, setBackdropIndex] = useState(0);
+	//
 	const { searchForMovie, isMovieSearching } = useMovieSearch();
 
 	const reset = useCallback(() => {
@@ -61,6 +66,10 @@ export function AddMovie({
 		setNewMovie({});
 		setLogoUrls([]);
 		setLogoIndex(0);
+		setPosterUrls([]);
+		setPosterIndex(0);
+		setBackdropUrls([]);
+		setBackdropIndex(0);
 		if (titleToSearch.current) {
 			titleToSearch.current.value = "";
 			titleToSearch.current.focus();
@@ -112,10 +121,27 @@ export function AddMovie({
 		});
 		setLogoUrls(movieData.logos ?? []);
 		setLogoIndex(0);
+		setPosterUrls(movieData.posters ?? []);
+		setPosterIndex(0);
+		setBackdropUrls(movieData.backdrops ?? []);
+		setBackdropIndex(0);
 		//
 		const cover = await buildCover(mappedMovie.cover?.url);
 		if (cover) setNewMovie((prev) => ({ ...prev, cover }));
 	}, [searchForMovie]);
+
+	// reread color
+	useEffect(() => {
+		const url = posterUrls[posterIndex];
+		if (!url) return;
+		let alive = true;
+		buildCover(url).then((cover) => {
+			if (alive && cover) setNewMovie((prev) => ({ ...prev, cover }));
+		});
+		return () => {
+			alive = false;
+		};
+	}, [posterUrls, posterIndex]);
 
 	const handleMovieDetailsUpdates = useCallback(
 		async (
@@ -152,6 +178,10 @@ export function AddMovie({
 			// when logo text set to null
 			...(logoUrls.length
 				? { logoUrl: logoUrls[logoIndex] ?? null }
+				: {}),
+			// cover already tracks the picked poster
+			...(backdropUrls.length
+				? { backdropUrl: backdropUrls[backdropIndex] }
 				: {}),
 		};
 		const isBattling = await onAddMovie(finalMovie as MovieProps);
@@ -285,6 +315,12 @@ export function AddMovie({
 					logoUrls={logoUrls}
 					logoIndex={logoIndex}
 					updateLogoIndex={setLogoIndex}
+					posterUrls={posterUrls}
+					posterIndex={posterIndex}
+					updatePosterIndex={setPosterIndex}
+					backdropUrls={backdropUrls}
+					backdropIndex={backdropIndex}
+					updateBackdropIndex={setBackdropIndex}
 				/>
 			)}
 		</ModalBackdrop>

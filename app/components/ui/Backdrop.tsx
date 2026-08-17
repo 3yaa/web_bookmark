@@ -37,7 +37,8 @@ export const BackdropImage = ({ src, width, height }: BackdropImageProps) => (
 				alt="Backdrop"
 				width={width}
 				height={height}
-				className="object-cover"
+				sizes="40vw"
+				className="object-cover w-full"
 				style={{
 					objectPosition: "center -10px",
 					filter: "brightness(0.40)",

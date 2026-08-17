@@ -69,6 +69,7 @@ export function ScoreBattlerDesktop<T extends BaseMediaProps>({
 								alt="flower"
 								width={240}
 								height={360}
+								unoptimized
 								className="max-w-24"
 							/>
 							{/* ACTION BUTTONS */}

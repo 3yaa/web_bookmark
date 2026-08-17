@@ -52,13 +52,17 @@ export function MobileListing<T extends BaseMediaProps>({
 	const [openSortOption, setOpenSortOption] = useState(false);
 	const [openStatusOption, setOpenStatusOption] = useState(false);
 	const [searchOpen, setSearchOpen] = useState(false);
+	// 120px wide at 3/4 for games, 0.677 otherwise
+	const rowEstimate = mediaType === "game" ? 160 : 178;
 	//
 	const virtualizer = useWindowVirtualizer({
 		count: mediaItems.length,
-		estimateSize: () => 136,
+		estimateSize: () => rowEstimate,
 		overscan: 5,
 		measureElement: (element) =>
-			element?.getBoundingClientRect().height ?? 136,
+			element?.getBoundingClientRect().height ?? rowEstimate,
+		//  mid-commit flushSync
+		useFlushSync: false,
 	});
 
 	const sortOptions = [

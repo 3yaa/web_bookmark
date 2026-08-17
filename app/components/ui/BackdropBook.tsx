@@ -1,3 +1,4 @@
+import { isResizable } from "@/utils/image-loader";
 import Image from "next/image";
 
 interface BackdropImageBookProps {
@@ -18,6 +19,7 @@ export const BackdropImageBook = ({
         alt="Backdrop"
         width={width}
         height={height}
+        unoptimized={!isResizable(src)}
         className="object-cover opacity-30"
         style={{ objectPosition: "center -190px" }}
       />

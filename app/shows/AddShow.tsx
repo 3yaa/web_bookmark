@@ -41,6 +41,11 @@ export function AddShow({
 	const [logoUrls, setLogoUrls] = useState<string[]>([]);
 	const [logoIndex, setLogoIndex] = useState(0);
 	//
+	const [posterUrls, setPosterUrls] = useState<string[]>([]);
+	const [posterIndex, setPosterIndex] = useState(0);
+	const [backdropUrls, setBackdropUrls] = useState<string[]>([]);
+	const [backdropIndex, setBackdropIndex] = useState(0);
+	//
 	const { searchForShow, searchForShowSeasonInfo, isShowSearching } =
 		useShowSearch();
 
@@ -53,6 +58,10 @@ export function AddShow({
 		setNewShow({});
 		setLogoUrls([]);
 		setLogoIndex(0);
+		setPosterUrls([]);
+		setPosterIndex(0);
+		setBackdropUrls([]);
+		setBackdropIndex(0);
 		if (titleToSearch.current) {
 			titleToSearch.current.value = "";
 			titleToSearch.current.focus();
@@ -97,9 +106,20 @@ export function AddShow({
 			}));
 			setLogoUrls(seasonInfo.logos ?? []);
 			setLogoIndex(0);
+			setPosterUrls(seasonInfo.posters ?? []);
+			setPosterIndex(0);
+			setBackdropUrls(seasonInfo.backdrops ?? []);
+			setBackdropIndex(0);
 		},
 		[searchForShowSeasonInfo],
 	);
+
+	// read poster color
+	useEffect(() => {
+		const url = posterUrls[posterIndex];
+		if (!url) return;
+		setNewShow((prev) => ({ ...prev, posterUrl: url }));
+	}, [posterUrls, posterIndex]);
 
 	const handleShowSearch = useCallback(async () => {
 		setActiveModal("showDetails");
@@ -157,6 +177,10 @@ export function AddShow({
 			// text title then null not undefined
 			...(logoUrls.length
 				? { logoUrl: logoUrls[logoIndex] ?? null }
+				: {}),
+			// posterUrl already tracks the picked poster
+			...(backdropUrls.length
+				? { backdropUrl: backdropUrls[backdropIndex] }
 				: {}),
 		};
 		const isBattling = await onAddShow(finalShow as ShowProps);
@@ -278,6 +302,12 @@ export function AddShow({
 					logoUrls={logoUrls}
 					logoIndex={logoIndex}
 					updateLogoIndex={setLogoIndex}
+					posterUrls={posterUrls}
+					posterIndex={posterIndex}
+					updatePosterIndex={setPosterIndex}
+					backdropUrls={backdropUrls}
+					backdropIndex={backdropIndex}
+					updateBackdropIndex={setBackdropIndex}
 				/>
 			)}
 		</ModalBackdrop>

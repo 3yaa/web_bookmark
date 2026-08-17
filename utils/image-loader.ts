@@ -15,6 +15,12 @@ const IGDB_PRESETS: Array<[number, string]> = [
 const atLeast = (ladder: number[], width: number) =>
 	ladder.find((w) => w >= width) ?? ladder[ladder.length - 1];
 
+// only these two expose a size
+export const isResizable = (src: string) =>
+	src.includes("image.tmdb.org")
+		? !src.toLowerCase().endsWith(".svg")
+		: src.includes("images.igdb.com");
+
 // hosts verified to answer with `access-control-allow-origin: *`.
 export const corsMode = (src: string): "anonymous" | undefined =>
 	src.includes("image.tmdb.org") || src.includes("images.igdb.com")

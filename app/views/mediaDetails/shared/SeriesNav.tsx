@@ -204,6 +204,7 @@ export function SeriesNav({
 									alt=""
 									fill
 									sizes="(min-width: 1024px) 860px, 100vw"
+									unoptimized
 									className="object-cover"
 									style={{
 										objectPosition: ART_POSITION,

@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { Fragment, useEffect, useRef, useState } from "react";
-import { corsMode } from "@/utils/image-loader";
+import { corsMode, isResizable } from "@/utils/image-loader";
 
 // sizing for logo
 const SIZES = {
@@ -273,10 +273,14 @@ export function MediaTitle({
 			<Image
 				src={logoUrl}
 				alt={title || "Untitled"}
-				width={500}
-				height={200}
-				// next/image refuses to optimise svg without dangerouslyAllowSVG
-				unoptimized={logoUrl.toLowerCase().endsWith(".svg")}
+				// the real size comes from `sizing` below -- 500 landed on the
+				// w500 tmdb logos are stored at, 342 keeps the 2.5 ratio and
+				// gives retina a w780 instead of w1280
+				width={342}
+				height={137}
+				// next/image refuses to optimise svg without dangerouslyAllowSVG,
+				// and steamgriddb serves one fixed file per logo
+				unoptimized={!isResizable(logoUrl)}
 				// tmdb logos can be read back off the canvas; steamgriddb sends
 				// no cors header -- inkStatsOf falls back on taint
 				crossOrigin={corsMode(logoUrl)}

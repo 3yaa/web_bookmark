@@ -1,4 +1,5 @@
 import { MediaCoverProps } from "@/types/media";
+import { isResizable } from "@/utils/image-loader";
 import Image from "next/image";
 
 interface BookCoverConfigProps {
@@ -38,6 +39,7 @@ export function BookCoverConfig({
           height={height}
           sizes={sizes}
           quality={quality}
+          unoptimized={!isResizable(coverUrls[coverIndex].url)}
           className={className}
           onLoad={onLoad}
         />
@@ -49,6 +51,7 @@ export function BookCoverConfig({
           height={height}
           sizes={sizes}
           quality={quality}
+          unoptimized={!isResizable(coverUrl)}
           className={className}
           onLoad={onLoad}
         />

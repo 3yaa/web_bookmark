@@ -1,5 +1,6 @@
 import { BaseMediaProps } from "@/types/media";
 import Image from "next/image";
+import { isResizable } from "@/utils/image-loader";
 import { getStatusBg, getStatusWaveColor } from "@/utils/formattingUtils";
 import { getDisplayScore } from "@/lib/tierConfig";
 
@@ -41,6 +42,7 @@ export function RecentItems({ items }: { items: BaseMediaProps[] }) {
                   width={112}
                   height={168}
                   sizes="56px"
+                  unoptimized={!isResizable(item.imageUrl)}
                 />
               ) : (
                 <div className="w-full h-full bg-zinc-800/50" />

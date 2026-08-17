@@ -9,7 +9,8 @@ import {
 	activeLogoIndex,
 	clearedFrom,
 	stepLogoIndex,
-} from "@/app/views/mediaDetails/shared/logoIndex";
+	stepArtworkIndex,
+} from "@/utils/artworkIndex";
 import { useScoreNudge } from "@/hooks/useScoreNudge";
 import {
 	ActorWork,
@@ -69,6 +70,8 @@ export type ShowAction =
 	| { type: "cancelRefresh" }
 	| { type: "changeLogo"; payload: "next" | "prev" }
 	| { type: "clearLogo" }
+	| { type: "changeCover"; payload: "next" | "prev" }
+	| { type: "changeBackdrop"; payload: "next" | "prev" }
 	| { type: "openRatings" };
 
 interface ShowDetailsProps {
@@ -97,6 +100,13 @@ interface ShowDetailsProps {
 	logoUrls?: string[];
 	logoIndex?: number;
 	updateLogoIndex?: (newIndex: number) => void;
+	// artwork to cycle
+	posterUrls?: string[];
+	posterIndex?: number;
+	updatePosterIndex?: (newIndex: number) => void;
+	backdropUrls?: string[];
+	backdropIndex?: number;
+	updateBackdropIndex?: (newIndex: number) => void;
 }
 
 export function ShowDetails({
@@ -114,6 +124,12 @@ export function ShowDetails({
 	logoUrls,
 	logoIndex,
 	updateLogoIndex,
+	posterUrls,
+	posterIndex,
+	updatePosterIndex,
+	backdropUrls,
+	backdropIndex,
+	updateBackdropIndex,
 }: ShowDetailsProps) {
 	const [localNote, setLocalNote] = useState(show.note || "");
 	const [isRefreshing, setIsRefreshing] = useState(false);
@@ -122,6 +138,10 @@ export function ShowDetails({
 	const [refreshMeta, setRefreshMeta] = useState<Partial<ShowProps>>({});
 	const [refreshLogos, setRefreshLogos] = useState<string[]>([]);
 	const [refreshLogoIndex, setRefreshLogoIndex] = useState(0);
+	const [refreshPosters, setRefreshPosters] = useState<string[]>([]);
+	const [refreshPosterIndex, setRefreshPosterIndex] = useState(0);
+	const [refreshBackdrops, setRefreshBackdrops] = useState<string[]>([]);
+	const [refreshBackdropIndex, setRefreshBackdropIndex] = useState(0);
 	const { searchForShowSeasonInfo } = useShowSearch();
 	const [editingMode, setEditingMode] = useState({
 		season: false,
@@ -146,9 +166,7 @@ export function ShowDetails({
 		"popularity",
 	);
 	const [pendingWork, setPendingWork] = useState<ActorWork | null>(null);
-	// store only the id + type; the live object is derived from the
-	// existingMovies/existingShows arrays on each render so edits show up
-	// immediately instead of after a reopen
+	// store only the id + type
 	const [selectedWorkItem, setSelectedWorkItem] = useState<
 		{ type: "movie"; id: number } | { type: "tv"; id: number } | null
 	>(null);
@@ -296,6 +314,12 @@ export function ShowDetails({
 			case "changeLogo":
 				handleLogoChange(action.payload);
 				break;
+			case "changeCover":
+				handlePosterChange(action.payload);
+				break;
+			case "changeBackdrop":
+				handleBackdropChange(action.payload);
+				break;
 			case "openRatings":
 				setRatingsOpen(true);
 				break;
@@ -320,6 +344,37 @@ export function ShowDetails({
 			current < 0 ? activeLogoIndex(current) : clearedFrom(current);
 		if (isSelecting) setRefreshLogoIndex(next);
 		else updateLogoIndex?.(next);
+	};
+
+	// load color of poster
+	const handlePosterChange = (dir: "next" | "prev") => {
+		const total = isSelecting
+			? refreshPosters.length
+			: (posterUrls?.length ?? 0);
+		if (total < 2) return;
+		if (isSelecting) {
+			const next = stepArtworkIndex(refreshPosterIndex, dir, total);
+			setRefreshPosterIndex(next);
+			setRefreshMeta((prev) => ({
+				...prev,
+				posterUrl: refreshPosters[next],
+			}));
+		} else {
+			updatePosterIndex?.(stepArtworkIndex(posterIndex ?? 0, dir, total));
+		}
+	};
+
+	const handleBackdropChange = (dir: "next" | "prev") => {
+		const total = isSelecting
+			? refreshBackdrops.length
+			: (backdropUrls?.length ?? 0);
+		if (total < 2) return;
+		if (isSelecting)
+			setRefreshBackdropIndex((i) => stepArtworkIndex(i, dir, total));
+		else
+			updateBackdropIndex?.(
+				stepArtworkIndex(backdropIndex ?? 0, dir, total),
+			);
 	};
 
 	//
@@ -350,6 +405,10 @@ export function ShowDetails({
 			setRefreshMeta(meta);
 			setRefreshLogos(tv.logos ?? []);
 			setRefreshLogoIndex(0);
+			setRefreshPosters(tv.posters ?? []);
+			setRefreshPosterIndex(0);
+			setRefreshBackdrops(tv.backdrops ?? []);
+			setRefreshBackdropIndex(0);
 			setIsSelecting(true);
 		} finally {
 			setIsRefreshing(false);
@@ -362,6 +421,10 @@ export function ShowDetails({
 		const meta = {
 			...refreshMeta,
 			logoUrl: refreshLogos[refreshLogoIndex] ?? null,
+			// posterUrl already tracks the picked poster
+			...(refreshBackdrops.length
+				? { backdropUrl: refreshBackdrops[refreshBackdropIndex] }
+				: {}),
 		};
 		exitSelecting();
 		if (Object.keys(meta).length) await onRefresh(meta);
@@ -372,6 +435,10 @@ export function ShowDetails({
 		setRefreshMeta({});
 		setRefreshLogos([]);
 		setRefreshLogoIndex(0);
+		setRefreshPosters([]);
+		setRefreshPosterIndex(0);
+		setRefreshBackdrops([]);
+		setRefreshBackdropIndex(0);
 	};
 
 	const handleCast = async () => {
@@ -671,6 +738,12 @@ export function ShowDetails({
 					canRefresh={!!onRefresh}
 					logoUrls={isSelecting ? refreshLogos : logoUrls}
 					logoIndex={isSelecting ? refreshLogoIndex : logoIndex}
+					posterUrls={isSelecting ? refreshPosters : posterUrls}
+					posterIndex={isSelecting ? refreshPosterIndex : posterIndex}
+					backdropUrls={isSelecting ? refreshBackdrops : backdropUrls}
+					backdropIndex={
+						isSelecting ? refreshBackdropIndex : backdropIndex
+					}
 					onAction={
 						handleAction as (action: {
 							type: string;
@@ -695,6 +768,8 @@ export function ShowDetails({
 					onClose={handleModalClose}
 					logoUrls={isSelecting ? refreshLogos : logoUrls}
 					logoIndex={isSelecting ? refreshLogoIndex : logoIndex}
+					posterUrls={isSelecting ? refreshPosters : posterUrls}
+					posterIndex={isSelecting ? refreshPosterIndex : posterIndex}
 					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {

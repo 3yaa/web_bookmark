@@ -1,11 +1,19 @@
 import Image from "next/image";
+import { isResizable } from "@/utils/image-loader";
 import React, { ReactNode } from "react";
 import { BaseMediaProps, ColumnConfig, SeriesMediaProps } from "@/types/media";
 import { BackdropImageMobile } from "../../components/ui/BackdropMobile";
-import { formatDateShort, getStatusBg } from "@/utils/formattingUtils";
-import { ShowProgressBarMobile } from "../../shows/components/showProgressListing";
+import {
+	formatDateShort,
+	getStatusBg,
+	getStatusWaveColor,
+} from "@/utils/formattingUtils";
 import { ShowProps } from "@/types/show";
+import { calcCurProgress } from "@/app/shows/utils/progressCalc";
 import { GameProps } from "@/types/game";
+import { BookProps } from "@/types/book";
+import { MovieProps } from "@/types/movie";
+import { Leaf } from "lucide-react";
 import { getDisplayScore } from "@/lib/tierConfig";
 
 // the first mounted item that needs priority loading (cover/backdrop)
@@ -35,6 +43,8 @@ export const MobileItem = React.memo(function MobileItem<
 			? (() => {
 					const game = item as unknown as GameProps;
 					return {
+						// dlc sits under the base game's name
+						label: game.dlcIndex !== 0 ? game.mainTitle : undefined,
 						placement:
 							game.dlcIndex !== 0
 								? String(game.dlcIndex)
@@ -46,6 +56,7 @@ export const MobileItem = React.memo(function MobileItem<
 			: (() => {
 					const s = item as unknown as SeriesMediaProps;
 					return {
+						label: s.seriesTitle,
 						placement: s.placeInSeries,
 						prequel: s.prequel,
 						sequel: s.sequel,
@@ -53,6 +64,51 @@ export const MobileItem = React.memo(function MobileItem<
 				})();
 
 	const coverSrc = item.cover?.url ?? item.posterUrl;
+
+	// source rating stands in for the completed date until it is watched/read
+	const externalRating =
+		mediaType === "movie" && item.status === "Want to Watch"
+			? (item as unknown as MovieProps).imdbRating
+			: mediaType === "book" && item.status === "Want to Read"
+				? (item as unknown as BookProps).rating
+				: null;
+
+	// how far into the show the user is -- full bar when there's nothing to count
+	const show = item as unknown as ShowProps;
+	const showProgress =
+		mediaType === "show"
+			? show.seasons?.[show.curSeasonIndex ?? 0]?.episode_count
+				? calcCurProgress(
+						show.seasons,
+						show.curSeasonIndex ?? 0,
+						show.curEpisode ?? 0,
+					)
+				: 100
+			: 0;
+
+	const metaDot = <span className="text-zinc-600 shrink-0">·</span>;
+
+	// RATING | COMPLETED DATE
+	const trailingMeta =
+		externalRating != null ? (
+			<span className="flex items-center gap-1 shrink-0">
+				{metaDot}
+				<Leaf
+					className="w-2.25 h-2.25 text-emerald-300/65 fill-emerald-300/15"
+					strokeWidth={1.75}
+				/>
+				<span className="tabular-nums text-zinc-400">
+					{externalRating.toFixed(1)}
+				</span>
+			</span>
+		) : item.dateCompleted && item.status === "Completed" ? (
+			<span className="flex items-center gap-x-1.5 shrink-0">
+				{metaDot}
+				<span className="tabular-nums">
+					{formatDateShort(item.dateCompleted)}
+				</span>
+			</span>
+		) : null;
 
 	return (
 		<div
@@ -72,6 +128,7 @@ export const MobileItem = React.memo(function MobileItem<
 						width={240}
 						height={360}
 						sizes="120px"
+						unoptimized={!isResizable(coverSrc)}
 						priority={index < EAGER_ROWS}
 						className="object-fill w-full h-full rounded-md border border-zinc-700/40"
 					/>
@@ -84,128 +141,130 @@ export const MobileItem = React.memo(function MobileItem<
 					></div>
 				)}
 			</div>
-			<div className="px-3 pt-3 flex flex-col w-full min-w-0">
+			<div className="px-3 pt-3 pb-2.5 flex flex-col w-full min-w-0">
 				{/* BACKDROP */}
 				{item.backdropUrl && (
 					<BackdropImageMobile
 						src={item.backdropUrl}
-						width={1280}
-						height={720}
+						width={540}
+						height={304}
 						priority={index < EAGER_ROWS}
 					/>
 				)}
-				{/* TITLE/SCORE */}
-				<div className="flex justify-between items-start">
-					<span className="text-zinc-200 font-semibold text-base leading-tight max-w-52 truncate">
+				{/* the whole stack rides the bottom of the row */}
+				<div className="mt-auto">
+					{/* SERIES TITLE -- fixed line so rows stay level */}
+					<div className="h-4 flex items-center gap-1 min-w-0 text-[0.65rem] leading-none font-semibold text-zinc-400/70">
+						{seriesSection.label && (
+							<span className="truncate min-w-0">
+								{seriesSection.label} ᭡
+							</span>
+						)}
+					</div>
+					{/* TITLE */}
+					<span className="block pr-14 text-zinc-200 font-semibold text-base leading-tight truncate">
 						{item.title || "-"}
 					</span>
-					<span className="text-zinc-400 text-sm font-bold bg-zinc-900/60 px-2.5 py-1 rounded-md shadow-xl shadow-black/80 -mt-1.5">
-						{item.score?.mu ? getDisplayScore(item.score.mu) : "-"}
-					</span>
-				</div>
-				{/* STUDIO/RELEASE DATE */}
-				<div className="text-zinc-500 text-xs font-medium flex space-x-1 pt-1">
-					{/* AUTHOR/STUDIO/DIRECTOR */}
-					<span className="truncate max-w-35">
-						{differentColumns[0].getValue(item) || "-"},
-					</span>
-					{/* RELEASE/PUBLISHED DATE */}
-					<span>{differentColumns[1].getValue(item) || "-"}</span>
-				</div>
-				{/* DATE COMPLETE AND STATUS BAR */}
-				{mediaType === "show" ? (
-					<ShowProgressBarMobile
-						show={item as unknown as ShowProps}
-					/>
-				) : (
-					<>
-						<div
-							className={`${item.dateCompleted ? "-mt-1.5" : "pt-2.5"}`}
-						>
-							<span className="flex justify-end text-zinc-500 text-[0.65rem] font-medium">
-								{formatDateShort(item.dateCompleted)}
-							</span>
-						</div>
-						<div className="mt-1.5 w-full rounded-md h-1.5 overflow-hidden">
-							<div
-								className={`${getStatusBg(
-									item.status,
-								)} h-1.5 transition-all duration-500 ease-out rounded-md`}
-							/>
-						</div>
-					</>
-				)}
-				{/* PREQUEL/SEQUEL */}
-				{mediaType !== "show" && (
-					<div
-						className={`${
-							seriesSection.placement
-								? "grid grid-cols-[1fr_2rem_1fr] mt-1"
-								: "mt-3"
-						}`}
-					>
-						{/* PREQUEL */}
-						<div className="truncate text-left">
-							{seriesSection.prequel && (
-								<div
-									className="flex gap-1 items-center text-[0.60rem] text-zinc-400/80"
-									style={{
-										maxWidth: seriesSection.sequel
-											? `${Math.min(Math.min(seriesSection.prequel.length, seriesSection.sequel.length) * 0.38, 7.38)}rem`
-											: "auto",
-									}}
-								>
-									<span>←</span>
-									<span className="truncate">
-										{seriesSection.prequel}
-									</span>
-								</div>
-							)}
-						</div>
-						{/* PLACEMENT */}
-						<div className="flex justify-center items-end">
-							{seriesSection.placement && (
-								<label className="text-[0.65rem] font-medium text-zinc-400/85">
-									{seriesSection.placement}
-								</label>
-							)}
-						</div>
-						{/* SEQUEL */}
-						<div className="text-right flex justify-end">
-							{seriesSection.sequel && (
-								<div
-									className={`flex gap-1 items-center text-[0.60rem] text-zinc-400/80`}
-									style={{
-										maxWidth: seriesSection.prequel
-											? `${Math.min(
-													Math.min(
-														seriesSection.prequel
-															.length,
-														seriesSection.sequel
-															.length,
-													) * 0.38,
-													7.38,
-												)}rem`
-											: "auto",
-									}}
-								>
-									<span className="truncate">
-										{seriesSection.sequel}
-									</span>
-									<span>→</span>
-								</div>
-							)}
-						</div>
+					{/* AUTHOR · RELEASED · COMPLETED/RATING */}
+					<div className="flex items-center gap-x-1.5 pr-14 text-[0.7rem] text-zinc-500 font-semibold min-w-0">
+						<span className="truncate min-w-0">
+							{differentColumns[0].getValue(item) || "-"}
+						</span>
+						{metaDot}
+						<span className="shrink-0 tabular-nums">
+							{differentColumns[1].getValue(item) || "-"}
+						</span>
+						{trailingMeta}
 					</div>
-				)}
-				{/* NOTES */}
-				<p
-					className={`text-zinc-500 text-sm overflow-hidden leading-snug font-medium flex items-center justify-center text-center min-h-8 w-full wrap-break-word ${mediaType === "show" && "mt-1.5"}`}
-				>
-					<span className="line-clamp-2">
-						{item.note || "No notes"}
+					{/* STATUS BAR -- the score sits on its right end */}
+					<div className="relative mt-2">
+						{/* SCORE */}
+						<span className="absolute right-0 bottom-full mb-1 px-2.5 py-1 rounded-lg neu-carved text-zinc-300/85 text-sm font-semibold tracking-wide tabular-nums">
+							{item.score?.mu
+								? getDisplayScore(item.score.mu)
+								: "-"}
+						</span>
+						{mediaType === "show" ? (
+							// shows fill to their progress, no season/episode labels
+							<div className="w-full bg-zinc-800/80 h-1 rounded-md overflow-hidden">
+								<div
+									className={`relative h-1 ${getStatusBg(item.status)} rounded-md overflow-hidden transition-all duration-500 ease-out`}
+									style={{ width: `${showProgress}%` }}
+								>
+									<div
+										className="absolute inset-0"
+										style={{
+											background: getStatusWaveColor(
+												item.status,
+											),
+											animation:
+												"wave 4s ease-in-out infinite",
+											width: "200%",
+										}}
+									/>
+								</div>
+							</div>
+						) : (
+							<div
+								className={`relative w-full ${getStatusBg(item.status)} h-1 rounded-md overflow-hidden`}
+							>
+								<div
+									className="absolute inset-0"
+									style={{
+										background: getStatusWaveColor(
+											item.status,
+										),
+										animation:
+											"wave 4s ease-in-out infinite",
+										width: "200%",
+									}}
+								/>
+							</div>
+						)}
+					</div>
+					{/* PREQUEL | PLACE IN SERIES | SEQUEL */}
+					{mediaType !== "show" &&
+						(seriesSection.prequel ||
+							seriesSection.sequel ||
+							seriesSection.placement) && (
+							<div className="mt-1 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-[0.60rem] text-zinc-400/80">
+								{/* PREQUEL */}
+								<div className="flex gap-1 items-center min-w-0">
+									{seriesSection.prequel && (
+										<>
+											<span className="shrink-0">←</span>
+											<span className="truncate">
+												{seriesSection.prequel}
+											</span>
+										</>
+									)}
+								</div>
+								{/* PLACE IN SERIES */}
+								<span className="shrink-0 text-[0.65rem] font-medium text-zinc-400/85 tabular-nums">
+									{seriesSection.placement}
+								</span>
+								{/* SEQUEL */}
+								<div className="flex gap-1 items-center justify-end min-w-0">
+									{seriesSection.sequel && (
+										<>
+											<span className="truncate">
+												{seriesSection.sequel}
+											</span>
+											<span className="shrink-0">→</span>
+										</>
+									)}
+								</div>
+							</div>
+						)}
+					{/* NOTE -- one line */}
+					<span className="block mt-1 text-center text-[0.8125rem] font-medium text-zinc-400/90 truncate">
+						{item.note ? (
+							<>&ldquo;{item.note}&rdquo;</>
+						) : (
+							<>&ldquo;{"· · ·"}&rdquo;</>
+						)}
 					</span>
-				</p>
+				</div>
 			</div>
 		</div>
 	);

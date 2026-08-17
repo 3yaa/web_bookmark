@@ -15,7 +15,8 @@ import {
 	activeLogoIndex,
 	clearedFrom,
 	stepLogoIndex,
-} from "@/app/views/mediaDetails/shared/logoIndex";
+	stepArtworkIndex,
+} from "@/utils/artworkIndex";
 import { useScoreNudge } from "@/hooks/useScoreNudge";
 import {
 	ActorWork,
@@ -71,6 +72,8 @@ export type MovieAction =
 	| { type: "cast" }
 	| { type: "changeLogo"; payload: "next" | "prev" }
 	| { type: "clearLogo" }
+	| { type: "changeCover"; payload: "next" | "prev" }
+	| { type: "changeBackdrop"; payload: "next" | "prev" }
 	| { type: "pickCoverColor"; payload: string }
 	| { type: "directorClick"; payload: string }
 	| { type: "directorPicker" };
@@ -103,6 +106,13 @@ interface MovieDetailsProps {
 	logoUrls?: string[];
 	logoIndex?: number;
 	updateLogoIndex?: (newIndex: number) => void;
+	// artwork to cycle
+	posterUrls?: string[];
+	posterIndex?: number;
+	updatePosterIndex?: (newIndex: number) => void;
+	backdropUrls?: string[];
+	backdropIndex?: number;
+	updateBackdropIndex?: (newIndex: number) => void;
 }
 
 export function MovieDetails({
@@ -123,6 +133,12 @@ export function MovieDetails({
 	logoUrls,
 	logoIndex,
 	updateLogoIndex,
+	posterUrls,
+	posterIndex,
+	updatePosterIndex,
+	backdropUrls,
+	backdropIndex,
+	updateBackdropIndex,
 }: MovieDetailsProps) {
 	const [localNote, setLocalNote] = useState(movie.note || "");
 	const [isRefreshing, setIsRefreshing] = useState(false);
@@ -132,6 +148,10 @@ export function MovieDetails({
 	const [refreshMeta, setRefreshMeta] = useState<Partial<MovieProps>>({});
 	const [refreshLogos, setRefreshLogos] = useState<string[]>([]);
 	const [refreshLogoIndex, setRefreshLogoIndex] = useState(0);
+	const [refreshPosters, setRefreshPosters] = useState<string[]>([]);
+	const [refreshPosterIndex, setRefreshPosterIndex] = useState(0);
+	const [refreshBackdrops, setRefreshBackdrops] = useState<string[]>([]);
+	const [refreshBackdropIndex, setRefreshBackdropIndex] = useState(0);
 	// actor related
 	const [castOpen, setCastOpen] = useState(false);
 	const [cast, setCast] = useState<CastMember[]>([]);
@@ -297,6 +317,12 @@ export function MovieDetails({
 			case "clearLogo":
 				handleClearLogo();
 				break;
+			case "changeCover":
+				handlePosterChange(action.payload);
+				break;
+			case "changeBackdrop":
+				handleBackdropChange(action.payload);
+				break;
 			case "pickCoverColor":
 				handlePickCoverColor(action.payload);
 				break;
@@ -329,6 +355,44 @@ export function MovieDetails({
 		else updateLogoIndex?.(next);
 	};
 
+	// the cover itself follows the index -- see the effect below
+	const handlePosterChange = (dir: "next" | "prev") => {
+		const total = isSelecting
+			? refreshPosters.length
+			: (posterUrls?.length ?? 0);
+		if (total < 2) return;
+		if (isSelecting)
+			setRefreshPosterIndex((i) => stepArtworkIndex(i, dir, total));
+		else
+			updatePosterIndex?.(stepArtworkIndex(posterIndex ?? 0, dir, total));
+	};
+
+	const handleBackdropChange = (dir: "next" | "prev") => {
+		const total = isSelecting
+			? refreshBackdrops.length
+			: (backdropUrls?.length ?? 0);
+		if (total < 2) return;
+		if (isSelecting)
+			setRefreshBackdropIndex((i) => stepArtworkIndex(i, dir, total));
+		else
+			updateBackdropIndex?.(
+				stepArtworkIndex(backdropIndex ?? 0, dir, total),
+			);
+	};
+
+	// set color for poster
+	useEffect(() => {
+		const url = refreshPosters[refreshPosterIndex];
+		if (!isSelecting || !url) return;
+		let alive = true;
+		buildCover(url).then((cover) => {
+			if (alive && cover) setRefreshMeta((prev) => ({ ...prev, cover }));
+		});
+		return () => {
+			alive = false;
+		};
+	}, [isSelecting, refreshPosters, refreshPosterIndex]);
+
 	// writes nothing until confirmRefresh
 	const handleRefresh = async () => {
 		if (!onRefresh || isRefreshing || isSelecting) return;
@@ -350,6 +414,10 @@ export function MovieDetails({
 			//
 			setRefreshLogos(reloaded.logos ?? []);
 			setRefreshLogoIndex(0);
+			setRefreshPosters(reloaded.posters ?? []);
+			setRefreshPosterIndex(0);
+			setRefreshBackdrops(reloaded.backdrops ?? []);
+			setRefreshBackdropIndex(0);
 			// legacy
 			if (!hasTmdbId) {
 				meta.tmdbId = reloaded.tmdb_id;
@@ -372,6 +440,10 @@ export function MovieDetails({
 		const meta = {
 			...refreshMeta,
 			logoUrl: refreshLogos[refreshLogoIndex] ?? null,
+			// cover already tracks the picked poster
+			...(refreshBackdrops.length
+				? { backdropUrl: refreshBackdrops[refreshBackdropIndex] }
+				: {}),
 		};
 		exitSelecting();
 		if (Object.keys(meta).length) await onRefresh(meta);
@@ -400,6 +472,10 @@ export function MovieDetails({
 		setRefreshMeta({});
 		setRefreshLogos([]);
 		setRefreshLogoIndex(0);
+		setRefreshPosters([]);
+		setRefreshPosterIndex(0);
+		setRefreshBackdrops([]);
+		setRefreshBackdropIndex(0);
 	};
 
 	const handleCast = async () => {
@@ -586,6 +662,12 @@ export function MovieDetails({
 					canRefresh={!!onRefresh}
 					logoUrls={isSelecting ? refreshLogos : logoUrls}
 					logoIndex={isSelecting ? refreshLogoIndex : logoIndex}
+					posterUrls={isSelecting ? refreshPosters : posterUrls}
+					posterIndex={isSelecting ? refreshPosterIndex : posterIndex}
+					backdropUrls={isSelecting ? refreshBackdrops : backdropUrls}
+					backdropIndex={
+						isSelecting ? refreshBackdropIndex : backdropIndex
+					}
 					onAction={
 						handleAction as (action: {
 							type: string;
@@ -609,6 +691,8 @@ export function MovieDetails({
 					isInList={isInList}
 					logoUrls={isSelecting ? refreshLogos : logoUrls}
 					logoIndex={isSelecting ? refreshLogoIndex : logoIndex}
+					posterUrls={isSelecting ? refreshPosters : posterUrls}
+					posterIndex={isSelecting ? refreshPosterIndex : posterIndex}
 					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {

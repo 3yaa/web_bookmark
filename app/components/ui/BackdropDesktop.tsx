@@ -30,9 +30,10 @@ export const BackdropDesktop = ({
 		<Image
 			src={src}
 			alt="Backdrop"
-			width={1280}
-			height={720}
-			className="absolute"
+			width={540}
+			height={304}
+			sizes="30vw"
+			className="absolute w-full"
 			style={{
 				objectPosition: is_book ? "center -40px" : "center -16px",
 				filter: "brightness(0.40)",

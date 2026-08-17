@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 import Image from "next/image";
+import { isResizable } from "@/utils/image-loader";
 import { BaseMediaProps, ColumnConfig, SeriesMediaProps } from "@/types/media";
 import { GameProps } from "@/types/game";
 import {
@@ -93,6 +94,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 							alt={item.title || "Untitled"}
 							fill
 							sizes="(min-width: 2200px) 160px, 80px"
+							unoptimized={!isResizable(coverSrc)}
 							priority={index < EAGER_ROWS}
 							className="object-cover transition-transform duration-450 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.04]"
 						/>
@@ -103,6 +105,7 @@ export const DesktopItem = React.memo(function DesktopItem<
 							width={160}
 							height={240}
 							sizes="(min-width: 2200px) 160px, 80px"
+							unoptimized={!isResizable(coverSrc)}
 							priority={index < EAGER_ROWS}
 							className="relative w-full h-full aspect-2/3 object-fill transition-transform duration-450 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.04]"
 						/>

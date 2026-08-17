@@ -805,7 +805,7 @@ export function DesktopDetails<T extends BaseMediaProps>({
 											>
 												Score
 											</label>
-											{item.score ? (
+											{item.score && !isAdding ? (
 												<div
 													// DO flex-row-reverse for flip
 													className={`group w-full ${FIELD_PLATE} flex flex-row items-center justify-between gap-3 px-4 py-3 select-none transition-all duration-300 ease-out`}
@@ -880,7 +880,14 @@ export function DesktopDetails<T extends BaseMediaProps>({
 												</div>
 											) : (
 												<Dropdown
-													value={"-"}
+													value={
+														item.score
+															? getTierFromMu(
+																	item.score
+																		.mu,
+																)
+															: "-"
+													}
 													onChange={(value) => {
 														if (value === "-")
 															return;

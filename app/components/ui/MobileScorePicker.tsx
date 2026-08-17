@@ -1,5 +1,4 @@
-import { Tier } from "@/lib/tierConfig";
-import { tierOptions } from "@/utils/dropDownDetails";
+import { Tier, TIERS } from "@/lib/tierConfig";
 import React, { useState } from "react";
 
 interface MobileScorePickerProps {
@@ -58,13 +57,15 @@ export function MobileScorePicker({
 
             <div className="h-56 mb-5">
               <div className="overflow-y-auto no-scrollbar h-full space-y-1.5 relative mask-gradient">
-                {tierOptions.map((option) => (
+                {/* straight off TIERS -- tierOptions leads with the dropdown's
+                    "-" placeholder, which is not a tier */}
+                {TIERS.map((tier) => (
                   <button
-                    key={option.value}
-                    onClick={() => handleSelect(option.value as Tier)}
+                    key={tier}
+                    onClick={() => handleSelect(tier)}
                     className="w-full py-3 rounded-lg font-medium transition-all duration-150 active:scale-[0.98] bg-zinc-800/40 text-zinc-400 active:bg-zinc-800/60"
                   >
-                    {option.label}
+                    {tier}
                   </button>
                 ))}
               </div>

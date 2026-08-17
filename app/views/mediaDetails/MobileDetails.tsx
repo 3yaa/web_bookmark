@@ -32,6 +32,7 @@ import {
 	Trash2,
 	Check,
 	X,
+	Wallpaper,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Loading } from "@/app/components/ui/Loading";
@@ -127,6 +128,9 @@ interface MobileDetailsProps<T extends BaseMediaProps> {
 	// movie/show -- the parent keeps item.cover/posterUrl on the picked one
 	posterUrls?: string[];
 	posterIndex?: number;
+	// game/movie/show -- previewed in the hero slot while picking
+	backdropUrls?: string[];
+	backdropIndex?: number;
 	// movie/show/game
 	logoUrls?: string[];
 	logoIndex?: number;
@@ -151,6 +155,8 @@ export function MobileDetails<T extends BaseMediaProps>({
 	coverIndex,
 	posterUrls,
 	posterIndex,
+	backdropUrls,
+	backdropIndex,
 	logoUrls,
 	logoIndex,
 }: MobileDetailsProps<T>) {
@@ -172,6 +178,8 @@ export function MobileDetails<T extends BaseMediaProps>({
 
 	const [isProgressPickerOpen, setIsProgressPickerOpen] = useState(false);
 	const [isScorePickerOpen, setIsScorePickerOpen] = useState(false);
+	// swaps the hero over to the backdrop candidates while picking
+	const [showBackdrop, setShowBackdrop] = useState(false);
 	// the control waiting on its confirmation sheet
 	const [pending, setPending] = useState<Control | null>(null);
 	const [isDragging, setIsDragging] = useState(false);
@@ -224,17 +232,17 @@ export function MobileDetails<T extends BaseMediaProps>({
 	const g = item as unknown as GameProps;
 	const show = item as unknown as ShowProps;
 
-	const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
+	//
+	const stepFrom = (type: string) => (e: React.MouseEvent<HTMLElement>) => {
 		const rect = e.currentTarget.getBoundingClientRect();
 		const clickX = e.clientX - rect.left;
 		const elementWidth = rect.width;
 		const isRightSide = clickX > elementWidth / 2;
 
-		onAction({
-			type: "changeCover",
-			payload: isRightSide ? "next" : "prev",
-		});
+		onAction({ type, payload: isRightSide ? "next" : "prev" });
 	};
+	const handleCoverChange = stepFrom("changeCover");
+	const handleBackdropChange = stepFrom("changeBackdrop");
 
 	// the cover being shown right now
 	const activeCover =
@@ -246,11 +254,17 @@ export function MobileDetails<T extends BaseMediaProps>({
 
 	// while adding or previewing a reload
 	const isPicking = isAdding || !!isSelecting;
-	// books cycle their own cover list, everything else keeps item.cover/
-	// posterUrl on the picked poster and just needs the count
+	//
 	const posterCount = (isBook ? coverUrls?.length : posterUrls?.length) ?? 0;
 	const posterPos = (isBook ? coverIndex : posterIndex) ?? 0;
-	const canCyclePoster = isPicking && posterCount > 1;
+	//
+	const backdropCount = backdropUrls?.length ?? 0;
+	const viewingBackdrop = isPicking && backdropCount > 0 && showBackdrop;
+	const canCyclePoster = isPicking && !viewingBackdrop && posterCount > 1;
+	const canCycleBackdrop = viewingBackdrop && backdropCount > 1;
+	const backdropSrc = viewingBackdrop
+		? backdropUrls?.[backdropIndex ?? 0]
+		: undefined;
 	const displayLogoUrl =
 		isPicking && logoUrls?.length ? logoUrls[logoIndex ?? 0] : item.logoUrl;
 	const logoIsCleared = isLogoCleared(logoIndex);
@@ -289,7 +303,22 @@ export function MobileDetails<T extends BaseMediaProps>({
 		!!s.seriesTitle || !!s.placeInSeries || !!s.prequel || !!s.sequel;
 
 	const controls: Control[] = isAdding
-		? []
+		? [
+				{
+					key: "add",
+					icon: Plus,
+					tone: "emerald",
+					label: "Add",
+					action: "add",
+				},
+				{
+					key: "moreOptions",
+					icon: ChevronsUp,
+					tone: "blue",
+					label: isBook ? "More" : "Year",
+					action: isBook ? "moreBooks" : "needYearField",
+				},
+			]
 		: isSelecting
 			? [
 					{
@@ -378,7 +407,11 @@ export function MobileDetails<T extends BaseMediaProps>({
 			label={c.label}
 			expanded={!c.confirm}
 			onPress={() =>
-				c.confirm ? setPending(c) : onAction({ type: c.action })
+				c.confirm
+					? setPending(c)
+					: c.action === "add"
+						? onAdd()
+						: onAction({ type: c.action })
 			}
 		/>
 	);
@@ -491,6 +524,11 @@ export function MobileDetails<T extends BaseMediaProps>({
 		dragVelocity.current = 0;
 	};
 
+	// the swap only exists while picking -- confirming a reload drops it
+	useEffect(() => {
+		if (!isPicking) setShowBackdrop(false);
+	}, [isPicking]);
+
 	// hold the page still behind the sheet
 	useScrollLock();
 
@@ -527,22 +565,40 @@ export function MobileDetails<T extends BaseMediaProps>({
 				{isPicking && (
 					<div className="sticky top-0 z-30">
 						<div className="absolute top-0 left-0 right-0 mt-1.5 mx-0.5 flex items-center justify-between">
-							{/* ADD BUTTON */}
-							{isAdding && (
-								<button
-									className="bg-zinc-800/50 backdrop-blur-2xl p-2 px-2.5 rounded-md active:scale-95 transition-transform duration-150"
-									onClick={onAdd}
-								>
-									<Plus className="w-5 h-5 text-slate-400" />
-								</button>
-							)}
-							{/* COVER COLORS */}
-							{colorPicker}
-							{/* COVER INDICATOR */}
-							{canCyclePoster && (
+							{/* LEFT -- WHAT THE HERO SHOWS */}
+							<div className="flex items-center gap-2">
+								{/* COVER COLORS */}
+								{colorPicker}
+								{/* POSTER <-> BACKDROP */}
+								{backdropCount > 0 && (
+									<button
+										className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md active:scale-95 transition-transform duration-150"
+										onClick={() =>
+											setShowBackdrop((v) => !v)
+										}
+										title={
+											viewingBackdrop
+												? "Back to the poster"
+												: "Pick a backdrop"
+										}
+									>
+										<Wallpaper
+											className={`w-5 h-5 ${
+												viewingBackdrop
+													? "text-emerald-400"
+													: "text-slate-400"
+											}`}
+										/>
+									</button>
+								)}
+							</div>
+							{/* ARTWORK INDICATOR */}
+							{(canCyclePoster || canCycleBackdrop) && (
 								<div className="p-1.5 px-2.5 bg-zinc-800/50 backdrop-blur-sm rounded-md">
 									<span className="text-xs text-slate-400 font-medium">
-										{posterPos + 1}/{posterCount}
+										{viewingBackdrop
+											? `${(backdropIndex ?? 0) + 1}/${backdropCount}`
+											: `${posterPos + 1}/${posterCount}`}
 									</span>
 								</div>
 							)}
@@ -610,27 +666,6 @@ export function MobileDetails<T extends BaseMediaProps>({
 										</button>
 									</div>
 								)}
-								{/* NEED YEAR -- re-searches, so adding only */}
-								{isAdding && (
-									<button
-										className="bg-zinc-800/50 backdrop-blur-2xl p-2 rounded-md px-2.5 active:scale-95 transition-transform duration-150"
-										onClick={() => {
-											onAction({
-												type:
-													mediaType === "book"
-														? "moreBooks"
-														: "needYearField",
-											});
-										}}
-										title={
-											mediaType === "book"
-												? "See More Options"
-												: "Search with year"
-										}
-									>
-										<ChevronsUp className="w-5 h-5 text-slate-400 transition-colors" />
-									</button>
-								)}
 							</div>
 						</div>
 					</div>
@@ -641,10 +676,26 @@ export function MobileDetails<T extends BaseMediaProps>({
 					<div
 						className={`relative w-full overflow-hidden bg-zinc-900/40 transition-all duration-300 ${
 							isDragging && "rounded-lg"
-						} ${canCyclePoster ? "cursor-pointer" : ""}`}
-						onClick={canCyclePoster ? handleCoverChange : undefined}
+						} ${canCyclePoster || canCycleBackdrop ? "cursor-pointer" : ""}`}
+						onClick={
+							canCycleBackdrop
+								? handleBackdropChange
+								: canCyclePoster
+									? handleCoverChange
+									: undefined
+						}
 					>
-						{mediaType === "book" ? (
+						{backdropSrc ? (
+							<Image
+								src={backdropSrc}
+								alt={item.title || "Backdrop"}
+								// 16:9, and off the rungs tmdb/igdb store
+								width={540}
+								height={304}
+								sizes="100vw"
+								className="object-cover w-full"
+							/>
+						) : mediaType === "book" ? (
 							<BookCoverConfig
 								coverUrl={
 									(item as unknown as BookProps).cover?.url
@@ -825,7 +876,7 @@ export function MobileDetails<T extends BaseMediaProps>({
 										)}
 										<button
 											onClick={() => {
-												if (!item.score)
+												if (!item.score || isAdding)
 													setIsScorePickerOpen(true);
 											}}
 											className="inline-flex items-center justify-center h-7.5 px-2 min-w-15 text-sm leading-5 text-zinc-300/85 font-semibold tracking-wide tabular-nums"

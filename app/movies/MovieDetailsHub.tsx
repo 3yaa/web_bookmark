@@ -693,6 +693,10 @@ export function MovieDetails({
 					logoIndex={isSelecting ? refreshLogoIndex : logoIndex}
 					posterUrls={isSelecting ? refreshPosters : posterUrls}
 					posterIndex={isSelecting ? refreshPosterIndex : posterIndex}
+					backdropUrls={isSelecting ? refreshBackdrops : backdropUrls}
+					backdropIndex={
+						isSelecting ? refreshBackdropIndex : backdropIndex
+					}
 					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {

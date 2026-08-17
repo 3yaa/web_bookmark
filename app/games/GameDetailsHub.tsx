@@ -427,6 +427,10 @@ export function GameDetails({
 					isSelecting={isSelecting}
 					logoUrls={isSelecting ? refreshLogos : logoUrls}
 					logoIndex={isSelecting ? refreshLogoIndex : logoIndex}
+					backdropUrls={isSelecting ? refreshBackdrops : backdropUrls}
+					backdropIndex={
+						isSelecting ? refreshBackdropIndex : backdropIndex
+					}
 					canRefresh={!!onRefresh}
 					onAction={
 						handleAction as (action: {

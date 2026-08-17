@@ -52,6 +52,7 @@ import { calcCurProgress } from "@/app/shows/utils/progressCalc";
 import { canNudgeMu, getDisplayScore, getTierFromMu } from "@/lib/tierConfig";
 import { BookProps } from "@/types/book";
 import { useScrollLock } from "@/hooks/useScrollLock";
+import { ConfirmPrompt } from "@/app/components/ui/Confirm";
 
 //
 const MOBILE_ACTION_TONE = {
@@ -61,17 +62,27 @@ const MOBILE_ACTION_TONE = {
 	red: "text-red-400/90 bg-red-700/30",
 } as const;
 
+type Control = {
+	key: string;
+	icon: LucideIcon;
+	tone: keyof typeof MOBILE_ACTION_TONE;
+	label: string;
+	action: string;
+	//
+	confirm?: { title: string; confirmLabel: string };
+};
+
 function MobileActionBtn({
 	icon: Icon,
 	tone,
 	label,
-	armed,
+	expanded,
 	onPress,
 }: {
 	icon: LucideIcon;
 	tone: keyof typeof MOBILE_ACTION_TONE;
 	label: string;
-	armed: boolean;
+	expanded: boolean;
 	onPress: () => void;
 }) {
 	return (
@@ -80,13 +91,13 @@ function MobileActionBtn({
 			onClick={onPress}
 			title={label}
 			className={`flex items-center gap-1.5 h-7 shrink-0 rounded-lg transition-all duration-200 active:scale-95 ${
-				armed
+				expanded
 					? `px-2 ${MOBILE_ACTION_TONE[tone]}`
 					: "w-7 justify-center neu-carved text-zinc-400/50"
 			}`}
 		>
 			<Icon className="w-4 h-4 shrink-0" />
-			{armed && (
+			{expanded && (
 				<span className="text-[0.7rem] font-semibold uppercase tracking-wide whitespace-nowrap">
 					{label}
 				</span>
@@ -155,9 +166,8 @@ export function MobileDetails<T extends BaseMediaProps>({
 
 	const [isProgressPickerOpen, setIsProgressPickerOpen] = useState(false);
 	const [isScorePickerOpen, setIsScorePickerOpen] = useState(false);
-	// which destructive control is waiting on its confirming tap
-	const [armed, setArmed] = useState<string | null>(null);
-	const disarmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+	// the control waiting on its confirmation sheet
+	const [pending, setPending] = useState<Control | null>(null);
 	const [isDragging, setIsDragging] = useState(false);
 	const [isVisible, setIsVisible] = useState(false);
 	const startY = useRef(0);
@@ -259,43 +269,13 @@ export function MobileDetails<T extends BaseMediaProps>({
 		"flex justify-center items-center w-7.5 h-7.5 rounded-lg neu-carved text-zinc-400/55 active:scale-95 active:text-zinc-200 transition-all duration-150 disabled:neu-carved-off disabled:opacity-40 disabled:active:scale-100";
 	const canNudgeScore = !!item.score && !isAdding && !isSelecting;
 
-	// first tap arms, second fires. anything else disarms
-	const armOrFire = (key: string, run: () => void) => {
-		if (disarmTimer.current) clearTimeout(disarmTimer.current);
-		if (armed === key) {
-			setArmed(null);
-			run();
-			return;
-		}
-		setArmed(key);
-		disarmTimer.current = setTimeout(() => setArmed(null), 4000);
-	};
-
-	useEffect(
-		() => () => {
-			if (disarmTimer.current) clearTimeout(disarmTimer.current);
-		},
-		[],
-	);
-
 	// the modal swaps items in place on a series jump
 	useEffect(() => {
-		setArmed(null);
+		setPending(null);
 	}, [item.id]);
 
 	const hasSeriesMeta =
 		!!s.seriesTitle || !!s.placeInSeries || !!s.prequel || !!s.sequel;
-
-	//
-	type Control = {
-		key: string;
-		icon: LucideIcon;
-		tone: keyof typeof MOBILE_ACTION_TONE;
-		label: string;
-		action: string;
-		// apply/cancel are themselves the confirmation, so they fire on one tap
-		instant?: boolean;
-	};
 
 	const controls: Control[] = isAdding
 		? []
@@ -307,7 +287,6 @@ export function MobileDetails<T extends BaseMediaProps>({
 						tone: "emerald",
 						label: "Apply",
 						action: "confirmRefresh",
-						instant: true,
 					},
 					{
 						key: "cancelRefresh",
@@ -315,7 +294,6 @@ export function MobileDetails<T extends BaseMediaProps>({
 						tone: "red",
 						label: "Cancel",
 						action: "cancelRefresh",
-						instant: true,
 					},
 				]
 			: [
@@ -327,6 +305,10 @@ export function MobileDetails<T extends BaseMediaProps>({
 									tone: "emerald",
 									label: "Reload",
 									action: "refresh",
+									confirm: {
+										title: `Reload this ${mediaType}?`,
+										confirmLabel: "Reload",
+									},
 								} as Control,
 							]
 						: []),
@@ -338,6 +320,10 @@ export function MobileDetails<T extends BaseMediaProps>({
 									tone: "orange",
 									label: "Clear series",
 									action: "clearSeriesMeta",
+									confirm: {
+										title: "Clear series info?",
+										confirmLabel: "Clear",
+									},
 								} as Control,
 							]
 						: []),
@@ -349,6 +335,10 @@ export function MobileDetails<T extends BaseMediaProps>({
 									tone: "blue",
 									label: "Reset score",
 									action: "resetScore",
+									confirm: {
+										title: "Reset score?",
+										confirmLabel: "Reset",
+									},
 								} as Control,
 							]
 						: []),
@@ -358,14 +348,16 @@ export function MobileDetails<T extends BaseMediaProps>({
 						tone: "red",
 						label: "Delete " + mediaType,
 						action: "delete",
+						confirm: {
+							title: `Delete this ${mediaType}?`,
+							confirmLabel: "Delete",
+						},
 					},
 				];
 
-	// an armed control needs room for its label, so the others step aside
 	const splitAt = Math.ceil(controls.length / 2);
-	const onRow = (c: Control) => !armed || c.key === armed;
-	const leftControls = controls.slice(0, splitAt).filter(onRow);
-	const rightControls = controls.slice(splitAt).filter(onRow);
+	const leftControls = controls.slice(0, splitAt);
+	const rightControls = controls.slice(splitAt);
 
 	const renderControl = (c: Control) => (
 		<MobileActionBtn
@@ -373,11 +365,9 @@ export function MobileDetails<T extends BaseMediaProps>({
 			icon={c.icon}
 			tone={c.tone}
 			label={c.label}
-			armed={!!c.instant || armed === c.key}
+			expanded={!c.confirm}
 			onPress={() =>
-				c.instant
-					? onAction({ type: c.action })
-					: armOrFire(c.key, () => onAction({ type: c.action }))
+				c.confirm ? setPending(c) : onAction({ type: c.action })
 			}
 		/>
 	);
@@ -418,7 +408,7 @@ export function MobileDetails<T extends BaseMediaProps>({
 	) : null;
 
 	const handleTouchStart = (e: React.TouchEvent) => {
-		if (isScorePickerOpen || isProgressPickerOpen) return;
+		if (isScorePickerOpen || isProgressPickerOpen || pending) return;
 		//
 		const target = e.target as HTMLElement;
 		if (
@@ -443,7 +433,8 @@ export function MobileDetails<T extends BaseMediaProps>({
 	};
 
 	const handleTouchMove = (e: React.TouchEvent) => {
-		if (!isDragging || isScorePickerOpen || isProgressPickerOpen) return;
+		if (!isDragging || isScorePickerOpen || isProgressPickerOpen || pending)
+			return;
 
 		const modal = modalRef.current;
 		if (!modal) return;
@@ -995,6 +986,20 @@ export function MobileDetails<T extends BaseMediaProps>({
 					}}
 				/>
 			)}
+			{/* CONFIRM AN ACTION */}
+			<ConfirmPrompt
+				isOpen={!!pending}
+				title={pending?.confirm?.title ?? ""}
+				confirmLabel={pending?.confirm?.confirmLabel}
+				icon={pending?.icon}
+				tone={pending?.tone}
+				onCancel={() => setPending(null)}
+				onConfirm={() => {
+					const action = pending?.action;
+					setPending(null);
+					if (action) onAction({ type: action });
+				}}
+			/>
 		</>
 	);
 }

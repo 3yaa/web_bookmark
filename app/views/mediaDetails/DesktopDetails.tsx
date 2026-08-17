@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useState } from "react";
 import { Loading } from "@/app/components/ui/Loading";
 import { DirectorNames } from "../../movies/components/DirectorNames";
 import { ModalBackdrop, ModalPanel } from "@/app/components/ui/ModalMotion";
@@ -36,6 +37,7 @@ import {
 	Unlink,
 	Type,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { BackdropImage } from "@/app/components/ui/Backdrop";
 import { Dropdown, Option } from "@/app/components/ui/Dropdown";
 import { tierOptions } from "@/utils/dropDownDetails";
@@ -64,6 +66,16 @@ import {
 import { ShowProps } from "@/types/show";
 import { MovieProps } from "@/types/movie";
 import { BookProps } from "@/types/book";
+import { ConfirmPrompt, type ConfirmTone } from "@/app/components/ui/Confirm";
+
+// an action held back until it's confirmed
+type PendingConfirm = {
+	action: string;
+	title: string;
+	confirmLabel: string;
+	tone: ConfirmTone;
+	icon: LucideIcon;
+};
 
 interface DesktopDetailsProps<T extends BaseMediaProps> {
 	item: T;
@@ -130,6 +142,9 @@ export function DesktopDetails<T extends BaseMediaProps>({
 	const gameItem = item as unknown as GameProps;
 	const movieItem = item as unknown as MovieProps;
 	const bookItem = item as unknown as BookProps;
+
+	// the action waiting on its confirmation
+	const [pending, setPending] = useState<PendingConfirm | null>(null);
 
 	// only for game/book
 	const handleCoverChange = (e: React.MouseEvent<HTMLElement>) => {
@@ -544,7 +559,13 @@ export function DesktopDetails<T extends BaseMediaProps>({
 										icon={RotateCcw}
 										tone="blue"
 										onClick={() =>
-											onAction({ type: "resetScore" })
+											setPending({
+												action: "resetScore",
+												title: "Reset score?",
+												confirmLabel: "Reset",
+												tone: "blue",
+												icon: RotateCcw,
+											})
 										}
 										title="Reset score"
 									/>
@@ -560,8 +581,12 @@ export function DesktopDetails<T extends BaseMediaProps>({
 											icon={Unlink}
 											tone="orange"
 											onClick={() =>
-												onAction({
-													type: "clearSeriesMeta",
+												setPending({
+													action: "clearSeriesMeta",
+													title: "Clear series info?",
+													confirmLabel: "Clear",
+													tone: "orange",
+													icon: Unlink,
 												})
 											}
 											title="Clear series metadata"
@@ -572,7 +597,15 @@ export function DesktopDetails<T extends BaseMediaProps>({
 									variant="ghost"
 									icon={Trash2}
 									tone="red"
-									onClick={() => onAction({ type: "delete" })}
+									onClick={() =>
+										setPending({
+											action: "delete",
+											title: `Delete this ${mediaType}?`,
+											confirmLabel: "Delete",
+											tone: "red",
+											icon: Trash2,
+										})
+									}
 									title={"Delete " + mediaType}
 								/>
 							</div>
@@ -943,6 +976,21 @@ export function DesktopDetails<T extends BaseMediaProps>({
 					</div>
 				</div>
 			</ModalPanel>
+			{/* CONFIRM AN ACTION */}
+			<ConfirmPrompt
+				isOpen={!!pending}
+				placement="center"
+				title={pending?.title ?? ""}
+				confirmLabel={pending?.confirmLabel}
+				icon={pending?.icon}
+				tone={pending?.tone}
+				onCancel={() => setPending(null)}
+				onConfirm={() => {
+					const action = pending?.action;
+					setPending(null);
+					if (action) onAction({ type: action });
+				}}
+			/>
 		</ModalBackdrop>
 	);
 }
